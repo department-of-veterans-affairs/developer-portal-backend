@@ -2,9 +2,12 @@
   "name": "developer-portal-backend",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node dist/server",
-    "watch": "tsc && concurrently \"tsc -w\" \"nodemon dist/server.js\""
+    "watch": "tsc && concurrently \"tsc -w\" \"nodemon dist/server.js\"",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^3.2.0",
@@ -27,12 +30,27 @@
     "@types/node": "^13.9.1",
     "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",
+    "@types/supertest": "^2.0.8",
     "concurrently": "^5.1.0",
     "jest": "^25.1.0",
     "jest-junit-reporter": "^1.1.0",
     "nodemon": "^2.0.2",
+    "supertest": "^4.0.2",
     "ts-jest": "^25.2.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/lib/"
+    ]
   }
 }
