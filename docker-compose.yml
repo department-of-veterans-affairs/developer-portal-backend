@@ -7,12 +7,7 @@ services:
     ports:
       - 9999:9999
     volumes:
+      # map local to remote folder, exclude node_modules
       - .:/home/node
-      - notused:/home/node/node_modules
+      - /home/node/node_modules
     command: npm run watch
-  test:
-    build: .
-    image: developer-portal-backend
-    command: npm test
-volumes:
-  notused:

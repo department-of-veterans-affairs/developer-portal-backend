@@ -17,3 +17,7 @@ npm install
 - `npm run watch`: compile code and restart the server when any files are changed
 - `npm test`: run tests 
 - `npm run test:watch`: rerun tests when any files are changed
+
+### Docker
+- `docker-compose up`: brings up the containers to run the application
+- `docker-compose run app jest` runs the test suite
