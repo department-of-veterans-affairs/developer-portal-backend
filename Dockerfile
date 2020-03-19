@@ -7,6 +7,6 @@ COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
 
 # Add node module binaries (like jest) to path
-ENV PATH /opt/app/node_modules/.bin:$PATH
+ENV PATH /home/node/node_modules/.bin:$PATH
 
 COPY --chown=node:node . .
