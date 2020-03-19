@@ -13,7 +13,7 @@ npm install
 
 ### Commands
 
-- `npm run start`: run the server as currently compiled
+- `npm start`: run the server as currently compiled
 - `npm run watch`: compile code and restart the server when any files are changed
-- `npm run test`: run tests 
+- `npm test`: run tests 
 - `npm run test:watch`: rerun tests when any files are changed

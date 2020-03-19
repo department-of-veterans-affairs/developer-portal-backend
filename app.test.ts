@@ -1,34 +1,31 @@
-import 'jest';
-import configureApp from './app';
-import supertest from 'supertest';
+import 'jest'
+import configureApp from './app'
+import supertest from 'supertest'
 
-const request = supertest(configureApp());
+const request = supertest(configureApp())
 describe("App routing", () => {
   
   describe("/hello endpoint", () => {
-    it('responds to get', async done => {
-      const response = await request.get('/hello');
+    it('responds to get', async () => {
+      const response = await request.get('/hello')
 
-      expect(response.status).toBe(200);
-      expect(response.text).toBe('hello');
-      done();
-    });
-  });
+      expect(response.status).toBe(200)
+      expect(response.text).toBe('hello')
+    })
+  })
 
   describe("/developer_application endpoint", () => {
-    it('responds to post', async done => {
-      const response = await request.post('/developer_application');
+    it('responds to post', async () => {
+      const response = await request.post('/developer_application')
 
-      expect(response.status).toBe(200);
-      expect(response.text).toBe('success');
-      done();
-    });
+      expect(response.status).toBe(200)
+      expect(response.text).toBe('success')
+    })
 
-    it('rejects get', async done => {
-      const response = await request.get('/developer_application');
+    it('rejects get', async () => {
+      const response = await request.get('/developer_application')
 
-      expect(response.status).toBe(404);
-      done();
-    });
-  });
-});
+      expect(response.status).toBe(404)
+    })
+  })
+})
