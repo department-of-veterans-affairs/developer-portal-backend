@@ -4,7 +4,15 @@ services:
   app:
     build: .
     image: developer-portal-backend
-    env_file:
-      - .env.default
-      - .env
-    
+    ports:
+      - 9999:9999
+    volumes:
+      - .:/home/node
+      - notused:/home/node/node_modules
+    command: npm run watch
+  test:
+    build: .
+    image: developer-portal-backend
+    command: npm test
+volumes:
+  notused:

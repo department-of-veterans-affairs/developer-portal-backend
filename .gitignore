@@ -62,3 +62,6 @@ typings/
 
 #
 dist
+.bash_history
+.lesshst
+.config
