@@ -21,3 +21,9 @@ npm install
 ### Docker
 - `docker-compose up`: brings up the containers to run the application
 - `docker-compose run app jest` runs the test suite
+
+### CI
+When building for production, use a build arg to only install production node modules:
+```
+docker build --build-arg NODE_ENV=production -t developer-portal-backend . 
+```
