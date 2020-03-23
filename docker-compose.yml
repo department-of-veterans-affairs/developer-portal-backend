@@ -1,8 +1,10 @@
-version: '3'
+version: '3.7'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      target: base
     image: developer-portal-backend
     ports:
       - 9999:9999
