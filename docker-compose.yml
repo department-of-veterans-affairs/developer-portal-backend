@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      target: base
+    image: developer-portal-backend
+    ports:
+      - 9999:9999
+    volumes:
+      # map local to remote folder, exclude node_modules
+      - .:/home/node
+      - /home/node/node_modules
+    command: npm run watch

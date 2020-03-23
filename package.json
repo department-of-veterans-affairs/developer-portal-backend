@@ -2,10 +2,9 @@
   "name": "developer-portal-backend",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "start": "node dist/server",
-    "watch": "tsc && concurrently \"tsc -w\" \"nodemon dist/server.js\"",
+    "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
@@ -31,7 +30,6 @@
     "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",
     "@types/supertest": "^2.0.8",
-    "concurrently": "^5.1.0",
     "jest": "^25.1.0",
     "jest-junit-reporter": "^1.1.0",
     "nodemon": "^2.0.2",
