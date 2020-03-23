@@ -5,6 +5,8 @@
   "scripts": {
     "start": "node dist/server",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
+    "lint": "eslint --ext .js,.ts .",
+    "pretest": "eslint --ext .js,.ts --fix --ignore-path .gitignore .",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
@@ -30,6 +32,9 @@
     "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",
     "@types/supertest": "^2.0.8",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "eslint": "^6.8.0",
     "jest": "^25.1.0",
     "jest-junit-reporter": "^1.1.0",
     "nodemon": "^2.0.2",
