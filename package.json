@@ -52,8 +52,7 @@
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/dist/",
-      "/lib/"
+      "/dist/"
     ]
   }
 }
