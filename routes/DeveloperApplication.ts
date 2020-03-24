@@ -1,5 +1,5 @@
-import express from 'express'
-
-export default function developerApplicationHandler(req: express.Request, res: express.Response): express.Response {
-  return res.send('success')
+export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
+  return function (req, res) {
+    res.send('success')
+  }
 }
