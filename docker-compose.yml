@@ -67,8 +67,10 @@ services:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
       - KONG_PG_DATABASE=kong
-      - KONG_PG_PASSWORD=kong  
-      - KONG_ADMIN_LISTEN=0.0.0.0:8001      
+      - KONG_PG_PASSWORD=kong
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+      - KONG_ADMIN_ACCESS_LOG='/dev/stdout'
+      - KONG_ADMIN_ERROR_LOG='/dev/stderr'
     expose:
       - 8000
       - 8001
@@ -78,4 +80,13 @@ services:
       retries: 10
     command: kong docker-start
     restart: on-failure
-    
+
+  kong_configuration:
+    image: developer-portal-backend
+    env_file: '.env'
+    depends_on:
+      - app
+    restart: on-failure
+    volumes:
+      - './add_kong_admin.sh:/home/node/add_kong_admin.sh'
+    command: bash add_kong_admin.sh
