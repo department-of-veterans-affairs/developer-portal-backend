@@ -6,7 +6,6 @@
     "start": "node dist/server",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "lint": "eslint --ext .js,.ts .",
-    "pretest": "eslint --ext .js,.ts --fix --ignore-path .gitignore .",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
