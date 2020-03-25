@@ -3,7 +3,7 @@ import pick from 'lodash.pick'
 import { User } from '../lib/models'
 
 export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
-  return async function (req, res) {
+  return async function (req, res): Promise<any> {
     const form: FormSubmission = pick(req.body, [
       'firstName',
       'lastName',
@@ -37,25 +37,26 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
         await user.sendSlackSuccess(slack)
       }
       if (!user.oauthApplication) {
-        return res.json({ token: user.token })
+        res.json({ token: user.token })
       } else {
-        return res.json({
+        res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
           token: user.token,
         })
       }
     } catch (error) {
+      let ourError = error
       if (error.errors) {
         // Sometimes what's thrown is the User object itself,
         // in which case we log the error from the `errors` property
-        error = error.errors
+        ourError = error.errors
       }
-      console.log(error)
+      console.log(ourError)
       if (slack) {
         await user.sendSlackFailure(slack)
       }
-      return res.status(500).json({error})
+      res.status(500).json({ourError})
     }
   }
 }
