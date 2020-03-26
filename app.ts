@@ -118,5 +118,10 @@ export default function configureApp(): express.Application {
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   )
 
+  app.use((err, req, res, next) => {
+    console.error(err)
+    res.status(500).json({ error: err })
+  })
+
   return app
 }

@@ -3,7 +3,7 @@ import pick from 'lodash.pick'
 import { User } from '../lib/models'
 
 export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
-  return async function (req, res): Promise<any> {
+  return async function (req, res, next): Promise<any> {
     const form: FormSubmission = pick(req.body, [
       'firstName',
       'lastName',
@@ -56,7 +56,7 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
       if (slack) {
         await user.sendSlackFailure(slack)
       }
-      res.status(500).json({ error: ourError })
+      next(ourError)
     }
   }
 }
