@@ -81,11 +81,11 @@ services:
     command: kong docker-start
     restart: on-failure
 
-  kong_configuration:
+  kong-create-admin:
     image: developer-portal-backend
     env_file: '.env'
     depends_on:
-      - app
+      - kong-migrations
     restart: on-failure
     volumes:
       - './add_kong_admin.sh:/home/node/add_kong_admin.sh'
