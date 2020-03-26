@@ -9,9 +9,7 @@ phases:
       - apt-get -y install awscli
       - echo Logging into ECR
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-  build:
-    commands:
-      - echo Build started on `date`
+      - echo Starting CI...
       - echo Building the CI Docker image...
       - docker build --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - docker images
@@ -19,6 +17,9 @@ phases:
       - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run lint
       - echo Running CI tests
       - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run test
+  build:
+    commands:
+      - echo Build started on `date`
       - docker build --target prod -t dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - docker tag dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION
   post_build:
