@@ -56,7 +56,7 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
       if (slack) {
         await user.sendSlackFailure(slack)
       }
-      res.status(500).json({ourError})
+      res.status(500).json({ error: ourError })
     }
   }
 }

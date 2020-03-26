@@ -87,6 +87,15 @@ services:
     depends_on:
       - kong-migrations
     restart: on-failure
-    volumes:
-      - './add_kong_admin.sh:/home/node/add_kong_admin.sh'
     command: bash add_kong_admin.sh
+
+  dynamodb:
+    image: amazon/dynamodb-local
+    ports:
+      - 8080:8000
+  dynamodb-migration:
+    image: developer-portal-backend
+    env_file: '.env'
+    depends_on:
+      - dynamodb
+    command: node dynamodb_schema.js
