@@ -18,6 +18,7 @@ phases:
       - echo Running CI tests
       - docker run --cidfile $CODEBUILD_SRC_DIR/ci.cid --entrypoint '' -w "/home/node" -e TEST_REPORT_PATH=/home/node -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run test
       - docker cp "$(cat $CODEBUILD_SRC_DIR/ci.cid)":/home/node/test-report.xml .
+      - ls
   build:
     commands:
       - echo Build started on `date`
