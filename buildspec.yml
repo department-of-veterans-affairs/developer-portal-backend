@@ -32,5 +32,5 @@ phases:
 reports:
   ci-test:
     files:
-      - 'test-report.xml'
+      - './test-report.xml'
     file-format: JunitXml
