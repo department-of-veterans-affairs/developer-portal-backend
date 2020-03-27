@@ -2,8 +2,10 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 12
+    commands:
+      - apt-get install -y curl
+      - curl -sL https://deb.nodesource.com/setup_12.x | bash -
+      - apt-get install -y nodejs
   pre_build:
     commands:
     - |
