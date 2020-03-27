@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: latest
+      python: 3.7
     commands:
       - apt-get install -y curl
       - curl -sL https://deb.nodesource.com/setup_12.x | bash -
