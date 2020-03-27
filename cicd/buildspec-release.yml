@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+    - |
+      npm install -g semantic-release \
+      @semantic-release/changelog \
+      @semantic-release/commit-analyzer \
+      @semantic-release/exec \
+      @semantic-release/git \
+      @semantic-release/release-notes-generator
+  build:
+    commands:
+
+  post_build:
+    commands:

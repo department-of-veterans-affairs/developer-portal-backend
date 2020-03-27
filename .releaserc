@@ -1,0 +1,24 @@
+{
+    "branches": ["master", "dg/codebuild/autorelease"],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md",
+                "changelogTitle": "# Semantic Versioning Changelog"
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "successComment": false,
+                "failComment": false,
+                "failTitle": false,
+                "labels": false,
+                "releasedLabels": false
+            }
+        ]
+    ]
+}
