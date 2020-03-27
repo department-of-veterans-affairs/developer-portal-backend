@@ -16,7 +16,8 @@ phases:
       - echo Linting...
       - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run lint
       - echo Running CI tests
-      - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run test
+      - docker run --cidfile $CODEBUILD_SRC_DIR/ci.cid --entrypoint '' -w "/home/node" -e TEST_REPORT_PATH=/home/node -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run test
+      - docker cp "$(cat $CODEBUILD_SRC_DIR/ci.cid)":/home/node/test-report.xml .
   build:
     commands:
       - echo Build started on `date`
@@ -31,6 +32,5 @@ phases:
 reports:
   ci-test:
     files:
-      - 'test-results.xml'
-    base-directory: '/'
+      - './test-report.xml'
     file-format: JunitXml
