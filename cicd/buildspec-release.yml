@@ -14,7 +14,10 @@ phases:
       @semantic-release/git \
       @semantic-release/release-notes-generator
   build:
+    env:
+      - parameter_store:
+        GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
-
+      - npx semantic-release --dry-run
   post_build:
     commands:
