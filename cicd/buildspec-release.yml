@@ -6,9 +6,9 @@ phases:
       python: 3.7
     commands:
       - apt-get install -y curl
+      - apt-get remove -y nodejs
       - curl -sL https://deb.nodesource.com/setup_12.x | bash -
       - apt-get install -y nodejs
-      - npm install -g npx
   pre_build:
     commands:
     - |
