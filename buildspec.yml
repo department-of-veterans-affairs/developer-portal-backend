@@ -34,5 +34,4 @@ reports:
   ci-test:
     files:
       - 'test-report.xml'
-    base-directory: '$CODEBUILD_SRC_DIR'
     file-format: JunitXml
