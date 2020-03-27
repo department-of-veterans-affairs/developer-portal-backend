@@ -5,9 +5,9 @@ import supertest from 'supertest'
 const request = supertest(configureApp())
 describe("App routing", () => {
   
-  describe("/hello endpoint", () => {
+  describe("simple healthcheck endpoint", () => {
     it('responds to get', async () => {
-      const response = await request.get('/hello')
+      const response = await request.get('/')
 
       expect(response.status).toBe(200)
       expect(response.text).toBe('hello')
