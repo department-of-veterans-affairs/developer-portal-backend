@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+    - |
+      npm install -g semantic-release \
+      @semantic-release/changelog \
+      @semantic-release/commit-analyzer \
+      @semantic-release/exec \
+      @semantic-release/git \
+      @semantic-release/release-notes-generator
+  build:
+    env:
+      - parameter_store:
+        GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+    commands:
+      - npx semantic-release --dry-run
+  post_build:
+    commands:
