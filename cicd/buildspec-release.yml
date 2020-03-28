@@ -6,7 +6,6 @@ phases:
       python: 3.7
     commands:
       - apt-get install -y curl
-      - apt-get remove -y nodejs
       - curl -sL https://deb.nodesource.com/setup_12.x | bash -
       - apt-get install -y nodejs
   pre_build:
@@ -23,6 +22,6 @@ phases:
       - parameter_store:
         GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
-      - npx semantic-release --dry-run
+      - npx -p node@12 semantic-release --dry-run
   post_build:
     commands:
