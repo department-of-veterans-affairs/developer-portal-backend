@@ -1,8 +1,7 @@
 version: 0.2
 
 env:
-  parameter_store:
-    GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+  git-credential-helper: yes
 
 phases:
   pre_build:
@@ -16,8 +15,6 @@ phases:
       @semantic-release/release-notes-generator
   build:
     commands:
-      - export GITHUB_TOKEN=$GITHUB_TOKEN
-      - env
       - npx semantic-release --dry-run
   post_build:
     commands:
