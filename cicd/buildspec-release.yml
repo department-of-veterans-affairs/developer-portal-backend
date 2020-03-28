@@ -12,7 +12,7 @@ phases:
       @semantic-release/release-notes-generator
   build:
     env:
-      - parameter_store:
+      parameter_store:
         GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
       - export GITHUB_TOKEN=$GITHUB_TOKEN
