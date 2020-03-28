@@ -16,11 +16,11 @@ phases:
       @semantic-release/release-notes-generator
   build:
     commands:
-      - |
-        if [ "$DRY_RUN" == "true" ]; then
-          npx semantic-release --dry-run
-        else
-          npx semantic-release --ci true
-        fi
+      - |-
+          if [ "$DRY_RUN" == "true" ]; then
+            npx semantic-release --dry-run
+          else
+            npx semantic-release --ci true
+          fi
   post_build:
     commands:
