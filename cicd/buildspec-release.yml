@@ -1,16 +1,6 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      python: 3.7
-    commands:
-      - apt update
-      - apt-get install -y curl
-      - curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | sh
-      - source /root/.nvm/nvm.sh
-      - nvm install node 12.16.1
-      - nvm use 12.16.1
   pre_build:
     commands:
     - |
