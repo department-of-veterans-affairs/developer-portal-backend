@@ -2,7 +2,8 @@ version: 0.2
 
 env:
   git-credential-helper: yes
-
+  parameter-store:
+    GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
 phases:
   pre_build:
     commands:
