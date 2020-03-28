@@ -15,6 +15,7 @@ phases:
       - parameter_store:
         GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
+      - env
       - npx semantic-release --dry-run
   post_build:
     commands:
