@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  parameter_store:
+    GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+
 phases:
   pre_build:
     commands:
@@ -11,9 +15,6 @@ phases:
       @semantic-release/git \
       @semantic-release/release-notes-generator
   build:
-    env:
-      parameter_store:
-        GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
       - export GITHUB_TOKEN=$GITHUB_TOKEN
       - env
