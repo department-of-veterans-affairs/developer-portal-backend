@@ -7,9 +7,10 @@ phases:
     commands:
       - apt update
       - apt-get install -y curl
-      - curl -sL https://deb.nodesource.com/setup_12.x | bash -
-      - apt-get install -y nodejs
-      - npm install -g npm
+      - curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | sh
+      - source /root/.nvm/nvm.sh
+      - nvm install node 12.16.1
+      - nvm use 12.16.1
   pre_build:
     commands:
     - |
@@ -24,6 +25,6 @@ phases:
       - parameter_store:
         GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
     commands:
-      - npx -p node@12 semantic-release --dry-run
+      - npx semantic-release --dry-run
   post_build:
     commands:
