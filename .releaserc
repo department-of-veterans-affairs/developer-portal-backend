@@ -25,7 +25,7 @@
             {
                 "execCwd": "cicd",
                 "prepareCmd": "tag_docker_container.sh ${nextRelease.version} ${CODEBUILD_SOURCE_VERSION}",
-                "publishCmd": "deploy_to_ecs.sh ${nextRelease.version} dev-portal-be dvp-dev
+                "publishCmd": "deploy_to_ecs.sh ${nextRelease.version} dev-portal-be dvp-dev"
             }
         ]
     ]

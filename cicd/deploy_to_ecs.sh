@@ -13,6 +13,6 @@ fi
 
 for (( e=3; e <= $#; e++))
 do
-  fargate service deploy ${!e}-"$2" --image $DOCKER_IMAGE:"$1"
+  /root/fargate service deploy ${!e}-"$2" --image $DOCKER_IMAGE:"$1"
 done
 
