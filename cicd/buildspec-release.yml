@@ -16,6 +16,7 @@ phases:
     - pip3 install --upgrade awscli
     - curl -LOk https://github.com/awslabs/fargatecli/releases/download/0.3.2/fargate-0.3.2-linux-amd64.zip
     - unzip fargate-0.3.2-linux-amd64.zip
+    - mv fargate /root/fargate
   pre_build:
     commands:
     - echo Logging into ECR
@@ -30,6 +31,6 @@ phases:
       semantic-release-slack-bot
   build:
     commands:
-      - CODEBUILD_SOURCE_VERSION=$CODEBUILD_SOURCE_VERSION npx semantic-release --ci true
+      - npx semantic-release --ci true
   post_build:
     commands:
