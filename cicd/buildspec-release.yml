@@ -30,6 +30,6 @@ phases:
       semantic-release-slack-bot
   build:
     commands:
-      - npx semantic-release --ci true
+      - CODEBUILD_SOURCE_VERSION=$CODEBUILD_SOURCE_VERSION npx semantic-release --ci true
   post_build:
     commands:
