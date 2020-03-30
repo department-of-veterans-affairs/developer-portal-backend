@@ -24,7 +24,7 @@
             "@semantic-release/exec",
             {
                 "execCwd": "cicd",
-                "prepareCmd": "tag_docker_container.sh ${nextRelease.version} ${CODEBUILD_SOURCE_VERSION}",
+                "prepareCmd": "tag_docker_container.sh ${nextRelease.version} ${nextRelease.gitHead}",
                 "publishCmd": "deploy_to_ecs.sh ${nextRelease.version} dev-portal-be dvp-dev"
             }
         ]
