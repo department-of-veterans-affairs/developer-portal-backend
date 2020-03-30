@@ -24,7 +24,7 @@ while read -r status; do
       exit 1
       ;;
   esac
-done < <(aws codebuild batch-get-builds --ids "$JOBS"|jq -r '.builds[] | select(.resolvedSourceVersion | contains("${2}")) | .buildStatus')
+done < <(aws codebuild batch-get-builds --ids "$JOBS"|jq -r --arg COMMIT_ID "$2" '.builds[] | select(.resolvedSourceVersion | contains($COMMIT_ID)) | .buildStatus')
 
 if [[ "$(aws ecr describe-images --repository-name "$REPOSITORY" --image-ids imageTag="$2"|jq -r .imageDetails[].imageTags[])" == "$2" ]]; then
   echo "Matched."
