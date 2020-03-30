@@ -10,7 +10,7 @@ phases:
     - apt update
     - apt-get -y install awscli jq python3-pip apt-transport-https ca-certificates software-properties-common gnupg
     - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    - echo "deb https://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list
     - apt update
     - apt-get -y install docker-ce
     - pip3 install --upgrade awscli
