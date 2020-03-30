@@ -65,3 +65,4 @@ dist
 .bash_history
 .lesshst
 .config
+test-report.xml
