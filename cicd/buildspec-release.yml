@@ -14,9 +14,7 @@ phases:
     - apt update
     - apt-get -y install docker-ce
     - pip3 install --upgrade awscli
-    - curl -LOk https://github.com/awslabs/fargatecli/releases/download/0.3.2/fargate-0.3.2-linux-amd64.zip
-    - unzip fargate-0.3.2-linux-amd64.zip
-    - mv fargate /root/fargate
+    - pip3 install ecs-deploy
   pre_build:
     commands:
     - echo Logging into ECR

@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
 # deploy container to ECS/Fargate
-# args: ghVersion, name, environment
+# args: $1 = ghVersion
+#       $2 = name
+#       $3 = environment
+#       $4 = environment (optional)
+#       $5... = environment (optional)
 
-command -v /root/fargate >/dev/null 2>&1 || { echo >&2 "I require fargatecli but it's not installed.  Aborting."; exit 1; }
+command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not installed.  Aborting."; exit 1; }
 
-DOCKER_IMAGE=dvp/developer-portal-backend
+# cluster name uses underscores instead of hyphens
+NAME_UNDERSCORE="${2//-/_}"
 
 if [ $# -le 2 ]; then
   echo "Not enough parameters"
@@ -13,6 +18,15 @@ fi
 
 for (( e=3; e <= $#; e++))
 do
-  /root/fargate service deploy ${!e}-"$2" --image $DOCKER_IMAGE:"$1"
+  case "${!e}" in
+    dvp-dev|dvp-staging)
+      echo "Deploying $1 of $2 to ${!e}..."
+      ecs deploy ${!e}_"${NAME_UNDERSCORE}"_cluster ${!e}-"$2" --tag "$1" --timeout 1200
+      ;;
+    *)
+      echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"
+      echo "Environment must be dvp-dev or dvp-staging, or both"
+      ;;
+  esac
 done
 
