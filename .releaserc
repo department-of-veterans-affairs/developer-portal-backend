@@ -23,7 +23,7 @@
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "cicd/tag_docker_container.sh ${nextRelease.version} ${nextRelease.gitHead}",
+                "prepareCmd": "python3 cicd/tag_containers.py -v ${nextRelease.version} -i ${nextRelease.gitHead} -r dvp/developer-portal-backend -n dev-portal-backend-ci",
                 "publishCmd": "cicd/deploy_to_ecs.sh ${nextRelease.version} dev-portal-be dvp-dev"
             }
         ]
