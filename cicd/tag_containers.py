@@ -53,7 +53,7 @@ def get_status(build):
         print("Build/Push Job failed or was stopped.")
         exit(1)
     if build['buildStatus'] == "IN_PROGRESS":
-        print(".", end="")
+        print(".", end='')
         time.sleep(10)
     return build['buildStatus']
 
@@ -102,7 +102,7 @@ def main():
     build = filter_builds(cb, build_list, args.id)
 
     status = None
-    print("Checking build status...", end="")
+    print("Checking build status...", end='')
     while status != "SUCCEEDED":
         status = get_status(filter_builds(cb, [build['id']], args.id))
 
