@@ -14,4 +14,5 @@ if [[ "$(aws ecr describe-images --repository-name "$REPOSITORY" --image-ids ima
   aws ecr put-image --repository-name "$REPOSITORY" --image-tag "$1" --image-manifest "$MANIFEST"
 else
   echo "Not matched."
+  exit 1
 fi
