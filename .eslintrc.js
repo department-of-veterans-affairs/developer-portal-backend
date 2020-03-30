@@ -22,6 +22,7 @@ module.exports = {
   },
   ignorePatterns: [
     "dist/",
-    "lib/"
+    "lib/",
+    "dynamodb_schema.js"
   ],
 };
