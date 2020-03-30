@@ -5,22 +5,26 @@ env:
   parameter-store:
     GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
 phases:
+  install:
+    commands:
+    - apt update
+    - apt-get -y install awscli jq
+    - curl -LOk https://github.com/awslabs/fargatecli/releases/download/0.3.2/fargate-0.3.2-linux-amd64.zip
+    - unzip fargate-0.3.2-linux-amd64.zip
   pre_build:
     commands:
+    - echo Logging into ECR
+    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
     - |
       npm install -g semantic-release \
       @semantic-release/changelog \
       @semantic-release/commit-analyzer \
       @semantic-release/exec \
       @semantic-release/git \
-      @semantic-release/release-notes-generator
+      @semantic-release/release-notes-generator \
+      semantic-release-slack-bot
   build:
     commands:
-      - |-
-          if [ "$DRY_RUN" == "true" ]; then
-            npx semantic-release --dry-run
-          else
-            npx semantic-release --ci true
-          fi
+      - npx semantic-release --ci true
   post_build:
     commands:
