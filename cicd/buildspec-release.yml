@@ -34,3 +34,4 @@ phases:
       - npx semantic-release --ci true
   post_build:
     commands:
+      - echo Do nothing
