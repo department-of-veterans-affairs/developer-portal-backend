@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+  parameter-store:
+    GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+phases:
+  install:
+    commands:
+    - apt update
+    - apt-get -y install awscli jq python3-pip apt-transport-https ca-certificates software-properties-common gnupg
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - echo "deb https://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list
+    - apt update
+    - apt-get -y install docker-ce
+    - pip3 install --upgrade awscli
+    - pip3 install ecs-deploy
+  pre_build:
+    commands:
+    - echo Logging into ECR
+    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - |
+      npm install -g semantic-release \
+      @semantic-release/changelog \
+      @semantic-release/commit-analyzer \
+      @semantic-release/exec \
+      @semantic-release/git \
+      @semantic-release/release-notes-generator \
+      semantic-release-slack-bot
+  build:
+    commands:
+      - npx semantic-release --ci true
+  post_build:
+    commands:
+      - echo Do nothing

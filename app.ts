@@ -105,7 +105,7 @@ export default function configureApp(): express.Application {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
-  app.get('/hello', (req, res) => res.send('hello'))
+  app.get('/', (req, res) => res.send('hello'))
 
   const kong = configureKongClient()
   const okta = configureOktaClient()

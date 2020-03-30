@@ -43,6 +43,7 @@
     "typescript": "^3.8.3"
   },
   "jest": {
+    "testResultsProcessor": "./node_modules/jest-junit-reporter",
     "preset": "ts-jest",
     "globals": {
       "ts-jest": {
