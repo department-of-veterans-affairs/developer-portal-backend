@@ -8,7 +8,8 @@ phases:
   install:
     commands:
     - apt update
-    - apt-get -y install awscli jq
+    - apt-get -y install awscli jq python3-pip
+    - pip3 install --upgrade awscli
     - curl -LOk https://github.com/awslabs/fargatecli/releases/download/0.3.2/fargate-0.3.2-linux-amd64.zip
     - unzip fargate-0.3.2-linux-amd64.zip
   pre_build:
