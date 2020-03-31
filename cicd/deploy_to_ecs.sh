@@ -19,13 +19,13 @@ fi
 for (( e=3; e <= $#; e++))
 do
   case "${!e}" in
-    dvp-dev|dvp-staging)
+    dev|staging)
       echo "Deploying $1 of $2 to ${!e}..."
-      ecs deploy ${!e}_"${NAME_UNDERSCORE}"_cluster ${!e}-"$2" --tag "$1" --timeout 1200
+      ecs deploy ${!e}_"${NAME_UNDERSCORE}"_cluster "dvp-"${!e}-"$2" --tag "$1" --timeout 1200
       ;;
     *)
       echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"
-      echo "Environment must be dvp-dev or dvp-staging, or both"
+      echo "Environment must be dev or staging, or both"
       ;;
   esac
 done
