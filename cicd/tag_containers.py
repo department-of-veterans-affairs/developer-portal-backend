@@ -41,8 +41,8 @@ def filter_builds(client, builds, id):
         if build['resolvedSourceVersion'] == id:
             return build
         else:
-            print("No matching container was found.")
-            exit(1)
+            build['buildStatus'] = "FAILED"
+            return build
 
 
 def get_status(build):
@@ -50,7 +50,7 @@ def get_status(build):
         print("No build was found.")
         exit(1)
     if build['buildStatus'] == "FAILED" or build['buildStatus'] == "STOPPED":
-        print("Build/Push Job failed or was stopped.")
+        print("Build/Push Job failed, was stopped, or didn't exist.")
         exit(1)
     if build['buildStatus'] == "IN_PROGRESS":
         print(".")
@@ -85,10 +85,7 @@ def tag_image(client, image, repo, version):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Tag containers in ECR.')
-    parser.add_argument(
-        '-t', '--tag', help='Version you would like to tag the container with.')
+    parser = argparse.ArgumentParser(description='Tag containers in ECR.')
     parser.add_argument('-i', '--id', help='Commit ID of container to tag.')
     parser.add_argument('-r', '--repo', help='Repository name.')
     parser.add_argument('-n', '--name', help="Name of the CI Codebuild job.")
