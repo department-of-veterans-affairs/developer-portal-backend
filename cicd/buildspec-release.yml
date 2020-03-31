@@ -15,21 +15,20 @@ phases:
     - apt-get -y install docker-ce
     - pip3 install --upgrade awscli
     - pip3 install ecs-deploy
+    - curl -LOk https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
+    - tar zxvf hub-linux-amd64-2.14.2.tgz
+    - cp hub-linux-amd64-2.14.2/bin/hub /usr/local/bin
   pre_build:
     commands:
     - echo Logging into ECR
     - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-    - |
-      npm install -g semantic-release \
-      @semantic-release/changelog \
-      @semantic-release/commit-analyzer \
-      @semantic-release/exec \
-      @semantic-release/git \
-      @semantic-release/release-notes-generator \
-      semantic-release-slack-bot
+    - echo Creating release...
+    - hub release create -m $(cicd/increment.sh $(hub tag|tail -1)) -t master $(cicd/increment.sh $(hub tag|tail -1))
+    - echo Tagging ECR image...
+    - python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_SOURCE_VERSION} -r dvp/developer-portal-backend -v $(cicd/increment.sh $(hub tag|tail -1))
   build:
     commands:
-      - npx semantic-release --ci true
+    - echo Triggering deploy...
+    - cicd/deploy_to_ecs.sh $(cicd/increment.sh $(hub tag|tail -1)) dev-portal-be dev
   post_build:
     commands:
-      - echo Do nothing
