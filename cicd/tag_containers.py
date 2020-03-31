@@ -40,9 +40,6 @@ def filter_builds(client, builds, id):
     for build in builds['builds']:
         if build['resolvedSourceVersion'] == id:
             return build
-        else:
-            build['buildStatus'] = "FAILED"
-            return build
 
 
 def get_status(build):
