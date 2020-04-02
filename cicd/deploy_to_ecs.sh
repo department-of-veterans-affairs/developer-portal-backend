@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -euxo pipefail
 # deploy container to ECS/Fargate
 # args: $1 = ghVersion
 #       $2 = name
@@ -10,6 +10,8 @@
 command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not installed.  Aborting."; exit 1; }
 
 # cluster name uses underscores instead of hyphens
+TAG="${1}"
+NAME="${2}"
 NAME_UNDERSCORE="${2//-/_}"
 
 if [ $# -le 2 ]; then
@@ -18,10 +20,17 @@ fi
 
 for (( e=3; e <= $#; e++))
 do
-  case "${!e}" in
+  # In this loop, the environment is ${!e}
+  ENV="${!e}"
+  # service is dvp-[ENVIRONMENT]-[NAME]
+  SERVICE="dvp-${ENV}-${NAME}"
+  # cluster is [ENVIRONMENT]_[NAME_WITH_UNDERSCORES]_cluster
+  CLUSTER="${ENV}_${NAME//-/_}_cluster"
+  case "${ENV}" in
     dev|staging)
-      echo "Deploying $1 of $2 to ${!e}..."
-      ecs deploy ${!e}_"${NAME_UNDERSCORE}"_cluster "dvp-"${!e}-"$2" --tag "$1" --timeout 1200
+      echo "Deploying ${TAG} of ${NAME} to ${ENV}..."
+      # Deploy to each environment and set env vars
+      ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 600 "${CLUSTER}" "${SERVICE}"
       ;;
     *)
       echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"

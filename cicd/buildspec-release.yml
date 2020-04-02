@@ -22,13 +22,15 @@ phases:
     commands:
     - echo Logging into ECR
     - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - echo Setting tag for new release...
+    - NEW_RELEASE_TAG=$(cicd/increment.sh $(hub tag|sort --version-sort |tail -1))
     - echo Creating release...
-    - hub release create -m $(cicd/increment.sh $(hub tag|tail -1)) -t master $(cicd/increment.sh $(hub tag|tail -1))
+    - hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG
     - echo Tagging ECR image...
-    - python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_RESOLVED_SOURCE_VERSION} -r dvp/developer-portal-backend -v $(cicd/increment.sh $(hub tag|tail -1))
+    - python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_RESOLVED_SOURCE_VERSION} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG
   build:
     commands:
-    - echo Triggering deploy to dev...
-    - ecs deploy -t $(cicd/increment.sh $(hub tag|tail -1)) -e dvp-dev-dev-portal-be CHAMBER_ENV dev -e dvp-dev-dev-portal-be AWS_APP_NAME developer-portal-backend --timeout 1200 dev_dev_portal_be_cluster dvp-dev-dev-portal-be
+    - echo Triggering deploys...
+    - cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
   post_build:
     commands:
