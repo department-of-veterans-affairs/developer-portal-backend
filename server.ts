@@ -16,3 +16,8 @@ server.on('listening', () => {
     `Server started on port ${PORT}`,
   )
 })
+
+//example of how to log with the tracer module
+import tracer from './tracer'
+tracer().trace('github.com')
+tracer().trace('example.com')
