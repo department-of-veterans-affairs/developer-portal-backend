@@ -28,11 +28,21 @@ do
   case "${ENV}" in
     dev|staging)
       echo "Kicking off deploy of version ${TAG} of ${NAME} to ${ENV}..."
+      # Notify slack of deploy
       cicd/slackpost.sh "Deploying ${TAG} of ${NAME} to ${ENV}..."
       # Deploy to each environment and set env vars
-      if $(ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 1200 "${CLUSTER}" "${SERVICE}"|tee $SRC_DIR/deploy_output.txt); then
+      if $(ecs deploy \
+           -t "${TAG}" \
+           -e "${SERVICE}" CHAMBER_ENV "${ENV}" \
+           -e "${SERVICE}" AWS_APP_NAME developer-portal-backend \
+            --timeout 1200 \
+            "${CLUSTER}" \
+            "${SERVICE}" \
+            |tee $SRC_DIR/deploy_output.txt); then
+        # Notify slack of success
         cicd/slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} complete."
       else
+        # Notify slack of failure
         cicd/slackpost.sh -d "$(cat ${SRC_DIR}/deploy_output.txt)" "Deploy of version ${TAG} of ${NAME} to ${ENV} marked as failed."
         PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
         BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
