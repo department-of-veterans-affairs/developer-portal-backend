@@ -33,7 +33,7 @@ phases:
         if TAG_RESULT=$(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_RESOLVED_SOURCE_VERSION} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG); then
           cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
         else
-          cicd/slackpost.sh "Tagging failed. -d "$TAG_RESULT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
+          cicd/slackpost.sh "Tagging failed." -d "$TAG_RESULT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
         fi
       else
         cicd/slackpost.sh "Release failed." -d "$RELEASE_RESULT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
