@@ -8,8 +8,8 @@ set -euo pipefail
 #       $5... = environment (optional)
 
 command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not installed.  Aborting."; exit 1; }
+command -v cicd/slackpost.sh >/dev/null 2>&1 || { echo >&2 "I require slackpost.sh but it's not installed.  Aborting."; exit 1; }
 
-# cluster name uses underscores instead of hyphens
 TAG="${1}"
 NAME="${2}"
 
