@@ -34,7 +34,7 @@ do
         cicd/slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} complete."
       else
         cicd/slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} marked as failed." -d "$DEPLOY_OUTPUT"
-        PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" 'print $1')
+        PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
         cicd/slackpost.sh "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
       fi
       ;;
