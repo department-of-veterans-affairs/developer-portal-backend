@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 # deploy container to ECS/Fargate
 # args: $1 = ghVersion
 #       $2 = name
@@ -12,7 +12,6 @@ command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not 
 # cluster name uses underscores instead of hyphens
 TAG="${1}"
 NAME="${2}"
-NAME_UNDERSCORE="${2//-/_}"
 
 if [ $# -le 2 ]; then
   echo "Not enough parameters"
@@ -28,9 +27,16 @@ do
   CLUSTER="${ENV}_${NAME//-/_}_cluster"
   case "${ENV}" in
     dev|staging)
-      echo "Deploying ${TAG} of ${NAME} to ${ENV}..."
+      echo "Kicking off deploy of version ${TAG} of ${NAME} to ${ENV}..."
+      ./slackpost.sh "Deploying ${TAG} of ${NAME} to ${ENV}..."
       # Deploy to each environment and set env vars
-      ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 1200 "${CLUSTER}" "${SERVICE}"
+      if ! DEPLOY_OUTPUT=$(ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 1200 "${CLUSTER}" "${SERVICE}"); then
+        ./slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} complete."
+      else
+        ./slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} marked as failed." -d "$DEPLOY_OUTPUT"
+        PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" 'print $1')
+        ./slackpost.sh "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
+      fi
       ;;
     *)
       echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"
