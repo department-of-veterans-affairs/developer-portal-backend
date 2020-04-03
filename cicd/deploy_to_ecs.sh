@@ -30,7 +30,7 @@ do
     dev|staging)
       echo "Deploying ${TAG} of ${NAME} to ${ENV}..."
       # Deploy to each environment and set env vars
-      ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 600 "${CLUSTER}" "${SERVICE}"
+      ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 1200 "${CLUSTER}" "${SERVICE}"
       ;;
     *)
       echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"
