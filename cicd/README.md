@@ -1,5 +1,17 @@
 CICD Workflow
 
+
+## CICD scripts
+- cicd/increment.sh
+  - smart incrementer for version numbers
+- tag_containers.py
+  - tags container <commitId> in ECR with a <version> tag
+- deploy_to_ecs.sh
+  - deploys new containers to ECS/Fargate
+- slackpost.sh
+  - Handles slack notifications
+
+
 ## CI
 - Codebuild CI job at /buildspec.yml runs on every code push to the repository
   - uses the pre-built environment from Codebuild
