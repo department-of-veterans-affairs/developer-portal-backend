@@ -41,6 +41,6 @@ phases:
   build:
     commands:
     - echo Triggering deploys...
-    - cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
+    - CODEBUILD_BUILD_NUMBER=$CODEBUILD_BUILD_NUMBER CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
   post_build:
     commands:
