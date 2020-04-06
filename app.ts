@@ -106,7 +106,6 @@ export default function configureApp(): express.Application {
   app.use(express.urlencoded({ extended: false }))
 
   app.get('/', (req, res) => {
-    throw new Error('the thing failed')
     res.send('hello')
   })
 
