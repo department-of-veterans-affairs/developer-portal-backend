@@ -39,16 +39,18 @@ phases:
           BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
           TAG_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/tag_output.txt)
           cicd/slackpost.sh -d "$TAG_OUTPUT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Tagging failed."
+          exit 1
         fi
       else
         PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
         BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
         RELEASE_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/release_output.txt)
         cicd/slackpost.sh -d "$RELEASE_OUTPUT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Release failed."
+        exit 1
       fi
   build:
     commands:
-    - echo Triggering deploys...
-    - SRC_DIR=$CODEBUILD_SRC_DIR CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
+      - echo Triggering deploys...
+      - SRC_DIR=$CODEBUILD_SRC_DIR CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
   post_build:
     commands:
