@@ -119,8 +119,13 @@ export default function configureApp(): express.Application {
   )
 
   app.use((err, req, res, next) => {
-    console.error(err)
-    res.status(500).json({ error: err })
+    if (Array.isArray(err)) {
+      console.error(err[0].message)
+    } else {
+      console.error(err.message)
+    }
+
+    res.status(500).json({ error: 'encountered an error' })
   })
 
   return app
