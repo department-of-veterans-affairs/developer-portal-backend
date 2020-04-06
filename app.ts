@@ -105,7 +105,10 @@ export default function configureApp(): express.Application {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
-  app.get('/', (req, res) => res.send('hello'))
+  app.get('/', (req, res) => {
+    throw new Error('the thing failed')
+    res.send('hello')
+  })
 
   const kong = configureKongClient()
   const okta = configureOktaClient()
@@ -120,7 +123,7 @@ export default function configureApp(): express.Application {
 
   app.use((err, req, res, next) => {
     if (Array.isArray(err)) {
-      console.error(err[0].message)
+      err.forEach((error) => {console.error(error.message)})
     } else {
       console.error(err.message)
     }
