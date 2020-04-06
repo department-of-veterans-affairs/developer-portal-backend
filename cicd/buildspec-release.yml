@@ -30,8 +30,9 @@ phases:
     - echo Creating release...
     - |
       if $(hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG|tee $CODEBUILD_SRC_DIR/release_output.txt); then
+        TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG)
         echo Tagging ECR image...
-        if $(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_RESOLVED_SOURCE_VERSION} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG|tee $CODEBUILD_SRC_DIR/tag_output.txt); then
+        if $(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG|tee $CODEBUILD_SRC_DIR/tag_output.txt); then
           cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
         else
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
