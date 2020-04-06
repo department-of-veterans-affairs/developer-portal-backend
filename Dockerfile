@@ -17,6 +17,13 @@ FROM vasdvp/lighthouse-node-application-base:node12 AS prod
 EXPOSE 9999
 WORKDIR /home/node
 ENV NODE_ENV production
+
+RUN openssl x509 \
+  -inform der \
+  -in /etc/pki/ca-trust/source/anchors/VA-Internal-S2-RCA1-v1.cer \
+  -out /home/node/va-internal.pem
+ENV NODE_EXTRA_CA_CERTS=/home/node/va-internal.pem
+
 COPY --chown=node:node --from=base /home/node/dist dist
 COPY --chown=node:node --from=base /home/node/package*.json ./
 COPY --chown=node:node --from=base /home/node/node_modules node_modules
