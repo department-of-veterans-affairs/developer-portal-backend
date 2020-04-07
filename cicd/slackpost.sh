@@ -84,4 +84,4 @@ JSON_PAYLOAD_3="\
 "
 JSON_PAYLOAD="$JSON_PAYLOAD_1$JSON_PAYLOAD_2$JSON_PAYLOAD_3"
 
-echo "$(curl -X POST -H 'Content-type: application/json' --data "$JSON_PAYLOAD" "$SLACK_WEBHOOK" 2>&1)"
+echo "$(curl -s -X POST -H 'Content-type: application/json' --data "$JSON_PAYLOAD" "$SLACK_WEBHOOK" 2>&1)"

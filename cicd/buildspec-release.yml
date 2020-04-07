@@ -21,6 +21,7 @@ phases:
     - cp hub-linux-amd64-2.14.2/bin/hub /usr/local/bin
   pre_build:
     commands:
+    - set -o pipefail
     - echo Logging into ECR
     - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
     - echo Setting tag for new release...
@@ -28,19 +29,28 @@ phases:
     - cicd/slackpost.sh "Creating and tagging a new release for the Developer Portal Backend..."
     - echo Creating release...
     - |
-      if RELEASE_RESULT=$(hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG); then
+      if $(hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG|tee $CODEBUILD_SRC_DIR/release_output.txt); then
+        TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG)
         echo Tagging ECR image...
-        if TAG_RESULT=$(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${CODEBUILD_RESOLVED_SOURCE_VERSION} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG); then
+        if $(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG|tee $CODEBUILD_SRC_DIR/tag_output.txt); then
           cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
         else
-          cicd/slackpost.sh "Tagging failed." -d "$TAG_RESULT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
+          PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
+          BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
+          TAG_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/tag_output.txt)
+          cicd/slackpost.sh -d "$TAG_OUTPUT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Tagging failed."
+          exit 1
         fi
       else
-        cicd/slackpost.sh "Release failed." -d "$RELEASE_RESULT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
+        PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
+        BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
+        RELEASE_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/release_output.txt)
+        cicd/slackpost.sh -d "$RELEASE_OUTPUT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Release failed."
+        exit 1
       fi
   build:
     commands:
-    - echo Triggering deploys...
-    - CODEBUILD_BUILD_NUMBER=$CODEBUILD_BUILD_NUMBER CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
+      - echo Triggering deploys...
+      - SRC_DIR=$CODEBUILD_SRC_DIR CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
   post_build:
     commands:

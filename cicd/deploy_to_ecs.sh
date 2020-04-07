@@ -8,8 +8,8 @@ set -euo pipefail
 #       $5... = environment (optional)
 
 command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not installed.  Aborting."; exit 1; }
+command -v cicd/slackpost.sh >/dev/null 2>&1 || { echo >&2 "I require slackpost.sh but it's not installed.  Aborting."; exit 1; }
 
-# cluster name uses underscores instead of hyphens
 TAG="${1}"
 NAME="${2}"
 
@@ -28,14 +28,26 @@ do
   case "${ENV}" in
     dev|staging)
       echo "Kicking off deploy of version ${TAG} of ${NAME} to ${ENV}..."
+      # Notify slack of deploy
       cicd/slackpost.sh "Deploying ${TAG} of ${NAME} to ${ENV}..."
       # Deploy to each environment and set env vars
-      if ! DEPLOY_OUTPUT=$(ecs deploy -t "${TAG}" -e "${SERVICE}" CHAMBER_ENV "${ENV}" -e "${SERVICE}" AWS_APP_NAME developer-portal-backend --timeout 1200 "${CLUSTER}" "${SERVICE}"); then
+      if $(ecs deploy \
+           -t "${TAG}" \
+           -e "${SERVICE}" CHAMBER_ENV "${ENV}" \
+           -e "${SERVICE}" AWS_APP_NAME developer-portal-backend \
+            --timeout 1200 \
+            "${CLUSTER}" \
+            "${SERVICE}" \
+            |tee $SRC_DIR/deploy_output.txt); then
+        # Notify slack of success
         cicd/slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} complete."
       else
-        cicd/slackpost.sh "Deploy of version ${TAG} of ${NAME} to ${ENV} marked as failed." -d "$DEPLOY_OUTPUT"
+        # Notify slack of failure
+        cicd/slackpost.sh -d "$(cat ${SRC_DIR}/deploy_output.txt)" "Deploy of version ${TAG} of ${NAME} to ${ENV} marked as failed."
         PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
-        cicd/slackpost.sh "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${CODEBUILD_BUILD_NUMBER}/log?region=${AWS_REGION}|CodeBuild Project>"
+        BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
+        cicd/slackpost.sh "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>"
+        exit 1
       fi
       ;;
     *)
