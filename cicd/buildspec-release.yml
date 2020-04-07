@@ -28,8 +28,7 @@ phases:
     - cicd/slackpost.sh "Creating and tagging a new release for the Developer Portal Backend..."
     - echo Creating release...
     - |
-      hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG
-      if [ $? -eq 0 ]; then
+      if hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG; then
         git fetch origin
         if TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG); then
           echo Got hash for $NEW_RELEASE_TAG: $TAG_COMMIT_HASH
