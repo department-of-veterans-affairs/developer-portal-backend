@@ -1,6 +1,7 @@
 import argparse
 import boto3
 from botocore.exceptions import ClientError
+import logging
 import time
 import sys
 
@@ -10,6 +11,7 @@ def get_client(service):
         client = boto3.client(service)
     except ClientError as e:
         print("Error: %s" % e)
+        logging.warning('Error: %s', e)
         exit(1)
     return client
 
@@ -35,6 +37,7 @@ def filter_builds(client, builds, id):
         )
     except ClientError as e:
         print("Error: %s" % e)
+        logging.warning('Error: %s', e)
         exit(1)
 
     for build in builds['builds']:
@@ -45,12 +48,15 @@ def filter_builds(client, builds, id):
 def get_status(build):
     if build == None:
         print("No build was found.")
+        logging.info('No build was found.')
         exit(1)
     if build['buildStatus'] == "FAILED" or build['buildStatus'] == "STOPPED":
         print("Build/Push Job failed, was stopped, or didn't exist.")
+        logging.info('Build/Push Job failed, was stopped, or didn\'t exist.')
         exit(1)
     if build['buildStatus'] == "IN_PROGRESS":
         print(".")
+        logging.info('.')
         time.sleep(10)
     return build['buildStatus']
 
@@ -76,6 +82,7 @@ def tag_image(client, image, repo, version):
         )
     except ClientError as e:
         print("Error: %s" % e)
+        logging.warning('Error: %s', e)
         exit(1)
 
     return response
@@ -88,8 +95,13 @@ def main():
     parser.add_argument('-n', '--name', help="Name of the CI Codebuild job.")
     parser.add_argument('-v', '--version',
                         help="Version number to tag the image with.")
+    parser.add_argument(
+        '-o', '--output', help="Full path to file to write output to.")
 
     args = parser.parse_args()
+
+    logging.basicConfig(filename=args.output,
+                        level=logging.DEBUG, format='%(asctime)s %(message)s')
 
     cb = get_client('codebuild')
     build_list = get_list_of_builds(cb, args.name)
@@ -97,6 +109,7 @@ def main():
 
     status = None
     print("Checking build status...")
+    logging.info('Checking build status...')
     while status != "SUCCEEDED":
         status = get_status(filter_builds(cb, [build['id']], args.id))
 
@@ -105,6 +118,7 @@ def main():
     response = tag_image(ecr, image, args.repo, args.version)
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
         print("Successfully tagged.")
+        logging.info('Successfully tagged.')
 
 
 if __name__ == "__main__":
