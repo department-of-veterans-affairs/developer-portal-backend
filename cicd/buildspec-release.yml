@@ -37,7 +37,7 @@ phases:
           exit 1
         fi
         echo Tagging ECR image...
-        if $(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG -o $CODEBUILD_SRC_DIR/tag_output.txt); then
+        if python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG -o $CODEBUILD_SRC_DIR/tag_output.txt; then
           cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
         else
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
