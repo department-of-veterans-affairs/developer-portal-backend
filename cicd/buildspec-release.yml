@@ -76,6 +76,6 @@ phases:
       # We trigger the deploys here. The list of environments to automatically deploy to is placed at the end of the command below, separated
       # by spaces, e.g.: deploy_to_ecs.sh <tag> <service> [dev staging]
       - echo Triggering deploys...
-      - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} cicd/deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} dev
+      - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} cicd/deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} "${AUTO_DEPLOY_VARS}"
   post_build:
     commands:
