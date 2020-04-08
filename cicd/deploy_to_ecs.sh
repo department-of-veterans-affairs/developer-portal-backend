@@ -3,21 +3,23 @@ set -euo pipefail
 # deploy container to ECS/Fargate
 # args: $1 = ghVersion
 #       $2 = name
-#       $3 = environment
-#       $4 = environment (optional)
-#       $5... = environment (optional)
+#       $3 = friendly name (used in parameter store as /project/environment/friendly-name)
+#       $4 = environment
+#       $5 = environment (optional)
+#       $6... = environment (optional)
 
 command -v ecs >/dev/null 2>&1 || { echo >&2 "I require ecs-deploy but it's not installed.  Aborting."; exit 1; }
 command -v cicd/slackpost.sh >/dev/null 2>&1 || { echo >&2 "I require slackpost.sh but it's not installed.  Aborting."; exit 1; }
 
 TAG="${1}"
 NAME="${2}"
+FRIENDLY_NAME="${3}"
 
-if [ $# -le 2 ]; then
+if [ $# -le 4 ]; then
   echo "Not enough parameters"
 fi
 
-for (( e=3; e <= $#; e++))
+for (( e=4; e <= $#; e++))
 do
   # In this loop, the environment is ${!e}
   ENV="${!e}"
@@ -30,11 +32,11 @@ do
       echo "Kicking off deploy of version ${TAG} of ${NAME} to ${ENV}..."
       # Notify slack of deploy
       cicd/slackpost.sh "Deploying ${TAG} of ${NAME} to ${ENV}..."
-      # Deploy to each environment and set env vars
+      # Deploy to each environment and set env vars for parameter store
       if ecs deploy \
            -t "${TAG}" \
            -e "${SERVICE}" CHAMBER_ENV "${ENV}" \
-           -e "${SERVICE}" AWS_APP_NAME developer-portal-backend \
+           -e "${SERVICE}" AWS_APP_NAME "${FRIENDLY_NAME}" \
            --timeout 1200 "${CLUSTER}" "${SERVICE}" \
            | tee "$SRC_DIR"/deploy_output.txt; then
         # Notify slack of success
@@ -49,7 +51,7 @@ do
       fi
       ;;
     *)
-      echo "Usage: deploy-to-ecs.sh ghVersion name environment [environment...]"
+      echo "Usage: deploy-to-ecs.sh ghVersion name friendly-name environment [environment...]"
       echo "Environment must be dev or staging, or both"
       ;;
   esac

@@ -10,8 +10,8 @@ env:
     CI_JOB_NAME: "dev-portal-backend-ci"
     # REPOSITORY should be the ECR Repository where the container is stored
     REPOSITORY: "dvp/developer-portal-backend"
-    # FRIENDLY_NAME should be a friendly service name (only used in notifications/logging)
-    FRIENDLY_NAME: "Developer Portal Backend"
+    # FRIENDLY_NAME should be the name used in Parameter store, e.g.: /dvp/environment/friendly-name
+    FRIENDLY_NAME: "developer-portal-backend"
     # Set AUTO_DEPLOY_ENVS to match the environments you would like to deploy to when this buildspec is triggered. e.g.: "dev staging"
     AUTO_DEPLOY_ENVS: "dev"
   parameter-store:
@@ -76,6 +76,6 @@ phases:
       # We trigger the deploys here. The list of environments to automatically deploy to is placed at the end of the command below, separated
       # by spaces, e.g.: deploy_to_ecs.sh <tag> <service> [dev staging]
       - echo Triggering deploys...
-      - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} cicd/deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} "${AUTO_DEPLOY_VARS}"
+      - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} cicd/deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} ${FRIENDLY_NAME} "${AUTO_DEPLOY_VARS}"
   post_build:
     commands:
