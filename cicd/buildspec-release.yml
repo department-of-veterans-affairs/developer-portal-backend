@@ -28,10 +28,16 @@ phases:
     - cicd/slackpost.sh "Creating and tagging a new release for the Developer Portal Backend..."
     - echo Creating release...
     - |
-      if $(hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG); then
-        TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG)
+      if hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG; then
+        git fetch origin
+        if TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG); then
+          echo Got hash for $NEW_RELEASE_TAG: $TAG_COMMIT_HASH
+        else
+          echo Failed to get hash for $NEW_RELEASE_TAG
+          exit 1
+        fi
         echo Tagging ECR image...
-        if $(python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG -o $CODEBUILD_SRC_DIR/tag_output.txt); then
+        if python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG -o $CODEBUILD_SRC_DIR/tag_output.txt; then
           cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
         else
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
