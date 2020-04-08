@@ -2,8 +2,19 @@ version: 0.2
 
 env:
   git-credential-helper: yes
+  variables:
+    # SERVICE_NAME should match the ECS service name without the project or environment
+    # Example: ECS Service name: dvp-staging-saml-proxy = SERVICE_NAME: "saml-proxy"
+    SERVICE_NAME: "dev-portal-be"
+    # CI_JOB_NAME should match the Codebuild CI job's name
+    CI_JOB_NAME: "dev-portal-backend-ci"
+    # REPOSITORY should be the ECR Repository where the container is stored
+    REPOSITORY: "dvp/developer-portal-backend"
+    # FRIENDLY_NAME should be a friendly service name (only used in notifications/logging)
+    FRIENDLY_NAME: "Developer Portal Backend"
   parameter-store:
     GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+    # SLACK_WEBHOOK should be a webhook that posts to the Slack channel you want notifications to go to
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook"
 phases:
   install:
@@ -22,23 +33,29 @@ phases:
   pre_build:
     commands:
     - echo Logging into ECR
-    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
     - echo Setting tag for new release...
+    # To get the new release version, we will increment the last version number found in Github
     - NEW_RELEASE_TAG=$(cicd/increment.sh $(hub tag|sort --version-sort |tail -1)); export NEW_RELEASE_TAG
-    - cicd/slackpost.sh "Creating and tagging a new release for the Developer Portal Backend..."
+    - cicd/slackpost.sh "Creating and tagging a new release for ${FRIENDLY_NAME}..."
     - echo Creating release...
+    # We use the 'hub' command to create a release here with the contents of 'master'. If the command exits successfully, we then
+    # git fetch to get the new tag created, and we use that tag to get a commit SHA for the new release.
+    # This is a WORKAROUND to Codebuild not having the 'git_commit_sha' from the webhook available.
+    # We then tag the image using tag_containers.py, if that command is successful, we are done with this section.
+    # Failures are noted and notifications are made with links to the Codebuild job.
     - |
-      if hub release create -m $NEW_RELEASE_TAG -t master $NEW_RELEASE_TAG; then
+      if hub release create -m ${NEW_RELEASE_TAG} -t master ${NEW_RELEASE_TAG}; then
         git fetch origin
-        if TAG_COMMIT_HASH=$(git rev-parse $NEW_RELEASE_TAG); then
-          echo Got hash for $NEW_RELEASE_TAG: $TAG_COMMIT_HASH
+        if TAG_COMMIT_HASH=$(git rev-parse ${NEW_RELEASE_TAG}); then
+          echo Got hash for ${NEW_RELEASE_TAG}: ${TAG_COMMIT_HASH}
         else
-          echo Failed to get hash for $NEW_RELEASE_TAG
+          echo Failed to get hash for ${NEW_RELEASE_TAG}
           exit 1
         fi
         echo Tagging ECR image...
-        if python3 cicd/tag_containers.py -n dev-portal-backend-ci -i ${TAG_COMMIT_HASH} -r dvp/developer-portal-backend -v $NEW_RELEASE_TAG -o $CODEBUILD_SRC_DIR/tag_output.txt; then
-          cicd/slackpost.sh "Tagged dvp/developer-portal-backend:$NEW_RELEASE_TAG"
+        if python3 cicd/tag_containers.py -n ${CI_JOB_NAME} -i ${TAG_COMMIT_HASH} -r ${REPOSITORY} -v ${NEW_RELEASE_TAG} -o ${CODEBUILD_SRC_DIR}/tag_output.txt; then
+          cicd/slackpost.sh "Tagged ${REPOSITORY}:${NEW_RELEASE_TAG}"
         else
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
           BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
@@ -54,7 +71,9 @@ phases:
       fi
   build:
     commands:
+      # We trigger the deploys here. The list of environments to automatically deploy to is placed at the end of the command below, separated
+      # by spaces, e.g.: deploy_to_ecs.sh <tag> <service> [dev staging]
       - echo Triggering deploys...
-      - SRC_DIR=$CODEBUILD_SRC_DIR CODEBUILD_BUILD_ID=$CODEBUILD_BUILD_ID cicd/deploy_to_ecs.sh $NEW_RELEASE_TAG dev-portal-be dev
+      - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} cicd/deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} dev
   post_build:
     commands:
