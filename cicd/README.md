@@ -2,13 +2,13 @@ CICD Workflow
 
 
 ## CICD scripts are included in the Docker image used for the Codebuild job: vasdvp/lighthouse-codebuild-dsva-fargate:latest
-- cicd/increment.sh
+- /usr/local/bin/increment.sh
   - smart incrementer for version numbers
-- tag_containers.py
+- /usr/local/bin/tag_containers.py
   - tags container <commitId> in ECR with a <version> tag
-- deploy_to_ecs.sh
+- /usr/local/bin/deploy_to_ecs.sh
   - deploys new containers to ECS/Fargate
-- slackpost.sh
+- /usr/local/bin/slackpost.sh
   - Handles slack notifications
 
 
@@ -30,8 +30,8 @@ CICD Workflow
 
 ## Release/Deploy
 - when PR is merged to master, it will trigger cicd/buildspec-release.yml in Codebuild for the project dev-portal-backend-release.
-  - Uses a stock ubuntu 18.04 image
-  - cicd/buildspec-release.yml
+  - Uses the vasdvp/lighthouse-codebuild-dsva-fargate image
+    - cicd/buildspec-release.yml
     - pre_build
       - logs into ECR
       - creates a new release in Github by naively incrementing the last digit of the version (configurable behavior in cicd/increment.sh)
