@@ -1,5 +1,6 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
+import * as Sentry from '@sentry/node'
 
 import {
   GovDeliveryClient,
@@ -102,6 +103,15 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
 export default function configureApp(): express.Application {
   const app = express()
 
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+    })
+
+    // Must be the first middleware
+    app.use(Sentry.Handlers.requestHandler());
+  }
+
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
@@ -119,6 +129,10 @@ export default function configureApp(): express.Application {
     '/developer_application',
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   )
+
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.errorHandler())
+  }
 
   app.use((err, req, res, next) => {
     if (Array.isArray(err)) {

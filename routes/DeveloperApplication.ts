@@ -52,7 +52,6 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
         // in which case we log the error from the `errors` property
         ourError = error.errors
       }
-      console.log(ourError)
       if (slack) {
         await user.sendSlackFailure(slack)
       }
