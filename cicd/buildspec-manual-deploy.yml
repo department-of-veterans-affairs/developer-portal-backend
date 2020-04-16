@@ -30,7 +30,7 @@ phases:
       if [ -n "$DEPLOY_TAG" ]; then
         echo Found DEPLOY_TAG in job variables: "$DEPLOY_TAG".
       else
-        DEPLOY_TAG=$(hub tag|sort --version-sort |tail -1)); export DEPLOY_TAG
+        DEPLOY_TAG=$(hub tag|sort --version-sort |tail -1); export DEPLOY_TAG
         echo Got latest tag from Github: "$DEPLOY_TAG"
       fi
     - slackpost.sh "Release version - ${DEPLOY_TAG} - will be deployed..."
