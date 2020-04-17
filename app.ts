@@ -110,7 +110,7 @@ export default function configureApp(): express.Application {
     })
 
     // Must be the first middleware
-    app.use(Sentry.Handlers.requestHandler());
+    app.use(Sentry.Handlers.requestHandler())
   }
 
   app.use(express.json())
@@ -135,7 +135,7 @@ export default function configureApp(): express.Application {
     app.use(Sentry.Handlers.errorHandler())
   }
 
-  app.use((err, req, res, next) => {
+  app.use((err, req, res) => {
     logger.error(err)
     if (process.env.NODE_ENV === 'production') {
       res.status(500).json({ error: 'encountered an error' })
