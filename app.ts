@@ -1,6 +1,7 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
 import * as Sentry from '@sentry/node'
+import logger from './lib/config/logger'
 
 import {
   GovDeliveryClient,
@@ -135,13 +136,16 @@ export default function configureApp(): express.Application {
   }
 
   app.use((err, req, res, next) => {
-    if (Array.isArray(err)) {
-      err.forEach((error) => {console.error(error.message)})
+    logger.error(err)
+    if (process.env.NODE_ENV === 'production') {
+      res.status(500).json({ error: 'encountered an error' })
     } else {
-      console.error(err.message)
+      res.status(500).json({ 
+        action: err.action,
+        message: err.message,
+        stack: err.stack 
+      })
     }
-
-    res.status(500).json({ error: 'encountered an error' })
   })
 
   return app
