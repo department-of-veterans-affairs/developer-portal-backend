@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import pick from 'lodash.pick';
 import process from 'process';
-import { GovDeliveryClient, KongClient, OktaClient, SlackClient } from '../';
+import { ApplicationType, GovDeliveryClient, KongClient, OktaClient, SlackClient } from '../';
 import { GovDeliveryUser, KongUser } from '../types';
 import { Application } from './Application';
 
@@ -22,6 +22,7 @@ export class User implements KongUser, GovDeliveryUser {
   public apis: string;
   public description: string;
   public oAuthRedirectURI: string;
+  public oAuthApplicationType?: string;
   public kongConsumerId?: string;
   public token?: string;
   public oauthApplication?: Application;
@@ -37,6 +38,7 @@ export class User implements KongUser, GovDeliveryUser {
     apis,
     description,
     oAuthRedirectURI,
+    oAuthApplicationType,
     termsOfService,
   }) {
     this.createdAt = new Date();
@@ -47,6 +49,7 @@ export class User implements KongUser, GovDeliveryUser {
     this.apis = apis;
     this.description = description;
     this.oAuthRedirectURI = oAuthRedirectURI;
+    this.oAuthApplicationType = oAuthApplicationType;
     this.errors = [];
     this.tosAccepted = termsOfService;
   }
@@ -167,6 +170,7 @@ export class User implements KongUser, GovDeliveryUser {
             // with the same name which isn't allowed by Okta
             name: `${this.consumerName()}-${this.createdAt.toISOString()}`,
             redirectURIs: [this.oAuthRedirectURI],
+            applicationType: this.oAuthApplicationType as ApplicationType
           },
           this,
         );
