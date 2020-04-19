@@ -41,7 +41,9 @@ const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 {{#if oauth }}
 <div>Here's your OAuth Client ID: <pre>{{ clientID }}</pre></div><br />
 
+{{#if clientSecret}}
 <div>Here's your OAuth Client Secret: <pre>{{ clientSecret }}</pre></div><br />
+{{/if}}
 
 <div>Please visit our OAuth documentation for implementation guidelines: <a href="https://developer.va.gov/oauth">developer.va.gov/oauth</a></div><br />
 {{/if}}
