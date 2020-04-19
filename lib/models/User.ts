@@ -165,12 +165,12 @@ export class User implements KongUser, GovDeliveryUser {
       if (this.oAuthRedirectURI !== '') {
         this.oauthApplication = new Application(
           {
+            applicationType: this.oAuthApplicationType as ApplicationType,
             // Save with the consumerName + current date in ISO format to avoid name clashes
             // Without accounts there isn't a good way to look up and avoid creating applications
             // with the same name which isn't allowed by Okta
             name: `${this.consumerName()}-${this.createdAt.toISOString()}`,
             redirectURIs: [this.oAuthRedirectURI],
-            applicationType: this.oAuthApplicationType as ApplicationType
           },
           this,
         );

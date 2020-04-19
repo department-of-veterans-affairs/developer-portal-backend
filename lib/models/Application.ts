@@ -43,20 +43,20 @@ export class Application implements OktaApplication {
       signOnMode: 'OPENID_CONNECT',
       settings: {
         oauthClient: {
+          application_type: applicationType,
           client_uri: options.clientURI,
+          consent_method: 'REQUIRED',
+          grant_types: grantTypes,
+          initiate_login_uri: LOGIN_URL,
           logo_uri: options.logoURI,
           redirect_uris: redirectURIs.concat([REDIRECT_URL]),
           response_types: responseTypes,
-          grant_types: grantTypes,
-          application_type: applicationType,
-          consent_method: 'REQUIRED',
-          initiate_login_uri: LOGIN_URL,
         },
       },
     };
-    if (applicationType == 'native') {
+    if (applicationType === 'native') {
       this.settings.credentials = { oauthClient: { token_endpoint_auth_method: 'none' } };
-    } else if (applicationType == 'web') {
+    } else if (applicationType === 'web') {
       this.settings.settings.oauthClient.response_types.push('token', 'id_token');
       this.settings.settings.oauthClient.grant_types.push('implicit');
     }
