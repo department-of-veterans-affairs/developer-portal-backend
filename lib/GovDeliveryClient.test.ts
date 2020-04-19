@@ -68,9 +68,9 @@ describe("KongClient", () => {
       const template = await client.welcomeTemplate;
       const html = template({
         apis: 'Health API',
+        clientID: 'superid',
         firstName: 'Edward',
         oauth: true,
-        clientID: 'superid'
       });
       expect(html).not.toEqual(expect.stringContaining('OAuth Client Secret'));
     });
