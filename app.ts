@@ -14,7 +14,7 @@ import {
 
 import developerApplicationHandler from './routes/DeveloperApplication'
 
-function loggingMiddleware(tokens, req, res) {
+function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
     method: tokens.method(req, res),
     url: tokens.url(req, res),
@@ -124,12 +124,18 @@ export default function configureApp(): express.Application {
     app.use(Sentry.Handlers.requestHandler())
   }
 
-  app.use(morgan(loggingMiddleware))
+  // request logs are skipped for the health check endpoint to reduce noise
+  app.use(morgan(loggingMiddleware, { skip: req => req.url == '/health' }))
+
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
   app.get('/', (req, res) => {
-    res.send('hello')
+    res.send('developer-portal-backend')
+  })
+
+  app.get('/health', (req, res) => {
+    res.json({ status: 'up' })
   })
 
   const kong = configureKongClient()
