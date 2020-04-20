@@ -147,12 +147,17 @@ export default function configureApp(): express.Application {
     app.use(Sentry.Handlers.errorHandler())
   }
 
-  //next is a required param despite not being used. typescript will throw
-  //a compilation error if only three arguments are provided, because express
-  //treats this like a regular middleware function instead of an error-handling
-  //middleware function if three parameters are provided instead of four.
+  /* 
+   * next is a required param despite not being used. typescript will throw
+   * a compilation error if only three arguments are provided, because express
+   * treats this like a regular middleware function instead of an error-handling
+   * middleware function if three parameters are provided instead of four.
+   */
   app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+    // To prevent sensitive information from ending up in the logs like keys, only certain safe
+    // fields are logged from errors.
     logger.error({ message: err.message, action: err.action, stack: err.stack })
+
     if (process.env.NODE_ENV === 'production') {
       res.status(500).json({ error: 'encountered an error' })
     } else {
