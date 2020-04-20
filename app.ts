@@ -152,7 +152,7 @@ export default function configureApp(): express.Application {
   //treats this like a regular middleware function instead of an error-handling
   //middleware function if three parameters are provided instead of four.
   app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-    logger.error(err)
+    logger.error({ message: err.message, action: err.action, stack: err.stack })
     if (process.env.NODE_ENV === 'production') {
       res.status(500).json({ error: 'encountered an error' })
     } else {
