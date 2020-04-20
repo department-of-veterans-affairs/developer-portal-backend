@@ -125,7 +125,7 @@ export default function configureApp(): express.Application {
   }
 
   // request logs are skipped for the health check endpoint to reduce noise
-  app.use(morgan(loggingMiddleware, { skip: req => req.url == '/health' }))
+  app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }))
 
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
