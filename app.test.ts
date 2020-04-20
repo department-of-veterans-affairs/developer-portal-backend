@@ -1,16 +1,19 @@
 import 'jest'
-import configureApp from './app'
 import supertest from 'supertest'
+
+//set server environment variables before the app is loaded
+process.env.KONG_KEY = "fake-key"
+process.env.KONG_HOST = "fake-host"
+import configureApp from './app'
 
 const request = supertest(configureApp())
 describe("App routing", () => {
-  
   describe("simple healthcheck endpoint", () => {
-    it('responds to get', async () => {
-      const response = await request.get('/')
+    it('succeeds on healthcheck', async () => {
+      const response = await request.get('/health')
 
       expect(response.status).toBe(200)
-      expect(response.text).toBe('hello')
+      expect(response.body.status).toBe('up')
     })
   })
 
@@ -20,12 +23,6 @@ describe("App routing", () => {
 
       expect(response.status).toBe(200)
       expect(response.text).toBe('success')
-    })
-
-    it('rejects get', async () => {
-      const response = await request.get('/developer_application')
-
-      expect(response.status).toBe(404)
     })
   })
 })
