@@ -1,6 +1,7 @@
 import { FormSubmission } from '../lib/FormSubmission'
 import pick from 'lodash.pick'
 import { User } from '../lib/models'
+import logger from '../lib/config/logger'
 
 export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
   return async function (req, res, next): Promise<any> {
@@ -17,20 +18,20 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
     const user: User = new User(form)
     try {
       if (user.shouldUpdateKong()) {
-        console.log('Creating Kong consumer...')
+        logger.info({ message: 'creating Kong consumer...' })
         await user.saveToKong(kong)
       }
 
       if (user.shouldUpdateOkta() && okta) {
-        console.info('Creating Okta client application...')
+        logger.info({ message: 'creating Okta client application...' })
         await user.saveToOkta(okta)
       }
 
-      console.info('Recording signup in DynamoDB...')
+      logger.info({ message: 'recording signup in DynamoDB...' })
       await user.saveToDynamo(dynamo)
 
       if (govdelivery) {
-        console.info('Sending email to new user...')
+        logger.info({ message: 'sending email to new user...' })
         await user.sendEmail(govdelivery)
       }
       if (slack) {
@@ -45,18 +46,11 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
           token: user.token,
         })
       }
-    } catch (error) {
-      let ourError = error
-      if (error.errors) {
-        // Sometimes what's thrown is the User object itself,
-        // in which case we log the error from the `errors` property
-        ourError = error.errors
-      }
-      console.log(ourError)
+    } catch (err) {
       if (slack) {
         await user.sendSlackFailure(slack)
       }
-      next(ourError)
+      next(err)
     }
   }
 }

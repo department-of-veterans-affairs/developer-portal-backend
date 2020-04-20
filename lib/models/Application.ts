@@ -21,7 +21,6 @@ export interface ApplicationSettings {
 export class Application implements OktaApplication {
   public owner?: OktaUser;
   public settings: OAuthApplication;
-  public errors: Error[] = [];
   public client_id?: string;
   public client_secret?: string;
   public oktaID?: string;
@@ -65,9 +64,9 @@ export class Application implements OktaApplication {
       this.client_secret = client_secret;
       this.oktaID = resp.id;
       return resp;
-    } catch (error) {
-      this.errors.push(error);
-      throw this;
+    } catch (err) {
+      err.action = 'failed saving to Okta'
+      throw err
     }
   }
 }
