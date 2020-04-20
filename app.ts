@@ -148,9 +148,9 @@ export default function configureApp(): express.Application {
   }
 
   /* 
-   * next is a required param despite not being used. typescript will throw
-   * a compilation error if only three arguments are provided, because express
-   * treats this like a regular middleware function instead of an error-handling
+   * 'next' is a required param despite not being used. Typescript will throw
+   * a compilation error on `res.status` if only three params are listed, because Express
+   * types it as a regular middleware function instead of an error-handling
    * middleware function if three parameters are provided instead of four.
    */
   app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
