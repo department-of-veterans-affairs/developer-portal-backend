@@ -1,5 +1,6 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
+import morgan from 'morgan'
 import * as Sentry from '@sentry/node'
 import logger from './lib/config/logger'
 
@@ -12,6 +13,16 @@ import {
 } from './lib'
 
 import developerApplicationHandler from './routes/DeveloperApplication'
+
+function loggingMiddleware(tokens, req, res) {
+  return JSON.stringify({
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: tokens.status(req, res),
+    contentLength: tokens.res(req, res, 'content-length'), 
+    responseTime: `${tokens['response-time'](req, res)} ms`,
+  })
+}
 
 const configureGovDeliveryClient = (): GovDeliveryClient | null => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env
@@ -113,6 +124,7 @@ export default function configureApp(): express.Application {
     app.use(Sentry.Handlers.requestHandler())
   }
 
+  app.use(morgan(loggingMiddleware))
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
@@ -135,7 +147,11 @@ export default function configureApp(): express.Application {
     app.use(Sentry.Handlers.errorHandler())
   }
 
-  app.use((err, req, res) => {
+  //next is a required param despite not being used. typescript will throw
+  //a compilation error if only three arguments are provided, because express
+  //treats this like a regular middleware function instead of an error-handling
+  //middleware function if three parameters are provided instead of four.
+  app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     logger.error(err)
     if (process.env.NODE_ENV === 'production') {
       res.status(500).json({ error: 'encountered an error' })

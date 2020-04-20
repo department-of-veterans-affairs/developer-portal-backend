@@ -15,19 +15,19 @@ const OKTA_CONSUMER_APIS = [
 ]
 
 export class User implements KongUser, GovDeliveryUser {
-  public createdAt: Date
-  public firstName: string
-  public lastName: string
-  public organization: string
-  public email: string
-  public apis: string
-  public description: string
-  public oAuthRedirectURI: string
-  public kongConsumerId?: string
-  public token?: string
-  public oauthApplication?: Application
-  public tableName: string = process.env.DYNAMODB_TABLE || 'Users'
-  public tosAccepted: boolean
+  public createdAt: Date;
+  public firstName: string;
+  public lastName: string;
+  public organization: string;
+  public email: string;
+  public apis: string;
+  public description: string;
+  public oAuthRedirectURI: string;
+  public kongConsumerId?: string;
+  public token?: string;
+  public oauthApplication?: Application;
+  public tableName: string = process.env.DYNAMODB_TABLE || 'Users';
+  public tosAccepted: boolean;
 
   constructor({
     firstName,
