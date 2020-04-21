@@ -134,44 +134,40 @@ describe('User', () => {
       expect(userResult).toEqual(user);
     });
 
-    test('it should add errors to user if save fails', async () => {
+    test('it should return an error if save fails', async () => {
       const client = new DynamoDB.DocumentClient();
-      const error = {
-        code: 'error',
-        message: 'error',
-        retryable: false,
-        statusCode: 234,
-        time: new Date().toISOString(),
-        hostname: '',
-        region: 'us-west-1',
-        retryDelay: 102,
-        requestId: 'id',
-        extendedRequestId: 'asdf',
-        cfId: '',
-      };
+      const error = new Error('error')
+
       client.put = jest.fn((params, cb) => {
         cb(error, params);
       });
       try {
         await user.saveToDynamo(client);
-      } catch (userResult) {
-        expect(userResult.errors[0]).toEqual(error);
+      } catch (err) {
+        expect(err).toEqual(error);
       }
     });
 
-    test('it should save even if oauth fields are empty', async () => {
+    // The DynamoDB API breaks if empty strings are passed in
+    test('it should convert empty strings in user model to nulls', async () => {
       const client = new DynamoDB.DocumentClient();
-      const form = new FormSubmission({
+      client.put = jest.fn((params, cb) => { cb(null, params) });
+
+      const form: FormSubmission = {
         apis: 'benefits,verification',
         description: 'Mayhem',
         email: 'ed@adhocteam.us',
         firstName: 'Edward',
         lastName: 'Paget',
         organization: 'Ad Hoc',
+        oAuthRedirectURI: '',
         termsOfService: true,
-      });
+      };
+
       user = new User(form);
-      user.saveToDynamo();
+      user.saveToDynamo(client);
+
+      expect(client.put.mock.calls[0][0]['Item']['oAuthRedirectURI']).toEqual(null);
     });
   });
 
