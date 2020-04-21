@@ -19,6 +19,7 @@ describe('SlackService', () => {
       headers: {},
     })
 
+    // cast to unknown first to avoid having to reimplement all of AxiosInstance
     jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance))
 
     const message = "Test, User: test@example.com\nRequested access to:\n* va_facilities\n* health\n"
