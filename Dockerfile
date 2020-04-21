@@ -29,7 +29,7 @@ COPY --chown=node:node --from=base /home/node/dist dist
 COPY --chown=node:node --from=base /home/node/package*.json ./
 COPY --chown=node:node --from=base /home/node/node_modules node_modules
 RUN npm prune --production
-HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
+HEALTHCHECK --interval=30s --timeout=4s --start-period=30s \
   CMD node bin/healthcheck.js
 CMD ["node", "dist/server.js"]
 
