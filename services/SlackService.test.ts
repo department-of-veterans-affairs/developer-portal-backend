@@ -1,16 +1,14 @@
-import 'jest'
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import SlackService from './SlackService'
-
-jest.mock('axios')
 
 describe('SlackService', () => {
   it('sends a provided bearer token', () => {
+    const mockCreate = jest.spyOn(axios, 'create')
     new SlackService('channel123', 'fakeToken')
-    
-    expect(axios.create).toHaveBeenCalledWith({
+
+    expect(mockCreate).toHaveBeenCalledWith({
       baseURL: 'https://slack.com/api',
-      headers: { 'Authorization': `Bearer fakeToken`}
+      headers: { 'Authorization': `Bearer fakeToken` }
     })
   })
 
@@ -20,7 +18,8 @@ describe('SlackService', () => {
       statusText: 'ok',
       headers: {},
     })
-    axios.create.mockImplementation(() => ({ post: mockPost }))
+
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance))
 
     const message = "Test, User: test@example.com\nRequested access to:\n* va_facilities\n* health\n"
     const service = new SlackService('channel123', 'faketoken')
@@ -46,7 +45,8 @@ describe('SlackService', () => {
       statusText: 'ok',
       headers: {},
     })
-    axios.create.mockImplementation(() => ({ post: mockPost }))
+    
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance))
 
     const message = "Test, User: test@example.com\nRequested access to:\n* va_facilities\n* health\n"
     const service = new SlackService('channel123', 'faketoken')
