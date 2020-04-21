@@ -24,11 +24,12 @@ RUN openssl x509 \
   -out /home/node/va-internal.pem
 ENV NODE_EXTRA_CA_CERTS=/home/node/va-internal.pem
 
+COPY --chown=node:node --from=base /home/node/bin bin
 COPY --chown=node:node --from=base /home/node/dist dist
 COPY --chown=node:node --from=base /home/node/package*.json ./
 COPY --chown=node:node --from=base /home/node/node_modules node_modules
 RUN npm prune --production
-HEALTHCHECK --interval=30s --timeout=3s \
-    CMD curl -f http://localhost:9999/ || exit 1
+HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
+  CMD node bin/healthcheck.js
 CMD ["node", "dist/server.js"]
 

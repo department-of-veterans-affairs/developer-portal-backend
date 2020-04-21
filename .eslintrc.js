@@ -30,6 +30,7 @@ module.exports = {
   ],
   ignorePatterns: [
     'dist/',
+    'bin/',
     'lib/',
     'dynamodb_schema.js'
   ],
