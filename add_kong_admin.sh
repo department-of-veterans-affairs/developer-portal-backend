@@ -18,7 +18,7 @@ fi
 # create route associated with the previously created service
 curl -s "$admin_api/services/$service_id/routes" \
   -d 'protocols=http' \
-  -d 'paths[]=/api_management/consumers' \
+  -d 'paths[]=/internal/admin/consumers' \
   -d 'methods[]=POST' \
   -d 'methods[]=GET'
 
