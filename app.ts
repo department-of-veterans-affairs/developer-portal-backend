@@ -9,9 +9,9 @@ import {
   KongClient,
   KongConfig,
   OktaClient,
-  SlackClient,
 } from './lib'
 
+import SlackService from './services/SlackService'
 import developerApplicationHandler from './routes/DeveloperApplication'
 
 function loggingMiddleware(tokens, req, res): string {
@@ -69,15 +69,12 @@ const configureOktaClient = (): OktaClient | null => {
   return client
 }
 
-const configureSlackClient = (): SlackClient | null => {
+const configureSlackClient = (): SlackService | null => {
   const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env
   let client
 
   if (SLACK_TOKEN && SLACK_CHANNEL_ID) {
-    client = new SlackClient({
-      channelID: SLACK_CHANNEL_ID,
-      token: SLACK_TOKEN,
-    })
+    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN)
   }
 
   return client
