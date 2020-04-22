@@ -21,7 +21,7 @@ export class KongClient {
   public protocol: Protocol;
   public kongPath = '/internal/admin/consumers';
 
-  constructor({ apiKey, host, port = 8000, protocol = 'https' }: KongConfig) {
+  constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
     this.apiKey = apiKey;
     this.host = host;
     this.port = port;

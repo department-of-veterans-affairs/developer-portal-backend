@@ -17,7 +17,8 @@ describe("KongClient", () => {
   beforeEach(() => {
     client = new KongClient({
       apiKey: 'fakeKey',
-      host: 'fakeHost'
+      host: 'fakeHost',
+      port: 8000
     });
     event = {
       apis: 'facilities,benefits',
@@ -35,7 +36,6 @@ describe("KongClient", () => {
 
   describe('constructor', () => {
     test('it should set defaults', () => {
-      expect(client.port).toEqual(8000);
       expect(client.protocol).toEqual('https');
     });
   });
