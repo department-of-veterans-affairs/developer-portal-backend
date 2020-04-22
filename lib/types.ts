@@ -4,7 +4,7 @@ export interface KongConfig {
   apiKey: string;
   host: string;
   protocol?: Protocol;
-  port?: number;
+  port: number;
 }
 
 export interface KongUser {

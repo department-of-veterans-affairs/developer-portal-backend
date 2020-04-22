@@ -39,12 +39,17 @@ const configureGovDeliveryClient = (): GovDeliveryClient | null => {
 }
 
 const configureKongClient = (): KongClient => {
-  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL } = process.env
+  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env
 
   if (KONG_KEY && KONG_HOST) {
+    // String interpolation here ensures the first arg to parseInt is
+    // always a string and never undefined.
+    const port = parseInt(`${KONG_PORT}`, 10) || 8000
+
     const kongfig: KongConfig = {
       apiKey: KONG_KEY,
       host: KONG_HOST,
+      port: port,
     }
     if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
       kongfig.protocol = KONG_PROTOCOL
