@@ -5,8 +5,8 @@ import { GrantTypes,
          OktaUser,
          ResponseTypes } from '../types';
 
-const REDIRECT_URL = 'https://dev-api.va.gov/oauth2/redirect/';
-const LOGIN_URL = 'https://dev-api.va.gov/oauth2/redirect/';
+const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
+const LOGIN_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
 const IDME_GROUP_ID = '00g1syt19eSr12rXz2p7';
 
 export interface ApplicationSettings {
