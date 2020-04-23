@@ -1,10 +1,11 @@
 import { DynamoDB } from 'aws-sdk'
 import pick from 'lodash.pick'
 import process from 'process'
-import { ApplicationType, GovDeliveryClient, KongClient, OktaClient, SlackClient } from '../';
+import { ApplicationType, GovDeliveryClient, KongClient, OktaClient } from '../';
 import { GovDeliveryUser, KongUser } from '../types'
 import { Application } from './Application'
 import logger from '../config/logger'
+import SlackService from '../../services/SlackService'
 
 const KONG_CONSUMER_APIS = ['benefits', 'facilities', 'vaForms', 'confirmation']
 const OKTA_CONSUMER_APIS = [
@@ -89,7 +90,7 @@ export class User implements KongUser, GovDeliveryUser {
     }
   }
 
-  public async sendSlackSuccess(client: SlackClient) {
+  public async sendSlackSuccess(client: SlackService) {
     try {
       return await client.sendSuccessMessage(
         this.toSlackString(),
@@ -101,7 +102,7 @@ export class User implements KongUser, GovDeliveryUser {
     }
   }
 
-  public async sendSlackFailure(client: SlackClient) {
+  public async sendSlackFailure(client: SlackService) {
     try {
       return await client.sendFailureMessage(
         this.toSlackString(),

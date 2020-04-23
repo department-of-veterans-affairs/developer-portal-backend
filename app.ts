@@ -9,9 +9,9 @@ import {
   KongClient,
   KongConfig,
   OktaClient,
-  SlackClient,
 } from './lib'
 
+import SlackService from './services/SlackService'
 import developerApplicationHandler from './routes/DeveloperApplication'
 
 function loggingMiddleware(tokens, req, res): string {
@@ -39,12 +39,17 @@ const configureGovDeliveryClient = (): GovDeliveryClient | null => {
 }
 
 const configureKongClient = (): KongClient => {
-  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL } = process.env
+  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env
 
   if (KONG_KEY && KONG_HOST) {
+    // String interpolation here ensures the first arg to parseInt is
+    // always a string and never undefined.
+    const port = parseInt(`${KONG_PORT}`, 10) || 8000
+
     const kongfig: KongConfig = {
       apiKey: KONG_KEY,
       host: KONG_HOST,
+      port: port,
     }
     if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
       kongfig.protocol = KONG_PROTOCOL
@@ -69,15 +74,12 @@ const configureOktaClient = (): OktaClient | null => {
   return client
 }
 
-const configureSlackClient = (): SlackClient | null => {
+const configureSlackClient = (): SlackService | null => {
   const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env
   let client
 
   if (SLACK_TOKEN && SLACK_CHANNEL_ID) {
-    client = new SlackClient({
-      channelID: SLACK_CHANNEL_ID,
-      token: SLACK_TOKEN,
-    })
+    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN)
   }
 
   return client
