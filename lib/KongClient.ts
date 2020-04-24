@@ -2,6 +2,7 @@ import * as request from 'request-promise-native';
 import { format } from 'url';
 import { apisToAcls } from './config';
 import { KongConfig, KongUser, Protocol } from './types';
+import logger from './config/logger'
 
 interface ConsumerRequest {
   username: string;
@@ -18,9 +19,9 @@ export class KongClient {
   public host: string;
   public port: number;
   public protocol: Protocol;
-  public kongPath = '/api_management/consumers';
+  public kongPath = '/internal/admin/consumers';
 
-  constructor({ apiKey, host, port = 8000, protocol = 'https' }: KongConfig) {
+  constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
     this.apiKey = apiKey;
     this.host = host;
     this.port = port;
@@ -34,7 +35,7 @@ export class KongClient {
         return kongUser;
       }
     } catch (err) {
-      console.debug('No existing consumer, creating new one');
+      logger.debug({ message: 'no existing consumer, creating new one' });
     }
     return await request.post(this.requestOptions(this.kongPath, { username: user.consumerName() }));
   }

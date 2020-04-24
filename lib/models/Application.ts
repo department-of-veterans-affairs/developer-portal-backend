@@ -1,17 +1,19 @@
 import { OktaClient } from '../OktaClient';
-import { GrantTypes,
+import { ApplicationType,
+         GrantTypes,
          OAuthApplication,
          OktaApplication,
          OktaUser,
          ResponseTypes } from '../types';
 
-const REDIRECT_URL = 'https://dev-api.va.gov/oauth2/redirect/';
-const LOGIN_URL = 'https://dev-api.va.gov/oauth2/redirect/';
+const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
+const LOGIN_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
 const IDME_GROUP_ID = '00g1syt19eSr12rXz2p7';
 
 export interface ApplicationSettings {
   name: string;
   redirectURIs: string[];
+  applicationType?: ApplicationType;
   responseTypes?: ResponseTypes[];
   grantTypes?: GrantTypes[];
   clientURI?: string;
@@ -21,7 +23,6 @@ export interface ApplicationSettings {
 export class Application implements OktaApplication {
   public owner?: OktaUser;
   public settings: OAuthApplication;
-  public errors: Error[] = [];
   public client_id?: string;
   public client_secret?: string;
   public oktaID?: string;
@@ -29,8 +30,9 @@ export class Application implements OktaApplication {
   constructor({
     name,
     redirectURIs,
-    responseTypes = ['token', 'id_token', 'code'],
-    grantTypes = ['authorization_code', 'implicit', 'refresh_token'],
+    applicationType = 'web',
+    responseTypes = ['code'],
+    grantTypes = ['authorization_code', 'refresh_token'],
     ...options
   }: ApplicationSettings, owner?: OktaUser) {
     this.owner = owner;
@@ -40,17 +42,23 @@ export class Application implements OktaApplication {
       signOnMode: 'OPENID_CONNECT',
       settings: {
         oauthClient: {
+          application_type: applicationType,
           client_uri: options.clientURI,
+          consent_method: 'REQUIRED',
+          grant_types: grantTypes,
+          initiate_login_uri: LOGIN_URL,
           logo_uri: options.logoURI,
           redirect_uris: redirectURIs.concat([REDIRECT_URL]),
           response_types: responseTypes,
-          grant_types: grantTypes,
-          application_type: 'web',
-          consent_method: 'REQUIRED',
-          initiate_login_uri: LOGIN_URL,
         },
       },
     };
+    if (applicationType === 'native') {
+      this.settings.credentials = { oauthClient: { token_endpoint_auth_method: 'none' } };
+    } else if (applicationType === 'web') {
+      this.settings.settings.oauthClient.response_types.push('token', 'id_token');
+      this.settings.settings.oauthClient.grant_types.push('implicit');
+    }
   }
 
   public toOktaApp() {
@@ -65,9 +73,9 @@ export class Application implements OktaApplication {
       this.client_secret = client_secret;
       this.oktaID = resp.id;
       return resp;
-    } catch (error) {
-      this.errors.push(error);
-      throw this;
+    } catch (err) {
+      err.action = 'failed saving to Okta'
+      throw err
     }
   }
 }

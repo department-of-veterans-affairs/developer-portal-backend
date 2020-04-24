@@ -17,7 +17,8 @@ describe("KongClient", () => {
   beforeEach(() => {
     client = new KongClient({
       apiKey: 'fakeKey',
-      host: 'fakeHost'
+      host: 'fakeHost',
+      port: 8000
     });
     event = {
       apis: 'facilities,benefits',
@@ -35,7 +36,6 @@ describe("KongClient", () => {
 
   describe('constructor', () => {
     test('it should set defaults', () => {
-      expect(client.port).toEqual(8000);
       expect(client.protocol).toEqual('https');
     });
   });
@@ -45,7 +45,7 @@ describe("KongClient", () => {
       request.get.mockImplementation(() => Promise.reject({}));
       await client.createConsumer(user)
       expect(request.post).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers",
+        url: "https://fakeHost:8000/internal/admin/consumers",
         body: { username: 'AdHocPaget' },
         json: true,
         headers: { apiKey: 'fakeKey' }
@@ -56,7 +56,7 @@ describe("KongClient", () => {
       request.get.mockImplementation(() => Promise.resolve({data: { username: 'AdHocPaget' }}));
       await client.createConsumer(user)
       expect(request.post).not.toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers",
+        url: "https://fakeHost:8000/internal/admin/consumers",
         body: { username: 'AdHocPaget' },
         json: true,
         headers: { apiKey: 'fakeKey' }
@@ -70,13 +70,13 @@ describe("KongClient", () => {
       request.get.mockImplementation(() => Promise.resolve({data: []}));
       await client.createACLs(user)
       expect(request.post).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers/AdHocPaget/acls",
+        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
       expect(request.post).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers/AdHocPaget/acls",
+        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'vba_documents' },
         json: true,
         headers: { apiKey: 'fakeKey' }
@@ -87,13 +87,13 @@ describe("KongClient", () => {
       request.get.mockImplementation(() => Promise.resolve({data: [{ group: 'vba_documents' }]}));
       await client.createACLs(user)
       expect(request.post).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers/AdHocPaget/acls",
+        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
       expect(request.post).not.toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers/AdHocPaget/acls",
+        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'vba_documents' },
         json: true,
         headers: { apiKey: 'fakeKey' }
@@ -105,7 +105,7 @@ describe("KongClient", () => {
     test('it should send a request', async () => {
       await client.createKeyAuth(user)
       expect(request.post).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/api_management/consumers/AdHocPaget/key-auth",
+        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
         json: true,
         headers: { apiKey: 'fakeKey' }
       });

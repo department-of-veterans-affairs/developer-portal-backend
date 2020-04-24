@@ -1,15 +1,28 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
+import morgan from 'morgan'
+import * as Sentry from '@sentry/node'
+import logger from './lib/config/logger'
 
 import {
   GovDeliveryClient,
   KongClient,
   KongConfig,
   OktaClient,
-  SlackClient,
 } from './lib'
 
+import SlackService from './services/SlackService'
 import developerApplicationHandler from './routes/DeveloperApplication'
+
+function loggingMiddleware(tokens, req, res): string {
+  return JSON.stringify({
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: tokens.status(req, res),
+    contentLength: tokens.res(req, res, 'content-length'), 
+    responseTime: `${tokens['response-time'](req, res)} ms`,
+  })
+}
 
 const configureGovDeliveryClient = (): GovDeliveryClient | null => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env
@@ -26,12 +39,17 @@ const configureGovDeliveryClient = (): GovDeliveryClient | null => {
 }
 
 const configureKongClient = (): KongClient => {
-  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL } = process.env
+  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env
 
   if (KONG_KEY && KONG_HOST) {
+    // String interpolation here ensures the first arg to parseInt is
+    // always a string and never undefined.
+    const port = parseInt(`${KONG_PORT}`, 10) || 8000
+
     const kongfig: KongConfig = {
       apiKey: KONG_KEY,
       host: KONG_HOST,
+      port: port,
     }
     if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
       kongfig.protocol = KONG_PROTOCOL
@@ -56,15 +74,12 @@ const configureOktaClient = (): OktaClient | null => {
   return client
 }
 
-const configureSlackClient = (): SlackClient | null => {
+const configureSlackClient = (): SlackService | null => {
   const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env
   let client
 
   if (SLACK_TOKEN && SLACK_CHANNEL_ID) {
-    client = new SlackClient({
-      channelID: SLACK_CHANNEL_ID,
-      token: SLACK_TOKEN,
-    })
+    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN)
   }
 
   return client
@@ -102,10 +117,28 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
 export default function configureApp(): express.Application {
   const app = express()
 
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+    })
+
+    // Must be the first middleware
+    app.use(Sentry.Handlers.requestHandler())
+  }
+
+  // request logs are skipped for the health check endpoint to reduce noise
+  app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }))
+
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
 
-  app.get('/', (req, res) => res.send('hello'))
+  app.get('/', (req, res) => {
+    res.send('developer-portal-backend')
+  })
+
+  app.get('/health', (req, res) => {
+    res.json({ status: 'up' })
+  })
 
   const kong = configureKongClient()
   const okta = configureOktaClient()
@@ -118,9 +151,30 @@ export default function configureApp(): express.Application {
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   )
 
-  app.use((err, req, res, next) => {
-    console.error(err)
-    res.status(500).json({ error: err })
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.errorHandler())
+  }
+
+  /* 
+   * 'next' is a required param despite not being used. Typescript will throw
+   * a compilation error on `res.status` if only three params are listed, because Express
+   * types it as a regular middleware function instead of an error-handling
+   * middleware function if three parameters are provided instead of four.
+   */
+  app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+    // To prevent sensitive information from ending up in the logs like keys, only certain safe
+    // fields are logged from errors.
+    logger.error({ message: err.message, action: err.action, stack: err.stack })
+
+    if (process.env.NODE_ENV === 'production') {
+      res.status(500).json({ error: 'encountered an error' })
+    } else {
+      res.status(500).json({ 
+        action: err.action,
+        message: err.message,
+        stack: err.stack 
+      })
+    }
   })
 
   return app

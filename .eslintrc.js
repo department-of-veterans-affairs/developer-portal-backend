@@ -15,14 +15,23 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
   env: {
-    "node": true
+    'node': true,
   },
   rules: {
-    "semi": ["error", "never"]
+    'semi': ['error', 'never'],
   },
+  overrides: [
+    {
+      files: ['*.test.ts'],
+      rules: {
+        '@typescript-eslint/unbound-method': 0,
+      },
+    },
+  ],
   ignorePatterns: [
-    "dist/",
-    "lib/",
-    "dynamodb_schema.js"
+    'dist/',
+    'bin/',
+    'lib/',
+    'dynamodb_schema.js'
   ],
 };
