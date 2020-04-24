@@ -37,11 +37,22 @@ export type GrantTypes =
   | 'client_credentials';
 export type ApplicationType = 'web' | 'native' | 'browser' | 'service';
 export type ConsentMethod = 'REQUIRED' | 'TRUSTED';
+export type TokenEndpointAuthMethod =
+  | 'client_secret_basic'
+  | 'client_secret_post'
+  | 'client_secret_jwt'
+  | 'private_key_jwt'
+  | 'none';
 
 export interface OAuthApplication {
   name: ApplicationName;
   label: string;
   signOnMode: SignOnMode;
+  credentials?: {
+    oauthClient: {
+      token_endpoint_auth_method: TokenEndpointAuthMethod;
+    };
+  };
   settings: {
     oauthClient: {
       client_uri?: string;
