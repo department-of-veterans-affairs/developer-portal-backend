@@ -63,6 +63,17 @@ describe("KongClient", () => {
       expect(html).toEqual(expect.stringContaining('superid'));
       expect(html).toEqual(expect.stringContaining('supersecret'));
     });
+
+    test('it should hide secret text when not applicable', async () => {
+      const template = await client.welcomeTemplate;
+      const html = template({
+        apis: 'Health API',
+        clientID: 'superid',
+        firstName: 'Edward',
+        oauth: true,
+      });
+      expect(html).not.toEqual(expect.stringContaining('OAuth Client Secret'));
+    });
   });
 
   describe('sendWelcomeEmail', () => {

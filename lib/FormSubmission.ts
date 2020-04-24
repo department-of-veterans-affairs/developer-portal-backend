@@ -6,6 +6,7 @@ export class FormSubmission {
   public description: string = '';
   public email: string = '';
   public oAuthRedirectURI: string = '';
+  public oAuthApplicationType: string = '';
   public termsOfService: boolean = false;
   public apis: string = ''; // Comma-separated list
 }

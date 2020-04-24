@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk'
 import pick from 'lodash.pick'
 import process from 'process'
-import { GovDeliveryClient, KongClient, OktaClient } from '../'
+import { ApplicationType, GovDeliveryClient, KongClient, OktaClient } from '../';
 import { GovDeliveryUser, KongUser } from '../types'
 import { Application } from './Application'
 import logger from '../config/logger'
@@ -24,6 +24,7 @@ export class User implements KongUser, GovDeliveryUser {
   public apis: string;
   public description: string;
   public oAuthRedirectURI: string;
+  public oAuthApplicationType?: string;
   public kongConsumerId?: string;
   public token?: string;
   public oauthApplication?: Application;
@@ -38,6 +39,7 @@ export class User implements KongUser, GovDeliveryUser {
     apis,
     description,
     oAuthRedirectURI,
+    oAuthApplicationType,
     termsOfService,
   }) {
     this.createdAt = new Date()
@@ -48,6 +50,7 @@ export class User implements KongUser, GovDeliveryUser {
     this.apis = apis
     this.description = description
     this.oAuthRedirectURI = oAuthRedirectURI
+    this.oAuthApplicationType = oAuthApplicationType;
     this.tosAccepted = termsOfService
   }
 
@@ -160,6 +163,7 @@ export class User implements KongUser, GovDeliveryUser {
       if (this.oAuthRedirectURI !== '') {
         this.oauthApplication = new Application(
           {
+            applicationType: this.oAuthApplicationType as ApplicationType,
             // Save with the consumerName + current date in ISO format to avoid name clashes
             // Without accounts there isn't a good way to look up and avoid creating applications
             // with the same name which isn't allowed by Okta

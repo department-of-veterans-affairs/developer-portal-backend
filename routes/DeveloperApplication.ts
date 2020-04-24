@@ -12,6 +12,7 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
       'description',
       'email',
       'oAuthRedirectURI',
+      'oAuthApplicationType',
       'termsOfService',
       'apis',
     ])
