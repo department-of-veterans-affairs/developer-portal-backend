@@ -43,7 +43,8 @@ phases:
         for ENV in $DEPLOY_ENVS; do
           SERVICE="dvp-${ENV}-${SERVICE_NAME}"
           CLUSTER="${ENV}_${SERVICE_NAME//-/_}_cluster"
-          if ecs deploy -t "$DEPLOY_TAG" \
+          if ecs deploy --no-deregister \
+            -t "$DEPLOY_TAG" \
             -e "${SERVICE}" CHAMBER_ENV "${ENV}" \
             -e "${SERVICE}" AWS_APP_NAME "${FRIENDLY_NAME}" \
             --timeout 1200 "${CLUSTER}" "${SERVICE}" \
