@@ -1,8 +1,8 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
 import morgan from 'morgan'
-import * as Sentry from '@sentry/node'
 import logger from './lib/config/logger'
+import Sentry from './lib/config/Sentry'
 
 import {
   GovDeliveryClient,
@@ -117,14 +117,8 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
 export default function configureApp(): express.Application {
   const app = express()
 
-  if (process.env.SENTRY_DSN) {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-    })
-
-    // Must be the first middleware
-    app.use(Sentry.Handlers.requestHandler())
-  }
+  // Must be the first middleware
+  app.use(Sentry.Handlers.requestHandler())
 
   // request logs are skipped for the health check endpoint to reduce noise
   app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }))
@@ -151,9 +145,7 @@ export default function configureApp(): express.Application {
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   )
 
-  if (process.env.SENTRY_DSN) {
-    app.use(Sentry.Handlers.errorHandler())
-  }
+  app.use(Sentry.Handlers.errorHandler())
 
   /* 
    * 'next' is a required param despite not being used. Typescript will throw

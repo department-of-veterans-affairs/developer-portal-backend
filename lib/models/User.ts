@@ -59,7 +59,7 @@ export class User implements KongUser, GovDeliveryUser {
   }
 
   public toSlackString(): string {
-    const intro = `${this.lastName}, ${this.firstName}: ${this.email}\nRequested access to:\n`
+    const intro = `${this.lastName}, ${this.firstName}: ${this.email}\nDescription: ${this.description}\nRequested access to:\n`
     return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro)
   }
 
