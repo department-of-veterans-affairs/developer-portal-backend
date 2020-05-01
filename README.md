@@ -4,8 +4,8 @@ This application handles backend work for the [Developer Portal](https://github.
 
 When a user applies for a key, several things happen:
 - If the user asks for access to a standard API (one secured with a symmetric key), a number of requests are made to the [Kong](https://konghq.com/kong/) admin API. The first requests whether the consumer already exists based on the tuple of organization and last name that are provided. After an existing consumer is returned or a new one is created, the correct ACLs for the requested standard APIs are attached to the consumer and a new key is generated. **Note: the same consumer can have many keys, and when an ACL is added to a consumer, all existing keys also get access to the new API.**
-- If the user asks for access to an OAuth API, a requests is made to [Okta](https://www.okta.com/) to create a new application named after the tuple of the organization and last name combined with the current timestamp.
-- A record of the user's signup request is saved in a DynamoDB table, which includes details like their name, email, organization, and which APIs they requested, among other fields. **Note: the DynamoDB table is not the canonical source of of information for which consumers have access to which APIs. Kong is the canonical source for standard APIs, and Okta is the canonical source for OAuth APIs. Consumers can and do have their access changed outside of the context of the initial application that updates the DynamoDB table.**
+- If the user asks for access to an OAuth API, a request is made to [Okta](https://www.okta.com/) to create a new application named after the tuple of the organization and last name combined with the current timestamp. Requests in DEV and PROD both go to our only non-production Okta organization `https://deptva-eval.okta.com/` using the [Okta API](https://developer.okta.com/docs/reference/api/apps/).
+- A record of the user's signup request is saved in a DynamoDB table, which includes details like their name, email, organization, and which APIs they requested, among other fields. **Note: the DynamoDB table is not the canonical source of information for which consumers have access to which APIs. Kong is the canonical source for standard APIs, and Okta is the canonical source for OAuth APIs. Consumers can and do have their access changed outside of the context of the initial application that updates the DynamoDB table.**
 - An email is sent via GovDelivery to the address the user provided that includes some combination of an api key, client id, and client secret.
 - A message is sent to Lighthouse Slack about the signup. Production signups go to `#feed-dx` and nonprod signups go to `#dev-signup-feed`. 
 
@@ -28,7 +28,7 @@ DYNAMODB_ENDPOINT=http://dynamodb:8000
 
 With a `.env` in place, use `docker-compose up` to run the application.
 
-To add support for more services, look up the dev environment variables in AWS Parameter Store under `/dvp/dev/developer-portal-backend` and add them to the `.env` file. Other variables include `GOVDELIVERY_HOST`, `GOVDELIVERY_KEY`, `OKTA_ORG`, `OKTA_TOKEN`, `SENTRY_DSN`, `SLACK_CHANNEL_ID`, and `SLACK_TOKEN`. **Note: SOCKS proxy access is required to run Sentry locally, and the JS Sentry client would need to be updated to proxy through it. It's likely easier to deploy another route that consistently throws an exception.**
+To add support for more services, look up the dev environment variables in AWS Parameter Store under `/dvp/dev/developer-portal-backend` and add them to the `.env` file. Other variables include `GOVDELIVERY_HOST`, `GOVDELIVERY_KEY`, `OKTA_ORG`, `OKTA_TOKEN`, `SENTRY_DSN`, `SLACK_CHANNEL_ID`, and `SLACK_TOKEN`. 
 
 ## Development
 The `docker-compose.yml` file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. 
@@ -72,7 +72,7 @@ curl --request POST 'https://dev-api.va.gov/internal/developer-portal-backend/de
 -H 'Content-Type: application/json' \
 -d '{
     "apis": "facilities,health",
-    "description": "example for the developer-portal-backend docs!",
+    "description": "🔥example for the developer-portal-backend docs!🔥",
     "email": "john.doe@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -87,7 +87,7 @@ curl --request POST 'https://dev-api.va.gov/internal/developer-portal-backend/de
 ### Logs
 To view logs, look in the `/dvp/dvp-dev-dev-portal-be` log group in CloudWatch. The prod log group is `/dvp/dvp-prod-dev-portal-be`. 
 
-[awslogs](https://github.com/jorgebastida/awslogs) is a convenient way to view these log groups. The following command will gather the previous 30 minutes of logs continuously check for new entries. It requires [having established an MFA session in AWS GovCloud](https://github.com/department-of-veterans-affairs/devops#credentials).
+[awslogs](https://github.com/jorgebastida/awslogs) is a convenient way to view these log groups. The following command will gather the previous 30 minutes of logs and continuously check for new entries. It requires [having established an MFA session in AWS GovCloud](https://github.com/department-of-veterans-affairs/devops#credentials).
 ```
 awslogs get -ws 30m /dvp/dvp-dev-dev-portal-be
 ```
@@ -96,6 +96,8 @@ awslogs get -ws 30m /dvp/dvp-dev-dev-portal-be
 Exceptions are captured in [Sentry](http://sentry.vfs.va.gov/vets-gov/). [SOCKS proxy access](https://github.com/department-of-veterans-affairs/va.gov-team/blob/master/platform/working-with-vsp/orientation/request-access-to-tools.md) is required to see Sentry. 
 - [developer-portal-backend-dev](http://sentry.vfs.va.gov/vets-gov/developer-portal-backend-dev/)
 - [developer-portal-backend-production](http://sentry.vfs.va.gov/vets-gov/developer-portal-backend-production/)
+
+Need to modify how Sentry is configured in the application? SOCKS proxy access is required to reach our Sentry instance from your local machine. To test out error reporting in a local environment you would need to configure the Sentry client to proxy through it. It's likely easier to deploy another route that consistently throws an exception.
 
 ### Deploying a one-off container
 Sometimes, a problem will show up where a deployed environment is the only place iterating toward a solution is possible. For example, there have been connectivity issues related to certificates that can only be tested from within the VAEC. Instead of continually merging PRs, it's easier to build a container locally, push it to ECR, and then create a new revision of the task definition that Fargate is running that points to your test container.
@@ -109,4 +111,6 @@ With the new revision made, go to the cluster again and click the service `dvp-d
 **Note: If you already have a revision with your test container tag on it from past attempts, you can just use that again instead of creating a new one. If you're not changing revisions while you're iterating, just check the `Force redeploy` box while keeping the same revision to make it pull the container again.**
 
 Now just wait for your new task to get up and running in Fargate. It will take a few minutes to start up, and then both tasks will run together for a brief period of time before the old one shuts down.
+
+This container will remain in place until overwritten by another run through this flow, a PR merge runs the release Codebuild job, or the manual Codebuild job is triggered against the dev cluster.
 
