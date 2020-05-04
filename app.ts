@@ -1,8 +1,8 @@
 import express from 'express'
 import { config, DynamoDB } from 'aws-sdk'
 import morgan from 'morgan'
-import * as Sentry from '@sentry/node'
 import logger from './lib/config/logger'
+import Sentry from './lib/config/Sentry'
 
 import {
   GovDeliveryClient,
@@ -117,14 +117,8 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
 export default function configureApp(): express.Application {
   const app = express()
 
-  if (process.env.SENTRY_DSN) {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-    })
-
-    // Must be the first middleware
-    app.use(Sentry.Handlers.requestHandler())
-  }
+  // Must be the first middleware
+  app.use(Sentry.Handlers.requestHandler())
 
   // request logs are skipped for the health check endpoint to reduce noise
   app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }))
@@ -151,9 +145,7 @@ export default function configureApp(): express.Application {
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   )
 
-  if (process.env.SENTRY_DSN) {
-    app.use(Sentry.Handlers.errorHandler())
-  }
+  app.use(Sentry.Handlers.errorHandler())
 
   /* 
    * 'next' is a required param despite not being used. Typescript will throw
@@ -166,14 +158,22 @@ export default function configureApp(): express.Application {
     // fields are logged from errors.
     logger.error({ message: err.message, action: err.action, stack: err.stack })
 
-    if (process.env.NODE_ENV === 'production') {
-      res.status(500).json({ error: 'encountered an error' })
-    } else {
-      res.status(500).json({ 
-        action: err.action,
-        message: err.message,
-        stack: err.stack 
-      })
+    
+		// Because we hooking post-response processing into the global error handler, we
+		// get to leverage unified logging and error handling; but, it means the response
+		// may have already been committed, since we don't know if the error was thrown
+		// PRE or POST response. As such, we have to check to see if the response has
+		// been committed before we attempt to send anything to the user.
+    if (!res.headersSent) {
+      if (process.env.NODE_ENV === 'production') {
+        res.status(500).json({ error: 'encountered an error' })
+      } else {
+        res.status(500).json({ 
+          action: err.action,
+          message: err.message,
+          stack: err.stack 
+        })
+      }
     }
   })
 

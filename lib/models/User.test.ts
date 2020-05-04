@@ -184,7 +184,7 @@ describe('User', () => {
         termsOfService: true,
       });
       expect(user.toSlackString()).toEqual(
-        'Paget, Edward: ed@adhocteam.us\nRequested access to:\n* benefits\n* verification\n* facilities\n* claims\n',
+        'Paget, Edward: ed@adhocteam.us\nDescription: Mayhem\nRequested access to:\n* benefits\n* verification\n* facilities\n* claims\n',
       );
     });
   });
