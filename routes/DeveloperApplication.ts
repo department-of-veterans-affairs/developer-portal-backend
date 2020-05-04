@@ -2,7 +2,6 @@ import { FormSubmission } from '../lib/FormSubmission'
 import pick from 'lodash.pick'
 import { User } from '../lib/models'
 import logger from '../lib/config/logger'
-import Sentry from '../lib/config/Sentry'
 
 export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
   return async function (req, res, next): Promise<any> {
@@ -18,7 +17,6 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
       'apis',
     ])
     const user: User = new User(form)
-    let signupSuccessful = false
     /* 
      * Sign up the user in Kong and Okta, record it in DynamoDB,
      * and return the result to UI as quickly as possible. Report
@@ -37,8 +35,6 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
 
       logger.info({ message: 'recording signup in DynamoDB' })
       await user.saveToDynamo(dynamo)
-
-      signupSuccessful = true
 
       if (!user.oauthApplication) {
         res.json({ token: user.token })
@@ -64,18 +60,18 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
         await user.sendEmail(govdelivery)
       }
     } catch(err) {
-      logger.error({ message: err.message, action: err.action, stack: err.stack })
-      Sentry.captureException(err)
+      err.action = 'sending govdelivery signup notification'
+      next(err)
     }
 
     try {
-      if (slack && signupSuccessful) {
+      if (slack) {
         logger.info({ message: 'sending success to slack' })
         await user.sendSlackSuccess(slack)
       }     
     } catch (err) {
-      logger.error({ message: err.message, action: err.action, stack: err.stack })
-      Sentry.captureException(err)
+      err.action = 'sending slack signup message'
+      next(err)
     }
   }
 }

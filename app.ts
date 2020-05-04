@@ -158,14 +158,22 @@ export default function configureApp(): express.Application {
     // fields are logged from errors.
     logger.error({ message: err.message, action: err.action, stack: err.stack })
 
-    if (process.env.NODE_ENV === 'production') {
-      res.status(500).json({ error: 'encountered an error' })
-    } else {
-      res.status(500).json({ 
-        action: err.action,
-        message: err.message,
-        stack: err.stack 
-      })
+    
+		// Because we hooking post-response processing into the global error handler, we
+		// get to leverage unified logging and error handling; but, it means the response
+		// may have already been committed, since we don't know if the error was thrown
+		// PRE or POST response. As such, we have to check to see if the response has
+		// been committed before we attempt to send anything to the user.
+    if (!res.headersSent) {
+      if (process.env.NODE_ENV === 'production') {
+        res.status(500).json({ error: 'encountered an error' })
+      } else {
+        res.status(500).json({ 
+          action: err.action,
+          message: err.message,
+          stack: err.stack 
+        })
+      }
     }
   })
 
