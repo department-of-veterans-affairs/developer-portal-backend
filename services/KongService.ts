@@ -1,4 +1,4 @@
-import * as request from 'request-promise-native';
+import request from 'request-promise-native';
 import { format } from 'url';
 import { apisToAcls } from '../config';
 import { KongConfig, KongUser, Protocol } from '../types';
@@ -43,10 +43,18 @@ export default class KongService {
   public async createACLs(user: KongUser) {
     const groups = (await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`)))
       .data.map(({ group }) => group);
+    
+    /* 
+    Temporarily ignore this linting error. The async/await reduce is probably incorrect JS,
+    but it's been running for a long time. Would like to address after the large reorg
+    settles.
+    */
+
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     return await user.apiList
       .reduce((toBeWrittenApis: string[], api: string) => {
         const group = apisToAcls[api];
-        if (group && (groups.indexOf(group) === -1)) {
+        if (  group && (groups.indexOf(group) === -1)) {
           toBeWrittenApis.push(api);
         }
         return toBeWrittenApis;

@@ -10,8 +10,7 @@
     "forceConsistentCasingInFileNames": true  
   },
   "exclude": [
-    "index.test.ts",
-    "lib/**/*.test.ts",
+    "**/*.test.ts",
     "dist",
     "node_modules"
   ]

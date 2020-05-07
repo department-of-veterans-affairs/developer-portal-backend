@@ -18,6 +18,8 @@ const OKTA_CONSUMER_APIS = [
   'claims',
 ];
 
+type APIFilterFn = (api: string) => boolean
+
 export default class User implements KongUser, GovDeliveryUser {
   public createdAt: Date;
   public firstName: string;
@@ -187,12 +189,12 @@ export default class User implements KongUser, GovDeliveryUser {
   }
 
   public shouldUpdateKong(): boolean {
-    const isKongApi = api => this.apiList.includes(api);
+    const isKongApi: APIFilterFn = api => this.apiList.includes(api);
     return KONG_CONSUMER_APIS.filter(isKongApi).length > 0;
   }
 
   public shouldUpdateOkta(): boolean {
-    const isOktaApi = api => this.apiList.includes(api);
+    const isOktaApi: APIFilterFn = api => this.apiList.includes(api);
     return OKTA_CONSUMER_APIS.filter(isOktaApi).length > 0;
   }
 

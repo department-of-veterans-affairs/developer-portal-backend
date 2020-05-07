@@ -1,12 +1,12 @@
 // A struct to define default values for submissions with omitted fields.
 export class FormSubmission {
-  public firstName: string = '';
-  public lastName: string = '';
-  public organization: string = '';
-  public description: string = '';
-  public email: string = '';
-  public oAuthRedirectURI: string = '';
-  public oAuthApplicationType: string = '';
-  public termsOfService: boolean = false;
-  public apis: string = ''; // Comma-separated list
+  public firstName = '';
+  public lastName = '';
+  public organization = '';
+  public description = '';
+  public email = '';
+  public oAuthRedirectURI = '';
+  public oAuthApplicationType = '';
+  public termsOfService = false;
+  public apis = ''; // Comma-separated list
 }

@@ -1,5 +1,5 @@
 import * as Handlebars from 'handlebars';
-import * as request from 'request-promise-native';
+import request from 'request-promise-native';
 import { format } from 'url';
 import { apisToProperNames } from '../config';
 import { GovDeliveryUser, Protocol } from '../types';
