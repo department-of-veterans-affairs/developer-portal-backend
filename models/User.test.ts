@@ -111,7 +111,7 @@ describe('User', () => {
     });
   });
 
-  describe.only('saveToDynamo', () => {
+  describe('saveToDynamo', () => {
     test('it should use dynamo put to save items', async () => {
       const client = new DynamoDB.DocumentClient();
       const mockPut = jest.spyOn(client, 'put');
