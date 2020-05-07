@@ -1,21 +1,21 @@
 import 'jest';
-import { KongClient } from './KongClient';
-import { User } from './models';
+import KongService from './KongService';
+import User from '../models/User';
 import * as request from 'request-promise-native';
 jest.mock('request-promise-native', () => {
   return {
     get: jest.fn((_) => Promise.resolve({})),
     post: jest.fn((_) => Promise.resolve({}))
-  }
+  };
 });
 
-describe("KongClient", () => {
-  let client;
+describe("KongService", () => {
+  let client: KongService;
   let event;
-  let user;
+  let user: User;
 
   beforeEach(() => {
-    client = new KongClient({
+    client = new KongService({
       apiKey: 'fakeKey',
       host: 'fakeHost',
       port: 8000
@@ -28,7 +28,7 @@ describe("KongClient", () => {
       lastName: 'Paget',
       organization: 'Ad Hoc',
       termsOfService: true,
-    }
+    };
     user = new User(event);
     request.get.mockReset();
     request.post.mockReset();

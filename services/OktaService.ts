@@ -1,7 +1,7 @@
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
-import { OktaApplication } from './types';
+import { OktaApplication } from '../types';
 
-export class OktaClient {
+class OktaService {
   public client: Client;
 
   constructor({ org, token }) {
@@ -18,3 +18,5 @@ export class OktaClient {
     return resp;
   }
 }
+
+export default OktaService;

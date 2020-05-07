@@ -1,18 +1,16 @@
-import express from 'express'
-import { config, DynamoDB } from 'aws-sdk'
-import morgan from 'morgan'
-import logger from './lib/config/logger'
-import Sentry from './lib/config/Sentry'
+import express from 'express';
+import { config, DynamoDB } from 'aws-sdk';
+import morgan from 'morgan';
+import logger from './config/logger';
+import Sentry from './config/Sentry';
+import OktaService from './services/OktaService';
+import KongService from './services/KongService';
+import GovDeliveryService from './services/GovDeliveryService';
 
-import {
-  GovDeliveryClient,
-  KongClient,
-  KongConfig,
-  OktaClient,
-} from './lib'
+import { KongConfig } from './types';
 
-import SlackService from './services/SlackService'
-import developerApplicationHandler from './routes/DeveloperApplication'
+import SlackService from './services/SlackService';
+import developerApplicationHandler from './routes/DeveloperApplication';
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -21,69 +19,69 @@ function loggingMiddleware(tokens, req, res): string {
     status: tokens.status(req, res),
     contentLength: tokens.res(req, res, 'content-length'), 
     responseTime: `${tokens['response-time'](req, res)} ms`,
-  })
+  });
 }
 
-const configureGovDeliveryClient = (): GovDeliveryClient | null => {
-  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env
-  let client
+const configureGovDeliveryService = (): GovDeliveryService | null => {
+  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env;
+  let client;
 
   if (GOVDELIVERY_KEY && GOVDELIVERY_HOST) {
-    client = new GovDeliveryClient({
+    client = new GovDeliveryService({
       host: GOVDELIVERY_HOST,
       token: GOVDELIVERY_KEY,
-    })
+    });
   }
 
-  return client
-}
+  return client;
+};
 
-const configureKongClient = (): KongClient => {
-  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env
+const configureKongService = (): KongService => {
+  const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env;
 
   if (KONG_KEY && KONG_HOST) {
     // String interpolation here ensures the first arg to parseInt is
     // always a string and never undefined.
-    const port = parseInt(`${KONG_PORT}`, 10) || 8000
+    const port = parseInt(`${KONG_PORT}`, 10) || 8000;
 
     const kongfig: KongConfig = {
       apiKey: KONG_KEY,
       host: KONG_HOST,
       port: port,
-    }
+    };
     if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
-      kongfig.protocol = KONG_PROTOCOL
+      kongfig.protocol = KONG_PROTOCOL;
     }
-    return new KongClient(kongfig)
+    return new KongService(kongfig);
   } else {
-    throw new Error('Kong Config Missing')
+    throw new Error('Kong Config Missing');
   }
-}
+};
 
-const configureOktaClient = (): OktaClient | null => {
-  const { OKTA_TOKEN, OKTA_ORG } = process.env
-  let client
+const configureOktaService = (): OktaService | null => {
+  const { OKTA_TOKEN, OKTA_ORG } = process.env;
+  let client;
 
   if (OKTA_TOKEN && OKTA_ORG) {
-    client = new OktaClient({
+    client = new OktaService({
       org: OKTA_ORG,
       token: OKTA_TOKEN,
-    })
+    });
   }
 
-  return client
-}
+  return client;
+};
 
-const configureSlackClient = (): SlackService | null => {
-  const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env
-  let client
+const configureSlackService = (): SlackService | null => {
+  const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env;
+  let client;
 
   if (SLACK_TOKEN && SLACK_CHANNEL_ID) {
-    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN)
+    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN);
   }
 
-  return client
-}
+  return client;
+};
 
 interface HttpOptions {
   timeout: number;
@@ -101,51 +99,51 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
       timeout: 5000,
     },
     maxRetries: 1,
-  }
+  };
   if (process.env.NODE_ENV !== 'production') {
     config.update({
       accessKeyId: 'NONE',
       region: 'us-west-2',
       secretAccessKey: 'NONE',
-    })
-    dynamoConfig.endpoint = process.env.DYNAMODB_ENDPOINT
+    });
+    dynamoConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
   }
 
-  return new DynamoDB.DocumentClient(dynamoConfig)
-}
+  return new DynamoDB.DocumentClient(dynamoConfig);
+};
 
 export default function configureApp(): express.Application {
-  const app = express()
+  const app = express();
 
   // Must be the first middleware
-  app.use(Sentry.Handlers.requestHandler())
+  app.use(Sentry.Handlers.requestHandler());
 
   // request logs are skipped for the health check endpoint to reduce noise
-  app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }))
+  app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }));
 
-  app.use(express.json())
-  app.use(express.urlencoded({ extended: false }))
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
   app.get('/', (req, res) => {
-    res.send('developer-portal-backend')
-  })
+    res.send('developer-portal-backend');
+  });
 
   app.get('/health', (req, res) => {
-    res.json({ status: 'up' })
-  })
+    res.json({ status: 'up' });
+  });
 
-  const kong = configureKongClient()
-  const okta = configureOktaClient()
-  const dynamo = configureDynamoDBClient()
-  const govdelivery = configureGovDeliveryClient()
-  const slack = configureSlackClient()
+  const kong = configureKongService();
+  const okta = configureOktaService();
+  const dynamo = configureDynamoDBClient();
+  const govdelivery = configureGovDeliveryService();
+  const slack = configureSlackService();
 
   app.post(
     '/developer_application',
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
-  )
+  );
 
-  app.use(Sentry.Handlers.errorHandler())
+  app.use(Sentry.Handlers.errorHandler());
 
   /* 
    * 'next' is a required param despite not being used. Typescript will throw
@@ -156,7 +154,7 @@ export default function configureApp(): express.Application {
   app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     // To prevent sensitive information from ending up in the logs like keys, only certain safe
     // fields are logged from errors.
-    logger.error({ message: err.message, action: err.action, stack: err.stack })
+    logger.error({ message: err.message, action: err.action, stack: err.stack });
 
     
 		// Because we hooking post-response processing into the global error handler, we
@@ -166,16 +164,16 @@ export default function configureApp(): express.Application {
 		// been committed before we attempt to send anything to the user.
     if (!res.headersSent) {
       if (process.env.NODE_ENV === 'production') {
-        res.status(500).json({ error: 'encountered an error' })
+        res.status(500).json({ error: 'encountered an error' });
       } else {
         res.status(500).json({ 
           action: err.action,
           message: err.message,
           stack: err.stack 
-        })
+        });
       }
     }
-  })
+  });
 
-  return app
+  return app;
 }

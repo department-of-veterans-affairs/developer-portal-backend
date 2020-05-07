@@ -1,11 +1,11 @@
 import 'jest';
-import { GovDeliveryClient } from './GovDeliveryClient';
-import { User } from './models';
+import GovDeliveryService from './GovDeliveryService';
+import User from '../models/User';
 import * as request from 'request-promise-native';
 jest.mock('request-promise-native', () => {
   return {
     post: jest.fn((options) => Promise.resolve({}))
-  }
+  };
 });
 
 describe("KongClient", () => {
@@ -14,7 +14,7 @@ describe("KongClient", () => {
   let user;
 
   beforeEach(() => {
-    client = new GovDeliveryClient({
+    client = new GovDeliveryService({
       token: 'fakeKey',
       host: 'tms.govdelivery.com',
     });
@@ -28,7 +28,7 @@ describe("KongClient", () => {
       termsOfService: true,
     }
     user = new User(event);
-    user.token = 'fakeKey'
+    user.token = 'fakeKey';
     request.post.mockReset();
   });
 

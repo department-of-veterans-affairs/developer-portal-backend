@@ -18,7 +18,8 @@ module.exports = {
     'node': true,
   },
   rules: {
-    'semi': ['error', 'never'],
+    'semi': ['error', 'always'],
+    '@typescript-eslint/camelcase': 'off',
   },
   overrides: [
     {

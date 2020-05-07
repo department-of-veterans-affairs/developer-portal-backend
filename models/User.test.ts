@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import 'jest';
-import { FormSubmission } from '../FormSubmission';
-import { User } from './User';
+import { FormSubmission } from '../types/FormSubmission';
+import User from './User';
 
 describe('User', () => {
   let event;
@@ -136,7 +136,7 @@ describe('User', () => {
 
     test('it should return an error if save fails', async () => {
       const client = new DynamoDB.DocumentClient();
-      const error = new Error('error')
+      const error = new Error('error');
 
       client.put = jest.fn((params, cb) => {
         cb(error, params);
@@ -151,7 +151,7 @@ describe('User', () => {
     // The DynamoDB API breaks if empty strings are passed in
     test('it should convert empty strings in user model to nulls', async () => {
       const client = new DynamoDB.DocumentClient();
-      client.put = jest.fn((params, cb) => { cb(null, params) });
+      client.put = jest.fn((params, cb) => { cb(null, params); });
 
       const form: FormSubmission = {
         apis: 'benefits,verification',
@@ -161,6 +161,7 @@ describe('User', () => {
         lastName: 'Paget',
         organization: 'Ad Hoc',
         oAuthRedirectURI: '',
+        oAuthApplicationType: '',
         termsOfService: true,
       };
 
@@ -180,6 +181,7 @@ describe('User', () => {
         firstName: 'Edward',
         lastName: 'Paget',
         oAuthRedirectURI: 'http://localhost:4000',
+        oAuthApplicationType: 'native',
         organization: 'Ad Hoc',
         termsOfService: true,
       });

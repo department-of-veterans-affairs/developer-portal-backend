@@ -1,8 +1,8 @@
 import * as request from 'request-promise-native';
 import { format } from 'url';
-import { apisToAcls } from './config';
-import { KongConfig, KongUser, Protocol } from './types';
-import logger from './config/logger'
+import { apisToAcls } from '../config';
+import { KongConfig, KongUser, Protocol } from '../types';
+import logger from '../config/logger';
 
 interface ConsumerRequest {
   username: string;
@@ -14,7 +14,7 @@ interface ACLRequest {
 
 type KongRequest = ConsumerRequest | ACLRequest;
 
-export class KongClient {
+export default class KongService {
   public apiKey: string;
   public host: string;
   public port: number;

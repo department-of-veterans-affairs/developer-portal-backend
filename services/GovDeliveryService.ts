@@ -1,9 +1,8 @@
-import fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as request from 'request-promise-native';
 import { format } from 'url';
-import { apisToProperNames } from './config';
-import { GovDeliveryUser, Protocol } from './types';
+import { apisToProperNames } from '../config';
+import { GovDeliveryUser, Protocol } from '../types';
 
 interface EmailRecipient {
   email: string;
@@ -59,7 +58,7 @@ const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 <div><strong>Email us at: </strong><a href="mailto:api@va.gov">api@va.gov</a></div>
 `;
 
-export class GovDeliveryClient {
+export default class GovDeliveryClient {
   public authToken: string;
   public protocol: Protocol = 'https';
   public host: string;
