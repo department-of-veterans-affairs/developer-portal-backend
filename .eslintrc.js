@@ -35,6 +35,6 @@ module.exports = {
   ignorePatterns: [
     'dist/',
     'bin/',
-    'dynamodb_schema.js'
+    'dev/'
   ],
 };

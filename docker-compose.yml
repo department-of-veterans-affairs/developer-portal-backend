@@ -87,7 +87,7 @@ services:
     depends_on:
       - kong-migrations
     restart: on-failure
-    command: bash add_kong_admin.sh
+    command: bash dev/add_kong_admin.sh
 
   dynamodb:
     image: amazon/dynamodb-local
@@ -98,4 +98,4 @@ services:
     env_file: '.env'
     depends_on:
       - dynamodb
-    command: node dynamodb_schema.js
+    command: node dev/dynamodb_schema.js
