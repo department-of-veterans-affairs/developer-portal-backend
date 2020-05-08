@@ -25,6 +25,42 @@ interface WelcomeEmail {
   clientSecret?: string;
 }
 
+interface EmailResponse {
+  from_name: string;
+  from_email: string;
+  reply_to: string;
+  errors_to: string;
+  subject: string;
+  macros: {
+    city: string;
+    address: string;
+    company: string;
+    url: string;
+  };
+  body: string;
+  click_tracking_enabled: boolean;
+  open_tracking_enabled: boolean;
+  message_type_code: string;
+  created_at: string;
+  _links: {
+    self: string;
+    email_template: string;
+    recipients: string;
+    clicked: string;
+    opened: string;
+  };
+  status: string;
+  recipient_counts: {
+    total: number;
+    new: number;
+    sending: number;
+    sent: number;
+    failed: number;
+    blacklisted: number;
+    canceled: number;
+  };
+}
+
 const EMAIL_SUBJECT = 'Welcome to the VA API Platform';
 const DUMP_SUBJECT = 'Daily User Registrations on Developer Portal';
 const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
@@ -58,33 +94,31 @@ const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 <div><strong>Email us at: </strong><a href="mailto:api@va.gov">api@va.gov</a></div>
 `;
 
-export default class GovDeliveryClient {
+export default class GovDeliveryService {
   public authToken: string;
   public protocol: Protocol = 'https';
   public host: string;
-  public welcomeTemplate: Promise<Handlebars.TemplateDelegate<WelcomeEmail>>;
+  public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
 
   constructor({ token, host }) {
     this.authToken = token;
     this.host = host;
-    this.welcomeTemplate = new Promise((resolve, reject) => {
-      resolve(Handlebars.compile(EMAIL_TEMPLATE));
-    });
+    this.welcomeTemplate = Handlebars.compile(EMAIL_TEMPLATE);
   }
 
-  public async sendDumpEmail(csvDump: string, sendTo: string[]) {
+  public sendDumpEmail(csvDump: string, sendTo: string[]): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: DUMP_SUBJECT,
       from_name: 'VA API Platform team',
       body: csvDump,
       recipients: sendTo.map((email) => ({ email })),
     };
-    return await request.post(this.requestOptions('/messages/email', email));
+    return request.post(this.requestOptions('/messages/email', email));
   }
 
-  public async sendWelcomeEmail(user: GovDeliveryUser) {
+  public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
     if (user.token || (user.oauthApplication && user.oauthApplication.client_id)) {
-      const template = await this.welcomeTemplate;
+      const template = this.welcomeTemplate;
       const email: EmailRequest = {
         subject: EMAIL_SUBJECT,
         from_name: 'VA API Platform team',
@@ -101,12 +135,13 @@ export default class GovDeliveryClient {
           email: user.email,
         }],
       };
-      return await request.post(this.requestOptions('/messages/email', email));
-    }
+      return request.post(this.requestOptions('/messages/email', email));
+    } 
+    
     throw Error('User must have token or client_id initialized');
   }
 
-  private listApis(user: GovDeliveryUser) {
+  private listApis(user: GovDeliveryUser): string {
     const apis = user.apiList;
     return apis.reduce((apiList, api, idx) => {
       const properName = apisToProperNames[api];

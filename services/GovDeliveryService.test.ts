@@ -3,7 +3,7 @@ import GovDeliveryService from './GovDeliveryService';
 import User from '../models/User';
 import request from 'request-promise-native';
 
-describe("KongClient", () => {
+describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
   let event;
   let user: User;
@@ -31,8 +31,8 @@ describe("KongClient", () => {
   });
 
   describe('constructor', () => {
-    it('should render the handlebars template', async () => {
-      const template = await client.welcomeTemplate;
+    it('should render the handlebars template', () => {
+      const template = client.welcomeTemplate;
       const html = template({
         apis: 'VA Facilities API',
         firstName: 'Edward',
@@ -45,8 +45,8 @@ describe("KongClient", () => {
       expect(html).toEqual(expect.stringContaining('apiKey: fakeKey'));
     });
 
-    it('should render the handlebars template with health and verification', async () => {
-      const template = await client.welcomeTemplate;
+    it('should render the handlebars template with health and verification', () => {
+      const template = client.welcomeTemplate;
       const html = template({
         apis: 'Health API, Veteran Verification API, and VA Facilities API',
         firstName: 'Edward',
@@ -62,8 +62,8 @@ describe("KongClient", () => {
       expect(html).toEqual(expect.stringContaining('supersecret'));
     });
 
-    it('should hide secret text when not applicable', async () => {
-      const template = await client.welcomeTemplate;
+    it('should hide secret text when not applicable', () => {
+      const template = client.welcomeTemplate;
       const html = template({
         apis: 'Health API',
         clientID: 'superid',
@@ -92,9 +92,17 @@ describe("KongClient", () => {
       });
     });
 
-    it('should raise error if user lacks token and client_id', () => {
+    it('should raise error if user lacks token and client_id', async () => {
+      //Fail the test if the expectation in the catch is never
+      //reached.
+      expect.assertions(1);
+
       user.token = undefined;
-      expect(client.sendWelcomeEmail(user)).rejects.toEqual(new Error('User must have token or client_id initialized'));
+      try {
+        await client.sendWelcomeEmail(user);
+      } catch (err) {
+        expect(err.message).toEqual('User must have token or client_id initialized');
+      }
     });
   });
 });
