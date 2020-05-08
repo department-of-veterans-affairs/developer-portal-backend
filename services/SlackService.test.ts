@@ -17,6 +17,9 @@ describe('SlackService', () => {
       status: 200,
       statusText: 'ok',
       headers: {},
+      data: {
+        channel: 'channel123'
+      },
     });
 
     // cast to unknown first to avoid having to reimplement all of AxiosInstance
@@ -27,7 +30,7 @@ describe('SlackService', () => {
 
     const res = await service.sendSuccessMessage(message, 'New User Application');
 
-    expect(res.status).toEqual(200);
+    expect(res.channel).toEqual('channel123');
     expect(mockPost).toHaveBeenCalledWith('/chat.postMessage', {
       channel: 'channel123',
       text: '',
@@ -45,6 +48,9 @@ describe('SlackService', () => {
       status: 200,
       statusText: 'ok',
       headers: {},
+      data: {
+        channel: 'channel123'
+      },
     });
     
     jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
@@ -54,7 +60,7 @@ describe('SlackService', () => {
 
     const res = await service.sendFailureMessage(message, 'User Signup Failed');
 
-    expect(res.status).toEqual(200);
+    expect(res.channel).toEqual('channel123');
     expect(mockPost).toHaveBeenCalledWith('/chat.postMessage', {
       channel: 'channel123',
       text: '',

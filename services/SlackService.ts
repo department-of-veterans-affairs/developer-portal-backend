@@ -1,5 +1,26 @@
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
+interface SlackChatResponse {
+  ok: boolean;
+  channel: string;
+  ts: string;
+  message: {
+    text: string;
+    username: string;
+    bot_id: string;
+    attachments: SlackAttachment[];
+    type: string;
+    subtype: string;
+    ts: string;
+  };
+}
+
+interface SlackAttachment {
+  text: string;
+  id: number;
+  fallback: string;
+}
+
 export default class SlackService {
   private channelID: string;
   private client: AxiosInstance;
@@ -12,16 +33,16 @@ export default class SlackService {
     });
   }
 
-  public sendSuccessMessage(message: string, title: string): Promise<AxiosResponse> {
+  public sendSuccessMessage(message: string, title: string): Promise<SlackChatResponse> {
     return this.sendChatWithAttachment(message, 'good', title);
   }
 
-  public sendFailureMessage(message: string, title: string): Promise<AxiosResponse> {
+  public sendFailureMessage(message: string, title: string): Promise<SlackChatResponse> {
     return this.sendChatWithAttachment(message, 'danger', title);
   }
 
-  private async sendChatWithAttachment(message: string, color: string, title: string): Promise<AxiosResponse> {
-    return this.client.post('/chat.postMessage', {
+  private async sendChatWithAttachment(message: string, color: string, title: string): Promise<SlackChatResponse> {
+    const res: AxiosResponse<SlackChatResponse> = await this.client.post('/chat.postMessage', {
       channel: this.channelID,
       text: '',
       attachments: [{
@@ -31,5 +52,7 @@ export default class SlackService {
         title,
       }],
     });
+
+    return res.data;
   }
 }
