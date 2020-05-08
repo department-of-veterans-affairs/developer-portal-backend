@@ -46,33 +46,36 @@ describe("KongService", () => {
 
   describe('createConsumer', () => {
     it('should send a request when the consumer does not exist', async () => {
-      getMock.mockImplementation(() => Promise.reject({}));
-      await client.createConsumer(user);
+      getMock.mockRejectedValue({});
+      postMock.mockResolvedValue({ username: 'AdHocPaget' });
+
+      const result = await client.createConsumer(user);
+      
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers",
         body: { username: 'AdHocPaget' },
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
+      expect(result.username).toEqual('AdHocPaget');
     });
 
-    it('should not send a request when the consumer does not exist', async () => {
-      getMock.mockImplementation(() => Promise.resolve({data: { username: 'AdHocPaget' }}));
-      await client.createConsumer(user);
-      expect(postMock).not.toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers",
-        body: { username: 'AdHocPaget' },
-        json: true,
-        headers: { apiKey: 'fakeKey' }
-      });
+    it('should not create a new consumer when one already exists', async () => {
+      getMock.mockResolvedValue({ username: 'AdHocPaget' });
+
+      const result = await client.createConsumer(user);
+
+      expect(postMock).not.toHaveBeenCalled();
+      expect(result.username).toEqual('AdHocPaget');
     });
- 
   });
 
   describe('createACLs', () => {
-    it('should send a request', async () => {
+    it('should add groups', async () => {
       getMock.mockImplementation(() => Promise.resolve({data: []}));
-      await client.createACLs(user);
+
+      const result = await client.createACLs(user);
+      
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
@@ -85,11 +88,14 @@ describe("KongService", () => {
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
+      expect(result.total).toEqual(2);
     });
 
-    it('should not send a request for groups consumer already belongs to', async () => {
+    it('should not add groups a consumer already belongs to', async () => {
       getMock.mockImplementation(() => Promise.resolve({data: [{ group: 'vba_documents' }]}));
-      await client.createACLs(user);
+
+      const result = await client.createACLs(user);
+      
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
@@ -102,17 +108,22 @@ describe("KongService", () => {
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
+      expect(result.total).toEqual(1);
     });
   });
 
   describe('createKeyAuth', () => {
     it('should send a request', async () => {
-      await client.createKeyAuth(user);
+      postMock.mockResolvedValue({ key: 'fakekey' });
+
+      const result = await client.createKeyAuth(user);
+
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
+      expect(result.key).toEqual('fakekey');
     });
   });
 });
