@@ -22,7 +22,7 @@ function loggingMiddleware(tokens, req, res): string {
   });
 }
 
-const configureGovDeliveryService = (): GovDeliveryService | null => {
+const configureGovDeliveryService = (): GovDeliveryService | undefined => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env;
   let client;
 
@@ -58,7 +58,7 @@ const configureKongService = (): KongService => {
   }
 };
 
-const configureOktaService = (): OktaService | null => {
+const configureOktaService = (): OktaService | undefined => {
   const { OKTA_TOKEN, OKTA_ORG } = process.env;
   let client;
 
@@ -72,7 +72,7 @@ const configureOktaService = (): OktaService | null => {
   return client;
 };
 
-const configureSlackService = (): SlackService | null => {
+const configureSlackService = (): SlackService | undefined => {
   const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env;
   let client;
 
