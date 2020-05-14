@@ -98,8 +98,13 @@ describe('developerApplicationHandler', () => {
     expect(mockSaveToOkta).toHaveBeenCalled();
   });
 
-  it('does not sign up for Okta if no Okta client is provided', () => {
+  it('does not sign up for Okta if no Okta client is provided', async () => {
+    mockShouldUpdateOkta.mockReturnValue(true);
 
+    const handler = developerApplicationHandler(kong, undefined, dynamo, undefined, undefined);
+    await handler(stubReq, stubRes, stubNext);
+
+    expect(mockSaveToOkta).not.toHaveBeenCalled();
   });
 
   it('saves details of the signup to DynamoDB', () => {
