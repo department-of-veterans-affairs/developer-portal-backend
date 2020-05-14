@@ -92,7 +92,7 @@ describe("KongClient", () => {
       });
     });
 
-    it('should raise error if user lacks token', () => {
+    it('should raise error if user lacks token and client_id', () => {
       user.token = undefined;
       expect(client.sendWelcomeEmail(user)).rejects.toEqual(new Error('User must have token or client_id initialized'));
     });

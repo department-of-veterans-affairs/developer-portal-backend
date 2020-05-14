@@ -8,5 +8,6 @@ curl --location --request POST 'http://localhost:9999/developer_application' \
     "lastName": "Doe",
     "oAuthRedirectURI": "",
     "organization": "Example Organization",
+    "oAuthApplicationType": "",
     "termsOfService": true
 }' | jq '.'

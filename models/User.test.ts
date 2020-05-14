@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import 'jest';
 import { FormSubmission } from '../types/FormSubmission';
+import { OKTA_CONSUMER_APIS } from '../config/apis';
 import User from './User';
 
 describe('User', () => {
@@ -32,13 +33,6 @@ describe('User', () => {
   });
 
   describe('shouldUpdateOkta', () => {
-    const OKTA_CONSUMER_APIS = [
-      'health',
-      'verification',
-      'communityCare',
-      'claims',
-    ];
-
     for (const api of OKTA_CONSUMER_APIS) {
       it(`should be true when ${api} is requested`, () => {
         event = {

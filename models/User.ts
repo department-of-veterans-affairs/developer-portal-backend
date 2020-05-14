@@ -1,24 +1,16 @@
 import { DynamoDB } from 'aws-sdk';
 import pick from 'lodash.pick';
 import process from 'process';
-import { ApplicationType } from '../types';
-import { GovDeliveryUser, KongUser } from '../types';
+import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
 import { Application } from './Application';
 import logger from '../config/logger';
 import OktaService from '../services/OktaService';
 import SlackService from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService from '../services/GovDeliveryService';
+import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
-const KONG_CONSUMER_APIS = ['benefits', 'facilities', 'vaForms', 'confirmation'];
-const OKTA_CONSUMER_APIS = [
-  'health',
-  'verification',
-  'communityCare',
-  'claims',
-];
-
-type APIFilterFn = (api: string) => boolean
+type APIFilterFn = (api: string) => boolean;
 
 export default class User implements KongUser, GovDeliveryUser {
   public createdAt: Date;
@@ -190,12 +182,12 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public shouldUpdateKong(): boolean {
     const isKongApi: APIFilterFn = api => this.apiList.includes(api);
-    return KONG_CONSUMER_APIS.filter(isKongApi).length > 0;
+    return KONG_CONSUMER_APIS.some(isKongApi);
   }
 
   public shouldUpdateOkta(): boolean {
     const isOktaApi: APIFilterFn = api => this.apiList.includes(api);
-    return OKTA_CONSUMER_APIS.filter(isOktaApi).length > 0;
+    return OKTA_CONSUMER_APIS.some(isOktaApi);
   }
 
   private get _apiList(): string[] {
