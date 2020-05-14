@@ -1,20 +1,16 @@
 import 'jest';
-import { GovDeliveryClient } from './GovDeliveryClient';
-import { User } from './models';
-import * as request from 'request-promise-native';
-jest.mock('request-promise-native', () => {
-  return {
-    post: jest.fn((options) => Promise.resolve({}))
-  }
-});
+import GovDeliveryService from './GovDeliveryService';
+import User from '../models/User';
+import request from 'request-promise-native';
 
 describe("KongClient", () => {
-  let client;
+  let client: GovDeliveryService;
   let event;
-  let user;
+  let user: User;
+  let mockPost: jest.SpyInstance;
 
   beforeEach(() => {
-    client = new GovDeliveryClient({
+    client = new GovDeliveryService({
       token: 'fakeKey',
       host: 'tms.govdelivery.com',
     });
@@ -26,14 +22,16 @@ describe("KongClient", () => {
       lastName: 'Paget',
       organization: 'Ad Hoc',
       termsOfService: true,
-    }
+    };
     user = new User(event);
-    user.token = 'fakeKey'
-    request.post.mockReset();
+    user.token = 'fakeKey';
+
+    mockPost = jest.spyOn(request, 'post').mockResolvedValue({});
+    mockPost.mockReset();
   });
 
   describe('constructor', () => {
-    test('it should render the handlebars template', async () => {
+    it('should render the handlebars template', async () => {
       const template = await client.welcomeTemplate;
       const html = template({
         apis: 'VA Facilities API',
@@ -47,7 +45,7 @@ describe("KongClient", () => {
       expect(html).toEqual(expect.stringContaining('apiKey: fakeKey'));
     });
 
-    test('it should render the handlebars template with health and verification', async () => {
+    it('should render the handlebars template with health and verification', async () => {
       const template = await client.welcomeTemplate;
       const html = template({
         apis: 'Health API, Veteran Verification API, and VA Facilities API',
@@ -64,22 +62,23 @@ describe("KongClient", () => {
       expect(html).toEqual(expect.stringContaining('supersecret'));
     });
 
-    test('it should hide secret text when not applicable', async () => {
+    it('should hide secret text when not applicable', async () => {
       const template = await client.welcomeTemplate;
       const html = template({
         apis: 'Health API',
         clientID: 'superid',
         firstName: 'Edward',
         oauth: true,
+        token_issued: true,
       });
       expect(html).not.toEqual(expect.stringContaining('OAuth Client Secret'));
     });
   });
 
   describe('sendWelcomeEmail', () => {
-    test('it should sent a request', async () => {
-      await client.sendWelcomeEmail(user)
-      expect(request.post).toHaveBeenCalledWith({
+    it('should send a request', async () => {
+      await client.sendWelcomeEmail(user);
+      expect(mockPost).toHaveBeenCalledWith({
         url: 'https://tms.govdelivery.com/messages/email',
         body: expect.objectContaining({
           recipients: expect.arrayContaining([expect.objectContaining({
@@ -93,7 +92,7 @@ describe("KongClient", () => {
       });
     });
 
-    test('it should raise error if user lacks token', async () => {
+    it('should raise error if user lacks token and client_id', () => {
       user.token = undefined;
       expect(client.sendWelcomeEmail(user)).rejects.toEqual(new Error('User must have token or client_id initialized'));
     });

@@ -3,7 +3,10 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
+    project: [
+      './tsconfig.json', 
+      './tsconfig.test.json',
+    ],
   },
   plugins: [
     '@typescript-eslint',
@@ -18,7 +21,8 @@ module.exports = {
     'node': true,
   },
   rules: {
-    'semi': ['error', 'never'],
+    'semi': ['error', 'always'],
+    '@typescript-eslint/camelcase': 'off',
   },
   overrides: [
     {
@@ -31,7 +35,6 @@ module.exports = {
   ignorePatterns: [
     'dist/',
     'bin/',
-    'lib/',
-    'dynamodb_schema.js'
+    'dev/'
   ],
 };

@@ -1,4 +1,4 @@
-import { OktaClient } from '../OktaClient';
+import OktaService from '../services/OktaService';
 import { ApplicationType,
          GrantTypes,
          OAuthApplication,
@@ -65,7 +65,7 @@ export class Application implements OktaApplication {
     return this.settings;
   }
 
-  public async createOktaApplication(client: OktaClient) {
+  public async createOktaApplication(client: OktaService) {
     try {
       const resp = await client.createApplication(this, IDME_GROUP_ID);
       const { client_id, client_secret } = resp.credentials.oauthClient;
@@ -74,8 +74,8 @@ export class Application implements OktaApplication {
       this.oktaID = resp.id;
       return resp;
     } catch (err) {
-      err.action = 'failed saving to Okta'
-      throw err
+      err.action = 'failed saving to Okta';
+      throw err;
     }
   }
 }

@@ -1,7 +1,7 @@
-import { FormSubmission } from '../lib/FormSubmission'
-import pick from 'lodash.pick'
-import { User } from '../lib/models'
-import logger from '../lib/config/logger'
+import { FormSubmission } from '../types/FormSubmission';
+import pick from 'lodash.pick';
+import User from '../models/User';
+import logger from '../config/logger';
 
 export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
   return async function (req, res, next): Promise<any> {
@@ -15,8 +15,8 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
       'oAuthApplicationType',
       'termsOfService',
       'apis',
-    ])
-    const user: User = new User(form)
+    ]);
+    const user: User = new User(form);
     /* 
      * Sign up the user in Kong and Okta, record it in DynamoDB,
      * and return the result to UI as quickly as possible. Report
@@ -24,30 +24,30 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
      */
     try {
       if (user.shouldUpdateKong()) {
-        logger.info({ message: 'creating Kong consumer' })
-        await user.saveToKong(kong)
+        logger.info({ message: 'creating Kong consumer' });
+        await user.saveToKong(kong);
       }
 
       if (user.shouldUpdateOkta() && okta) {
-        logger.info({ message: 'creating Okta client application' })
-        await user.saveToOkta(okta)
+        logger.info({ message: 'creating Okta client application' });
+        await user.saveToOkta(okta);
       }
 
-      logger.info({ message: 'recording signup in DynamoDB' })
-      await user.saveToDynamo(dynamo)
+      logger.info({ message: 'recording signup in DynamoDB' });
+      await user.saveToDynamo(dynamo);
 
       if (!user.oauthApplication) {
-        res.json({ token: user.token })
+        res.json({ token: user.token });
       } else {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
           token: user.token,
-        })
+        });
       }
     } catch (err) {
-      next(err)
-      return
+      next(err);
+      return;
     }
 
     /*
@@ -56,22 +56,22 @@ export default function developerApplicationHandler(kong, okta, dynamo, govdeliv
      */
     try {
       if (govdelivery) {
-        logger.info({ message: 'sending email to new user' })
-        await user.sendEmail(govdelivery)
+        logger.info({ message: 'sending email to new user' });
+        await user.sendEmail(govdelivery);
       }
     } catch(err) {
-      err.action = 'sending govdelivery signup notification'
-      next(err)
+      err.action = 'sending govdelivery signup notification';
+      next(err);
     }
 
     try {
       if (slack) {
-        logger.info({ message: 'sending success to slack' })
-        await user.sendSlackSuccess(slack)
+        logger.info({ message: 'sending success to slack' });
+        await user.sendSlackSuccess(slack);
       }     
     } catch (err) {
-      err.action = 'sending slack signup message'
-      next(err)
+      err.action = 'sending slack signup message';
+      next(err);
     }
-  }
+  };
 }

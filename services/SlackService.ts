@@ -1,23 +1,23 @@
-import axios, { AxiosResponse, AxiosInstance } from 'axios'
+import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
 export default class SlackService {
   private channelID: string;
   private client: AxiosInstance;
 
   constructor(channelID: string, token: string) {
-    this.channelID = channelID
+    this.channelID = channelID;
     this.client = axios.create({
       baseURL: 'https://slack.com/api',
       headers: { 'Authorization': `Bearer ${token}` },
-    })
+    });
   }
 
   public sendSuccessMessage(message: string, title: string): Promise<AxiosResponse> {
-    return this.sendChatWithAttachment(message, 'good', title)
+    return this.sendChatWithAttachment(message, 'good', title);
   }
 
   public sendFailureMessage(message: string, title: string): Promise<AxiosResponse> {
-    return this.sendChatWithAttachment(message, 'danger', title)
+    return this.sendChatWithAttachment(message, 'danger', title);
   }
 
   private async sendChatWithAttachment(message: string, color: string, title: string): Promise<AxiosResponse> {
@@ -30,6 +30,6 @@ export default class SlackService {
         color,
         title,
       }],
-    })
+    });
   }
 }

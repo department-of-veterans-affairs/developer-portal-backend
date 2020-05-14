@@ -42,18 +42,5 @@
     "ts-jest": "^25.2.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
-  },
-  "jest": {
-    "testResultsProcessor": "./node_modules/jest-junit-reporter",
-    "preset": "ts-jest",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
-    },
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/dist/"
-    ]
   }
 }
