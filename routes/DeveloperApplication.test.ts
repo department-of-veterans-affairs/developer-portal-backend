@@ -80,9 +80,6 @@ describe('developerApplicationHandler', () => {
     stubNext.mockReset();
   });
 
-  it('pulls values from the body to create a user', () => {
-  });
-
   it('signs users up for Kong if they requested access to valid standard APIs', async () => {
     mockShouldUpdateKong.mockReturnValue(true);
     stubOAuthCreds = undefined;
