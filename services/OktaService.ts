@@ -1,4 +1,4 @@
-import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
+ import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { OktaApplication } from '../types';
 
 export interface OktaApplicationResponse {
@@ -6,7 +6,7 @@ export interface OktaApplicationResponse {
   credentials: {
     oauthClient: {
       client_id: string;
-      client_secret: string;
+      client_secret?: string;
     };
   };
 }
