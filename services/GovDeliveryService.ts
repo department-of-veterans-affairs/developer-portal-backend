@@ -62,7 +62,6 @@ interface EmailResponse {
 }
 
 const EMAIL_SUBJECT = 'Welcome to the VA API Platform';
-const DUMP_SUBJECT = 'Daily User Registrations on Developer Portal';
 const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 
 <div>Thank you for your interest in our {{ apis }}. We are excited to partner with you to improve the lives of veterans.</div><br />
@@ -104,16 +103,6 @@ export default class GovDeliveryService {
     this.authToken = token;
     this.host = host;
     this.welcomeTemplate = Handlebars.compile(EMAIL_TEMPLATE);
-  }
-
-  public sendDumpEmail(csvDump: string, sendTo: string[]): Promise<EmailResponse> {
-    const email: EmailRequest = {
-      subject: DUMP_SUBJECT,
-      from_name: 'VA API Platform team',
-      body: csvDump,
-      recipients: sendTo.map((email) => ({ email })),
-    };
-    return request.post(this.requestOptions('/messages/email', email));
   }
 
   public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
