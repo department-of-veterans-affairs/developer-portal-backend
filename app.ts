@@ -11,6 +11,7 @@ import { KongConfig } from './types';
 
 import SlackService from './services/SlackService';
 import developerApplicationHandler from './routes/DeveloperApplication';
+import contactUsHandler from './routes/ContactUs';
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -142,6 +143,8 @@ export default function configureApp(): express.Application {
     '/developer_application',
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
   );
+
+  app.post('/services/meta/contact-us', contactUsHandler(govdelivery));
 
   app.use(Sentry.Handlers.errorHandler());
 
