@@ -159,7 +159,7 @@ describe('developerApplicationHandler', () => {
 
   it('does not send an email if the signup failed', async () => {
     mockShouldUpdateKong.mockReturnValue(true);
-    mockSaveToKong.mockRejectedValue('failed');
+    mockSaveToKong.mockRejectedValue('failed saving to Kong');
 
     const handler = developerApplicationHandler(kong, undefined, dynamo, govDelivery, undefined);
     await handler(stubReq, stubRes, stubNext);
@@ -214,7 +214,6 @@ describe('developerApplicationHandler', () => {
 
   it('sends signup errors to the default error handler', async () => {
     const err = new Error('failed saving to Kong');
-    
     mockShouldUpdateKong.mockReturnValue(true);
     mockSaveToKong.mockRejectedValue(err);
 
