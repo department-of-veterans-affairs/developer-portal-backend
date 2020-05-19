@@ -14,7 +14,7 @@ function filterRelevantApis(apis: { [api: string]: boolean }): string[] {
   return allApis.filter(api => apis[api]);
 }
 
-export default function contactUsHandler(govDelivery: GovDeliveryService | null) {
+export default function contactUsHandler(govDelivery: GovDeliveryService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!govDelivery) {
       res.status(503).json({ error: 'service not enabled'});

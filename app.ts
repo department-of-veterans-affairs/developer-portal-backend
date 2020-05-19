@@ -140,12 +140,9 @@ export default function configureApp(): express.Application {
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
 
-  app.post(
-    '/developer_application',
-    developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
-  );
+  app.post('/developer_application', developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.post('/services/meta/contact-us', contactUsHandler(govdelivery));
+  app.post('/contact-us', contactUsHandler(govdelivery));
 
   app.use(Sentry.Handlers.errorHandler());
 

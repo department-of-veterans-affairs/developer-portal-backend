@@ -32,7 +32,7 @@ describe('contactUsHandler', () => {
   });
 
   it('returns a 503 if the service is not configured', async () => {
-    const handler = contactUsHandler(null);
+    const handler = contactUsHandler(undefined);
     const mockReq = {
       body: {
         firstName: 'Samwise',
