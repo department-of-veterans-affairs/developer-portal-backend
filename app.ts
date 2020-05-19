@@ -27,11 +27,11 @@ const configureGovDeliveryService = (): GovDeliveryService | undefined => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
   let client;
 
-  if (GOVDELIVERY_KEY && GOVDELIVERY_HOST && SUPPORT_EMAIL) {
+  if (GOVDELIVERY_KEY && GOVDELIVERY_HOST) {
     client = new GovDeliveryService({
       host: GOVDELIVERY_HOST,
       token: GOVDELIVERY_KEY,
-      supportEmail: SUPPORT_EMAIL,
+      supportEmail: SUPPORT_EMAIL || 'api@va.gov',
     });
   }
 
