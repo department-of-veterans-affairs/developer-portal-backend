@@ -1,10 +1,20 @@
+import { Request, Response, NextFunction } from 'express';
+import { DynamoDB } from 'aws-sdk';
 import { FormSubmission } from '../types/FormSubmission';
 import pick from 'lodash.pick';
-import User from '../models/User';
 import logger from '../config/logger';
+import User from '../models/User';
+import KongService from '../services/KongService';
+import OktaService from '../services/OktaService';
+import GovDeliveryService from '../services/GovDeliveryService';
+import SlackService from '../services/SlackService';
 
-export default function developerApplicationHandler(kong, okta, dynamo, govdelivery, slack) {
-  return async function (req, res, next): Promise<any> {
+export default function developerApplicationHandler(kong: KongService, 
+  okta: OktaService | undefined, 
+  dynamo: DynamoDB.DocumentClient, 
+  govdelivery: GovDeliveryService | undefined, 
+  slack: SlackService | undefined) {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const form: FormSubmission = pick(req.body, [
       'firstName',
       'lastName',
