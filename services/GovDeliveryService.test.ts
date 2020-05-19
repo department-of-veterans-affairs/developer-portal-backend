@@ -1,13 +1,14 @@
 import 'jest';
+import axios, { AxiosInstance } from 'axios';
 import GovDeliveryService, { SupportEmail } from './GovDeliveryService';
 import User from '../models/User';
-import request from 'request-promise-native';
 
 describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
   let event;
   let user: User;
-  let mockPost: jest.SpyInstance;
+  const mockPost = jest.fn();
+  jest.spyOn(axios, 'create').mockReturnValue({ post: mockPost } as unknown as AxiosInstance);
 
   beforeEach(() => {
     client = new GovDeliveryService({
@@ -27,8 +28,13 @@ describe('GovDeliveryService', () => {
     user = new User(event);
     user.token = 'fakeKey';
 
-    mockPost = jest.spyOn(request, 'post').mockResolvedValue({});
     mockPost.mockReset();
+    mockPost.mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      data: {},
+    });
   });
 
   describe('constructor', () => {
@@ -79,18 +85,11 @@ describe('GovDeliveryService', () => {
   describe('sendWelcomeEmail', () => {
     it('should send a request', async () => {
       await client.sendWelcomeEmail(user);
-      expect(mockPost).toHaveBeenCalledWith({
-        url: 'https://tms.shiredelivery.com/messages/email',
-        body: expect.objectContaining({
-          recipients: expect.arrayContaining([expect.objectContaining({
-            email: 'ed@adhocteam.us'
-          })]),
-          subject: 'Welcome to the VA API Platform',
-          body: expect.stringContaining('VA Facilities API and Benefits Intake API'),
-        }),
-        json: true,
-        headers: { 'X-AUTH-TOKEN': 'fakeKey' }
-      });
+      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
+        recipients: [{ email: 'ed@adhocteam.us' }],
+        subject: 'Welcome to the VA API Platform',
+        body: expect.stringContaining('VA Facilities API and Benefits Intake API'),
+      }));
     });
 
     it('should raise error if user lacks token and client_id', async () => {
@@ -119,16 +118,12 @@ describe('GovDeliveryService', () => {
       };
 
       await client.sendSupportEmail(email);
-      expect(mockPost).toHaveBeenCalledWith({
-        url: 'https://tms.shiredelivery.com/messages/email',
-        body: expect.objectContaining({
-          recipients: [{ email: 'gandalf@istari.net' }],
-          subject: 'Support Needed',
-          body: expect.stringContaining('peregrin@thefellowship.org'),
-        }),
-        json: true,
-        headers: { 'X-AUTH-TOKEN': 'fakeKey' }
-      });
+      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
+        recipients: [{ email: 'gandalf@istari.net' }],
+        from_name: 'Peregrin Took',
+        subject: 'Support Needed',
+        body: expect.stringContaining('peregrin@thefellowship.org'),
+      }));
     });
   });
 });

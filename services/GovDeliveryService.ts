@@ -1,8 +1,7 @@
 import * as Handlebars from 'handlebars';
-import request from 'request-promise-native';
-import { format } from 'url';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { apisToProperNames } from '../config';
-import { GovDeliveryUser, Protocol } from '../types';
+import { GovDeliveryUser } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
 
 interface EmailRecipient {
@@ -72,19 +71,21 @@ interface EmailResponse {
 }
 
 export default class GovDeliveryService {
-  public authToken: string;
-  public protocol: Protocol = 'https';
   public host: string;
   public supportEmail: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
   public supportTemplate: Handlebars.TemplateDelegate<SupportEmail>;
+  public client: AxiosInstance;
 
   constructor({ token, host, supportEmail }) {
-    this.authToken = token;
     this.host = host;
     this.supportEmail = supportEmail;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
+    this.client = axios.create({
+      baseURL: `https://${this.host}`,
+      headers: { 'X-AUTH-TOKEN': token }
+    });
   }
 
   public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
@@ -124,8 +125,9 @@ export default class GovDeliveryService {
     return this.sendEmail(email);
   }
 
-  private sendEmail(email: EmailRequest): Promise<EmailResponse> {
-    return request.post(this.requestOptions('/messages/email', email));
+  private async sendEmail(email: EmailRequest): Promise<EmailResponse> {
+    const res: AxiosResponse<EmailResponse> = await this.client.post('/messages/email', email);
+    return res.data;
   }
 
   private listApis(user: GovDeliveryUser): string {
@@ -141,17 +143,5 @@ export default class GovDeliveryService {
       }
       return `${apiList}, ${properName}`;
     }, '');
-  }
-
-  private requestOptions(path: string, body: EmailRequest): request.Options {
-    const url = format({
-      protocol: this.protocol,
-      hostname: this.host,
-      pathname: path,
-    });
-    const headers = {
-      'X-AUTH-TOKEN': this.authToken,
-    };
-    return { body, url, headers, json: true };
   }
 }
