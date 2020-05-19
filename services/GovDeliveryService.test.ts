@@ -1,5 +1,5 @@
 import 'jest';
-import GovDeliveryService from './GovDeliveryService';
+import GovDeliveryService, { SupportEmail } from './GovDeliveryService';
 import User from '../models/User';
 import request from 'request-promise-native';
 
@@ -12,7 +12,8 @@ describe('GovDeliveryService', () => {
   beforeEach(() => {
     client = new GovDeliveryService({
       token: 'fakeKey',
-      host: 'tms.govdelivery.com',
+      host: 'tms.shiredelivery.com',
+      supportEmail: 'gandalf@istari.net'
     });
     event = {
       apis: 'facilities,benefits',
@@ -79,7 +80,7 @@ describe('GovDeliveryService', () => {
     it('should send a request', async () => {
       await client.sendWelcomeEmail(user);
       expect(mockPost).toHaveBeenCalledWith({
-        url: 'https://tms.govdelivery.com/messages/email',
+        url: 'https://tms.shiredelivery.com/messages/email',
         body: expect.objectContaining({
           recipients: expect.arrayContaining([expect.objectContaining({
             email: 'ed@adhocteam.us'
@@ -103,6 +104,31 @@ describe('GovDeliveryService', () => {
       } catch (err) {
         expect(err.message).toEqual('User must have token or client_id initialized');
       }
+    });
+  });
+
+  describe('sendSupportEmail', () => {
+    it('should send a request', async () => {
+      const email: SupportEmail = {
+        firstName: 'Peregrin',
+        lastName: 'Took',
+        requester: 'peregrin@thefellowship.org',
+        description: 'Need more supplies for second breakfast',
+        organization: 'The Fellowship of the Ring',
+        apis: ['facilities', 'benefits'],
+      };
+
+      await client.sendSupportEmail(email);
+      expect(mockPost).toHaveBeenCalledWith({
+        url: 'https://tms.shiredelivery.com/messages/email',
+        body: expect.objectContaining({
+          recipients: [{ email: 'gandalf@istari.net' }],
+          subject: 'Support Needed',
+          body: expect.stringContaining('peregrin@thefellowship.org'),
+        }),
+        json: true,
+        headers: { 'X-AUTH-TOKEN': 'fakeKey' }
+      });
     });
   });
 });

@@ -24,13 +24,14 @@ function loggingMiddleware(tokens, req, res): string {
 }
 
 const configureGovDeliveryService = (): GovDeliveryService | undefined => {
-  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env;
+  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
   let client;
 
-  if (GOVDELIVERY_KEY && GOVDELIVERY_HOST) {
+  if (GOVDELIVERY_KEY && GOVDELIVERY_HOST && SUPPORT_EMAIL) {
     client = new GovDeliveryService({
       host: GOVDELIVERY_HOST,
       token: GOVDELIVERY_KEY,
+      supportEmail: SUPPORT_EMAIL,
     });
   }
 

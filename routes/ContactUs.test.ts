@@ -5,11 +5,13 @@ import GovDeliveryService from '../services/GovDeliveryService';
 const mockStatus = jest.fn();
 const mockJson = jest.fn();
 const mockSendEmail = jest.fn();
-const mockGovDelivery = { sendEmail: mockSendEmail } as unknown as GovDeliveryService;
+const mockSendStatus = jest.fn();
+const mockGovDelivery = { sendSupportEmail: mockSendEmail } as unknown as GovDeliveryService;
 
 const mockRes: Response = {
   status: mockStatus,
   json: mockJson,
+  sendStatus: mockSendStatus,
 } as unknown as Response;
 
 const mockNext = jest.fn();
@@ -21,13 +23,32 @@ describe('contactUsHandler', () => {
     // to be called properly.
     mockStatus.mockReset();
     mockStatus.mockReturnValue(mockRes);
+    mockSendStatus.mockReset();
 
     mockJson.mockReset();
     mockNext.mockReset();
     mockSendEmail.mockReset();
+    mockSendEmail.mockResolvedValue({});
   });
 
-  it('returns a 400 if a single required field is missing', () => {
+  it('returns a 503 if the service is not configured', async () => {
+    const handler = contactUsHandler(null);
+    const mockReq = {
+      body: {
+        firstName: 'Samwise',
+        lastName: 'Gamgee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      },
+    } as Request;
+
+    await handler(mockReq, mockRes, mockNext);
+
+    expect(mockStatus).toHaveBeenCalledWith(503);
+    expect(mockJson).toHaveBeenCalledWith({ error: 'service not enabled' });
+  });
+
+  it('returns a 400 if a single required field is missing', async () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
@@ -37,7 +58,7 @@ describe('contactUsHandler', () => {
       }
     } as Request;
 
-    handler(mockReq, mockRes, mockNext);
+    await handler(mockReq, mockRes, mockNext);
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
@@ -46,7 +67,7 @@ describe('contactUsHandler', () => {
     });
   });
 
-  it('returns a 400 if multiple required fields are missing', () => {
+  it('returns a 400 if multiple required fields are missing', async () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
@@ -55,7 +76,7 @@ describe('contactUsHandler', () => {
       }
     } as Request;
 
-    handler(mockReq, mockRes, mockNext);
+    await handler(mockReq, mockRes, mockNext);
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
@@ -64,9 +85,7 @@ describe('contactUsHandler', () => {
     });
   });
 
-  it('calls to send an email', () => {
-    process.env.SUPPORT_EMAIL = 'gandalf@istari.net';
-
+  it('responds with a 200 when the request is okay', async () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
@@ -78,25 +97,47 @@ describe('contactUsHandler', () => {
         apis: {
           benefits: true,
           facilities: true,
-          health: false,
+        },
+      }
+    } as Request;
+
+    await handler(mockReq, mockRes, mockNext);
+
+    expect(mockSendEmail).toHaveBeenCalledWith({
+      firstName: mockReq.body.firstName,
+      lastName: mockReq.body.lastName,
+      requester: mockReq.body.email,
+      description: mockReq.body.description,
+      organization: mockReq.body.organization,
+      apis: ['benefits', 'facilities'],
+    });
+
+    expect(mockSendStatus).toHaveBeenCalledWith(200);
+  });
+
+  it('only sends apis in need of support', async () => {
+    const handler = contactUsHandler(mockGovDelivery);
+    const mockReq = {
+      body: {
+        firstName: 'Samwise',
+        lastName: 'Gamgee',
+        email: 'samwise@thefellowship.org',
+        organization: 'The Fellowship of the Ring',
+        description: 'Need help getting to Mt. Doom',
+        apis: {
+          benefits: false,
+          facilities: true,
+          health: true,
           vaForms: false,
           verification: false,
         },
       }
     } as Request;
 
-    handler(mockReq, mockRes, mockNext);
+    await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendEmail).toHaveBeenCalledWith(
-      mockReq.body.firstName,
-      mockReq.body.lastName,
-      mockReq.body.email,
-      mockReq.body.organization,
-      mockReq.body.apis,
-      mockReq.body.description,
-      'Support Needed',
-      'gandalf@istari.net',
-    );
-    expect(mockJson).toHaveBeenCalledWith({ id: 'abc123' });
+    expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      apis: ['facilities', 'health'],
+    }));
   });
 });
