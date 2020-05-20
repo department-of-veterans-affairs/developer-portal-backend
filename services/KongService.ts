@@ -14,6 +14,36 @@ interface ACLRequest {
 
 type KongRequest = ConsumerRequest | ACLRequest;
 
+export interface KongConsumerResponse {
+  id: string;
+  created_at: number;
+  username: string;
+  custom_id: string;
+  tags: string[] | null;
+}
+
+export interface KongAcl {
+  group: string;
+  created_at: number;
+  id: string;
+  consumer: {
+    id: string;
+  };
+}
+export interface KongAclsResponse {
+  total: number;
+  data: KongAcl[];
+}
+
+export interface KongKeyResponse {
+  key: string;
+  created_at: number;
+  consumer: {
+    id: string;
+  };
+  id: string;
+}
+
 export default class KongService {
   public apiKey: string;
   public host: string;
@@ -28,47 +58,44 @@ export default class KongService {
     this.protocol = protocol;
   }
 
-  public async createConsumer(user: KongUser) {
+  public async createConsumer(user: KongUser): Promise<KongConsumerResponse> {
     try {
-      const kongUser = await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}`));
+      const kongUser: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}`));
       if (kongUser) {
         return kongUser;
       }
     } catch (err) {
       logger.debug({ message: 'no existing consumer, creating new one' });
     }
-    return await request.post(this.requestOptions(this.kongPath, { username: user.consumerName() }));
+    return request.post(this.requestOptions(this.kongPath, { username: user.consumerName() }));
   }
 
-  public async createACLs(user: KongUser) {
-    const groups = (await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`)))
-      .data.map(({ group }) => group);
+  public async createACLs(user: KongUser): Promise<KongAclsResponse> {
+    const res: KongAclsResponse = await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`));
+    const existingGroups = res.data.map(({ group }) => group);
+
+    const groupsToAdd = user.apiList.reduce((toAdd: string[], api: string) => {
+      const validGroup = apisToAcls[api];
+      if (validGroup && (!existingGroups.includes(validGroup))) {
+        toAdd.push(validGroup);
+      }
+      return toAdd;
+    }, []);
+
+    const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) => (
+      request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`, { group }))
+    ));
+
+    const results: KongAcl[] = await Promise.all(addCalls);
     
-    /* 
-    Temporarily ignore this linting error. The async/await reduce is probably incorrect JS,
-    but it's been running for a long time. Would like to address after the large reorg
-    settles.
-    */
-
-    // eslint-disable-next-line @typescript-eslint/await-thenable
-    return await user.apiList
-      .reduce((toBeWrittenApis: string[], api: string) => {
-        const group = apisToAcls[api];
-        if (  group && (groups.indexOf(group) === -1)) {
-          toBeWrittenApis.push(api);
-        }
-        return toBeWrittenApis;
-      }, [])
-      .reduce(async (responses, api) => {
-        const group = apisToAcls[api];
-        const response = await request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`, { group }));
-        responses[api] = response;
-        return responses;
-      }, {});
+    return {
+      total: results.length,
+      data: results,
+    };
   }
 
-  public async createKeyAuth(user: KongUser) {
-    return await request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/key-auth`));
+  public createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
+    return request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/key-auth`));
   }
 
   private requestOptions(path: string, body?: KongRequest): request.Options {
