@@ -1,18 +1,27 @@
 import 'jest';
-import GovDeliveryService from './GovDeliveryService';
+import axios, { AxiosInstance } from 'axios';
+import GovDeliveryService, { SupportEmail } from './GovDeliveryService';
 import User from '../models/User';
-import request from 'request-promise-native';
 
 describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
   let event;
   let user: User;
-  let mockPost: jest.SpyInstance;
+
+  const mockPost = jest.fn();
+  mockPost.mockResolvedValue({
+    status: 200,
+    statusText: 'ok',
+    headers: {},
+    data: {},
+  });
+  jest.spyOn(axios, 'create').mockReturnValue({ post: mockPost } as unknown as AxiosInstance);
 
   beforeEach(() => {
     client = new GovDeliveryService({
       token: 'fakeKey',
-      host: 'tms.govdelivery.com',
+      host: 'tms.shiredelivery.com',
+      supportEmailRecipient: 'gandalf@istari.net'
     });
     event = {
       apis: 'facilities,benefits',
@@ -26,8 +35,7 @@ describe('GovDeliveryService', () => {
     user = new User(event);
     user.token = 'fakeKey';
 
-    mockPost = jest.spyOn(request, 'post').mockResolvedValue({});
-    mockPost.mockReset();
+    mockPost.mockClear();
   });
 
   describe('constructor', () => {
@@ -78,18 +86,11 @@ describe('GovDeliveryService', () => {
   describe('sendWelcomeEmail', () => {
     it('should send a request', async () => {
       await client.sendWelcomeEmail(user);
-      expect(mockPost).toHaveBeenCalledWith({
-        url: 'https://tms.govdelivery.com/messages/email',
-        body: expect.objectContaining({
-          recipients: expect.arrayContaining([expect.objectContaining({
-            email: 'ed@adhocteam.us'
-          })]),
-          subject: 'Welcome to the VA API Platform',
-          body: expect.stringContaining('VA Facilities API and Benefits Intake API'),
-        }),
-        json: true,
-        headers: { 'X-AUTH-TOKEN': 'fakeKey' }
-      });
+      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
+        recipients: [{ email: 'ed@adhocteam.us' }],
+        subject: 'Welcome to the VA API Platform',
+        body: expect.stringContaining('VA Facilities API and Benefits Intake API'),
+      }));
     });
 
     it('should raise error if user lacks token and client_id', async () => {
@@ -103,6 +104,27 @@ describe('GovDeliveryService', () => {
       } catch (err) {
         expect(err.message).toEqual('User must have token or client_id initialized');
       }
+    });
+  });
+
+  describe('sendSupportEmail', () => {
+    it('should send a request', async () => {
+      const email: SupportEmail = {
+        firstName: 'Peregrin',
+        lastName: 'Took',
+        requester: 'peregrin@thefellowship.org',
+        description: 'Need more supplies for second breakfast',
+        organization: 'The Fellowship of the Ring',
+        apis: ['facilities', 'benefits'],
+      };
+
+      await client.sendSupportEmail(email);
+      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
+        recipients: [{ email: 'gandalf@istari.net' }],
+        from_name: 'Peregrin Took',
+        subject: 'Support Needed',
+        body: expect.stringContaining('peregrin@thefellowship.org'),
+      }));
     });
   });
 });

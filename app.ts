@@ -11,6 +11,7 @@ import { KongConfig } from './types';
 
 import SlackService from './services/SlackService';
 import developerApplicationHandler from './routes/DeveloperApplication';
+import contactUsHandler from './routes/ContactUs';
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -23,13 +24,14 @@ function loggingMiddleware(tokens, req, res): string {
 }
 
 const configureGovDeliveryService = (): GovDeliveryService | undefined => {
-  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST } = process.env;
+  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
   let client;
 
   if (GOVDELIVERY_KEY && GOVDELIVERY_HOST) {
     client = new GovDeliveryService({
       host: GOVDELIVERY_HOST,
       token: GOVDELIVERY_KEY,
+      supportEmailRecipient: SUPPORT_EMAIL || 'api@va.gov',
     });
   }
 
@@ -138,10 +140,9 @@ export default function configureApp(): express.Application {
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
 
-  app.post(
-    '/developer_application',
-    developerApplicationHandler(kong, okta, dynamo, govdelivery, slack)
-  );
+  app.post('/developer_application', developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
+
+  app.post('/contact-us', contactUsHandler(govdelivery));
 
   app.use(Sentry.Handlers.errorHandler());
 

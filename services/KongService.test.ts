@@ -7,8 +7,8 @@ describe("KongService", () => {
   let client: KongService;
   let event;
   let user: User;
-  let getMock: jest.SpyInstance;
-  let postMock: jest.SpyInstance;
+  const getMock = jest.spyOn(request, 'get').mockResolvedValue({});
+  const postMock = jest.spyOn(request, 'post').mockResolvedValue({});
 
   beforeEach(() => {
     client = new KongService({
@@ -29,13 +29,8 @@ describe("KongService", () => {
 
     user = new User(event);
 
-    getMock = jest.spyOn(request, 'get').mockResolvedValue({});
-    postMock = jest.spyOn(request, 'post').mockResolvedValue({});
-
-    // mockReset leaves the mocked implementation, but clears information about
-    // the previous runs.
-    getMock.mockReset();
-    postMock.mockReset();
+    getMock.mockClear();
+    postMock.mockClear();
   });
 
   describe('constructor', () => {
@@ -72,7 +67,7 @@ describe("KongService", () => {
 
   describe('createACLs', () => {
     it('should add groups', async () => {
-      getMock.mockImplementation(() => Promise.resolve({data: []}));
+      getMock.mockResolvedValue({data: []});
 
       const result = await client.createACLs(user);
       
@@ -92,7 +87,7 @@ describe("KongService", () => {
     });
 
     it('should not add groups a consumer already belongs to', async () => {
-      getMock.mockImplementation(() => Promise.resolve({data: [{ group: 'vba_documents' }]}));
+      getMock.mockResolvedValue({data: [{ group: 'vba_documents' }]});
 
       const result = await client.createACLs(user);
       

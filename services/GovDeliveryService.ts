@@ -1,8 +1,8 @@
 import * as Handlebars from 'handlebars';
-import request from 'request-promise-native';
-import { format } from 'url';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { apisToProperNames } from '../config';
-import { GovDeliveryUser, Protocol } from '../types';
+import { GovDeliveryUser } from '../types';
+import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
 
 interface EmailRecipient {
   email: string;
@@ -23,6 +23,15 @@ interface WelcomeEmail {
   oauth: boolean;
   clientID?: string;
   clientSecret?: string;
+}
+
+export interface SupportEmail {
+  firstName: string;
+  lastName: string;
+  requester: string;
+  description: string;
+  organization?: string;
+  apis?: string[];
 }
 
 interface EmailResponse {
@@ -61,57 +70,30 @@ interface EmailResponse {
   };
 }
 
-const EMAIL_SUBJECT = 'Welcome to the VA API Platform';
-const EMAIL_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
-
-<div>Thank you for your interest in our {{ apis }}. We are excited to partner with you to improve the lives of veterans.</div><br />
-
-{{# if token_issued}}
-<div>Here's your key for accessing the development environment: <pre>{{ key }}</pre></div><br />
-
-<div>You can use your key by including it as an HTTP request header <pre>apiKey: {{ key }}</pre> in your requests to the API. You can find additional documentation at <a href="https://developer.va.gov">developer.va.gov</a></div><br />
-{{/if}}
-
-{{#if oauth }}
-<div>Here's your OAuth Client ID: <pre>{{ clientID }}</pre></div><br />
-
-{{#if clientSecret}}
-<div>Here's your OAuth Client Secret: <pre>{{ clientSecret }}</pre></div><br />
-{{/if}}
-
-<div>Please visit our OAuth documentation for implementation guidelines: <a href="https://developer.va.gov/oauth">developer.va.gov/oauth</a></div><br />
-{{/if}}
-
-<div>If you find a bug or would like to make a feature request, please open an issue through our Support page. We are continually working to improve our process and welcome <a href="https://developer.va.gov/support">feedback along your journey</a>.</div><br />
-
-<div>When you're ready to move to a production environment, please follow the steps outlined on our <a href="https://developer.va.gov/go-live">Path to Production</a> page.</div><br />
-
-<div>Thank you again,</div>
-<div>VA API Platform Team</div> <br />
-<div><strong>Read VA API Docs at: </strong><a href="https://developer.va.gov">developer.va.gov</a></div>
-<div><strong>Get support: </strong><a href="https://github.com/department-of-veterans-affairs/vets-api-clients/issues/new/choose">Create Github Issue</a></div>
-<div><strong>Email us at: </strong><a href="mailto:api@va.gov">api@va.gov</a></div>
-`;
-
 export default class GovDeliveryService {
-  public authToken: string;
-  public protocol: Protocol = 'https';
   public host: string;
+  public supportEmailRecipient: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
+  public supportTemplate: Handlebars.TemplateDelegate<SupportEmail>;
+  public client: AxiosInstance;
 
-  constructor({ token, host }) {
-    this.authToken = token;
+  constructor({ token, host, supportEmailRecipient }) {
     this.host = host;
-    this.welcomeTemplate = Handlebars.compile(EMAIL_TEMPLATE);
+    this.supportEmailRecipient = supportEmailRecipient;
+    this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
+    this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
+    this.client = axios.create({
+      baseURL: `https://${this.host}`,
+      headers: { 'X-AUTH-TOKEN': token }
+    });
   }
 
   public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
     if (user.token || (user.oauthApplication && user.oauthApplication.client_id)) {
-      const template = this.welcomeTemplate;
       const email: EmailRequest = {
-        subject: EMAIL_SUBJECT,
+        subject: 'Welcome to the VA API Platform',
         from_name: 'VA API Platform team',
-        body: template({
+        body: this.welcomeTemplate({
           apis: this.listApis(user),
           clientID: user.oauthApplication ? user.oauthApplication.client_id : '',
           clientSecret: user.oauthApplication ? user.oauthApplication.client_secret : '',
@@ -124,10 +106,27 @@ export default class GovDeliveryService {
           email: user.email,
         }],
       };
-      return request.post(this.requestOptions('/messages/email', email));
+
+      return this.sendEmail(email);
     } 
     
     throw Error('User must have token or client_id initialized');
+  }
+  
+  public sendSupportEmail(supportRequest: SupportEmail): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      subject: 'Support Needed',
+      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
+      body: this.supportTemplate(supportRequest),
+      recipients: [ { email: this.supportEmailRecipient }]
+    };
+
+    return this.sendEmail(email);
+  }
+
+  private async sendEmail(email: EmailRequest): Promise<EmailResponse> {
+    const res: AxiosResponse<EmailResponse> = await this.client.post('/messages/email', email);
+    return res.data;
   }
 
   private listApis(user: GovDeliveryUser): string {
@@ -143,17 +142,5 @@ export default class GovDeliveryService {
       }
       return `${apiList}, ${properName}`;
     }, '');
-  }
-
-  private requestOptions(path: string, body: EmailRequest): request.Options {
-    const url = format({
-      protocol: this.protocol,
-      hostname: this.host,
-      pathname: path,
-    });
-    const headers = {
-      'X-AUTH-TOKEN': this.authToken,
-    };
-    return { body, url, headers, json: true };
   }
 }
