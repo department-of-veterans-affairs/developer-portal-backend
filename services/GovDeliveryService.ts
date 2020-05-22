@@ -72,14 +72,14 @@ interface EmailResponse {
 
 export default class GovDeliveryService {
   public host: string;
-  public supportEmail: string;
+  public supportEmailRecipient: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
   public supportTemplate: Handlebars.TemplateDelegate<SupportEmail>;
   public client: AxiosInstance;
 
-  constructor({ token, host, supportEmail }) {
+  constructor({ token, host, supportEmailRecipient }) {
     this.host = host;
-    this.supportEmail = supportEmail;
+    this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
     this.client = axios.create({
@@ -90,11 +90,10 @@ export default class GovDeliveryService {
 
   public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
     if (user.token || (user.oauthApplication && user.oauthApplication.client_id)) {
-      const template = this.welcomeTemplate;
       const email: EmailRequest = {
         subject: 'Welcome to the VA API Platform',
         from_name: 'VA API Platform team',
-        body: template({
+        body: this.welcomeTemplate({
           apis: this.listApis(user),
           clientID: user.oauthApplication ? user.oauthApplication.client_id : '',
           clientSecret: user.oauthApplication ? user.oauthApplication.client_secret : '',
@@ -119,7 +118,7 @@ export default class GovDeliveryService {
       subject: 'Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
       body: this.supportTemplate(supportRequest),
-      recipients: [ { email: this.supportEmail }]
+      recipients: [ { email: this.supportEmailRecipient }]
     };
 
     return this.sendEmail(email);

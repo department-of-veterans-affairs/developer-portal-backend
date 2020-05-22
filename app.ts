@@ -31,7 +31,7 @@ const configureGovDeliveryService = (): GovDeliveryService | undefined => {
     client = new GovDeliveryService({
       host: GOVDELIVERY_HOST,
       token: GOVDELIVERY_KEY,
-      supportEmail: SUPPORT_EMAIL || 'api@va.gov',
+      supportEmailRecipient: SUPPORT_EMAIL || 'api@va.gov',
     });
   }
 

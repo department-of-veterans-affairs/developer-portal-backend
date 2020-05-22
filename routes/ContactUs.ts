@@ -26,10 +26,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService | undef
 
     if (missingFields.length > 0) {
       res.status(400).json({
-        body: `Missing Required Parameter(s): ${missingFields.join(',')}`,
-        // Odd to list status code again, but required to honor the contract with 
-        // the frontend that came from when this was a lambda.
-        statusCode: 400,
+        error: `Missing Required Parameter(s): ${missingFields.join(',')}`,
       });
       return;
     }

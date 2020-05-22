@@ -7,14 +7,21 @@ describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
   let event;
   let user: User;
+
   const mockPost = jest.fn();
+  mockPost.mockResolvedValue({
+    status: 200,
+    statusText: 'ok',
+    headers: {},
+    data: {},
+  });
   jest.spyOn(axios, 'create').mockReturnValue({ post: mockPost } as unknown as AxiosInstance);
 
   beforeEach(() => {
     client = new GovDeliveryService({
       token: 'fakeKey',
       host: 'tms.shiredelivery.com',
-      supportEmail: 'gandalf@istari.net'
+      supportEmailRecipient: 'gandalf@istari.net'
     });
     event = {
       apis: 'facilities,benefits',
@@ -28,13 +35,7 @@ describe('GovDeliveryService', () => {
     user = new User(event);
     user.token = 'fakeKey';
 
-    mockPost.mockReset();
-    mockPost.mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      data: {},
-    });
+    mockPost.mockClear();
   });
 
   describe('constructor', () => {

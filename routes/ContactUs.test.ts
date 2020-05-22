@@ -2,33 +2,32 @@ import { Request, Response } from 'express';
 import contactUsHandler from './ContactUs';
 import GovDeliveryService from '../services/GovDeliveryService';
 
-const mockStatus = jest.fn();
-const mockJson = jest.fn();
-const mockSendEmail = jest.fn();
-const mockSendStatus = jest.fn();
-const mockGovDelivery = { sendSupportEmail: mockSendEmail } as unknown as GovDeliveryService;
-
-const mockRes: Response = {
-  status: mockStatus,
-  json: mockJson,
-  sendStatus: mockSendStatus,
-} as unknown as Response;
-
-const mockNext = jest.fn();
-
 describe('contactUsHandler', () => {
-  beforeEach(() => {
-    // It's important for the mockReturnValue to be set after the mockReset.
-    // the call to status needs to return the response object again for json
-    // to be called properly.
-    mockStatus.mockReset();
-    mockStatus.mockReturnValue(mockRes);
-    mockSendStatus.mockReset();
+  const mockSendEmail = jest.fn();
+  const mockSendStatus = jest.fn();
+  const mockGovDelivery = { sendSupportEmail: mockSendEmail } as unknown as GovDeliveryService;
+  mockSendEmail.mockResolvedValue({});
 
-    mockJson.mockReset();
-    mockNext.mockReset();
-    mockSendEmail.mockReset();
-    mockSendEmail.mockResolvedValue({});
+
+  const mockStatus = jest.fn();
+  const mockJson = jest.fn();
+  const mockNext = jest.fn();
+  const mockRes: Response = {
+    status: mockStatus,
+    json: mockJson,
+    sendStatus: mockSendStatus,
+  } as unknown as Response;
+  
+  // The call to status needs to return the response object again for json
+  // to be called properly.
+  mockStatus.mockReturnValue(mockRes);  
+
+  beforeEach(() => {
+    mockStatus.mockClear();
+    mockSendStatus.mockClear();
+    mockJson.mockClear();
+    mockNext.mockClear();
+    mockSendEmail.mockClear();
   });
 
   it('returns a 503 if the service is not configured', async () => {
@@ -62,8 +61,7 @@ describe('contactUsHandler', () => {
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
-      body: `Missing Required Parameter(s): firstName`,
-      statusCode: 400,
+      error: `Missing Required Parameter(s): firstName`,
     });
   });
 
@@ -80,8 +78,7 @@ describe('contactUsHandler', () => {
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
-      body: `Missing Required Parameter(s): firstName,email`,
-      statusCode: 400,
+      error: `Missing Required Parameter(s): firstName,email`,
     });
   });
 
