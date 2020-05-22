@@ -137,4 +137,25 @@ describe('contactUsHandler', () => {
       apis: ['facilities', 'health'],
     }));
   });
+
+  it('gracefully handles no apis or organization being provided', async () => {
+    const handler = contactUsHandler(mockGovDelivery);
+    const mockReq = {
+      body: {
+        firstName: 'Samwise',
+        lastName: 'Gamgee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      }
+    } as Request;
+
+    await handler(mockReq, mockRes, mockNext);
+
+    expect(mockSendEmail).toHaveBeenCalledWith({
+      firstName: mockReq.body.firstName,
+      lastName: mockReq.body.lastName,
+      requester: mockReq.body.email,
+      description: mockReq.body.description,
+    });
+  });
 });

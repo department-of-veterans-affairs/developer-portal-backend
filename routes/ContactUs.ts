@@ -9,9 +9,13 @@ function checkRequiredFields(submittedFields: string[]): string[] {
   });
 }
 
-function filterRelevantApis(apis: { [api: string]: boolean }): string[] {
-  const allApis = Object.keys(apis);
-  return allApis.filter(api => apis[api]);
+function filterRelevantApis(apis: { [api: string]: boolean } | undefined): string[] | undefined {
+  if (apis) {
+    const allApis = Object.keys(apis);
+    return allApis.filter(api => apis[api]);
+  }
+
+  return apis;
 }
 
 export default function contactUsHandler(govDelivery: GovDeliveryService | undefined) {
