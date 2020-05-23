@@ -1,5 +1,5 @@
 import 'jest';
-import { Application } from './Application';
+import Application from './Application';
 
 describe('User', () => {
     let applicationSettings;
