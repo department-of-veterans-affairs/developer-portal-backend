@@ -6,7 +6,7 @@ import User from './User';
 import KongService from '../services/KongService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import OktaService from '../services/OktaService';
-import Application  from './Application';
+import Application from './Application';
 import SlackService from '../services/SlackService';
 
 const mockCreateOktaApplication = jest.fn();
@@ -132,26 +132,43 @@ describe('User', () => {
   });
 
   describe('saveToDynamo', () => {
-    it('uses dynamo put to save items', async () => {
-      const client = new DynamoDB.DocumentClient();
-      const mockPut = jest.spyOn(client, 'put');
+    const mockPut = jest.fn();
+    const dynamoClient = { put: mockPut } as unknown as DynamoDB.DocumentClient;
+    let form: FormSubmission;
+
+    beforeEach(() => {
+      mockPut.mockClear();
       mockPut.mockImplementation((params, cb) => {
         cb(null, params);
       });
 
-      const userResult = await user.saveToDynamo(client);
+      form = {
+        apis: 'benefits',
+        description: 'Getting benefits for the Rohirrim',
+        email: 'eomer@rohirrim.rohan.horse',
+        firstName: 'Eomer',
+        lastName: 'King',
+        organization: 'The Rohirrim',
+        oAuthRedirectURI: '',
+        oAuthApplicationType: '',
+        termsOfService: true,
+      };
+    });
+
+    it('uses dynamo put to save items', async () => {
+      const userResult = await user.saveToDynamo(dynamoClient);
+
       expect(userResult).toEqual(user);
     });
 
     it('returns an error if save fails', async () => {
-      const client = new DynamoDB.DocumentClient();
       const error = new Error('error');
-
-      client.put = jest.fn((params, cb) => {
+      mockPut.mockImplementation((params, cb) => {
         cb(error, params);
       });
+
       try {
-        await user.saveToDynamo(client);
+        await user.saveToDynamo(dynamoClient);
       } catch (err) {
         expect(err).toEqual(error);
       }
@@ -159,25 +176,35 @@ describe('User', () => {
 
     // The DynamoDB API breaks if empty strings are passed in
     it('converts empty strings in user model to nulls', async () => {
-      const client = new DynamoDB.DocumentClient();
-      client.put = jest.fn((params, cb) => { cb(null, params); });
+      const user = new User(form);
+      await user.saveToDynamo(dynamoClient);
 
-      const form: FormSubmission = {
-        apis: 'benefits,verification',
-        description: 'Mayhem',
-        email: 'ed@adhocteam.us',
-        firstName: 'Edward',
-        lastName: 'Paget',
-        organization: 'Ad Hoc',
-        oAuthRedirectURI: '',
-        oAuthApplicationType: '',
-        termsOfService: true,
-      };
+      expect(mockPut.mock.calls[0][0]['Item']['oAuthRedirectURI']).toEqual(null);
+    });
 
-      user = new User(form);
-      await user.saveToDynamo(client);
+    it('saves client ids and secrets if they exist', async () => {
+      const user = new User(form);
+      user.oauthApplication = {
+        oktaID: 'abc123',
+        client_id: 'xyz456',
+      } as unknown as Application;
 
-      expect(client.put.mock.calls[0][0]['Item']['oAuthRedirectURI']).toEqual(null);
+      await user.saveToDynamo(dynamoClient);
+
+      expect(mockPut.mock.calls[0][0]['Item']).toEqual(expect.objectContaining({
+        okta_application_id: 'abc123',
+        okta_client_id: 'xyz456',
+      }));
+    });
+
+    it('avoids saving okta ids if they do not exist', async () => {
+      const user = new User(form);
+
+      await user.saveToDynamo(dynamoClient);
+
+      const calledParams = Object.keys(mockPut.mock.calls[0][0]['Item']);
+      expect(calledParams).not.toContain('okta_application_id');
+      expect(calledParams).not.toContain('okta_client_id');
     });
   });
 
@@ -280,5 +307,4 @@ Requested access to:
       expect(mockSendSuccessMessage).toHaveBeenCalledWith(expectedSlackString, 'New User Application');
     });
   });
-
 });
