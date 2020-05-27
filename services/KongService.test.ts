@@ -4,14 +4,14 @@ import User from '../models/User';
 import request from 'request-promise-native';
 
 describe("KongService", () => {
-  let client: KongService;
+  let service: KongService;
   let event;
   let user: User;
   const getMock = jest.spyOn(request, 'get').mockResolvedValue({});
   const postMock = jest.spyOn(request, 'post').mockResolvedValue({});
 
   beforeEach(() => {
-    client = new KongService({
+    service = new KongService({
       apiKey: 'fakeKey',
       host: 'fakeHost',
       port: 8000
@@ -35,7 +35,7 @@ describe("KongService", () => {
 
   describe('constructor', () => {
     it('should set defaults', () => {
-      expect(client.protocol).toEqual('https');
+      expect(service.protocol).toEqual('https');
     });
   });
 
@@ -44,7 +44,7 @@ describe("KongService", () => {
       getMock.mockRejectedValue({});
       postMock.mockResolvedValue({ username: 'AdHocPaget' });
 
-      const result = await client.createConsumer(user);
+      const result = await service.createConsumer(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers",
@@ -58,7 +58,7 @@ describe("KongService", () => {
     it('should not create a new consumer when one already exists', async () => {
       getMock.mockResolvedValue({ username: 'AdHocPaget' });
 
-      const result = await client.createConsumer(user);
+      const result = await service.createConsumer(user);
 
       expect(postMock).not.toHaveBeenCalled();
       expect(result.username).toEqual('AdHocPaget');
@@ -69,7 +69,7 @@ describe("KongService", () => {
     it('should add groups', async () => {
       getMock.mockResolvedValue({data: []});
 
-      const result = await client.createACLs(user);
+      const result = await service.createACLs(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
@@ -89,7 +89,7 @@ describe("KongService", () => {
     it('should not add groups a consumer already belongs to', async () => {
       getMock.mockResolvedValue({data: [{ group: 'vba_documents' }]});
 
-      const result = await client.createACLs(user);
+      const result = await service.createACLs(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
@@ -111,7 +111,7 @@ describe("KongService", () => {
     it('should send a request', async () => {
       postMock.mockResolvedValue({ key: 'fakekey' });
 
-      const result = await client.createKeyAuth(user);
+      const result = await service.createKeyAuth(user);
 
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
