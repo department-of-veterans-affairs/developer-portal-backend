@@ -1,4 +1,4 @@
-import e, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { DynamoDB } from 'aws-sdk';
 import logger from '../config/logger';
 import KongService from '../services/KongService';
@@ -14,9 +14,18 @@ export default function healthCheckHandler(kong: KongService,
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     let failed = false;
 
-    if (failed) {
-      res.status(503).json({ health_check_status: 'lackluster' });
-    } else {
+    try {
+      const kongSuccess = await kong.healthCheck();
+      if (!kongSuccess) {
+        throw new Error('Kong found no users');
+      }
+    } catch(err) {
+      failed = true;
+      err.action = 'checking Kong';
+      next(err);
+    }
+
+    if (!failed) {
       res.status(200).json({ health_check_status: 'vibrant' });
     }
   };

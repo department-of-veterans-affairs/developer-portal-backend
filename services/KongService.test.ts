@@ -121,4 +121,36 @@ describe("KongService", () => {
       expect(result.key).toEqual('fakekey');
     });
   });
+
+  describe('healthCheck', () => {
+    it('should send a request', async () => {
+      await service.healthCheck();
+      expect(getMock).toHaveBeenCalledWith({
+        url: "https://fakeHost:8000/internal/admin/consumers",
+        json: true,
+        headers: { apiKey: 'fakeKey' }
+      });
+    });
+
+    it('should return false when it does not receive a data array', async () => {
+      getMock.mockResolvedValue({});
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toBe(false);
+    });
+
+    it('should return false when it receives an empty data array', async () => {
+      getMock.mockResolvedValue({data: []});
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toBe(false);
+    });
+
+    it('should return true when it receives a data array with elements', async () => {
+      getMock.mockResolvedValue({data: [{}]});
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toBe(true);
+    });
+  });
 });
