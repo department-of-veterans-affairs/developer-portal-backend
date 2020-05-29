@@ -2,12 +2,12 @@ import { DynamoDB } from 'aws-sdk';
 import pick from 'lodash.pick';
 import process from 'process';
 import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
-import { Application } from './Application';
+import Application from './Application';
 import logger from '../config/logger';
 import OktaService from '../services/OktaService';
-import SlackService from '../services/SlackService';
+import SlackService, { SlackChatResponse } from '../services/SlackService';
 import KongService from '../services/KongService';
-import GovDeliveryService from '../services/GovDeliveryService';
+import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
@@ -39,7 +39,7 @@ export default class User implements KongUser, GovDeliveryUser {
     oAuthApplicationType,
     termsOfService,
   }) {
-    this.createdAt = new Date();
+    this.createdAt = new Date(Date.now());
     this.firstName = firstName;
     this.lastName = lastName;
     this.organization = organization;
@@ -55,7 +55,7 @@ export default class User implements KongUser, GovDeliveryUser {
     return `${this.organization}${this.lastName}`.replace(/\W/g, '');
   }
 
-  public toSlackString(): string {
+  private toSlackString(): string {
     const intro = `${this.lastName}, ${this.firstName}: ${this.email}\nDescription: ${this.description}\nRequested access to:\n`;
     return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro);
   }
@@ -64,7 +64,7 @@ export default class User implements KongUser, GovDeliveryUser {
     return this._apiList;
   }
 
-  public async saveToKong(client: KongService) {
+  public async saveToKong(client: KongService): Promise<User> {
     try {
       const consumer = await client.createConsumer(this);
       this.kongConsumerId = consumer.id;
@@ -72,42 +72,30 @@ export default class User implements KongUser, GovDeliveryUser {
       const keyAuth = await client.createKeyAuth(this);
       this.token = keyAuth.key;
       return this;
-    } catch (error) {
-      error.action = 'failed creating kong consumer';
-      throw error;
+    } catch (err) {
+      err.action = 'failed creating kong consumer';
+      throw err;
     }
   }
 
-  public async sendEmail(client: GovDeliveryService) {
+  public sendEmail(client: GovDeliveryService): Promise<EmailResponse> {
     try {
-      return await client.sendWelcomeEmail(this);
-    } catch (error) {
-      error.action = 'failed sending welcome email';
-      throw error;
+      return client.sendWelcomeEmail(this);
+    } catch (err) {
+      err.action = 'failed sending welcome email';
+      throw err;
     }
   }
 
-  public async sendSlackSuccess(client: SlackService) {
+  public sendSlackSuccess(client: SlackService): Promise<SlackChatResponse> {
     try {
-      return await client.sendSuccessMessage(
+      return client.sendSuccessMessage(
         this.toSlackString(),
         'New User Application',
       );
-    } catch (error) {
-      error.action = 'failed sending slack success';
-      throw error;
-    }
-  }
-
-  public async sendSlackFailure(client: SlackService) {
-    try {
-      return await client.sendFailureMessage(
-        this.toSlackString(),
-        'User signup failed',
-      );
-    } catch (error) {
-      error.action = 'failed sending slack failure';
-      throw error;
+    } catch (err) {
+      err.action = 'failed sending slack success';
+      throw err;
     }
   }
 
@@ -144,7 +132,7 @@ export default class User implements KongUser, GovDeliveryUser {
         TableName: this.tableName,
       };
 
-      client.put(params, (err, data) => {
+      client.put(params, (err) => {
         if (err) {
           const dynamoErr = new Error(err.message);
           reject(dynamoErr);

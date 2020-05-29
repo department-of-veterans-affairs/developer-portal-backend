@@ -34,7 +34,7 @@ export interface SupportEmail {
   apis?: string[];
 }
 
-interface EmailResponse {
+export interface EmailResponse {
   from_name: string;
   from_email: string;
   reply_to: string;
