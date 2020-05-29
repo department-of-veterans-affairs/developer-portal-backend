@@ -1,4 +1,4 @@
-import OktaService from '../services/OktaService';
+import OktaService, { OktaApplicationResponse } from '../services/OktaService';
 import { ApplicationType,
          GrantTypes,
          OAuthApplication,
@@ -20,7 +20,7 @@ export interface ApplicationSettings {
   logoURI?: string;
 }
 
-export class Application implements OktaApplication {
+export default class Application implements OktaApplication {
   public owner?: OktaUser;
   public settings: OAuthApplication;
   public client_id?: string;
@@ -61,11 +61,11 @@ export class Application implements OktaApplication {
     }
   }
 
-  public toOktaApp() {
+  public toOktaApp(): OAuthApplication {
     return this.settings;
   }
 
-  public async createOktaApplication(client: OktaService) {
+  public async createOktaApplication(client: OktaService): Promise<OktaApplicationResponse> {
     try {
       const resp = await client.createApplication(this, IDME_GROUP_ID);
       const { client_id, client_secret } = resp.credentials.oauthClient;

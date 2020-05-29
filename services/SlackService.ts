@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
-interface SlackChatResponse {
+export interface SlackChatResponse {
   ok: boolean;
   channel: string;
   ts: string;
@@ -35,10 +35,6 @@ export default class SlackService {
 
   public sendSuccessMessage(message: string, title: string): Promise<SlackChatResponse> {
     return this.sendChatWithAttachment(message, 'good', title);
-  }
-
-  public sendFailureMessage(message: string, title: string): Promise<SlackChatResponse> {
-    return this.sendChatWithAttachment(message, 'danger', title);
   }
 
   private async sendChatWithAttachment(message: string, color: string, title: string): Promise<SlackChatResponse> {

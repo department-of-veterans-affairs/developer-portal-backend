@@ -7,6 +7,11 @@ module.exports = {
       tsConfig: 'tsconfig.test.json',
     }
   },
+  coverageThreshold: {
+    "**/*.ts": {
+      statements: 80,
+    },
+  },
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/'

@@ -42,34 +42,4 @@ describe('SlackService', () => {
       }]
     });
   });
-
-  it('sends a failure message', async () => {
-    const mockPost = jest.fn().mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      data: {
-        channel: 'channel123'
-      },
-    });
-    
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
-
-    const message = "Test, User: test@example.com\nRequested access to:\n* va_facilities\n* health\n";
-    const service = new SlackService('channel123', 'faketoken');
-
-    const res = await service.sendFailureMessage(message, 'User Signup Failed');
-
-    expect(res.channel).toEqual('channel123');
-    expect(mockPost).toHaveBeenCalledWith('/chat.postMessage', {
-      channel: 'channel123',
-      text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color: 'danger',
-        title: 'User Signup Failed',
-      }]
-    });
-  });
 });
