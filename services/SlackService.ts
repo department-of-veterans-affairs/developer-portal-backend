@@ -1,54 +1,53 @@
-import axios, { AxiosResponse, AxiosInstance } from 'axios';
+import axios, {AxiosInstance } from 'axios';
 
-export interface SlackChatResponse {
-  ok: boolean;
+/* 
+WebhookOptions override the defaults configured in the webhook
+in Slack. The username field is what the message will be posted as.
+The channel field is the name of a channel like #dev-signup-feed,
+including the hash.
+*/
+interface WebhookOptions {
   channel: string;
-  ts: string;
-  message: {
-    text: string;
-    username: string;
-    bot_id: string;
-    attachments: SlackAttachment[];
-    type: string;
-    subtype: string;
-    ts: string;
-  };
-}
-
-interface SlackAttachment {
-  text: string;
-  id: number;
-  fallback: string;
+  username: string;
+  icon_emoji?: string;
+  icon?: string;
 }
 
 export default class SlackService {
-  private channelID: string;
   private client: AxiosInstance;
+  private options: WebhookOptions;
 
-  constructor(channelID: string, token: string) {
-    this.channelID = channelID;
-    this.client = axios.create({
-      baseURL: 'https://slack.com/api',
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+  constructor(webhook: string, options: WebhookOptions) {
+    this.client = axios.create({ baseURL: webhook });
+    this.options = options;
   }
 
-  public sendSuccessMessage(message: string, title: string): Promise<SlackChatResponse> {
+  public sendSuccessMessage(message: string, title: string): Promise<string> {
     return this.sendChatWithAttachment(message, 'good', title);
   }
 
-  private async sendChatWithAttachment(message: string, color: string, title: string): Promise<SlackChatResponse> {
-    const res: AxiosResponse<SlackChatResponse> = await this.client.post('/chat.postMessage', {
-      channel: this.channelID,
-      text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color,
-        title,
-      }],
-    });
+  private async sendChatWithAttachment(message: string, color: string, title: string): Promise<string> {
+    try {
+      const res = await this.client.post('', {
+        ...this.options,
+        text: '',
+        attachments: [{
+          text: message,
+          fallback: message,
+          color,
+          title,
+        }],
+      });
 
-    return res.data;
+      return res.data;
+    }
+    catch (err) {
+      // Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
+      // We will want that information, so we're re-writing the message field of the error
+      // that axios throws on 400 and 500 responses, since our default error handling
+      // will accept and log that field.
+      err.message = `Status: ${err.response.status}, Data: ${err.response.data}, Original: ${err.message}`;
+      throw err;
+    }
   }
 }
