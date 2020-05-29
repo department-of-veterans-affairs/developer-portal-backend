@@ -40,7 +40,7 @@ describe("KongService", () => {
   });
 
   describe('createConsumer', () => {
-    it('should send a request when the consumer does not exist', async () => {
+    it('sends a request when the consumer does not exist', async () => {
       getMock.mockRejectedValue({});
       postMock.mockResolvedValue({ username: 'AdHocPaget' });
 
@@ -55,7 +55,7 @@ describe("KongService", () => {
       expect(result.username).toEqual('AdHocPaget');
     });
 
-    it('should not create a new consumer when one already exists', async () => {
+    it('does not create a new consumer when one already exists', async () => {
       getMock.mockResolvedValue({ username: 'AdHocPaget' });
 
       const result = await service.createConsumer(user);
@@ -66,7 +66,7 @@ describe("KongService", () => {
   });
 
   describe('createACLs', () => {
-    it('should add groups', async () => {
+    it('adds groups', async () => {
       getMock.mockResolvedValue({data: []});
 
       const result = await service.createACLs(user);
@@ -86,7 +86,7 @@ describe("KongService", () => {
       expect(result.total).toEqual(2);
     });
 
-    it('should not add groups a consumer already belongs to', async () => {
+    it('does not add groups a consumer already belongs to', async () => {
       getMock.mockResolvedValue({data: [{ group: 'vba_documents' }]});
 
       const result = await service.createACLs(user);
@@ -108,7 +108,7 @@ describe("KongService", () => {
   });
 
   describe('createKeyAuth', () => {
-    it('should send a request', async () => {
+    it('sends a request', async () => {
       postMock.mockResolvedValue({ key: 'fakekey' });
 
       const result = await service.createKeyAuth(user);
@@ -123,7 +123,7 @@ describe("KongService", () => {
   });
 
   describe('healthCheck', () => {
-    it('should send a request', async () => {
+    it('sends a request', async () => {
       await service.healthCheck();
       expect(getMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers",
@@ -132,21 +132,21 @@ describe("KongService", () => {
       });
     });
 
-    it('should return false when it does not receive a data array', async () => {
+    it('returns false when it does not receive a data array', async () => {
       getMock.mockResolvedValue({});
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toBe(false);
     });
 
-    it('should return false when it receives an empty data array', async () => {
+    it('returns false when it receives an empty data array', async () => {
       getMock.mockResolvedValue({data: []});
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toBe(false);
     });
 
-    it('should return true when it receives a data array with elements', async () => {
+    it('returns true when it receives a data array with elements', async () => {
       getMock.mockResolvedValue({data: [{}]});
 
       const healthCheck = await service.healthCheck();
