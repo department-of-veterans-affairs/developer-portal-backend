@@ -46,7 +46,9 @@ export default class SlackService {
       // We will want that information, so we're re-writing the message field of the error
       // that axios throws on 400 and 500 responses, since our default error handling
       // will accept and log that field.
-      err.message = `Status: ${err.response.status}, Data: ${err.response.data}, Original: ${err.message}`;
+      if (err.response) {
+        err.message = `Status: ${err.response.status}, Data: ${err.response.data}, Original: ${err.message}`;
+      }
       throw err;
     }
   }
