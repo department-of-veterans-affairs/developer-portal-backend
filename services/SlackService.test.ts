@@ -46,4 +46,29 @@ describe('SlackService', () => {
       }]
     });
   });
+
+  it('re-tags the error message if the error contains a response', async () => {
+    expect.assertions(1);
+
+    const mockPost = jest.fn().mockRejectedValue({
+      status: 400,
+      statusText: 'bad-request',
+      response: {
+        status: 400,
+        data: 'did it wrong',
+      }
+    });
+
+    // cast to unknown first to avoid having to reimplement all of AxiosInstance
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+
+    const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
+    const service = new SlackService(hookUrl, hookConfig);
+
+    try {
+      await service.sendSuccessMessage(message, 'New User Application');
+    } catch (err) {
+      expect(err.message).toEqual('Status: 400, Data: did it wrong, Original: undefined');
+    }
+  });
 });
