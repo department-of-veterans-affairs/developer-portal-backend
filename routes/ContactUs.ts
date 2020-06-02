@@ -9,15 +9,6 @@ function checkRequiredFields(submittedFields: string[]): string[] {
   });
 }
 
-function filterRelevantApis(apis: { [api: string]: boolean } | undefined): string[] | undefined {
-  if (apis) {
-    const allApis = Object.keys(apis);
-    return allApis.filter(api => apis[api]);
-  }
-
-  return apis;
-}
-
 export default function contactUsHandler(govDelivery: GovDeliveryService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!govDelivery) {
@@ -42,7 +33,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService | undef
         requester: req.body.email,
         description: req.body.description,
         organization: req.body.organization,
-        apis: filterRelevantApis(req.body.apis),
+        apis: req.body.apis,
       };
       
       await govDelivery.sendSupportEmail(supportRequest);
