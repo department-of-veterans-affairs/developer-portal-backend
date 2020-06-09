@@ -50,6 +50,7 @@ export default class KongService {
   public port: number;
   public protocol: Protocol;
   public kongPath = '/internal/admin/consumers';
+  private adminConsumerName = '_internal_DeveloperPortal';
 
   constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
     this.apiKey = apiKey;
@@ -98,11 +99,11 @@ export default class KongService {
     return request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/key-auth`));
   }
 
-  // Kong is considered healthy if the admin consumer is able to return a list of the consumers on the connected instance
+  // Kong is considered healthy if the admin consumer is able to query itself on the connected instance
   public async healthCheck(): Promise<boolean> {
     try {
-      const res = await request.get(this.requestOptions(`${this.kongPath}`));
-      return Array.isArray(res.data) && res.data.length > 0;
+      const res: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${this.adminConsumerName}`));
+      return res.username === this.adminConsumerName;
     } catch (err) {
       return false;
     }

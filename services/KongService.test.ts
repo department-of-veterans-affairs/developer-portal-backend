@@ -126,7 +126,7 @@ describe("KongService", () => {
     it('sends a request', async () => {
       await service.healthCheck();
       expect(getMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers",
+        url: "https://fakeHost:8000/internal/admin/consumers/_internal_DeveloperPortal",
         json: true,
         headers: { apiKey: 'fakeKey' }
       });
@@ -139,22 +139,22 @@ describe("KongService", () => {
       expect(healthCheck).toBe(false);
     });
 
-    it('returns false when it does not receive a data array', async () => {
-      getMock.mockResolvedValue({});
+    it('returns false when it does not receive a KongConsumerResponse', async () => {
+      getMock.mockResolvedValue({ message: 'Not found' });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toBe(false);
     });
 
-    it('returns false when it receives an empty data array', async () => {
-      getMock.mockResolvedValue({data: []});
+    it('returns false when it receives the wrong consumer', async () => {
+      getMock.mockResolvedValue({ username: 'wrong_user' });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toBe(false);
     });
 
-    it('returns true when it receives a data array with elements', async () => {
-      getMock.mockResolvedValue({data: [{}]});
+    it('returns true when it receives the right consumer', async () => {
+      getMock.mockResolvedValue({ username: '_internal_DeveloperPortal' });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toBe(true);
