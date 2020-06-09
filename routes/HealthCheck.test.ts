@@ -19,30 +19,32 @@ describe('healthCheckHandler', () => {
     mockJson.mockClear();
   });
 
-  it('checks on Kong', async () => {
-    const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
-    await handler(mockReq, mockRes, mockNext);
+  describe('checks Kong', () => {
+    it('calls Kong healthCheck', async () => {
+      const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
 
-    expect(mockKongHealthCheck).toHaveBeenCalled();
-  });
+      expect(mockKongHealthCheck).toHaveBeenCalled();
+    });
 
-  it('sends error to the default error handler if Kong throws an error', async () => {
-    const err = new Error('failed to connect to Kong');
-    mockKongHealthCheck.mockRejectedValue(err);
+    it('sends error to the default error handler if Kong throws an error', async () => {
+      const err = new Error('failed to connect to Kong');
+      mockKongHealthCheck.mockRejectedValue(err);
 
-    const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
-    await handler(mockReq, mockRes, mockNext);
+      const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
 
-    expect(mockNext).toHaveBeenCalledWith(err);
-  });
+      expect(mockNext).toHaveBeenCalledWith(err);
+    });
 
-  it('sends error to the default error handler if Kong fails to report back healthy', async () => {
-    mockKongHealthCheck.mockResolvedValue(false);
+    it('sends error to the default error handler if Kong fails to report back healthy', async () => {
+      mockKongHealthCheck.mockResolvedValue(false);
 
-    const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
-    await handler(mockReq, mockRes, mockNext);
+      const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
 
-    expect(mockNext).toHaveBeenCalledWith(new Error('Kong found no users'));
+      expect(mockNext).toHaveBeenCalledWith(new Error('Kong is lifeless'));
+    });
   });
 
   it('returns 200 if all services report back healthy', async () => {
