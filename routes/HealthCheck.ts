@@ -26,7 +26,7 @@ export default function healthCheckHandler(kong: KongService,
     }
 
     if (!failed) {
-      res.status(200).json({ health_check_status: 'vibrant' });
+      res.json({ health_check_status: 'vibrant' });
     }
   };
 }
