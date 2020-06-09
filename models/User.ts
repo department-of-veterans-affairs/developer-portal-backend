@@ -5,7 +5,7 @@ import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
 import Application from './Application';
 import logger from '../config/logger';
 import OktaService from '../services/OktaService';
-import SlackService, { SlackChatResponse } from '../services/SlackService';
+import SlackService from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
@@ -87,7 +87,7 @@ export default class User implements KongUser, GovDeliveryUser {
     }
   }
 
-  public sendSlackSuccess(client: SlackService): Promise<SlackChatResponse> {
+  public sendSlackSuccess(client: SlackService): Promise<string> {
     try {
       return client.sendSuccessMessage(
         this.toSlackString(),

@@ -76,11 +76,15 @@ const configureOktaService = (): OktaService | undefined => {
 };
 
 const configureSlackService = (): SlackService | undefined => {
-  const { SLACK_TOKEN, SLACK_CHANNEL_ID } = process.env;
+  const { SLACK_WEBHOOK, SLACK_CHANNEL } = process.env;
   let client;
 
-  if (SLACK_TOKEN && SLACK_CHANNEL_ID) {
-    client = new SlackService(SLACK_CHANNEL_ID, SLACK_TOKEN);
+  if (SLACK_WEBHOOK && SLACK_CHANNEL) {
+    client = new SlackService(SLACK_WEBHOOK, {
+      channel: SLACK_CHANNEL,
+      username: 'Developer Portal',
+      icon_emoji: ':lighthouse:',
+    });
   }
 
   return client;

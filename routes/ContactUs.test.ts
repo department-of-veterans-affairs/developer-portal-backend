@@ -91,10 +91,7 @@ describe('contactUsHandler', () => {
         email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
-        apis: {
-          benefits: true,
-          facilities: true,
-        },
+        apis: ['benefits', 'facilities'],
       }
     } as Request;
 
@@ -121,13 +118,7 @@ describe('contactUsHandler', () => {
         email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
-        apis: {
-          benefits: false,
-          facilities: true,
-          health: true,
-          vaForms: false,
-          verification: false,
-        },
+        apis: ['facilities', 'health'],
       }
     } as Request;
 
