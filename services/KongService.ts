@@ -100,8 +100,12 @@ export default class KongService {
 
   // Kong is considered healthy if the admin consumer is able to return a list of the consumers on the connected instance
   public async healthCheck(): Promise<boolean> {
-    const res = await request.get(this.requestOptions(`${this.kongPath}`));
-    return Array.isArray(res.data) && res.data.length > 0;
+    try {
+      const res = await request.get(this.requestOptions(`${this.kongPath}`));
+      return Array.isArray(res.data) && res.data.length > 0;
+    } catch (err) {
+      return false;
+    }
   }
 
   private requestOptions(path: string, body?: KongRequest): request.Options {

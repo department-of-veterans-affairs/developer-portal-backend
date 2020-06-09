@@ -132,6 +132,13 @@ describe("KongService", () => {
       });
     });
 
+    it('returns false when it catches an error', async () => {
+      getMock.mockRejectedValue('failed to connect to Kong');
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toBe(false);
+    });
+
     it('returns false when it does not receive a data array', async () => {
       getMock.mockResolvedValue({});
 
