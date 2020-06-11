@@ -133,31 +133,40 @@ describe("KongService", () => {
     });
 
     it('returns false when it catches an error', async () => {
-      getMock.mockRejectedValue('failed to connect to Kong');
+      const err = new Error('failed to connect to Kong');
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      getMock.mockRejectedValue(err);
 
       const healthCheck = await service.healthCheck();
-      expect(healthCheck).toBe(false);
+      expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
     it('returns false when it does not receive a KongConsumerResponse', async () => {
-      getMock.mockResolvedValue({ message: 'Not found' });
+      const getMockValue = { message: 'Not found' };
+      const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      getMock.mockResolvedValue(getMockValue);
 
       const healthCheck = await service.healthCheck();
-      expect(healthCheck).toBe(false);
+      expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
     it('returns false when it receives the wrong consumer', async () => {
+      const getMockValue = { username: 'wrong_user' };
+      const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
       getMock.mockResolvedValue({ username: 'wrong_user' });
 
       const healthCheck = await service.healthCheck();
-      expect(healthCheck).toBe(false);
+      expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
     it('returns true when it receives the right consumer', async () => {
+      const expectedReturn = { serviceName: 'Kong', healthy: true };
       getMock.mockResolvedValue({ username: '_internal_DeveloperPortal' });
 
       const healthCheck = await service.healthCheck();
-      expect(healthCheck).toBe(true);
+      expect(healthCheck).toStrictEqual(expectedReturn);
     });
   });
 });

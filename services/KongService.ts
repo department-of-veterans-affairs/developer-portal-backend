@@ -3,6 +3,7 @@ import { format } from 'url';
 import { apisToAcls } from '../config';
 import { KongConfig, KongUser, Protocol } from '../types';
 import logger from '../config/logger';
+import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
 interface ConsumerRequest {
   username: string;
@@ -100,12 +101,23 @@ export default class KongService {
   }
 
   // Kong is considered healthy if the admin consumer is able to query itself on the connected instance
-  public async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     try {
       const res: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${this.adminConsumerName}`));
-      return res.username === this.adminConsumerName;
+      if (res.username !== this.adminConsumerName) {
+        throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res)}`);
+      }
+      return {
+        serviceName: 'Kong',
+        healthy: true,
+       };
     } catch (err) {
-      return false;
+      err.action = 'checking health of Kong';
+      return {
+        serviceName: 'Kong',
+        healthy: false,
+        err: err
+       };
     }
   }
 

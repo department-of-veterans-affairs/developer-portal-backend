@@ -26,35 +26,35 @@ describe('healthCheckHandler', () => {
 
       expect(mockKongHealthCheck).toHaveBeenCalled();
     });
-
-    it('sends error to the default error handler if Kong throws an error', async () => {
-      const err = new Error('failed to connect to Kong');
-      mockKongHealthCheck.mockRejectedValue(err);
-
+    
+    it('returns 503 if kong fails to report back healthy', async () => {
+      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
+      const mockKongHealthCheckResponse = { serviceName: 'Kong', healthy: false, err: err };
+      mockKongHealthCheck.mockResolvedValue(mockKongHealthCheckResponse);
+      
       const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
       await handler(mockReq, mockRes, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(err);
+      
+      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockKongHealthCheckResponse ] });
     });
-
-    it('sends error to the default error handler if Kong fails to report back healthy', async () => {
-      mockKongHealthCheck.mockResolvedValue(false);
-
-      const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
-      await handler(mockReq, mockRes, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(new Error('Kong is lifeless'));
-    });
+  });
+  
+  it('sends error to the default error handler if an error occurs', async () => {
+    const err = new Error('service does not exist');
+    mockKongHealthCheck.mockRejectedValue(err);
+  
+    const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
+    await handler(mockReq, mockRes, mockNext);
+  
+    expect(mockNext).toHaveBeenCalledWith(err);
   });
 
   it('returns 200 if all services report back healthy', async () => {
-    mockKongHealthCheck.mockResolvedValue(true);
-
+    mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
+    
     const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
     await handler(mockReq, mockRes, mockNext);
-
-    expect(mockJson).toHaveBeenCalledWith({
-      health_check_status: 'vibrant',
-    });
+    
+    expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'vibrant', failedHealthChecks: [] });
   });
 });
