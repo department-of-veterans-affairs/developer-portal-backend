@@ -11,13 +11,13 @@ export interface ServiceHealthCheckResponse {
   };
 }
 
-export interface HealthCheckResponse {
+export interface HealthCheckResults {
   healthStatus: string;
   failedHealthChecks: Array<ServiceHealthCheckResponse>;
 }
 
 export default class HealthCheck {
-  public healthCheckResults: HealthCheckResponse
+  public healthCheckResults: HealthCheckResults
 
   constructor() {
     this.healthCheckResults = { healthStatus: 'vibrant', failedHealthChecks: [] };
@@ -35,7 +35,7 @@ export default class HealthCheck {
     }
   }
 
-  public getResults(): HealthCheckResponse {
+  public getResults(): HealthCheckResults {
     return this.healthCheckResults;
   }
 }
