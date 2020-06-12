@@ -4,14 +4,14 @@ import User from '../models/User';
 import request from 'request-promise-native';
 
 describe("KongService", () => {
-  let client: KongService;
+  let service: KongService;
   let event;
   let user: User;
   const getMock = jest.spyOn(request, 'get').mockResolvedValue({});
   const postMock = jest.spyOn(request, 'post').mockResolvedValue({});
 
   beforeEach(() => {
-    client = new KongService({
+    service = new KongService({
       apiKey: 'fakeKey',
       host: 'fakeHost',
       port: 8000
@@ -35,16 +35,16 @@ describe("KongService", () => {
 
   describe('constructor', () => {
     it('should set defaults', () => {
-      expect(client.protocol).toEqual('https');
+      expect(service.protocol).toEqual('https');
     });
   });
 
   describe('createConsumer', () => {
-    it('should send a request when the consumer does not exist', async () => {
+    it('sends a request when the consumer does not exist', async () => {
       getMock.mockRejectedValue({});
       postMock.mockResolvedValue({ username: 'AdHocPaget' });
 
-      const result = await client.createConsumer(user);
+      const result = await service.createConsumer(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers",
@@ -55,10 +55,10 @@ describe("KongService", () => {
       expect(result.username).toEqual('AdHocPaget');
     });
 
-    it('should not create a new consumer when one already exists', async () => {
+    it('does not create a new consumer when one already exists', async () => {
       getMock.mockResolvedValue({ username: 'AdHocPaget' });
 
-      const result = await client.createConsumer(user);
+      const result = await service.createConsumer(user);
 
       expect(postMock).not.toHaveBeenCalled();
       expect(result.username).toEqual('AdHocPaget');
@@ -66,10 +66,10 @@ describe("KongService", () => {
   });
 
   describe('createACLs', () => {
-    it('should add groups', async () => {
+    it('adds groups', async () => {
       getMock.mockResolvedValue({data: []});
 
-      const result = await client.createACLs(user);
+      const result = await service.createACLs(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
@@ -86,10 +86,10 @@ describe("KongService", () => {
       expect(result.total).toEqual(2);
     });
 
-    it('should not add groups a consumer already belongs to', async () => {
+    it('does not add groups a consumer already belongs to', async () => {
       getMock.mockResolvedValue({data: [{ group: 'vba_documents' }]});
 
-      const result = await client.createACLs(user);
+      const result = await service.createACLs(user);
       
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
@@ -108,10 +108,10 @@ describe("KongService", () => {
   });
 
   describe('createKeyAuth', () => {
-    it('should send a request', async () => {
+    it('sends a request', async () => {
       postMock.mockResolvedValue({ key: 'fakekey' });
 
-      const result = await client.createKeyAuth(user);
+      const result = await service.createKeyAuth(user);
 
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
@@ -119,6 +119,54 @@ describe("KongService", () => {
         headers: { apiKey: 'fakeKey' }
       });
       expect(result.key).toEqual('fakekey');
+    });
+  });
+
+  describe('healthCheck', () => {
+    it('sends a request', async () => {
+      await service.healthCheck();
+      expect(getMock).toHaveBeenCalledWith({
+        url: "https://fakeHost:8000/internal/admin/consumers/_internal_DeveloperPortal",
+        json: true,
+        headers: { apiKey: 'fakeKey' }
+      });
+    });
+
+    it('returns false when it catches an error', async () => {
+      const err = new Error('failed to connect to Kong');
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      getMock.mockRejectedValue(err);
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
+    });
+
+    it('returns false when it does not receive a KongConsumerResponse', async () => {
+      const getMockValue = { message: 'Not found' };
+      const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      getMock.mockResolvedValue(getMockValue);
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
+    });
+
+    it('returns false when it receives the wrong consumer', async () => {
+      const getMockValue = { username: 'wrong_user' };
+      const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
+      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      getMock.mockResolvedValue({ username: 'wrong_user' });
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
+    });
+
+    it('returns true when it receives the right consumer', async () => {
+      const expectedReturn = { serviceName: 'Kong', healthy: true };
+      getMock.mockResolvedValue({ username: '_internal_DeveloperPortal' });
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
     });
   });
 });

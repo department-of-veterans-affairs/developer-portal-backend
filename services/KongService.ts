@@ -3,6 +3,7 @@ import { format } from 'url';
 import { apisToAcls } from '../config';
 import { KongConfig, KongUser, Protocol } from '../types';
 import logger from '../config/logger';
+import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
 interface ConsumerRequest {
   username: string;
@@ -50,6 +51,7 @@ export default class KongService {
   public port: number;
   public protocol: Protocol;
   public kongPath = '/internal/admin/consumers';
+  private adminConsumerName = '_internal_DeveloperPortal';
 
   constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
     this.apiKey = apiKey;
@@ -96,6 +98,27 @@ export default class KongService {
 
   public createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
     return request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/key-auth`));
+  }
+
+  // Kong is considered healthy if the admin consumer is able to query itself on the connected instance
+  public async healthCheck(): Promise<ServiceHealthCheckResponse> {
+    try {
+      const res: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${this.adminConsumerName}`));
+      if (res.username !== this.adminConsumerName) {
+        throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res)}`);
+      }
+      return {
+        serviceName: 'Kong',
+        healthy: true,
+       };
+    } catch (err) {
+      err.action = 'checking health of Kong';
+      return {
+        serviceName: 'Kong',
+        healthy: false,
+        err: err
+       };
+    }
   }
 
   private requestOptions(path: string, body?: KongRequest): request.Options {

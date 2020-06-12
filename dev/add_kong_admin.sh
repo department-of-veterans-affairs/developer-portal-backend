@@ -28,7 +28,7 @@ curl -s "$admin_api/plugins" \
 
 # create consumer for the developer portal backend to access the
 # kong admin api
-admin_consumer='devportalbackend'
+admin_consumer='_internal_DeveloperPortal'
 curl -s "$admin_api/consumers" \
   -d "username=$admin_consumer"
 
