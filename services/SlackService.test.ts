@@ -68,7 +68,7 @@ describe('SlackService', () => {
       ],
     };
 
-    const res = await service.sendWrapUpMessage(wrapup);
+    const res = await service.sendWrapupMessage(wrapup);
 
     expect(res).toEqual('ok');
     expect(mockPost).toHaveBeenCalledWith('', {

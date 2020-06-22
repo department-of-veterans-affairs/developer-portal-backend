@@ -69,7 +69,7 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
   
-  public async sendWrapUpMessage(req: ApplyWrapup): Promise<string> {
+  public async sendWrapupMessage(req: ApplyWrapup): Promise<string> {
     const numsByApi = req.numByApi.map(api => ({ type: 'plain_text', text: `${api.name}: ${api.num}`, emoji: false }));
 
     const body: PostBody = {

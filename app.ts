@@ -14,6 +14,7 @@ import DynamoService from './services/DynamoService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
+import applyWrapupHandler from './routes/internal/ApplyWrapup';
 
 function validationMiddleware(schema: Schema) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -158,6 +159,8 @@ export default function configureApp(): express.Application {
     contactUsHandler(govdelivery));
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
+
+  app.get('/internal/apply-wrapup', applyWrapupHandler(slack));
 
   app.use(Sentry.Handlers.errorHandler());
 
