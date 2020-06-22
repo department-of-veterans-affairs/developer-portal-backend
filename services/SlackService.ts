@@ -14,6 +14,38 @@ interface WebhookOptions {
   icon?: string;
 }
 
+export interface ApplyWrapup {
+  duration: 'week' | 'month';
+  numApplications: number;
+  numByApi: { name: string; num: number }[];
+}
+
+interface Attachment {
+  text: string;
+  fallback: string;
+  color: string;
+  title: string;
+}
+
+interface Block {
+  type: string;
+  text?: {
+    type: string;
+    text: string;
+  };
+  fields?: {
+    type: string;
+    text: string;
+    emoji: boolean;
+  }[];
+}
+
+interface PostBody {
+  text: string;
+  blocks?: Block[];
+  attachments?:  Attachment[];
+}
+
 export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
   private options: WebhookOptions;
@@ -24,22 +56,54 @@ export default class SlackService implements MonitoredService {
   }
 
   public sendSuccessMessage(message: string, title: string): Promise<string> {
-    return this.sendChatWithAttachment(message, 'good', title);
-  }
-
-  private async sendChatWithAttachment(message: string, color: string, title: string): Promise<string> {
-    try {
-      const res = await this.client.post('', {
-        ...this.options,
+    const body: PostBody = {
         text: '',
         attachments: [{
           text: message,
           fallback: message,
-          color,
+          color: 'good',
           title,
         }],
-      });
+    };
 
+    return this.post(body);
+  }
+  
+  public async sendWrapUpMessage(req: ApplyWrapup): Promise<string> {
+    const numsByApi = req.numByApi.map(api => ({ type: 'plain_text', text: `${api.name}: ${api.num}`, emoji: false }));
+
+    const body: PostBody = {
+      text: `${req.duration} sandbox applications report`,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `${req.numApplications} people applied for Sandbox keys this ${req.duration}.`
+          }
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          fields: numsByApi,
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '_Numbers not what you expect? Read <https://google.com|how we calculate signups>._'
+          }
+        }
+      ],
+    };
+
+    return this.post(body);
+  }
+
+  private async post(body: PostBody): Promise<string> {
+    try {
+      const res = await this.client.post('', { ...this.options, ...body });
       return res.data;
     }
     catch (err) {

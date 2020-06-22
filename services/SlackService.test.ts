@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import SlackService from './SlackService';
+import SlackService, { ApplyWrapup }from './SlackService';
 
 describe('SlackService', () => {
   const hookUrl = 'https://beacons.gondor.gov';
@@ -45,6 +45,64 @@ describe('SlackService', () => {
         title: 'New User Application',
       }]
     });
+  });
+
+  it('sends a formatted wrap-up message', async () => {
+    const mockPost = jest.fn().mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      data: 'ok',
+    });
+
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+
+    const service = new SlackService(hookUrl, hookConfig);
+
+    const wrapup: ApplyWrapup = {
+      duration: 'week',
+      numApplications: 12,
+      numByApi: [
+        { name: 'Facilities', num: 7 },
+        { name: 'Forms', num: 6 },
+      ],
+    };
+
+    const res = await service.sendWrapUpMessage(wrapup);
+
+    expect(res).toEqual('ok');
+    expect(mockPost).toHaveBeenCalledWith('', {
+      channel: hookConfig.channel,
+      username: hookConfig.username,
+      icon_emoji: hookConfig.icon_emoji,
+      text: 'week sandbox applications report',
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '12 people applied for Sandbox keys this week.' 
+          }
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          fields: [
+            { type: 'plain_text', text: 'Facilities: 7', emoji: false },
+            { type: 'plain_text', text: 'Forms: 6', emoji: false },
+          ],
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '_Numbers not what you expect? Read <https://google.com|how we calculate signups>._'
+          }
+        }
+      ]
+    });
+
   });
 
   it('re-tags the error message if the error contains a response', async () => {
