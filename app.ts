@@ -19,7 +19,7 @@ function validationMiddleware(schema: Schema) {
     const { error } = schema.validate(req.body);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
-      res.status(422).json({ errors:  messages });
+      res.status(400).json({ errors:  messages });
     } else {
       next();
     }

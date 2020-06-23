@@ -47,11 +47,11 @@ describe('developerApplicationHandler', () => {
   const stubRes: Response = {
     json: mockJson,
   } as unknown as Response;
-  
+
   const stubNext = jest.fn();
-  
+
   let stubReq;
-  
+
   beforeEach(() => {
     stubReq = {
       body: {
@@ -247,225 +247,243 @@ describe('developerApplicationHandler', () => {
 });
 
 describe('validations', () => {
-  it('requires a firstName', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('firstName', () => {
+    it('is required', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"firstName" is required');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"firstName" is required');
+    });
+
+    it('is a string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 12345,
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"firstName" must be a string');
+    });
   });
 
-  it('ensures firstName is a string', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 12345,
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('lastName', () => {
+    it('is required', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"firstName" must be a string');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"lastName" is required');
+    });
+
+    it('is a string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 12345,
+        organization: 'Rohan',
+        termsOfService: true,
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"lastName" must be a string');
+    });
   });
 
-  it('requires a lastName', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('organization', () => {
+    it('is required', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"lastName" is required');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"organization" is required');
+    });
+
+    it('is a string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: { name: 'Rohan' },
+        termsOfService: true,
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"organization" must be a string');
+    });
   });
 
-  it('ensures lastName is a string', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 12345,
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('description', () => {
+    it('is a string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        description: 123456789,
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"lastName" must be a string');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"description" must be a string');
+    });
   });
 
-  it('requires organization', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      termsOfService: true,
-    };
+  describe('email', () => {
+    it('is required', () => {
+      const payload = {
+        apis: 'benefits',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"organization" is required');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"email" is required');
+    });
+
+    it('is in a valid format', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'lolnotanemail.com',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"email" must be a valid email');
+    });
   });
 
-  it('ensures organization is a string', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: { name: 'Rohan' },
-      termsOfService: true,
-    };
+  describe('oAuthRedirectURI', () => {
+    it('is a string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+        oAuthRedirectURI: 12345,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"organization" must be a string');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"oAuthRedirectURI" must be a string');
+    });
   });
 
-  it('ensures description is a string', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      description: 123456789,
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('oAuthApplicationType', () => {
+    it('is either web or native', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+        oAuthApplicationType: 'horsies?',
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"description" must be a string');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
+    });
   });
 
-  it('requires email', () => {
-    const payload = {
-      apis: 'benefits',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('termsOfService', () => {
+    it('is required', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"email" is required');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"termsOfService" is required');
+    });
+
+    it('requires terms of service were accepted', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: false,
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"termsOfService" must be [true]');
+    });
   });
 
-  it('ensures email is a valid format', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'lolnotanemail.com',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+  describe('apis', () => {
+    it('is required', () => {
+      const payload = {
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"email" must be a valid email');
-  });
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"apis" is required');
+    });
 
-  it('ensures oAuthRedirectURI is a string', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-      oAuthRedirectURI: 12345,
-    };
+    it('only allows supported api values', () => {
+      const payload = {
+        apis: 'benefits,horsies',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"oAuthRedirectURI" must be a string');
-  });
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"apis" failed custom validation because invalid apis in list');
+    });
 
-  it('ensures oAuthApplicationType is a valid option', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-      oAuthApplicationType: 'horsies?',
-    };
+    it('gracefully handles non-string types', () => {
+      const payload = {
+        apis: 12345,
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
 
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
-  });
-
-  it('requires termsOfService', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-    };
-
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"termsOfService" is required');
-  });
-
-  it('ensures termsOfService is a boolean', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: 12345,
-    };
-
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"termsOfService" must be a boolean');
-  });
-
-  it('requires apis', () => {
-    const payload = {
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
-
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"apis" is required');
-  });
-
-  it('ensures apis are in the allowed list', () => {
-    const payload = {
-      apis: 'benefits,horsies',
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
-
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"apis" failed custom validation because invalid apis in list');
-  });
-
-  it('gracefully handles non-string types sent for apis', () => {
-    const payload = {
-      apis: 12345,
-      email: 'eowyn@rohan.horse',
-      firstName: 'Eowyn',
-      lastName: 'Eorl',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
-
-    const result = applySchema.validate(payload);
-    expect(result.error.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
+    });
   });
 
   it('reports multiple failures at a time', () => {

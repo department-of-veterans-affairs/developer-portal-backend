@@ -36,7 +36,7 @@ export const applySchema = Joi.object().keys({
   email: Joi.string().email().required(),
   oAuthRedirectURI: Joi.string(),
   oAuthApplicationType: Joi.valid('web', 'native'),
-  termsOfService: Joi.bool().required(),
+  termsOfService: Joi.required().valid(true),
   apis: Joi.custom(validateApiList).required(),
 }).options({ abortEarly: false });
 

@@ -8,7 +8,7 @@ import configureApp from './app';
 
 const request = supertest(configureApp());
 describe('App routing', () => {
-  describe('/healthcheck', () => {
+  describe('/health', () => {
     it('succeeds on healthcheck', async () => {
       const response = await request.get('/health');
 
@@ -18,7 +18,7 @@ describe('App routing', () => {
   });
 
   describe('/developer_application', () => {
-    it('sends a 4xx response and descriptive errors if validations fail', async () => {
+    it('sends a 400 response and descriptive errors if validations fail', async () => {
       const response = await request.post('/developer_application').send({
         apis: 'benefits',
         email: 'eowyn@rohan.horse',
@@ -26,7 +26,7 @@ describe('App routing', () => {
         termsOfService: true
       });
 
-      expect(response.status).toEqual(422);
+      expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         errors: ['"firstName" is required', '"organization" is required']
       });
