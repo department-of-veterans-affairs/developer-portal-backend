@@ -1,18 +1,30 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { config, DynamoDB } from 'aws-sdk';
 import morgan from 'morgan';
+import { Schema, ValidationErrorItem } from '@hapi/joi';
+
 import logger from './config/logger';
 import Sentry from './config/Sentry';
 import OktaService from './services/OktaService';
 import KongService from './services/KongService';
 import GovDeliveryService from './services/GovDeliveryService';
-
 import { KongConfig } from './types';
-
 import SlackService from './services/SlackService';
-import developerApplicationHandler from './routes/DeveloperApplication';
+import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
+
+function validationMiddleware(schema: Schema) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { error } = schema.validate(req.body);
+    if (error) {
+      const messages = error.details.map((i: ValidationErrorItem) => i.message);
+      res.status(400).json({ errors:  messages });
+    } else {
+      next();
+    }
+  };
+}
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -125,8 +137,10 @@ export default function configureApp(): express.Application {
   // Must be the first middleware
   app.use(Sentry.Handlers.requestHandler());
 
-  // request logs are skipped for the health check endpoint to reduce noise
-  app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }));
+  // request logs are skipped for the health check endpoint and in tests
+  if (process.env.NODE_ENV !== 'test') {
+    app.use(morgan(loggingMiddleware, { skip: req => req.url === '/health' }));
+  }
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
@@ -145,7 +159,9 @@ export default function configureApp(): express.Application {
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
 
-  app.post('/developer_application', developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
+  app.post('/developer_application', 
+    validationMiddleware(applySchema), 
+    developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
 
   app.post('/contact-us', contactUsHandler(govdelivery));
 
