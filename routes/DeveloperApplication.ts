@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { DynamoDB } from 'aws-sdk';
+import Joi from '@hapi/joi';
+
 import { FormSubmission } from '../types/FormSubmission';
 import pick from 'lodash.pick';
 import logger from '../config/logger';
@@ -8,11 +10,40 @@ import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
+import { API_LIST } from '../config';
 
-export default function developerApplicationHandler(kong: KongService, 
-  okta: OktaService | undefined, 
-  dynamo: DynamoDB.DocumentClient, 
-  govdelivery: GovDeliveryService | undefined, 
+function validateApiList(val: string): string {
+  let result: boolean;
+  try {
+    const apis = val.split(',');
+    result = apis.every(api => API_LIST.includes(api));
+  } catch {
+    throw new Error('it was unable to process the provided data');
+  }
+
+  if (!result) {
+    throw new Error('invalid apis in list');
+  }
+
+  return val;
+}
+
+export const applySchema = Joi.object().keys({
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+  organization: Joi.string().required(),
+  description: Joi.string(),
+  email: Joi.string().email().required(),
+  oAuthRedirectURI: Joi.string(),
+  oAuthApplicationType: Joi.valid('web', 'native'),
+  termsOfService: Joi.required().valid(true),
+  apis: Joi.custom(validateApiList).required(),
+}).options({ abortEarly: false });
+
+export default function developerApplicationHandler(kong: KongService,
+  okta: OktaService | undefined,
+  dynamo: DynamoDB.DocumentClient,
+  govdelivery: GovDeliveryService | undefined,
   slack: SlackService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const form: FormSubmission = pick(req.body, [
@@ -69,7 +100,7 @@ export default function developerApplicationHandler(kong: KongService,
         logger.info({ message: 'sending email to new user' });
         await user.sendEmail(govdelivery);
       }
-    } catch(err) {
+    } catch (err) {
       err.action = 'sending govdelivery signup notification';
       next(err);
     }
@@ -78,7 +109,7 @@ export default function developerApplicationHandler(kong: KongService,
       if (slack) {
         logger.info({ message: 'sending success to slack' });
         await user.sendSlackSuccess(slack);
-      }     
+      }
     } catch (err) {
       err.action = 'sending slack signup message';
       next(err);

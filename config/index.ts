@@ -18,3 +18,14 @@ export const apisToProperNames = {
   vaForms: 'VA Form API',
   verification: 'Veteran Verification API',
 };
+
+ export const API_LIST = [
+   'benefits',
+   'claims',
+   'communityCare',
+   'confirmation',
+   'facilities',
+   'health',
+   'vaForms',
+   'verification',
+ ];
