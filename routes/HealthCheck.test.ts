@@ -1,11 +1,15 @@
 import { Request, Response } from 'express';
 import KongService from '../services/KongService';
+import OktaService from '../services/OktaService';
 import healthCheckHandler from '../routes/HealthCheck';
 
 describe('healthCheckHandler', () => {
   const mockKongHealthCheck = jest.fn();
   const mockKong = { healthCheck: mockKongHealthCheck } as unknown as KongService;
-
+  
+  const mockOktaHealthCheck = jest.fn();
+  const mockOkta = { healthCheck: mockOktaHealthCheck } as unknown as OktaService;
+  
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   const mockReq = { body: {} } as Request;  
@@ -14,9 +18,13 @@ describe('healthCheckHandler', () => {
   } as unknown as Response;
 
   beforeEach(() => {
-    mockKongHealthCheck.mockReset();
+    mockKongHealthCheck.mockClear();
+    mockOktaHealthCheck.mockClear();
     mockNext.mockClear();
     mockJson.mockClear();
+
+    mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
+    mockOktaHealthCheck.mockResolvedValue({ serviceName: 'Okta', healthy: true });
   });
 
   describe('checks Kong', () => {
@@ -27,7 +35,7 @@ describe('healthCheckHandler', () => {
       expect(mockKongHealthCheck).toHaveBeenCalled();
     });
     
-    it('returns 503 if kong fails to report back healthy', async () => {
+    it('returns unhealthy response if Kong fails to report back healthy', async () => {
       const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
       const mockKongHealthCheckResponse = { serviceName: 'Kong', healthy: false, err: err };
       mockKongHealthCheck.mockResolvedValue(mockKongHealthCheckResponse);
@@ -38,7 +46,27 @@ describe('healthCheckHandler', () => {
       expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockKongHealthCheckResponse ] });
     });
   });
-  
+
+  describe('checks Okta', () => {
+    it('calls Okta healthCheck', async () => {
+      const handler = healthCheckHandler(mockKong, mockOkta, undefined, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockOktaHealthCheck).toHaveBeenCalled();
+    });
+
+    it('returns unhealthy response if Okta fails to report back healthy', async () => {
+      const err = new Error(`Okta did not return a user: { constructor: { name: 'Orc' } }`);
+      const mockOktaHealthCheckResponse = { serviceName: 'Okta', healthy: false, err: err };
+      mockOktaHealthCheck.mockResolvedValue(mockOktaHealthCheckResponse);
+      
+      const handler = healthCheckHandler(mockKong, mockOkta, undefined, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
+      
+      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockOktaHealthCheckResponse ] });
+    });
+  });
+
   it('sends error to the default error handler if an error occurs', async () => {
     const err = new Error('service does not exist');
     mockKongHealthCheck.mockRejectedValue(err);

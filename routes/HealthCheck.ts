@@ -17,6 +17,11 @@ export default function healthCheckHandler(kong: KongService,
     try {
       const kongHealth: ServiceHealthCheckResponse = await kong.healthCheck();
       healthCheck.addResult(kongHealth);
+
+      if (okta) {
+        const oktaHealth: ServiceHealthCheckResponse = await okta.healthCheck();
+        healthCheck.addResult(oktaHealth);
+      }
     } catch(err) {
       err.action = 'checking health of services';
       next(err);
