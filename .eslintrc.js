@@ -23,6 +23,7 @@ module.exports = {
   rules: {
     'semi': ['error', 'always'],
     '@typescript-eslint/camelcase': 'off',
+    '@typescript-eslint/interface-name-prefix': 'off',
   },
   overrides: [
     {

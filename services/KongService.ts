@@ -1,7 +1,7 @@
 import request from 'request-promise-native';
 import { format } from 'url';
 import { apisToAcls } from '../config';
-import { KongConfig, KongUser, Protocol } from '../types';
+import { IService, KongConfig, KongUser, Protocol } from '../types';
 import logger from '../config/logger';
 import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
@@ -45,7 +45,7 @@ export interface KongKeyResponse {
   id: string;
 }
 
-export default class KongService {
+export default class KongService implements IService {
   public apiKey: string;
   public host: string;
   public port: number;
