@@ -16,9 +16,6 @@ export default function healthCheckHandler(kong: KongService,
     const healthCheck: HealthCheck = new HealthCheck;
 
     try {
-      const kongHealth: ServiceHealthCheckResponse = await kong.healthCheck();
-      healthCheck.addResult(kongHealth);
-
       const services: IService[] = [kong, okta, dynamo, govdelivery, slack].filter(service => !!service)  as IService[];
       const resultPromises: Promise<ServiceHealthCheckResponse>[] = services.map(service => service.healthCheck());
       const results = await Promise.all(resultPromises);
