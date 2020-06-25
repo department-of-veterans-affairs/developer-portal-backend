@@ -21,7 +21,6 @@ export default function healthCheckHandler(kong: KongService,
       const results = await Promise.all(resultPromises);
       results.forEach(result => healthCheck.addResult(result));
     } catch(err) {
-      console.log(err);
       err.action = 'checking health of services';
       next(err);
     }
