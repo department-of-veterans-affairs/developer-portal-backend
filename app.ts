@@ -11,7 +11,7 @@ import GovDeliveryService from './services/GovDeliveryService';
 import { KongConfig } from './types';
 import SlackService from './services/SlackService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
-import contactUsHandler from './routes/ContactUs';
+import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 
 function validationMiddleware(schema: Schema) {
@@ -163,7 +163,9 @@ export default function configureApp(): express.Application {
     validationMiddleware(applySchema), 
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.post('/contact-us', contactUsHandler(govdelivery));
+  app.post('/contact-us', 
+    validationMiddleware(contactSchema),
+    contactUsHandler(govdelivery));
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
 
