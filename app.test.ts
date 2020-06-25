@@ -32,4 +32,18 @@ describe('App routing', () => {
       });
     });
   });
+
+  describe('/contact-us', () => {
+    it('sends a 400 response and descriptive errors if validations fail', async () => {
+      const response = await request.post('/contact-us').send({
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      });
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        errors: ['"firstName" is required', '"lastName" is required']
+      });
+    });
+  });
 });
