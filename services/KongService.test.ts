@@ -132,7 +132,7 @@ describe("KongService", () => {
       });
     });
 
-    it('returns false when it catches an error', async () => {
+    it('returns unhealthy when it catches an error', async () => {
       const err = new Error('failed to connect to Kong');
       const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
       getMock.mockRejectedValue(err);
@@ -141,7 +141,7 @@ describe("KongService", () => {
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns false when it does not receive a KongConsumerResponse', async () => {
+    it('returns unhealthy when it does not receive a KongConsumerResponse', async () => {
       const getMockValue = { message: 'Not found' };
       const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
       const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
@@ -151,7 +151,7 @@ describe("KongService", () => {
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns false when it receives the wrong consumer', async () => {
+    it('returns unhealthy when it receives the wrong consumer', async () => {
       const getMockValue = { username: 'wrong_user' };
       const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
       const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
@@ -161,7 +161,7 @@ describe("KongService", () => {
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns true when it receives the right consumer', async () => {
+    it('returns healthy when it receives the right consumer', async () => {
       const expectedReturn = { serviceName: 'Kong', healthy: true };
       getMock.mockResolvedValue({ username: '_internal_DeveloperPortal' });
 
