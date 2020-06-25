@@ -1,7 +1,7 @@
 import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { apisToProperNames } from '../config';
-import { GovDeliveryUser, IService, ServiceHealthCheckResponse } from '../types';
+import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
 
 interface EmailRecipient {
@@ -70,7 +70,7 @@ export interface EmailResponse {
   };
 }
 
-export default class GovDeliveryService implements IService {
+export default class GovDeliveryService implements MonitoredService {
   public host: string;
   public supportEmailRecipient: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;

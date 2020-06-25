@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { DynamoDB } from 'aws-sdk';
 import HealthCheck from '../models/HealthCheck';
-import { IService, ServiceHealthCheckResponse } from '../types';
+import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
@@ -16,7 +16,7 @@ export default function healthCheckHandler(kong: KongService,
     const healthCheck: HealthCheck = new HealthCheck;
 
     try {
-      const services: IService[] = [kong, okta, dynamo, govdelivery, slack].filter(service => !!service)  as IService[];
+      const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack].filter(service => !!service)  as MonitoredService[];
       const resultPromises: Promise<ServiceHealthCheckResponse>[] = services.map(service => service.healthCheck());
       const results = await Promise.all(resultPromises);
       results.forEach(result => healthCheck.addResult(result));

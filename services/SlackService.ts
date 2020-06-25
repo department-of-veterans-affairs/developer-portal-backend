@@ -1,5 +1,5 @@
 import axios, {AxiosInstance } from 'axios';
-import { IService, ServiceHealthCheckResponse } from '../types';
+import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 
 /* 
 WebhookOptions override the defaults configured in the webhook
@@ -14,7 +14,7 @@ interface WebhookOptions {
   icon?: string;
 }
 
-export default class SlackService implements IService {
+export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
   private options: WebhookOptions;
 
