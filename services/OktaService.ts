@@ -1,6 +1,5 @@
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
-import { IService, OktaApplication } from '../types';
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
+import { IService, OktaApplication, ServiceHealthCheckResponse } from '../types';
 
 export interface OktaApplicationResponse {
   id: string;

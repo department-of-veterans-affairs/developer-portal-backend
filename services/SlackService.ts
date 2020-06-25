@@ -1,6 +1,5 @@
 import axios, {AxiosInstance } from 'axios';
-import { IService } from '../types';
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
+import { IService, ServiceHealthCheckResponse } from '../types';
 
 /* 
 WebhookOptions override the defaults configured in the webhook

@@ -1,5 +1,3 @@
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
-
 export type Protocol = 'http' | 'https';
 
 export interface KongConfig {
@@ -81,4 +79,14 @@ export interface OktaApplication {
 
 export interface IService {
   healthCheck: () => Promise<ServiceHealthCheckResponse>;
+}
+
+export interface ServiceHealthCheckResponse {
+  serviceName: string;
+  healthy: boolean;
+  err?: {
+    message: string;
+    stack?: string;
+    action?: string;
+  };
 }

@@ -1,15 +1,6 @@
 import logger from '../config/logger';
 import Sentry from '../config/Sentry';
-
-export interface ServiceHealthCheckResponse {
-  serviceName: string;
-  healthy: boolean;
-  err?: {
-    message: string;
-    stack?: string;
-    action?: string;
-  };
-}
+import { ServiceHealthCheckResponse } from '../types';
 
 export interface HealthCheckResults {
   healthStatus: string;

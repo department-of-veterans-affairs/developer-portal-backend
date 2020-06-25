@@ -1,9 +1,8 @@
 import request from 'request-promise-native';
 import { format } from 'url';
 import { apisToAcls } from '../config';
-import { IService, KongConfig, KongUser, Protocol } from '../types';
+import { IService, KongConfig, KongUser, Protocol, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
 interface ConsumerRequest {
   username: string;

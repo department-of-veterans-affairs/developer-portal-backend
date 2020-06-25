@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { DynamoDB } from 'aws-sdk';
-import HealthCheck, { ServiceHealthCheckResponse } from '../models/HealthCheck';
-import { IService } from '../types';
+import HealthCheck from '../models/HealthCheck';
+import { IService, ServiceHealthCheckResponse } from '../types';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';

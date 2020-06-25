@@ -1,9 +1,8 @@
 import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { apisToProperNames } from '../config';
-import { GovDeliveryUser, IService } from '../types';
+import { GovDeliveryUser, IService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
 interface EmailRecipient {
   email: string;
