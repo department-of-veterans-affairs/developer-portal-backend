@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import contactUsHandler from './ContactUs';
+import contactUsHandler, { contactSchema } from './ContactUs';
 import GovDeliveryService from '../services/GovDeliveryService';
 
 describe('contactUsHandler', () => {
@@ -45,41 +45,6 @@ describe('contactUsHandler', () => {
 
     expect(mockStatus).toHaveBeenCalledWith(503);
     expect(mockJson).toHaveBeenCalledWith({ error: 'service not enabled' });
-  });
-
-  it('returns a 400 if a single required field is missing', async () => {
-    const handler = contactUsHandler(mockGovDelivery);
-    const mockReq = {
-      body: {
-        lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      }
-    } as Request;
-
-    await handler(mockReq, mockRes, mockNext);
-
-    expect(mockStatus).toHaveBeenCalledWith(400);
-    expect(mockJson).toHaveBeenCalledWith({
-      error: `Missing Required Parameter(s): firstName`,
-    });
-  });
-
-  it('returns a 400 if multiple required fields are missing', async () => {
-    const handler = contactUsHandler(mockGovDelivery);
-    const mockReq = {
-      body: {
-        lastName: 'Gamgee',
-        description: 'Need help getting to Mt. Doom',
-      }
-    } as Request;
-
-    await handler(mockReq, mockRes, mockNext);
-
-    expect(mockStatus).toHaveBeenCalledWith(400);
-    expect(mockJson).toHaveBeenCalledWith({
-      error: `Missing Required Parameter(s): firstName,email`,
-    });
   });
 
   it('responds with a 200 when the request is okay', async () => {
@@ -148,5 +113,149 @@ describe('contactUsHandler', () => {
       requester: mockReq.body.email,
       description: mockReq.body.description,
     });
+  });
+});
+
+describe('validations', () => {
+  describe('firstName', () => {
+    it('is required', () => {
+      const payload = {
+        lastName: 'Gamgee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"firstName" is required');
+    });
+
+    it('is a string', () => {
+      const payload = {
+        firstName: 1234,
+        lastName: 'Gamgee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"firstName" must be a string');
+    });
+  });
+
+  describe('lastName', () => {
+    it('is required', () => {
+      const payload = {
+        firstName: 'Samwise',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"lastName" is required');
+    });
+
+    it('is a string', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: { name: 'Gamegee' },
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"lastName" must be a string');
+    });
+  });
+
+  describe('email', () => {
+    it('is required', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"email" is required');
+    });
+
+    it('is in a valid format', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'http://theyaretakingthehobbitstoisengard.com',
+        description: 'Need help getting to Mt. Doom',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"email" must be a valid email');
+    });
+  });
+
+  describe('description', () => {
+    it('is a string', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: { potatoes: 'boil em, mash em, stick em in a stew' },
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"description" must be a string');
+    });
+  });
+
+  describe('organization', () => {
+    it('is a string', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        organization: ['The', 'Fellowship'],
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"organization" must be a string');
+    });
+  });
+
+  describe('apis', () => {
+    it('is an array', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        apis: 'health,benefits,facilities',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"apis" must be an array');
+    });
+
+    it('is an array of strings', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        apis: [1, 2],
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
+    });
+  });
+
+  it('reports multiple failures at a time', () => {
+    const payload = {
+      email: 'samwise@thefellowship.org',
+      description: 'Need help getting to Mt. Doom',
+    };
+
+    const result = contactSchema.validate(payload);
+    expect(result.error.message).toEqual('"firstName" is required. "lastName" is required');
   });
 });

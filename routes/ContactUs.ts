@@ -1,28 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
+import Joi from '@hapi/joi';
+
 import GovDeliveryService, { SupportEmail } from '../services/GovDeliveryService';
 
-const requiredFields = ['firstName', 'lastName', 'email', 'description'];
-
-function checkRequiredFields(submittedFields: string[]): string[] {
-  return requiredFields.filter(required => {
-      return !submittedFields.includes(required);
-  });
-}
+export const contactSchema = Joi.object().keys({
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+  email: Joi.string().email().required(),
+  description: Joi.string().required(),
+  organization: Joi.string(),
+  apis: Joi.array().items(Joi.string()),
+}).options({ abortEarly: false });
 
 export default function contactUsHandler(govDelivery: GovDeliveryService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!govDelivery) {
       res.status(503).json({ error: 'service not enabled'});
-      return;
-    }
-
-    const submittedFields = Object.keys(req.body);
-    const missingFields = checkRequiredFields(submittedFields);
-
-    if (missingFields.length > 0) {
-      res.status(400).json({
-        error: `Missing Required Parameter(s): ${missingFields.join(',')}`,
-      });
       return;
     }
 
