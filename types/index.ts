@@ -77,7 +77,7 @@ export interface OktaApplication {
   toOktaApp: () => OAuthApplication;
 }
 
-export interface IService {
+export interface MonitoredService {
   healthCheck: () => Promise<ServiceHealthCheckResponse>;
 }
 
