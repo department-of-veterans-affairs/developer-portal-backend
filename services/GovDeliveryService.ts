@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { apisToProperNames } from '../config';
+import { APIS_TO_PROPER_NAMES } from '../config';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
 
@@ -132,7 +132,7 @@ export default class GovDeliveryService implements MonitoredService {
   private listApis(user: GovDeliveryUser): string {
     const apis = user.apiList;
     return apis.reduce((apiList, api, idx) => {
-      const properName = apisToProperNames[api];
+      const properName = APIS_TO_PROPER_NAMES[api];
       if (idx === 0) {
         return properName;
       } else if (idx === apis.length - 1 && apis.length === 2) {

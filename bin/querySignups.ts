@@ -1,18 +1,20 @@
 import { config } from 'aws-sdk';
 import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-line-args';
 import moment, { Moment } from 'moment';
-import { countSignups } from '../utils/signups';
+import { sprintf } from 'sprintf-js';
+import { APIS_TO_PROPER_NAMES } from '../config';
+import { countSignups, SignupCountResult } from '../utils/signups';
 
 const parseMoment = (argName: string) => {
   return (date: string): Moment => {
-    try {
-      return moment(date);
-    } catch (error) {
-      console.error(
+    const momentArg = moment(date);
+    if (!momentArg.isValid()) {
+      throw new Error(
         `"${argName}" must be a date string parseable by moment() [https://momentjs.com/docs/#/parsing/]`
       );
-      throw error;
     }
+
+    return momentArg;
   };
 };
 
@@ -37,8 +39,24 @@ const printArgs = (args: CommandLineOptions) => {
   console.log(`   end: ${args.end.toISOString()}\n`);
 };
 
-console.log('Running signup query...');
+const printResult = (counts: SignupCountResult) => {
+  const totalLine = sprintf("%'.-38s %u", 'Total ', counts.total);
+  console.log('RESULTS');
+  console.log(totalLine);
+  console.log('By API');
+
+  Object.keys(counts.apiCounts).forEach((apiId: string) => {
+    const formattedLine = sprintf(
+      "  %'.-36s %u", 
+      `${APIS_TO_PROPER_NAMES[apiId]} `, 
+      counts.apiCounts[apiId],
+    );
+    console.log(formattedLine);
+  });
+};
+
 const args: CommandLineOptions = commandLineArgs(cliOptions);
+console.log('Running signup query...');
 printArgs(args);
 
 if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
@@ -52,4 +70,4 @@ config.update({
 countSignups({
   startDate: args.start,
   endDate: args.end,
-}).then(counts => console.log(counts));
+}).then((counts: SignupCountResult) => printResult(counts));

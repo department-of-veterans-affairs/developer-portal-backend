@@ -7,7 +7,7 @@ export const apisToAcls = {
   verification: 'veteran_verification',
 };
 
-export const apisToProperNames = {
+export const APIS_TO_PROPER_NAMES = {
   appeals: 'Appeals Status API',
   benefits: 'Benefits Intake API',
   claims: 'Claims API',
