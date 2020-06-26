@@ -105,11 +105,14 @@ const countApiSignups = (uniqueSignups: AttributeMap[]): ApiSignupCounts => {
   });
 
   return apiCounts;
-}
+};
 
-export const getUniqueSignups = async (options: SignupQueryOptions): Promise<AttributeMap[]> => {
-  const signups = await querySignups();
-  let signupsByEmail: { [email: string]: AttributeMap } = {};
+export const getFirstTimeSignups = async (options: SignupQueryOptions): Promise<AttributeMap[]> => {
+  const signups = await querySignups({
+    endDate: options.endDate,
+  });
+
+  const signupsByEmail: { [email: string]: AttributeMap } = {};
   signups.forEach((signup: AttributeMap) => {
     const existingSignup = signupsByEmail[signup.email.toString()];
     if (!existingSignup || signup.createdAt < existingSignup.createdAt) {
@@ -122,10 +125,10 @@ export const getUniqueSignups = async (options: SignupQueryOptions): Promise<Att
     const endDate = options.endDate || moment('3000');
     return signup.createdAt >= startDate.toISOString() && signup.createdAt <= endDate.toISOString();
   });
-}
+};
 
-export const countSignups = async (options: SignupQueryOptions) => {
-  const uniqueSignups: AttributeMap[] = await getUniqueSignups(options);
+export const countSignups = async (options: SignupQueryOptions): Promise<SignupCountResult> => {
+  const uniqueSignups: AttributeMap[] = await getFirstTimeSignups(options);
   return {
     total: uniqueSignups.length,
     apiCounts: countApiSignups(uniqueSignups),

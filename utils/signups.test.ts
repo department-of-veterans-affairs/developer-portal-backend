@@ -29,7 +29,7 @@
     Apr 2020: 38 signups, 4 users, no users signing up for the first time
     May 2020: 16 signups, 2 users, 1 user signing up for the first time
 
-  Tests for getUniqueSignups and countSignups use Jan 2019, July 2019, Nov 2019,
+  Tests for getFirstTimeSignups and countSignups use Jan 2019, July 2019, Nov 2019,
   Jan 2020, Mar 2020, and May 2020 as test data.
 */
 
@@ -37,7 +37,7 @@ import 'jest';
 import { config } from 'aws-sdk';
 import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import moment from 'moment';
-import { querySignups, countSignups, getUniqueSignups } from './signups';
+import { querySignups, countSignups, getFirstTimeSignups } from './signups';
 
 const compareItemsByCreatedDate = (item1: AttributeMap, item2: AttributeMap): number => {
   if (item1.createdAt < item2.createdAt) {
@@ -136,9 +136,9 @@ describeFunc('signups module', () => {
     });
   });
 
-  describe('getUniqueSignups', () => {
+  describe('getFirstTimeSignups', () => {
     it('gets all unique signups', async () => {
-      const signups = await getUniqueSignups({});
+      const signups = await getFirstTimeSignups({});
       expect(signups.length).toBeGreaterThanOrEqual(48);
 
       signups.sort(compareItemsByCreatedDate);
@@ -151,8 +151,8 @@ describeFunc('signups module', () => {
 
     // 28 total signups, 3 users
     // no users with previous duplicates because there is no start date
-    it('gets unique signups before a specific date (September 2018)', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups before a specific date (September 2018)', async () => {
+      const signups = await getFirstTimeSignups({
         endDate: moment('2018-09-30').endOf('month'),
       });
       expect(signups.length).toBe(3);
@@ -172,8 +172,8 @@ describeFunc('signups module', () => {
     });
 
     // 6 signups, 2 users, 1 user signing up for the first time (as of 6/25/20)
-    it('gets unique signups after a specific date (June 2020)', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups after a specific date (June 2020)', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2020-06-01').startOf('month'),
       });
       expect(signups.length).toBeGreaterThanOrEqual(1);
@@ -187,8 +187,8 @@ describeFunc('signups module', () => {
     });
 
     // 11 signups, 7 users, 6 users signing up for the first time
-    it('gets unique signups for Jan 2019', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for Jan 2019', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2019-01-01').startOf('month'),
         endDate: moment('2019-01-01').endOf('month'),
       });
@@ -209,8 +209,8 @@ describeFunc('signups module', () => {
     });
 
     // 14 signups, 7 users, 5 users signing up for the first time
-    it('gets unique signups for Jul 2019', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for Jul 2019', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2019-07-01').startOf('month'),
         endDate: moment('2019-07-01').endOf('month'),
       });
@@ -231,8 +231,8 @@ describeFunc('signups module', () => {
     });
 
     // Nov 2019: 17 signups, 9 users, 4 signing up for the first time
-    it('gets unique signups for Nov 2019', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for Nov 2019', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2019-11-01').startOf('month'),
         endDate: moment('2019-11-01').endOf('month'),
       });
@@ -253,8 +253,8 @@ describeFunc('signups module', () => {
     });
 
     // 24 signups, 7 users, 4 users signing up for the first time
-    it('gets unique signups for Jan 2020', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for Jan 2020', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2020-01-01').startOf('month'),
         endDate: moment('2020-01-01').endOf('month'),
       });
@@ -275,8 +275,8 @@ describeFunc('signups module', () => {
     });
 
     // 5 signups, 3 users, no users signing up for the first time
-    it('gets unique signups for Mar 2020', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for Mar 2020', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2020-03-01').startOf('month'),
         endDate: moment('2020-03-01').endOf('month'),
       });
@@ -284,8 +284,8 @@ describeFunc('signups module', () => {
     });
 
     // 16 signups, 2 unique users, 1 user signing up for the first time
-    it('gets unique signups for May 2020', async () => {
-      const signups = await getUniqueSignups({
+    it('gets first-time signups for May 2020', async () => {
+      const signups = await getFirstTimeSignups({
         startDate: moment('2020-05-01').startOf('month'),
         endDate: moment('2020-05-31').endOf('month'),
       });
