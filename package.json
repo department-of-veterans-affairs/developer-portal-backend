@@ -20,7 +20,6 @@
     "command-line-args": "^5.1.1",
     "express": "~4.16.1",
     "handlebars": "^4.7.3",
-    "lodash.filter": "^4.6.0",
     "lodash.pick": "^4.4.0",
     "morgan": "~1.9.1",
     "request": "^2.88.2",

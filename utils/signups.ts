@@ -1,7 +1,6 @@
 import { AWSError } from 'aws-sdk';
 import { AttributeMap, DocumentClient, ScanInput } from 'aws-sdk/clients/dynamodb';
-import filter from 'lodash.filter';
-import moment, { Moment } from 'moment';
+import { Moment } from 'moment';
 
 const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
 
@@ -65,22 +64,55 @@ export const querySignups = async (options: SignupQueryOptions = {}): Promise<At
   );
 };
 
-export interface ApiSignupCounts {
-  benefits: number;
-  facilities: number;
-  vaForms: number;
-  confirmation: number;
-  health: number;
-  communityCare: number;
-  verification: number;
-  claims: number;
-}
+export const getUniqueSignups = async (options: SignupQueryOptions): Promise<AttributeMap[]> => {
+  const signups = await querySignups(options);
+  const signupsByEmail: { [email: string]: AttributeMap } = {};
+  signups.forEach((signup: AttributeMap) => {
+    const existingSignup = signupsByEmail[signup.email.toString()];
+    if (!existingSignup || signup.createdAt < existingSignup.createdAt) {
+      signupsByEmail[signup.email.toString()] = signup;
+    }
+  });
+  
+  return Object.values(signupsByEmail);
+};
 
-export interface SignupCountResult {
-  total: number;
-  apiCounts: ApiSignupCounts;
-}
-
+const isDuplicateSignup = async (signup: AttributeMap): Promise<boolean> => {
+  // todo extract, preferably once we go to a service (also in querySignups)
+  const tableName = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
+  const dynamoClient = new DocumentClient({
+    httpOptions: {
+      timeout: 5000,
+    },
+    maxRetries: 1,
+  });
+  
+  return await new Promise<boolean>((resolve, reject) => {
+    dynamoClient.query({
+      TableName: tableName,
+      ExpressionAttributeValues: {
+        ':email': signup.email,
+        ':signupDate': signup.createdAt,
+      },
+      KeyConditionExpression: 'email = :email and createdAt < :signupDate'
+    }, (error: AWSError, data: DocumentClient.QueryOutput) => {
+      if (error) {
+        reject(error);
+      } else {
+        const isDuplicate = data.Items && data.Items.length > 0;
+        resolve(isDuplicate);
+      }
+    });
+  });
+};
+  
+export const getFirstTimeSignups = async (options: SignupQueryOptions): Promise<AttributeMap[]> => {
+  const signups = await getUniqueSignups(options);
+  const duplicates: boolean[] = await Promise.all(signups.map(isDuplicateSignup))
+  
+  return signups.filter((signup: AttributeMap, index: number): boolean => !duplicates[index]);
+};
+  
 const countApiSignups = (uniqueSignups: AttributeMap[]): ApiSignupCounts => {
   const apiCounts = {
     benefits: 0,
@@ -107,26 +139,22 @@ const countApiSignups = (uniqueSignups: AttributeMap[]): ApiSignupCounts => {
   return apiCounts;
 };
 
-export const getFirstTimeSignups = async (options: SignupQueryOptions): Promise<AttributeMap[]> => {
-  const signups = await querySignups({
-    endDate: options.endDate,
-  });
+export interface ApiSignupCounts {
+  benefits: number;
+  facilities: number;
+  vaForms: number;
+  confirmation: number;
+  health: number;
+  communityCare: number;
+  verification: number;
+  claims: number;
+}
 
-  const signupsByEmail: { [email: string]: AttributeMap } = {};
-  signups.forEach((signup: AttributeMap) => {
-    const existingSignup = signupsByEmail[signup.email.toString()];
-    if (!existingSignup || signup.createdAt < existingSignup.createdAt) {
-      signupsByEmail[signup.email.toString()] = signup;
-    }
-  });
-
-  return filter(signupsByEmail, (signup: AttributeMap) => {
-    const startDate = options.startDate || moment('2000');
-    const endDate = options.endDate || moment('3000');
-    return signup.createdAt >= startDate.toISOString() && signup.createdAt <= endDate.toISOString();
-  });
-};
-
+export interface SignupCountResult {
+  total: number;
+  apiCounts: ApiSignupCounts;
+}
+  
 export const countSignups = async (options: SignupQueryOptions): Promise<SignupCountResult> => {
   const uniqueSignups: AttributeMap[] = await getFirstTimeSignups(options);
   return {
