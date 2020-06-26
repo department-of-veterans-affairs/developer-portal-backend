@@ -1,0 +1,41 @@
+import { DynamoDB } from 'aws-sdk';
+import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
+
+export default class DynamoService implements MonitoredService {
+  public client: DynamoDB.DocumentClient;
+
+  constructor(config: DynamoConfig) {
+    this.client = new DynamoDB.DocumentClient(config);
+  }
+  
+  // DynamoDB is considered healthy if a table scan can return a record
+  public async healthCheck(): Promise<ServiceHealthCheckResponse> {
+    const tableName: string = process.env.DYNAMODB_TABLE || 'Users';
+    
+    return new Promise((resolve, reject) => {
+      try {
+        const params = {
+          Limit: 1,
+          TableName: tableName,
+        };
+
+        this.client.scan(params, (err, data) => {
+          if (err) {
+            throw new Error(`DynamoDB did not return a record: ${err.message}`);
+          }
+          resolve({
+            serviceName: 'Dynamo',
+            healthy: true,
+          });
+        });
+      } catch (err) {
+        err.action = 'checking health of DynamoDB';
+        resolve({
+          serviceName: 'Dynamo',
+          healthy: false,
+          err: err
+        });
+      }
+    });
+  }
+}
