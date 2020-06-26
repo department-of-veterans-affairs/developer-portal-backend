@@ -1,4 +1,5 @@
 import axios, {AxiosInstance } from 'axios';
+import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 
 /* 
 WebhookOptions override the defaults configured in the webhook
@@ -13,7 +14,7 @@ interface WebhookOptions {
   icon?: string;
 }
 
-export default class SlackService {
+export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
   private options: WebhookOptions;
 
@@ -51,5 +52,13 @@ export default class SlackService {
       }
       throw err;
     }
+  }
+
+  // Slack is considered healthy if <insert criteria>
+  public async healthCheck(): Promise<ServiceHealthCheckResponse> {
+    return await Promise.resolve({
+      serviceName: 'Slack',
+      healthy: true,
+    });
   }
 }

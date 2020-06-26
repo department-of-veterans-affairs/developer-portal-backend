@@ -76,3 +76,17 @@ export interface OktaApplication {
   client_secret?: string;
   toOktaApp: () => OAuthApplication;
 }
+
+export interface MonitoredService {
+  healthCheck: () => Promise<ServiceHealthCheckResponse>;
+}
+
+export interface ServiceHealthCheckResponse {
+  serviceName: string;
+  healthy: boolean;
+  err?: {
+    message: string;
+    stack?: string;
+    action?: string;
+  };
+}

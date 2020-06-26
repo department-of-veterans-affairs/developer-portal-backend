@@ -1,9 +1,8 @@
 import request from 'request-promise-native';
 import { format } from 'url';
 import { apisToAcls } from '../config';
-import { KongConfig, KongUser, Protocol } from '../types';
+import { KongConfig, KongUser, MonitoredService, Protocol, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
-import { ServiceHealthCheckResponse } from '../models/HealthCheck';
 
 interface ConsumerRequest {
   username: string;
@@ -45,7 +44,7 @@ export interface KongKeyResponse {
   id: string;
 }
 
-export default class KongService {
+export default class KongService implements MonitoredService {
   public apiKey: string;
   public host: string;
   public port: number;
