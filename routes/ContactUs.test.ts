@@ -219,6 +219,32 @@ describe('validations', () => {
       const result = contactSchema.validate(payload);
       expect(result.error.message).toEqual('"organization" must be a string');
     });
+
+    it('is allowed to be empty', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        organization: '',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error).toBe(undefined);
+    });
+
+    it('accepts other strings', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        organization: 'The Fellowship',
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error).toBe(undefined);
+    });
   });
 
   describe('apis', () => {
@@ -246,6 +272,19 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
       expect(result.error.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
+    });
+
+    it('allows an empty array', () => {
+      const payload = {
+        firstName: 'Samwise',
+        lastName: 'Gamegee',
+        email: 'samwise@thefellowship.org',
+        description: 'Need help getting to Mt. Doom',
+        apis: [],
+      };
+
+      const result = contactSchema.validate(payload);
+      expect(result.error).toBe(undefined);
     });
   });
 

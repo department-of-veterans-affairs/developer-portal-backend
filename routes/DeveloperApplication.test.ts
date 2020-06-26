@@ -349,6 +349,22 @@ describe('validations', () => {
       const result = applySchema.validate(payload);
       expect(result.error.message).toEqual('"description" must be a string');
     });
+
+    it('is allowed to be an empty string', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        description: '',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+      };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error).toEqual(undefined);
+    });
   });
 
   describe('email', () => {
@@ -394,6 +410,21 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
       expect(result.error.message).toEqual('"oAuthRedirectURI" must be a string');
+    });
+
+    it('is a uri', () => {
+      const payload = {
+        apis: 'benefits',
+        email: 'eowyn@rohan.horse',
+        firstName: 'Eowyn',
+        lastName: 'Eorl',
+        organization: 'Rohan',
+        termsOfService: true,
+        oAuthRedirectURI: 'horsiesAreCool',
+      };
+
+      const result = applySchema.validate(payload);
+      expect(result.error.message).toEqual('"oAuthRedirectURI" must be a valid uri');
     });
   });
 
