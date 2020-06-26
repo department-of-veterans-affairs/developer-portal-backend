@@ -1,4 +1,3 @@
-import { DynamoDB } from 'aws-sdk';
 import pick from 'lodash.pick';
 import process from 'process';
 import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
@@ -8,6 +7,7 @@ import OktaService from '../services/OktaService';
 import SlackService from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
+import DynamoService from '../services/DynamoService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
@@ -99,7 +99,7 @@ export default class User implements KongUser, GovDeliveryUser {
     }
   }
 
-  public saveToDynamo(client: DynamoDB.DocumentClient): Promise<User> {
+  public saveToDynamo(service: DynamoService): Promise<User> {
     const dynamoItem = pick(this, [
       'apis',
       'email',
@@ -132,7 +132,7 @@ export default class User implements KongUser, GovDeliveryUser {
         TableName: this.tableName,
       };
 
-      client.put(params, (err) => {
+      service.client.put(params, (err) => {
         if (err) {
           const dynamoErr = new Error(err.message);
           reject(dynamoErr);

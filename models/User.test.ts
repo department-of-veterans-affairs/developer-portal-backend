@@ -8,6 +8,7 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import OktaService from '../services/OktaService';
 import Application from './Application';
 import SlackService from '../services/SlackService';
+import DynamoService from '../services/DynamoService';
 
 const mockCreateOktaApplication = jest.fn();
 jest.mock('./Application', () => {
@@ -134,6 +135,7 @@ describe('User', () => {
   describe('saveToDynamo', () => {
     const mockPut = jest.fn();
     const dynamoClient = { put: mockPut } as unknown as DynamoDB.DocumentClient;
+    const dynamo = { client: dynamoClient } as DynamoService;
     let form: FormSubmission;
 
     beforeEach(() => {
@@ -156,7 +158,7 @@ describe('User', () => {
     });
 
     it('uses dynamo put to save items', async () => {
-      const userResult = await user.saveToDynamo(dynamoClient);
+      const userResult = await user.saveToDynamo(dynamo);
 
       expect(userResult).toEqual(user);
     });
@@ -168,7 +170,7 @@ describe('User', () => {
       });
 
       try {
-        await user.saveToDynamo(dynamoClient);
+        await user.saveToDynamo(dynamo);
       } catch (err) {
         expect(err).toEqual(error);
       }
@@ -177,7 +179,7 @@ describe('User', () => {
     // The DynamoDB API breaks if empty strings are passed in
     it('converts empty strings in user model to nulls', async () => {
       const user = new User(form);
-      await user.saveToDynamo(dynamoClient);
+      await user.saveToDynamo(dynamo);
 
       expect(mockPut.mock.calls[0][0]['Item']['oAuthRedirectURI']).toEqual(null);
     });
@@ -189,7 +191,7 @@ describe('User', () => {
         client_id: 'xyz456',
       } as unknown as Application;
 
-      await user.saveToDynamo(dynamoClient);
+      await user.saveToDynamo(dynamo);
 
       expect(mockPut.mock.calls[0][0]['Item']).toEqual(expect.objectContaining({
         okta_application_id: 'abc123',
@@ -200,7 +202,7 @@ describe('User', () => {
     it('avoids saving okta ids if they do not exist', async () => {
       const user = new User(form);
 
-      await user.saveToDynamo(dynamoClient);
+      await user.saveToDynamo(dynamo);
 
       const calledParams = Object.keys(mockPut.mock.calls[0][0]['Item']);
       expect(calledParams).not.toContain('okta_application_id');

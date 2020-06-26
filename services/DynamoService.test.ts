@@ -5,6 +5,10 @@ import DynamoService from './DynamoService';
 describe("DynamoService", () => {
   let service: DynamoService;
   let mockScan: jest.SpyInstance;
+  // const mockScan = jest.fn().mockImplementation((params, cb) => {
+  //   cb(null, params);
+  // });
+  // const mockDynamoDBClient = { scan: mockScan } as unknown as DynamoDB.DocumentClient;
 
   beforeEach(() => {
     service = new DynamoService({

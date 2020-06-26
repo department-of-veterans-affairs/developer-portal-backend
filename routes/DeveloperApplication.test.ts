@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { DynamoDB } from 'aws-sdk';
 import KongService from '../services/KongService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import OktaService from '../services/OktaService';
+import DynamoService from '../services/DynamoService';
 import developerApplicationHandler, { applySchema } from '../routes/DeveloperApplication';
 
 // The mocking that follows that is outside of the describe block is
@@ -39,7 +39,7 @@ jest.mock('../models/User', () => {
 describe('developerApplicationHandler', () => {
   const kong = {} as KongService;
   const okta = {} as OktaService;
-  const dynamo = {} as DynamoDB.DocumentClient;
+  const dynamo = {} as DynamoService;
   const govDelivery = {} as GovDeliveryService;
   const slack = {} as SlackService;
 
