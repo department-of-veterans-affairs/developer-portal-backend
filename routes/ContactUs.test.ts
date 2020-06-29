@@ -117,184 +117,134 @@ describe('contactUsHandler', () => {
 });
 
 describe('validations', () => {
+  const defaultPayload = {
+    firstName: 'Samwise',
+    lastName: 'Gamgee',
+    email: 'samwise@thefellowship.org',
+    description: 'Need help getting to Mt. Doom',
+  };
+
   describe('firstName', () => {
     it('is required', () => {
-      const payload = {
-        lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, firstName: undefined};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"firstName" is required');
     });
 
     it('is a string', () => {
-      const payload = {
-        firstName: 1234,
-        lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, firstName: 1234};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"firstName" must be a string');
     });
   });
 
   describe('lastName', () => {
     it('is required', () => {
-      const payload = {
-        firstName: 'Samwise',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, lastName: undefined};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"lastName" is required');
     });
 
     it('is a string', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: { name: 'Gamegee' },
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, lastName: { name: 'Gamegee' }};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"lastName" must be a string');
     });
   });
 
   describe('email', () => {
     it('is required', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, email: undefined};
 
       const result = contactSchema.validate(payload);
+      
       expect(result.error.message).toEqual('"email" is required');
     });
 
     it('is in a valid format', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'http://theyaretakingthehobbitstoisengard.com',
-        description: 'Need help getting to Mt. Doom',
-      };
+      const payload = {...defaultPayload, email: 'http://theyaretakingthehobbitstoisengard.com'};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"email" must be a valid email');
     });
   });
 
   describe('description', () => {
     it('is a string', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: { potatoes: 'boil em, mash em, stick em in a stew' },
-      };
+      const payload = {...defaultPayload, description: { potatoes: 'boil em, mash em, stick em in a stew' }};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"description" must be a string');
     });
   });
 
   describe('organization', () => {
     it('is a string', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        organization: ['The', 'Fellowship'],
-      };
+      const payload = {...defaultPayload, organization: ['The', 'Fellowship']};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"organization" must be a string');
     });
 
     it('is allowed to be empty', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        organization: '',
-      };
+      const payload = {...defaultPayload, organization: ''};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error).toBe(undefined);
     });
 
     it('accepts other strings', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        organization: 'The Fellowship',
-      };
+      const payload = {...defaultPayload, organization: 'The Fellowship'};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error).toBe(undefined);
     });
   });
 
   describe('apis', () => {
     it('is an array', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        apis: 'health,benefits,facilities',
-      };
+      const payload = {...defaultPayload, apis: 'health,benefits,facilities' };
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"apis" must be an array');
     });
 
     it('is an array of strings', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        apis: [1, 2],
-      };
+      const payload = {...defaultPayload, apis: [1, 2]};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
     });
 
     it('allows an empty array', () => {
-      const payload = {
-        firstName: 'Samwise',
-        lastName: 'Gamegee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-        apis: [],
-      };
+      const payload = {...defaultPayload, apis: []};
 
       const result = contactSchema.validate(payload);
+
       expect(result.error).toBe(undefined);
     });
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {
-      email: 'samwise@thefellowship.org',
-      description: 'Need help getting to Mt. Doom',
-    };
+    const payload = {...defaultPayload, firstName: undefined, lastName: undefined};
 
     const result = contactSchema.validate(payload);
+
     expect(result.error.message).toEqual('"firstName" is required. "lastName" is required');
   });
 });
