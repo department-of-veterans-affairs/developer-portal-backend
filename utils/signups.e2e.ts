@@ -42,6 +42,7 @@ import {
   getFirstTimeSignups, 
   getUniqueSignups,
   Signup,
+  isDuplicateSignup,
 } from './signups';
 
 const compareItemsByCreatedDate = (item1: Signup, item2: Signup): number => {
@@ -310,6 +311,28 @@ describeFunc('signups module', () => {
         createdAt: '2020-05-29T19:31:41.494Z',
         apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
+    });
+  });
+
+  describe('isDuplicateSignup', () => {
+    it('returns false for a first-time signup', async () => {
+      const result = await isDuplicateSignup({
+        email: 'mike.lumetta@adhoc.team',
+        createdAt: '2020-05-29T19:31:41.494Z',
+        apis: 'health,vaForms',
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true for a repeat signup', async () => {
+      const result = await isDuplicateSignup({
+        email: 'ryan.travitz@adhocteam.us',
+        createdAt: '2020-05-05T14:13:42.108Z',
+        apis: 'facilities',
+      });
+
+      expect(result).toBe(true);
     });
   });
 

@@ -103,7 +103,7 @@ export const getUniqueSignups = async (options: SignupQueryOptions): Promise<Sig
   return uniqueSignups;
 };
 
-const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
+export const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
   // todo extract, preferably once we go to a service (also in querySignups)
   const tableName = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   const dynamoClient = new DocumentClient({
@@ -134,7 +134,7 @@ const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
   
 export const getFirstTimeSignups = async (options: SignupQueryOptions): Promise<Signup[]> => {
   const signups = await getUniqueSignups(options);
-  const duplicates: boolean[] = await Promise.all(signups.map(isDuplicateSignup))
+  const duplicates: boolean[] = await Promise.all(signups.map(isDuplicateSignup));
   
   return signups.filter((signup: Signup, index: number): boolean => !duplicates[index]);
 };
