@@ -12,6 +12,7 @@ module.exports = {
       statements: 80,
     },
   },
+  testMatch: ['**/?(*.)+(e2e|test).[jt]s?(x)'],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/'

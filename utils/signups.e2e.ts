@@ -35,11 +35,16 @@
 
 import 'jest';
 import { config } from 'aws-sdk';
-import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import moment from 'moment';
-import { querySignups, countSignups, getFirstTimeSignups, getUniqueSignups } from './signups';
+import { 
+  querySignups, 
+  countSignups, 
+  getFirstTimeSignups, 
+  getUniqueSignups,
+  Signup,
+} from './signups';
 
-const compareItemsByCreatedDate = (item1: AttributeMap, item2: AttributeMap): number => {
+const compareItemsByCreatedDate = (item1: Signup, item2: Signup): number => {
   if (item1.createdAt < item2.createdAt) {
     return -1;
   } else if (item2.createdAt < item1.createdAt) {
@@ -56,7 +61,7 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
 }
 
 describeFunc('signups module', () => {
-  let originalTable: string;
+  let originalTable: string | undefined;
   beforeAll(() => {
     originalTable = process.env.DYNAMODB_TABLE;
     process.env.DYNAMODB_TABLE = 'dvp-dev-developer-portal-users';
@@ -66,7 +71,9 @@ describeFunc('signups module', () => {
   });
 
   afterAll(() => {
-    process.env.DYNAMODB_TABLE = originalTable;
+    if (originalTable) {
+      process.env.DYNAMODB_TABLE = originalTable;
+    }
   });
 
   describe('querySignups', () => {
@@ -148,7 +155,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ed@adhocteam.us',
         createdAt: '2018-09-19T18:57:37.052Z',
-        apis: 'facilities,verification',
+        apis: 'benefits,facilities,health,verification',
       });
 
       expect(signups[signups.length - 1]).toEqual({
@@ -169,7 +176,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ryan.travitz@adhocteam.us',
         createdAt: '2020-06-01T22:50:36.448Z',
-        apis: 'facilities',
+        apis: 'benefits,claims,facilities',
       });
     });
 
@@ -207,7 +214,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'kalil@adhocteam.us',
         createdAt: '2019-07-03T14:37:07.793Z',
-        apis: 'benefits',
+        apis: 'benefits,health',
       });
 
       expect(signups[signups.length - 1]).toEqual({
@@ -251,13 +258,13 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'jeff.dunn@oddball.io',
         createdAt: '2020-01-11T20:43:26.992Z',
-        apis: 'verification',
+        apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
 
       expect(signups[signups.length - 1]).toEqual({
         email: 'will.huang@adhocteam.us',
         createdAt: '2020-01-16T19:18:49.117Z',
-        apis: 'benefits,communityCare,confirmation,facilities,vaForms,verification',
+        apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
     });
 
@@ -295,19 +302,19 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ryan.travitz@adhocteam.us',
         createdAt: '2020-05-05T14:13:42.108Z',
-        apis: 'facilities',
+        apis: 'facilities,health,verification',
       });
 
       expect(signups[signups.length - 1]).toEqual({
         email: 'mike.lumetta@adhoc.team',
         createdAt: '2020-05-29T19:31:41.494Z',
-        apis: 'health,vaForms',
+        apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
     });
   });
 
   describe('getFirstTimeSignups', () => {
-    it('gets all unique signups', async () => {
+    it('gets all first-time signups', async () => {
       const signups = await getFirstTimeSignups({});
       expect(signups.length).toBeGreaterThanOrEqual(48);
 
@@ -315,7 +322,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ed@adhocteam.us',
         createdAt: '2018-09-19T18:57:37.052Z',
-        apis: 'facilities,verification',
+        apis: 'benefits,facilities,health,verification',
       });
     });
 
@@ -331,7 +338,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ed@adhocteam.us',
         createdAt: '2018-09-19T18:57:37.052Z',
-        apis: 'facilities,verification',
+        apis: 'benefits,facilities,health,verification',
       });
 
       expect(signups[signups.length - 1]).toEqual({
@@ -440,7 +447,7 @@ describeFunc('signups module', () => {
       expect(signups[signups.length - 1]).toEqual({
         email: 'willhuang@adhocteam.us',
         createdAt: '2020-01-16T18:41:28.938Z',
-        apis: 'confirmation',
+        apis: 'benefits,communityCare,confirmation,facilities,vaForms,verification',
       });
     });
 
@@ -464,7 +471,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'mike.lumetta@adhoc.team',
         createdAt: '2020-05-29T19:31:41.494Z',
-        apis: 'health,vaForms',
+        apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
     });
   });
@@ -491,10 +498,10 @@ describeFunc('signups module', () => {
         total: 3,
         apiCounts: {
           ... zeroCounts,
-          benefits: 2,
-          facilities: 2,
-          health: 1,
-          verification: 2,
+          benefits: 3,
+          facilities: 3,
+          health: 3,
+          verification: 3,
         },
       });
     });
@@ -522,7 +529,7 @@ describeFunc('signups module', () => {
         total: 6,
         apiCounts: {
           ... zeroCounts,
-          benefits: 2,
+          benefits: 3,
           verification: 1,
           facilities: 5,
           health: 1,
@@ -564,6 +571,7 @@ describeFunc('signups module', () => {
           ... zeroCounts,
           benefits: 2,
           vaForms: 2,
+          verification: 1,
         },
       });
     });
@@ -579,11 +587,13 @@ describeFunc('signups module', () => {
         total: 4,
         apiCounts: {
           ... zeroCounts,
-          benefits: 1,
+          benefits: 3,
           claims: 1,
-          facilities: 1,
-          confirmation: 1,
-          verification: 1,
+          communityCare: 1,
+          facilities: 2,
+          confirmation: 2,
+          vaForms: 2,
+          verification: 3,
         },
       });
     });
@@ -611,9 +621,14 @@ describeFunc('signups module', () => {
       expect(result).toEqual({
         total: 1,
         apiCounts: {
-          ... zeroCounts,
+          benefits: 1,
+          claims: 1,
+          communityCare: 1,
+          confirmation: 1,
+          facilities: 1,
           health: 1,
           vaForms: 1,
+          verification: 1,
         },
       });
     });
