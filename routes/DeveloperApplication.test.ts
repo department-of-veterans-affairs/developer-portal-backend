@@ -362,6 +362,14 @@ describe('validations', () => {
 
       expect(result.error.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
     });
+
+    it('is allowed to be an empty string', () => {
+      const payload = { ...defaultPayload, oAuthRedirectURI: '' };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error).toBe(undefined);
+    });
   });
 
   describe('oAuthApplicationType', () => {
@@ -371,6 +379,14 @@ describe('validations', () => {
       const result = applySchema.validate(payload);
 
       expect(result.error.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
+    });
+
+    it('is allowed to be an empty string', () => {
+      const payload = { ...defaultPayload, oAuthApplicationType: '' };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error).toBe(undefined);
     });
   });
 
