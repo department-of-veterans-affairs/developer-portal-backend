@@ -44,7 +44,17 @@ const buildFilterParams = (options: SignupQueryOptions): Partial<ScanInput> => {
   return filterParams;
 };
 
-export const querySignups = async (options: SignupQueryOptions = {}): Promise<Signup[]> => {
+const mapItemsToSignups = (items: AttributeMap[]): Signup[] => {
+  return items.map(item => {
+    return { 
+      email: item.email.toString(),
+      createdAt: item.createdAt.toString(),
+      apis: item.apis.toString(),
+    };
+  });
+};
+
+export const querySignups = (options: SignupQueryOptions = {}): Promise<Signup[]> => {
   const tableName = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   const dynamoClient = new DocumentClient({
     httpOptions: {
@@ -53,7 +63,7 @@ export const querySignups = async (options: SignupQueryOptions = {}): Promise<Si
     maxRetries: 1,
   });
 
-  return await new Promise<Signup[]>(
+  return new Promise<Signup[]>(
     (resolve, reject) => {
       dynamoClient.scan({
         TableName: tableName,
@@ -63,14 +73,7 @@ export const querySignups = async (options: SignupQueryOptions = {}): Promise<Si
         if (error) {
           reject(error);
         } else {
-          const signups: Signup[] = (data.Items || []).map((signup: AttributeMap): Signup => {
-            return { 
-              email: signup.email.toString(),
-              createdAt: signup.createdAt.toString(),
-              apis: signup.apis.toString()
-            };
-          });
-
+          const signups: Signup[] = mapItemsToSignups(data.Items || []);
           resolve(signups);
         }
       });
@@ -103,7 +106,7 @@ export const getUniqueSignups = async (options: SignupQueryOptions): Promise<Sig
   return uniqueSignups;
 };
 
-export const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
+export const getPreviousSignups = (signup: Signup): Promise<Signup[]> => {
   // todo extract, preferably once we go to a service (also in querySignups)
   const tableName = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   const dynamoClient = new DocumentClient({
@@ -113,7 +116,7 @@ export const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
     maxRetries: 1,
   });
   
-  return await new Promise<boolean>((resolve, reject) => {
+  return new Promise<Signup[]>((resolve, reject) => {
     dynamoClient.query({
       TableName: tableName,
       ExpressionAttributeValues: {
@@ -125,44 +128,10 @@ export const isDuplicateSignup = async (signup: Signup): Promise<boolean> => {
       if (error) {
         reject(error);
       } else {
-        const isDuplicate = data.Items && data.Items.length > 0;
-        resolve(isDuplicate);
+        resolve(mapItemsToSignups(data.Items || []));
       }
     });
   });
-};
-  
-export const getFirstTimeSignups = async (options: SignupQueryOptions): Promise<Signup[]> => {
-  const signups = await getUniqueSignups(options);
-  const duplicates: boolean[] = await Promise.all(signups.map(isDuplicateSignup));
-  
-  return signups.filter((signup: Signup, index: number): boolean => !duplicates[index]);
-};
-  
-const countApiSignups = (uniqueSignups: Signup[]): ApiSignupCounts => {
-  const apiCounts = {
-    benefits: 0,
-    facilities: 0,
-    vaForms: 0,
-    confirmation: 0,
-    health: 0,
-    communityCare: 0,
-    verification: 0,
-    claims: 0,
-  };
-
-  uniqueSignups.forEach((signup: Signup) => {
-    const consumerApis = signup.apis.toString().split(',');
-    consumerApis.forEach((api: string) => {
-      if (!(api in apiCounts)) {
-        throw new Error(`Encountered unknown API: ${api}`);
-      }
-
-      apiCounts[api]++;
-    });
-  });
-
-  return apiCounts;
 };
 
 export interface ApiSignupCounts {
@@ -182,9 +151,42 @@ export interface SignupCountResult {
 }
   
 export const countSignups = async (options: SignupQueryOptions): Promise<SignupCountResult> => {
-  const uniqueSignups: Signup[] = await getFirstTimeSignups(options);
-  return {
-    total: uniqueSignups.length,
-    apiCounts: countApiSignups(uniqueSignups),
+  const result = {
+    total: 0,
+    apiCounts: {
+      benefits: 0,
+      facilities: 0,
+      vaForms: 0,
+      confirmation: 0,
+      health: 0,
+      communityCare: 0,
+      verification: 0,
+      claims: 0,
+    },
   };
+
+  const uniqueSignups: Signup[] = await getUniqueSignups(options);
+  for (let i = 0; i < uniqueSignups.length; i++) {
+    const previousSignups = await getPreviousSignups(uniqueSignups[i]);
+    const newApis = new Set<string>(uniqueSignups[i].apis.split(','));
+    if (previousSignups.length === 0) {
+      result.total++;
+    } else {
+      previousSignups.forEach((signup: Signup) => {
+        signup.apis.split(',').forEach((apiId: string) => {
+          newApis.delete(apiId);
+        });
+      });
+    }
+
+    newApis.forEach((apiId: string) => {
+      if (!(apiId in result.apiCounts)) {
+        throw new Error(`Encountered unknown API: ${apiId}`);
+      }
+
+      result.apiCounts[apiId]++;
+    });
+  }
+  
+  return result;
 };

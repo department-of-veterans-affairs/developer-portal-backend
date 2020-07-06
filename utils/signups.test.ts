@@ -74,63 +74,11 @@ describe('getUniqueSignups', () => {
   });
 });
 
-describe('getFirstTimeSignups', () => {
-  let mockGetUniqueSignups, mockIsDuplicate;
-  beforeAll(() => {
-    mockGetUniqueSignups = jest.spyOn(signups, 'getUniqueSignups');
-    mockIsDuplicate = jest.spyOn(signups, 'isDuplicateSignup');
-  })
-
-  beforeEach(() => {
-    mockGetUniqueSignups.mockClear();
-    mockIsDuplicate.mockClear();
-
-    mockIsDuplicate.mockResolvedValue(false);
-  });
-
-  it('calls getUniqueSignups', async () => {
-    await signups.getFirstTimeSignups({});
-    expect(mockGetUniqueSignups).toHaveBeenCalled();
-  });
-
-  it("returns all signups from getUniqueSignups if they aren't duplicates", async () => {
-    const signup = {
-      email: 'frodo@theshire.com',
-      createdAt: '2020-06-29T14:00:00.000Z',
-      apis: 'facilities',
-    };
-
-    mockGetUniqueSignups.mockResolvedValue([signup]);
-    const result = await signups.getFirstTimeSignups({});
-    expect(result).toStrictEqual([signup]);
-  });
-
-  it('does not return duplicate signups', async () => {
-    const firstSignup = {
-      email: 'samwise.gamgee@theshire.com',
-      createdAt: '2020-06-29T14:00:00.000Z',
-      apis: 'facilities',
-    };
-
-    mockGetUniqueSignups.mockResolvedValue([
-      {
-        email: 'frodo@theshire.com',
-        createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'facilities',
-      },
-      firstSignup,
-    ]);
-
-    mockIsDuplicate.mockResolvedValueOnce(true);
-    const result = await signups.getFirstTimeSignups({});
-    expect(result).toStrictEqual([firstSignup]);
-  });
-});
-
 describe('countSignups', () => {
-  let mockFirstTimeSignups;
+  let mockUniqueSignups;
+  let mockPreviousSignups;
   beforeAll(() => {
-    mockFirstTimeSignups = jest.spyOn(signups, 'getFirstTimeSignups').mockResolvedValue([
+    mockUniqueSignups = jest.spyOn(signups, 'getUniqueSignups').mockResolvedValue([
       {
         email: 'frodo.baggins@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
@@ -152,33 +100,93 @@ describe('countSignups', () => {
         apis: 'benefits,claims,facilities,health,confirmation',
       },
     ]);
+
+    mockPreviousSignups = jest.spyOn(signups, 'getPreviousSignups').mockResolvedValue([]);
   });
 
   beforeEach(() => {
-    mockFirstTimeSignups.mockClear();
+    mockUniqueSignups.mockClear();
+    mockPreviousSignups.mockClear();
   });
 
   it('calls getFirstTimeSignups', async () => {
     await signups.countSignups({});
-    expect(mockFirstTimeSignups).toHaveBeenCalled();
+    expect(mockUniqueSignups).toHaveBeenCalled();
   });
 
-  it('counts the total signups', async () => {
-    const result = await signups.countSignups({});
-    expect(result.total).toBe(4);
+  describe('total signups', () => {
+    it('counts the total signups with no previous signups', async () => {
+      const result = await signups.countSignups({});
+      expect(result.total).toBe(4);
+    });
+
+    it('excludes consumers who have previously signed up from the total', async () => {
+      mockPreviousSignups.mockResolvedValueOnce([{
+        email: 'frodo.baggins@theshire.com',
+        createdAt: '2020-06-29T14:00:00.000Z',
+        apis: 'benefits,facilities,health,verification'
+      }]);
+
+      const result = await signups.countSignups({});
+      expect(result.total).toBe(3);
+    });
   });
 
-  it('counts the signups by API', async () => {
-    const result = await signups.countSignups({});
-    expect(result.apiCounts).toStrictEqual({
-      benefits: 3,
-      claims: 3,
-      communityCare: 0,
-      confirmation: 1,
-      facilities: 3,
-      health: 3,
-      vaForms: 2,
-      verification: 2,
+  describe('API signups', () => {
+    it('counts the signups by API with no previous signups', async () => {
+      const result = await signups.countSignups({});
+      expect(result.apiCounts).toStrictEqual({
+        benefits: 3,
+        claims: 3,
+        communityCare: 0,
+        confirmation: 1,
+        facilities: 3,
+        health: 3,
+        vaForms: 2,
+        verification: 2,
+      });
+    });
+
+    it('counts new API signups', async () => {
+      mockPreviousSignups.mockResolvedValueOnce([{
+        email: 'frodo.baggins@theshire.com',
+        createdAt: '2020-01-29T14:00:00.000Z',
+        apis: 'claims'
+      }]);
+
+      const result = await signups.countSignups({});
+      expect(result.total).toBe(3);
+      expect(result.apiCounts).toStrictEqual({
+        benefits: 3,
+        claims: 3,
+        communityCare: 0,
+        confirmation: 1,
+        facilities: 3,
+        health: 3,
+        vaForms: 2,
+        verification: 2,
+      });
+    });
+
+    it('does not count repeated/old API signups', async () => {
+      mockPreviousSignups.mockResolvedValueOnce([{
+        email: 'frodo.baggins@theshire.com',
+        createdAt: '2020-01-29T14:00:00.000Z',
+        apis: 'benefits,facilities,health'
+      }]);
+
+      const result = await signups.countSignups({});
+      expect(result.total).toBe(3);
+      expect(result.apiCounts).toStrictEqual({
+        benefits: 2,
+        claims: 3,
+        communityCare: 0,
+        confirmation: 1,
+        facilities: 2,
+        health: 2,
+        vaForms: 2,
+        verification: 2,
+      });
     });
   });
 });

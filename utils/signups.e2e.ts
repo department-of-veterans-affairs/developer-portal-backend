@@ -29,7 +29,7 @@
     Apr 2020: 38 signups, 4 users, no users signing up for the first time
     May 2020: 16 signups, 3 users, 1 user signing up for the first time
 
-  Tests for getFirstTimeSignups and countSignups use Jan 2019, July 2019, Nov 2019,
+  Tests for getUniqueSignups and countSignups use Jan 2019, July 2019, Nov 2019,
   Jan 2020, Mar 2020, and May 2020 as test data.
 */
 
@@ -39,10 +39,9 @@ import moment from 'moment';
 import { 
   querySignups, 
   countSignups, 
-  getFirstTimeSignups, 
   getUniqueSignups,
+  getPreviousSignups,
   Signup,
-  isDuplicateSignup,
 } from './signups';
 
 const compareItemsByCreatedDate = (item1: Signup, item2: Signup): number => {
@@ -177,7 +176,12 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ryan.travitz@adhocteam.us',
         createdAt: '2020-06-01T22:50:36.448Z',
-        apis: 'benefits,claims,facilities',
+        apis: expect.anything(),
+      });
+
+      const apis = signups[0].apis.split(',');
+      ['benefits', 'claims', 'facilities'].forEach(api => {
+        expect(apis.includes(api)).toBe(true);
       });
     });
 
@@ -314,187 +318,37 @@ describeFunc('signups module', () => {
     });
   });
 
-  describe('isDuplicateSignup', () => {
-    it('returns false for a first-time signup', async () => {
-      const result = await isDuplicateSignup({
+  describe('getPreviousSignups', () => {
+    it('returns an empty array for a first-time signup', async () => {
+      const result = await getPreviousSignups({
         email: 'mike.lumetta@adhoc.team',
         createdAt: '2020-05-29T19:31:41.494Z',
         apis: 'health,vaForms',
       });
 
-      expect(result).toBe(false);
+      expect(result).toEqual([]);
     });
 
-    it('returns true for a repeat signup', async () => {
-      const result = await isDuplicateSignup({
+    it('returns an array of earlier signups for a repeat signup', async () => {
+      const result = await getPreviousSignups({
         email: 'ryan.travitz@adhocteam.us',
         createdAt: '2020-05-05T14:13:42.108Z',
         apis: 'facilities',
       });
 
-      expect(result).toBe(true);
-    });
-  });
+      expect(result.length).toBe(26);
+      result.sort(compareItemsByCreatedDate);
 
-  describe('getFirstTimeSignups', () => {
-    it('gets all first-time signups', async () => {
-      const signups = await getFirstTimeSignups({});
-      expect(signups.length).toBeGreaterThanOrEqual(48);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'ed@adhocteam.us',
-        createdAt: '2018-09-19T18:57:37.052Z',
-        apis: 'benefits,facilities,health,verification',
-      });
-    });
-
-    // 28 total signups, 3 users
-    // no users with previous duplicates because there is no start date
-    it('gets first-time signups before a specific date (September 2018)', async () => {
-      const signups = await getFirstTimeSignups({
-        endDate: moment('2018-09-30').endOf('month'),
-      });
-      expect(signups.length).toBe(3);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'ed@adhocteam.us',
-        createdAt: '2018-09-19T18:57:37.052Z',
-        apis: 'benefits,facilities,health,verification',
+      expect(result[0]).toStrictEqual({
+        email: 'ryan.travitz@adhocteam.us',
+        createdAt: '2019-12-23T20:48:18.188Z',
+        apis: 'benefits,claims,communityCare,facilities,health,vaForms,verification',
       });
 
-      expect(signups[signups.length - 1]).toEqual({
-        email: 'leanna@adhocteam.us',
-        createdAt: '2018-09-24T14:13:39.051Z',
-        apis: 'benefits,facilities,health,verification',
-      });
-    });
-
-    // 6 signups, 2 users, 1 user signing up for the first time (as of 6/25/20)
-    it('gets first-time signups after a specific date (June 2020)', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2020-06-01').startOf('month'),
-      });
-      expect(signups.length).toBeGreaterThanOrEqual(1);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'ACAREY@GMAIL.COM',
-        createdAt: '2020-06-24T14:25:35.585Z',
-        apis: 'benefits,confirmation,facilities,vaForms',
-      });
-    });
-
-    // 11 signups, 7 users, 6 users signing up for the first time
-    it('gets first-time signups for Jan 2019', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2019-01-01').startOf('month'),
-        endDate: moment('2019-01-01').endOf('month'),
-      });
-      expect(signups.length).toBe(6);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'success@example.com',
-        createdAt: '2019-01-09T18:34:33.689Z',
+      expect(result[result.length - 1]).toStrictEqual({
+        email: 'ryan.travitz@adhocteam.us',
+        createdAt: '2020-04-30T16:22:00.190Z',
         apis: 'facilities',
-      });
-
-      expect(signups[signups.length - 1]).toEqual({
-        email: 'kalil@adhocteam.us',
-        createdAt: '2019-01-24T22:29:51.958Z',
-        apis: 'facilities',
-      });
-    });
-
-    // 14 signups, 7 users, 5 users signing up for the first time
-    it('gets first-time signups for Jul 2019', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2019-07-01').startOf('month'),
-        endDate: moment('2019-07-01').endOf('month'),
-      });
-      expect(signups.length).toBe(5);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'kalilsn@adhocteam.us',
-        createdAt: '2019-07-12T17:37:31.165Z',
-        apis: 'claims',
-      });
-
-      expect(signups[signups.length - 1]).toEqual({
-        email: 'katherine.rodriguez@oddball.io',
-        createdAt: '2019-07-23T20:03:51.194Z',
-        apis: 'benefits,claims,communityCare,facilities,health,verification',
-      });
-    });
-
-    // Nov 2019: 17 signups, 9 users, 4 signing up for the first time
-    it('gets first-time signups for Nov 2019', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2019-11-01').startOf('month'),
-        endDate: moment('2019-11-01').endOf('month'),
-      });
-      expect(signups.length).toBe(4);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'amsapisupport@veros.com',
-        createdAt: '2019-11-07T21:34:17.917Z',
-        apis: 'benefits',
-      });
-
-      expect(signups[signups.length - 1]).toEqual({
-        email: 'arteal89@gmail.com',
-        createdAt: '2019-11-25T17:15:05.546Z',
-        apis: 'vaForms',
-      });
-    });
-
-    // 24 signups, 7 users, 4 users signing up for the first time
-    it('gets first-time signups for Jan 2020', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2020-01-01').startOf('month'),
-        endDate: moment('2020-01-01').endOf('month'),
-      });
-      expect(signups.length).toBe(4);
-
-      signups.sort(compareItemsByCreatedDate);
-      expect(signups[0]).toEqual({
-        email: 'nick.fasulo@adhocteam.us',
-        createdAt: '2020-01-11T21:33:56.129Z',
-        apis: 'verification',
-      });
-
-      expect(signups[signups.length - 1]).toEqual({
-        email: 'willhuang@adhocteam.us',
-        createdAt: '2020-01-16T18:41:28.938Z',
-        apis: 'benefits,communityCare,confirmation,facilities,vaForms,verification',
-      });
-    });
-
-    // 5 signups, 3 users, no users signing up for the first time
-    it('gets first-time signups for Mar 2020', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2020-03-01').startOf('month'),
-        endDate: moment('2020-03-01').endOf('month'),
-      });
-      expect(signups.length).toBe(0);
-    });
-
-    // 16 signups, 3 users, 1 user signing up for the first time
-    it('gets first-time signups for May 2020', async () => {
-      const signups = await getFirstTimeSignups({
-        startDate: moment('2020-05-01').startOf('month'),
-        endDate: moment('2020-05-31').endOf('month'),
-      });
-
-      expect(signups.length).toBe(1);
-      expect(signups[0]).toEqual({
-        email: 'mike.lumetta@adhoc.team',
-        createdAt: '2020-05-29T19:31:41.494Z',
-        apis: 'benefits,claims,communityCare,confirmation,facilities,health,vaForms,verification',
       });
     });
   });
@@ -572,7 +426,7 @@ describeFunc('signups module', () => {
         apiCounts: {
           ... zeroCounts,
           benefits: 3,
-          claims: 3,
+          claims: 4,
           communityCare: 1,
           facilities: 1,
           health: 1,
@@ -593,7 +447,9 @@ describeFunc('signups module', () => {
         apiCounts: {
           ... zeroCounts,
           benefits: 2,
-          vaForms: 2,
+          claims: 2,
+          communityCare: 1,
+          vaForms: 5,
           verification: 1,
         },
       });
@@ -610,13 +466,14 @@ describeFunc('signups module', () => {
         total: 4,
         apiCounts: {
           ... zeroCounts,
-          benefits: 3,
-          claims: 1,
-          communityCare: 1,
+          benefits: 4,
+          claims: 2,
+          communityCare: 2,
           facilities: 2,
-          confirmation: 2,
-          vaForms: 2,
-          verification: 3,
+          health: 1,
+          confirmation: 4,
+          vaForms: 3,
+          verification: 4,
         },
       });
     });
@@ -630,7 +487,11 @@ describeFunc('signups module', () => {
   
       expect(result).toEqual({
         total: 0,
-        apiCounts: zeroCounts,
+        apiCounts: {
+          ... zeroCounts,
+          benefits: 1,
+          claims: 1,
+        },
       });
     });
   
@@ -650,7 +511,7 @@ describeFunc('signups module', () => {
           confirmation: 1,
           facilities: 1,
           health: 1,
-          vaForms: 1,
+          vaForms: 2,
           verification: 1,
         },
       });
