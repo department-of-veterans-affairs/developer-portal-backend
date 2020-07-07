@@ -8,7 +8,7 @@ export const contactSchema = Joi.object().keys({
   lastName: Joi.string().required(),
   email: Joi.string().email().required(),
   description: Joi.string().required(),
-  organization: Joi.string(),
+  organization: Joi.string().allow(''),
   apis: Joi.array().items(Joi.string()),
 }).options({ abortEarly: false });
 

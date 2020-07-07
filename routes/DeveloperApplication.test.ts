@@ -247,254 +247,198 @@ describe('developerApplicationHandler', () => {
 });
 
 describe('validations', () => {
+  const defaultPayload = {
+    firstName: 'Eowyn',
+    apis: 'benefits',
+    email: 'eowyn@rohan.horse',
+    lastName: 'Eorl',
+    organization: 'Rohan',
+    termsOfService: true,
+  };
+
   describe('firstName', () => {
     it('is required', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, firstName: undefined};
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"firstName" is required');
     });
 
     it('is a string', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 12345,
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, firstName: 12345 };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"firstName" must be a string');
     });
   });
 
   describe('lastName', () => {
     it('is required', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, lastName: undefined};
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"lastName" is required');
     });
 
     it('is a string', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 12345,
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, lastName: 12345 };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"lastName" must be a string');
     });
   });
 
   describe('organization', () => {
     it('is required', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, organization: undefined};
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"organization" is required');
     });
 
     it('is a string', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: { name: 'Rohan' },
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, organization: { name: 'Rohan' }};
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"organization" must be a string');
     });
   });
 
   describe('description', () => {
     it('is a string', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        description: 123456789,
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, description: 123456789};
+      
+      const result = applySchema.validate(payload);
+
+      expect(result.error.message).toEqual('"description" must be a string');
+    });
+
+    it('is allowed to be an empty string', () => {
+      const payload = {...defaultPayload, description: ''};
 
       const result = applySchema.validate(payload);
-      expect(result.error.message).toEqual('"description" must be a string');
+
+      expect(result.error).toEqual(undefined);
     });
   });
 
   describe('email', () => {
     it('is required', () => {
-      const payload = {
-        apis: 'benefits',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = {...defaultPayload, email: undefined};
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"email" is required');
     });
 
     it('is in a valid format', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'lolnotanemail.com',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, email: 'lolnotanemail.com' };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"email" must be a valid email');
     });
   });
 
   describe('oAuthRedirectURI', () => {
     it('is a string', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-        oAuthRedirectURI: 12345,
-      };
+      const payload = { ...defaultPayload, oAuthRedirectURI: 12345 };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"oAuthRedirectURI" must be a string');
+    });
+
+    it('is a uri', () => {
+      const payload = { ...defaultPayload, oAuthRedirectURI: 'horsiesAreCool', };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
+    });
+
+    it('is allowed to be an empty string', () => {
+      const payload = { ...defaultPayload, oAuthRedirectURI: '' };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error).toBe(undefined);
     });
   });
 
   describe('oAuthApplicationType', () => {
     it('is either web or native', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-        oAuthApplicationType: 'horsies?',
-      };
+      const payload = { ...defaultPayload, oAuthApplicationType: 'horsies?' };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
+    });
+
+    it('is allowed to be an empty string', () => {
+      const payload = { ...defaultPayload, oAuthApplicationType: '' };
+
+      const result = applySchema.validate(payload);
+
+      expect(result.error).toBe(undefined);
     });
   });
 
   describe('termsOfService', () => {
     it('is required', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-      };
+      const payload = { ...defaultPayload, termsOfService: undefined };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"termsOfService" is required');
     });
 
     it('requires terms of service were accepted', () => {
-      const payload = {
-        apis: 'benefits',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: false,
-      };
+      const payload = { ...defaultPayload, termsOfService: false };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"termsOfService" must be [true]');
     });
   });
 
   describe('apis', () => {
     it('is required', () => {
-      const payload = {
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, apis: undefined };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"apis" is required');
     });
 
     it('only allows supported api values', () => {
-      const payload = {
-        apis: 'benefits,horsies',
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, apis: 'benefits,horsies' };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"apis" failed custom validation because invalid apis in list');
     });
 
     it('gracefully handles non-string types', () => {
-      const payload = {
-        apis: 12345,
-        email: 'eowyn@rohan.horse',
-        firstName: 'Eowyn',
-        lastName: 'Eorl',
-        organization: 'Rohan',
-        termsOfService: true,
-      };
+      const payload = { ...defaultPayload, apis: 12345 };
 
       const result = applySchema.validate(payload);
+
       expect(result.error.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
     });
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {
-      apis: 'benefits',
-      email: 'eowyn@rohan.horse',
-      organization: 'Rohan',
-      termsOfService: true,
-    };
+    const payload = {...defaultPayload, firstName: undefined, lastName: undefined};
 
     const result = applySchema.validate(payload);
+
     expect(result.error.message).toEqual('"firstName" is required. "lastName" is required');
   });
 });
