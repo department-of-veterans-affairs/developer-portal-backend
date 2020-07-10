@@ -1,13 +1,12 @@
-import { DynamoDB } from 'aws-sdk';
 import pick from 'lodash.pick';
 import process from 'process';
 import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
 import Application from './Application';
-import logger from '../config/logger';
 import OktaService from '../services/OktaService';
 import SlackService from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
+import DynamoService from '../services/DynamoService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
@@ -99,47 +98,32 @@ export default class User implements KongUser, GovDeliveryUser {
     }
   }
 
-  public saveToDynamo(client: DynamoDB.DocumentClient): Promise<User> {
-    const dynamoItem = pick(this, [
-      'apis',
-      'email',
-      'firstName',
-      'lastName',
-      'organization',
-      'oAuthRedirectURI',
-      'kongConsumerId',
-      'tosAccepted',
-    ]);
-    dynamoItem.description =
-      this.description === '' ? 'no description' : this.description;
-    dynamoItem.createdAt = this.createdAt.toISOString();
+  public async saveToDynamo(service: DynamoService): Promise<User> {
+    try {
+      const dynamoItem = pick(this, [
+        'apis',
+        'email',
+        'firstName',
+        'lastName',
+        'organization',
+        'oAuthRedirectURI',
+        'kongConsumerId',
+        'tosAccepted',
+      ]);
+      dynamoItem.description = this.description || 'no description';
+      dynamoItem.createdAt = this.createdAt.toISOString();
 
-    if (this.oauthApplication && this.oauthApplication.oktaID) {
-      dynamoItem.okta_application_id = this.oauthApplication.oktaID;
-      dynamoItem.okta_client_id = this.oauthApplication.client_id;
-    }
-
-    Object.keys(dynamoItem).forEach((k) => {
-      if (dynamoItem[k] === '') {
-        logger.debug({ message: `converting ${k} from empty string to null` });
-        dynamoItem[k] = null;
+      if (this.oauthApplication && this.oauthApplication.oktaID) {
+        dynamoItem.okta_application_id = this.oauthApplication.oktaID;
+        dynamoItem.okta_client_id = this.oauthApplication.client_id;
       }
-    });
 
-    return new Promise((resolve, reject) => {
-      const params = {
-        Item: dynamoItem,
-        TableName: this.tableName,
-      };
-
-      client.put(params, (err) => {
-        if (err) {
-          const dynamoErr = new Error(err.message);
-          reject(dynamoErr);
-        }
-        resolve(this);
-      });
-    });
+      await service.putItem(dynamoItem, this.tableName);
+      return this;
+    } catch (err) {
+      err.action = 'failed saving to dynamo';
+      throw err;
+    }
   }
 
   public async saveToOkta(client: OktaService): Promise<User> {
