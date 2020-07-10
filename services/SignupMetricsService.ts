@@ -1,5 +1,4 @@
-import { AWSError } from 'aws-sdk';
-import { AttributeMap, DocumentClient, ScanInput } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
 import DynamoService, { FilterParams } from './DynamoService';
 
@@ -36,13 +35,8 @@ export default class SignupMetricsService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;
 
-  public constructor() {
-    this.dynamoService = new DynamoService({
-      httpOptions: {
-        timeout: 5000
-      },
-      maxRetries: 1
-    });
+  public constructor(dynamoService: DynamoService) {
+    this.dynamoService = dynamoService;
   }
 
   public async querySignups(options: SignupQueryOptions = {}): Promise<Signup[]> {

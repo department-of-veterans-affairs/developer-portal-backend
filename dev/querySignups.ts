@@ -4,6 +4,7 @@ import moment, { Moment } from 'moment';
 import { sprintf } from 'sprintf-js';
 import { APIS_TO_PROPER_NAMES } from '../config';
 import SignupMetricsService, { SignupCountResult } from '../services/SignupMetricsService';
+import DynamoService from '../services/DynamoService';
 
 const parseMoment = (argName: string) => {
   return (date: string): Moment => {
@@ -67,7 +68,13 @@ config.update({
   region: 'us-gov-west-1'
 });
 
-const service: SignupMetricsService = new SignupMetricsService();
+const dynamoService = new DynamoService({
+  httpOptions: {
+    timeout: 5000
+  },
+  maxRetries: 1
+});
+const service = new SignupMetricsService(dynamoService);
 service
   .countSignups({
     startDate: args.start,

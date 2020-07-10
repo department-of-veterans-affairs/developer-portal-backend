@@ -37,6 +37,7 @@ import 'jest';
 import { config } from 'aws-sdk';
 import moment from 'moment';
 import SignupMetricsService, { Signup } from './SignupMetricsService';
+import DynamoService from './DynamoService';
 
 const compareItemsByCreatedDate = (item1: Signup, item2: Signup): number => {
   if (item1.createdAt < item2.createdAt) {
@@ -64,7 +65,13 @@ describeFunc('signups module', () => {
       region: 'us-gov-west-1'
     });
 
-    service = new SignupMetricsService();
+    const dynamoService = new DynamoService({
+      httpOptions: {
+        timeout: 5000
+      },
+      maxRetries: 1
+    });
+    service = new SignupMetricsService(dynamoService);
   });
 
   afterAll(() => {
