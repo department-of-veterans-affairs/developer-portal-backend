@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { DynamoDB } from 'aws-sdk';
 import Joi from '@hapi/joi';
 
 import { FormSubmission } from '../types/FormSubmission';
@@ -10,6 +9,7 @@ import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
+import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config';
 
 function validateApiList(val: string): string {
@@ -42,7 +42,7 @@ export const applySchema = Joi.object().keys({
 
 export default function developerApplicationHandler(kong: KongService,
   okta: OktaService | undefined,
-  dynamo: DynamoDB.DocumentClient,
+  dynamo: DynamoService,
   govdelivery: GovDeliveryService | undefined,
   slack: SlackService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -90,3 +90,13 @@ export interface ServiceHealthCheckResponse {
     action?: string;
   };
 }
+
+interface HttpOptions {
+  timeout: number;
+}
+
+export interface DynamoConfig {
+  httpOptions: HttpOptions;
+  maxRetries: number;
+  endpoint?: string | undefined;
+}

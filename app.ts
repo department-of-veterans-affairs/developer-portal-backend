@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { config, DynamoDB } from 'aws-sdk';
+import { config } from 'aws-sdk';
 import morgan from 'morgan';
 import { Schema, ValidationErrorItem } from '@hapi/joi';
 
@@ -8,8 +8,9 @@ import Sentry from './config/Sentry';
 import OktaService from './services/OktaService';
 import KongService from './services/KongService';
 import GovDeliveryService from './services/GovDeliveryService';
-import { KongConfig } from './types';
+import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
+import DynamoService from './services/DynamoService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
@@ -102,17 +103,7 @@ const configureSlackService = (): SlackService | undefined => {
   return client;
 };
 
-interface HttpOptions {
-  timeout: number;
-}
-
-interface DynamoConfig {
-  httpOptions: HttpOptions;
-  maxRetries: number;
-  endpoint?: string | undefined;
-}
-
-const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
+const configureDynamoService = (): DynamoService => {
   const dynamoConfig: DynamoConfig = {
     httpOptions: {
       timeout: 5000,
@@ -127,8 +118,7 @@ const configureDynamoDBClient = (): DynamoDB.DocumentClient => {
     });
     dynamoConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
   }
-
-  return new DynamoDB.DocumentClient(dynamoConfig);
+  return new DynamoService(dynamoConfig);
 };
 
 export default function configureApp(): express.Application {
@@ -155,7 +145,7 @@ export default function configureApp(): express.Application {
 
   const kong = configureKongService();
   const okta = configureOktaService();
-  const dynamo = configureDynamoDBClient();
+  const dynamo = configureDynamoService();
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
 
