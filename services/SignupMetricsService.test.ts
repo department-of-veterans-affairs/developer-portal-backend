@@ -4,27 +4,26 @@ import DynamoService from './DynamoService';
 
 let service: SignupMetricsService;
 describe('SignupMetricsService', () => {
-  const mockDynamoService = {
+  const mockScan = jest.fn();
+  const mockQuery = jest.fn();
 
-  } as DynamoService;
+  const mockDynamoService = {
+    scan: mockScan,
+    query: mockQuery,
+  } as unknown as DynamoService;
 
   describe('getUniqueSignups', () => {
-    let mockQuerySignups: jest.SpyInstance;
-
-
-    beforeAll(() => {
-      service = new SignupMetricsService(mockDynamoService);
-      mockQuerySignups = jest.spyOn(service, 'querySignups');
-    });
+    service = new SignupMetricsService(mockDynamoService);
 
     beforeEach(() => {
-      mockQuerySignups.mockClear();
+      mockScan.mockReset();
+      mockQuery.mockReset();
     });
 
     it('calls querySignups', async () => {
-      mockQuerySignups.mockResolvedValue([]);
+      mockScan.mockResolvedValue([]);
       await service.getUniqueSignups({});
-      expect(mockQuerySignups).toHaveBeenCalled();
+      expect(mockScan).toHaveBeenCalled();
     });
 
     it('returns values from querySignups()', async () => {
@@ -34,7 +33,7 @@ describe('SignupMetricsService', () => {
         apis: 'facilities'
       };
 
-      mockQuerySignups.mockResolvedValue([signup]);
+      mockScan.mockResolvedValue([signup]);
       const result = await service.getUniqueSignups({});
       expect(result).toStrictEqual([signup]);
     });
@@ -46,7 +45,7 @@ describe('SignupMetricsService', () => {
         apis: 'facilities'
       };
 
-      mockQuerySignups.mockResolvedValue([
+      mockScan.mockResolvedValue([
         firstSignup,
         {
           email: 'frodo@theshire.com',
@@ -56,11 +55,11 @@ describe('SignupMetricsService', () => {
       ]);
 
       const result = await service.getUniqueSignups({});
-      expect(result).toStrictEqual([firstSignup]);
+      expect(result).toStrictEqual([{...firstSignup, apis: 'facilities,health'}]);
     });
 
     it('aggregates signups for each user in the window', async () => {
-      mockQuerySignups.mockResolvedValue([
+      mockScan.mockResolvedValue([
         {
           email: 'frodo@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
