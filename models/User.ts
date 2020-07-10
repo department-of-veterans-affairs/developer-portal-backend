@@ -110,8 +110,7 @@ export default class User implements KongUser, GovDeliveryUser {
         'kongConsumerId',
         'tosAccepted',
       ]);
-      dynamoItem.description =
-        this.description === '' ? 'no description' : this.description;
+      dynamoItem.description = this.description || 'no description';
       dynamoItem.createdAt = this.createdAt.toISOString();
 
       if (this.oauthApplication && this.oauthApplication.oktaID) {

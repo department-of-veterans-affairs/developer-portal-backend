@@ -38,7 +38,7 @@ export default class DynamoService implements MonitoredService {
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     const tableName: string = process.env.DYNAMODB_TABLE || 'Users';
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       try {
         const params = {
           Limit: 1,
@@ -47,7 +47,9 @@ export default class DynamoService implements MonitoredService {
 
         this.client.scan(params, (err, data) => {
           if (err) {
-            throw new Error(`DynamoDB did not return a record: ${err.message}`);
+            throw new Error(`DynamoDB encountered an error: ${err.message}`);
+          } else if (!data || data.Count !== 1) {
+            throw new Error(`DynamoDB did not return a record: ${JSON.stringify(data)}`);
           }
           resolve({
             serviceName: 'Dynamo',

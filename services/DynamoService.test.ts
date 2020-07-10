@@ -23,7 +23,7 @@ describe("DynamoService", () => {
     });
     mockScan.mockClear();
     mockScan.mockImplementation((params, cb) => {
-      cb(null, [{}]);
+      cb(null, { Count: 1 });
     });
   });
 
@@ -75,9 +75,9 @@ describe("DynamoService", () => {
       expect(mockScan).toHaveBeenCalledWith({ Limit:1, TableName: 'Users'}, expect.any(Function));
     });
 
-    it('returns unhealthy when it does not receive a record', async () => {
+    it('returns unhealthy when it receives an error', async () => {
       const mockValue = 'Missing region in config';
-      const err = new Error(`DynamoDB did not return a record: ${mockValue}`);
+      const err = new Error(`DynamoDB encountered an error: ${mockValue}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
       mockScan.mockImplementationOnce((params, cb) => {
         cb(new Error(mockValue));
@@ -87,7 +87,31 @@ describe("DynamoService", () => {
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns healthy when it receives a record', async () => {
+    it('returns unhealthy when it does not receive a properly formed response', async () => {
+      const mockValue = {};
+      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
+      mockScan.mockImplementation((params, cb) => {
+        cb(null, mockValue);
+      });
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
+    });
+
+    it('returns unhealthy when it does not receive a single record', async () => {
+      const mockValue = { Count: 0 };
+      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
+      mockScan.mockImplementation((params, cb) => {
+        cb(null, mockValue);
+      });
+
+      const healthCheck = await service.healthCheck();
+      expect(healthCheck).toStrictEqual(expectedReturn);
+    });
+
+    it('returns healthy when it receives a single record', async () => {
       const expectedReturn = { serviceName: 'Dynamo', healthy: true };
 
       const healthCheck = await service.healthCheck();
