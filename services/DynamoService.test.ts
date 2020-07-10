@@ -1,11 +1,12 @@
 import 'jest';
-import { DynamoDB } from 'aws-sdk';
+import { AWSError, DynamoDB } from 'aws-sdk';
 import DynamoService from './DynamoService';
 
 describe("DynamoService", () => {
   let service: DynamoService;
   let mockPut: jest.SpyInstance;
   let mockScan: jest.SpyInstance;
+  let mockQuery: jest.SpyInstance;
 
   beforeEach(() => {
     service = new DynamoService({
@@ -16,6 +17,7 @@ describe("DynamoService", () => {
     });
     mockPut = jest.spyOn(service.client, 'put');
     mockScan = jest.spyOn(service.client, 'scan');
+    mockQuery = jest.spyOn(service.client, 'query');
 
     mockPut.mockClear();
     mockPut.mockImplementation((params, cb) => {
@@ -24,6 +26,11 @@ describe("DynamoService", () => {
     mockScan.mockClear();
     mockScan.mockImplementation((params, cb) => {
       cb(null, { Count: 1 });
+    });
+
+    mockQuery.mockClear();
+    mockQuery.mockImplementation((params, cb) => {
+      cb(null, [{}]);
     });
   });
 
@@ -66,6 +73,77 @@ describe("DynamoService", () => {
     it('resolves after inserting item', async () => {
       const resolve = await service.putItem(item, tableName);
       expect(resolve).toBeUndefined();
+    });
+  });
+
+  describe('scan', () => {
+    const tableName = 'Ents';
+    const tableRecord = { 
+      commonName: 'Treebeard',
+      sidarinName: 'Fangorn',
+      entishName: 'Not stored due to buffer overflow',
+      orcishName: '',
+    };
+    const projectionExp = 'commonName, sidarinName, entishName, orcishName';
+    const filterParams = {
+      ExpressionAttributeValues: { 
+        ':commonName': { S: 'Treebeard' },
+      },
+      FilterExpression: 'commonName = :commonName',
+    };
+
+    it('retrieves rows from the table', async () => {
+      mockScan.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
+      
+      const result = await service.scan(tableName, projectionExp, filterParams);
+
+      expect(result[0]).toEqual(tableRecord);
+    });
+
+    it('rejects when Dynamo returns and error', async () => {
+      expect.assertions(1);
+
+      const err = new Error('failed to retrieve from table') as AWSError;
+      mockScan.mockImplementation((_, cb) => { cb(err); });
+
+      try {
+        await service.scan(tableName, projectionExp, filterParams);
+      } catch (err) {
+        expect(err).toStrictEqual(err);
+      }
+    });
+  });
+
+  describe('query', () => {
+    const tableName = 'Ents';
+    const tableRecord = { 
+      commonName: 'Treebeard',
+      sidarinName: 'Fangorn',
+      entishName: 'Not stored due to buffer overflow',
+      orcishName: '',
+    };
+    const attributes =  { ':commonName': 'Treebeard' };
+    const keyCondition = 'commonName = :commonName';
+
+    it('retrieves rows from the table', async () => {
+      mockQuery.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
+      
+      const result = await service.query(tableName, keyCondition, attributes);
+
+      expect(result[0]).toEqual(tableRecord);
+    });
+
+    it('rejects when Dynamo returns and error', async () => {
+      expect.assertions(1);
+
+      const err = new Error('failed to retrieve from table') as AWSError;
+      mockQuery.mockImplementation((_, cb) => { cb(err); });
+
+      try {
+        await service.query(tableName, keyCondition, attributes);
+      } catch (err) {
+        expect(err).toStrictEqual(err);
+      }
     });
   });
 

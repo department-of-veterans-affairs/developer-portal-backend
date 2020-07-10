@@ -38,11 +38,7 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public scan(
-    tableName: string,
-    projectionExp: string,
-    filters: FilterParams
-  ): Promise<AttributeMap[]> {
+  public scan(tableName: string, projectionExp: string, filters: FilterParams): Promise<AttributeMap[]> {
     return new Promise<AttributeMap[]>((resolve, reject) => {
       this.client.scan(
         {
