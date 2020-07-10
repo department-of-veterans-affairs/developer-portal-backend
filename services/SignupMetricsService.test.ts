@@ -1,10 +1,13 @@
 import 'jest';
-import * as signups from './signups';
+import SignupMetricsService from './SignupMetricsService';
 
+let service: SignupMetricsService;
 describe('getUniqueSignups', () => {
-  let mockQuerySignups;
+  let mockQuerySignups: jest.SpyInstance;
+
   beforeAll(() => {
-    mockQuerySignups = jest.spyOn(signups, 'querySignups');
+    service = new SignupMetricsService();
+    mockQuerySignups = jest.spyOn(service, 'querySignups');
   });
 
   beforeEach(() => {
@@ -13,19 +16,19 @@ describe('getUniqueSignups', () => {
 
   it('calls querySignups', async () => {
     mockQuerySignups.mockResolvedValue([]);
-    await signups.getUniqueSignups({});
+    await service.getUniqueSignups({});
     expect(mockQuerySignups).toHaveBeenCalled();
-  })
+  });
 
   it('returns values from querySignups()', async () => {
     const signup = {
       email: 'frodo@theshire.com',
       createdAt: '2020-06-29T14:00:00.000Z',
-      apis: 'facilities',
+      apis: 'facilities'
     };
 
     mockQuerySignups.mockResolvedValue([signup]);
-    const result = await signups.getUniqueSignups({});
+    const result = await service.getUniqueSignups({});
     expect(result).toStrictEqual([signup]);
   });
 
@@ -33,7 +36,7 @@ describe('getUniqueSignups', () => {
     const firstSignup = {
       email: 'frodo@theshire.com',
       createdAt: '2020-06-29T14:00:00.000Z',
-      apis: 'facilities',
+      apis: 'facilities'
     };
 
     mockQuerySignups.mockResolvedValue([
@@ -41,11 +44,11 @@ describe('getUniqueSignups', () => {
       {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T20:00:00.000Z',
-        apis: 'health',
-      },
+        apis: 'health'
+      }
     ]);
 
-    const result = await signups.getUniqueSignups({});
+    const result = await service.getUniqueSignups({});
     expect(result).toStrictEqual([firstSignup]);
   });
 
@@ -54,54 +57,55 @@ describe('getUniqueSignups', () => {
       {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'facilities',
+        apis: 'facilities'
       },
       {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T20:00:00.000Z',
-        apis: 'health',
-      },
+        apis: 'health'
+      }
     ]);
 
-    const result = await signups.getUniqueSignups({});
+    const result = await service.getUniqueSignups({});
     expect(result).toStrictEqual([
       {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'facilities,health',
-      },
+        apis: 'facilities,health'
+      }
     ]);
   });
 });
 
 describe('countSignups', () => {
-  let mockUniqueSignups;
-  let mockPreviousSignups;
+  let mockUniqueSignups: jest.SpyInstance;
+  let mockPreviousSignups: jest.SpyInstance;
   beforeAll(() => {
-    mockUniqueSignups = jest.spyOn(signups, 'getUniqueSignups').mockResolvedValue([
+    service = new SignupMetricsService();
+    mockUniqueSignups = jest.spyOn(service, 'getUniqueSignups').mockResolvedValue([
       {
         email: 'frodo.baggins@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'benefits,facilities,health,verification',
+        apis: 'benefits,facilities,health,verification'
       },
       {
         email: 'samwise.gamgee@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'benefits,claims,facilities,vaForms',
+        apis: 'benefits,claims,facilities,vaForms'
       },
       {
         email: 'pippin.took@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'claims,health,vaForms,verification',
+        apis: 'claims,health,vaForms,verification'
       },
       {
         email: 'merry.brandybuck@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'benefits,claims,facilities,health,confirmation',
-      },
+        apis: 'benefits,claims,facilities,health,confirmation'
+      }
     ]);
 
-    mockPreviousSignups = jest.spyOn(signups, 'getPreviousSignups').mockResolvedValue([]);
+    mockPreviousSignups = jest.spyOn(service, 'getPreviousSignups').mockResolvedValue([]);
   });
 
   beforeEach(() => {
@@ -110,31 +114,33 @@ describe('countSignups', () => {
   });
 
   it('calls getFirstTimeSignups', async () => {
-    await signups.countSignups({});
+    await service.countSignups({});
     expect(mockUniqueSignups).toHaveBeenCalled();
   });
 
   describe('total signups', () => {
     it('counts the total signups with no previous signups', async () => {
-      const result = await signups.countSignups({});
+      const result = await service.countSignups({});
       expect(result.total).toBe(4);
     });
 
     it('excludes consumers who have previously signed up from the total', async () => {
-      mockPreviousSignups.mockResolvedValueOnce([{
-        email: 'frodo.baggins@theshire.com',
-        createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'benefits,facilities,health,verification'
-      }]);
+      mockPreviousSignups.mockResolvedValueOnce([
+        {
+          email: 'frodo.baggins@theshire.com',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          apis: 'benefits,facilities,health,verification'
+        }
+      ]);
 
-      const result = await signups.countSignups({});
+      const result = await service.countSignups({});
       expect(result.total).toBe(3);
     });
   });
 
   describe('API signups', () => {
     it('counts the signups by API with no previous signups', async () => {
-      const result = await signups.countSignups({});
+      const result = await service.countSignups({});
       expect(result.apiCounts).toStrictEqual({
         benefits: 3,
         claims: 3,
@@ -143,18 +149,20 @@ describe('countSignups', () => {
         facilities: 3,
         health: 3,
         vaForms: 2,
-        verification: 2,
+        verification: 2
       });
     });
 
     it('counts new API signups', async () => {
-      mockPreviousSignups.mockResolvedValueOnce([{
-        email: 'frodo.baggins@theshire.com',
-        createdAt: '2020-01-29T14:00:00.000Z',
-        apis: 'claims'
-      }]);
+      mockPreviousSignups.mockResolvedValueOnce([
+        {
+          email: 'frodo.baggins@theshire.com',
+          createdAt: '2020-01-29T14:00:00.000Z',
+          apis: 'claims'
+        }
+      ]);
 
-      const result = await signups.countSignups({});
+      const result = await service.countSignups({});
       expect(result.total).toBe(3);
       expect(result.apiCounts).toStrictEqual({
         benefits: 3,
@@ -164,18 +172,20 @@ describe('countSignups', () => {
         facilities: 3,
         health: 3,
         vaForms: 2,
-        verification: 2,
+        verification: 2
       });
     });
 
     it('does not count repeated/old API signups', async () => {
-      mockPreviousSignups.mockResolvedValueOnce([{
-        email: 'frodo.baggins@theshire.com',
-        createdAt: '2020-01-29T14:00:00.000Z',
-        apis: 'benefits,facilities,health'
-      }]);
+      mockPreviousSignups.mockResolvedValueOnce([
+        {
+          email: 'frodo.baggins@theshire.com',
+          createdAt: '2020-01-29T14:00:00.000Z',
+          apis: 'benefits,facilities,health'
+        }
+      ]);
 
-      const result = await signups.countSignups({});
+      const result = await service.countSignups({});
       expect(result.total).toBe(3);
       expect(result.apiCounts).toStrictEqual({
         benefits: 2,
@@ -185,7 +195,7 @@ describe('countSignups', () => {
         facilities: 2,
         health: 2,
         vaForms: 2,
-        verification: 2,
+        verification: 2
       });
     });
   });

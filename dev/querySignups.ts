@@ -3,7 +3,7 @@ import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-l
 import moment, { Moment } from 'moment';
 import { sprintf } from 'sprintf-js';
 import { APIS_TO_PROPER_NAMES } from '../config';
-import { countSignups, SignupCountResult } from '../utils/signups';
+import SignupMetricsService, { SignupCountResult } from '../services/SignupMetricsService';
 
 const parseMoment = (argName: string) => {
   return (date: string): Moment => {
@@ -23,18 +23,18 @@ const cliOptions: OptionDefinition[] = [
     name: 'start',
     alias: 's',
     type: parseMoment('start'),
-    defaultValue: moment().subtract(7, 'days'),
+    defaultValue: moment().subtract(7, 'days')
   },
   {
     name: 'end',
     alias: 'e',
     type: parseMoment('end'),
-    defaultValue: moment(),
+    defaultValue: moment()
   }
 ];
 
 const printArgs = (args: CommandLineOptions) => {
-  console.log("\nArguments:");
+  console.log('\nArguments:');
   console.log(`   start: ${args.start.toISOString()}`);
   console.log(`   end: ${args.end.toISOString()}\n`);
 };
@@ -47,9 +47,9 @@ const printResult = (counts: SignupCountResult) => {
 
   Object.keys(counts.apiCounts).forEach((apiId: string) => {
     const formattedLine = sprintf(
-      "  %'.-36s %u", 
-      `${APIS_TO_PROPER_NAMES[apiId]} `, 
-      counts.apiCounts[apiId],
+      "  %'.-36s %u",
+      `${APIS_TO_PROPER_NAMES[apiId]} `,
+      counts.apiCounts[apiId]
     );
     console.log(formattedLine);
   });
@@ -64,10 +64,13 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
 }
 
 config.update({
-  region: 'us-gov-west-1',
+  region: 'us-gov-west-1'
 });
 
-countSignups({
-  startDate: args.start,
-  endDate: args.end,
-}).then((counts: SignupCountResult) => printResult(counts));
+const service: SignupMetricsService = new SignupMetricsService();
+service
+  .countSignups({
+    startDate: args.start,
+    endDate: args.end
+  })
+  .then((counts: SignupCountResult) => printResult(counts));
