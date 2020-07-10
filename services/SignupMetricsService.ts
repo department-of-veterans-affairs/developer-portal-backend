@@ -1,8 +1,9 @@
-import { AWSError } from "aws-sdk";
-import { AttributeMap, DocumentClient, ScanInput } from "aws-sdk/clients/dynamodb";
-import { Moment } from "moment";
+import { AWSError } from 'aws-sdk';
+import { AttributeMap, DocumentClient, ScanInput } from 'aws-sdk/clients/dynamodb';
+import { Moment } from 'moment';
+import DynamoService, { FilterParams } from './DynamoService';
 
-const DEFAULT_TABLE = "dvp-prod-developer-portal-users";
+const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -33,10 +34,10 @@ export interface SignupCountResult {
 
 export default class SignupMetricsService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
-  private dynamoClient: DocumentClient;
+  private dynamoService: DynamoService;
 
   public constructor() {
-    this.dynamoClient = new DocumentClient({
+    this.dynamoService = new DynamoService({
       httpOptions: {
         timeout: 5000
       },
@@ -44,24 +45,14 @@ export default class SignupMetricsService {
     });
   }
 
-  public querySignups(options: SignupQueryOptions = {}): Promise<Signup[]> {
-    return new Promise<Signup[]>((resolve, reject) => {
-      this.dynamoClient.scan(
-        {
-          TableName: this.tableName,
-          ProjectionExpression: "email, createdAt, apis",
-          ...this.buildFilterParams(options)
-        },
-        (error: AWSError, data: DocumentClient.ScanOutput) => {
-          if (error) {
-            reject(error);
-          } else {
-            const signups: Signup[] = this.mapItemsToSignups(data.Items || []);
-            resolve(signups);
-          }
-        }
-      );
-    });
+  public async querySignups(options: SignupQueryOptions = {}): Promise<Signup[]> {
+    const items = await this.dynamoService.scan(
+      this.tableName,
+      'email, createdAt, apis',
+      this.buildFilterParams(options)
+    );
+
+    return this.mapItemsToSignups(items);
   }
 
   public async getUniqueSignups(options: SignupQueryOptions): Promise<Signup[]> {
@@ -78,7 +69,7 @@ export default class SignupMetricsService {
 
       signup.apis
         .toString()
-        .split(",")
+        .split(',')
         .forEach((apiId: string) => {
           apisByEmail[signup.email].add(apiId);
         });
@@ -86,32 +77,23 @@ export default class SignupMetricsService {
 
     const uniqueSignups = Object.values(signupsByEmail);
     uniqueSignups.forEach((signup: Signup) => {
-      signup.apis = [...apisByEmail[signup.email]].sort().join(",");
+      signup.apis = [...apisByEmail[signup.email]].sort().join(',');
     });
 
     return uniqueSignups;
   }
 
-  public getPreviousSignups(signup: Signup): Promise<Signup[]> {
-    return new Promise<Signup[]>((resolve, reject) => {
-      this.dynamoClient.query(
-        {
-          TableName: this.tableName,
-          ExpressionAttributeValues: {
-            ":email": signup.email,
-            ":signupDate": signup.createdAt
-          },
-          KeyConditionExpression: "email = :email and createdAt < :signupDate"
-        },
-        (error: AWSError, data: DocumentClient.QueryOutput) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(this.mapItemsToSignups(data.Items || []));
-          }
-        }
-      );
-    });
+  public async getPreviousSignups(signup: Signup): Promise<Signup[]> {
+    const items: AttributeMap[] = await this.dynamoService.query(
+      this.tableName,
+      'email = :email and createdAt < :signupDate',
+      {
+        ':email': signup.email,
+        ':signupDate': signup.createdAt
+      }
+    );
+
+    return this.mapItemsToSignups(items);
   }
 
   public async countSignups(options: SignupQueryOptions): Promise<SignupCountResult> {
@@ -132,12 +114,12 @@ export default class SignupMetricsService {
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
     for (let i = 0; i < uniqueSignups.length; i++) {
       const previousSignups = await this.getPreviousSignups(uniqueSignups[i]);
-      const newApis = new Set<string>(uniqueSignups[i].apis.split(","));
+      const newApis = new Set<string>(uniqueSignups[i].apis.split(','));
       if (previousSignups.length === 0) {
         result.total++;
       } else {
         previousSignups.forEach((signup: Signup) => {
-          signup.apis.split(",").forEach((apiId: string) => {
+          signup.apis.split(',').forEach((apiId: string) => {
             newApis.delete(apiId);
           });
         });
@@ -155,29 +137,29 @@ export default class SignupMetricsService {
     return result;
   }
 
-  private buildFilterParams(options: SignupQueryOptions): Partial<ScanInput> {
+  private buildFilterParams(options: SignupQueryOptions): FilterParams {
     let filterParams = {};
     if (options.startDate && options.endDate) {
       filterParams = {
         ExpressionAttributeValues: {
-          ":startDate": options.startDate.toISOString(),
-          ":endDate": options.endDate.toISOString()
+          ':startDate': options.startDate.toISOString(),
+          ':endDate': options.endDate.toISOString()
         },
-        FilterExpression: "createdAt BETWEEN :startDate AND :endDate"
+        FilterExpression: 'createdAt BETWEEN :startDate AND :endDate'
       };
     } else if (options.startDate) {
       filterParams = {
         ExpressionAttributeValues: {
-          ":startDate": options.startDate.toISOString()
+          ':startDate': options.startDate.toISOString()
         },
-        FilterExpression: "createdAt >= :startDate"
+        FilterExpression: 'createdAt >= :startDate'
       };
     } else if (options.endDate) {
       filterParams = {
         ExpressionAttributeValues: {
-          ":endDate": options.endDate.toISOString()
+          ':endDate': options.endDate.toISOString()
         },
-        FilterExpression: "createdAt <= :endDate"
+        FilterExpression: 'createdAt <= :endDate'
       };
     }
 
