@@ -115,7 +115,7 @@ export default class KongService implements MonitoredService {
       return {
         serviceName: 'Kong',
         healthy: false,
-        err: err
+        err: err,
        };
     }
   }

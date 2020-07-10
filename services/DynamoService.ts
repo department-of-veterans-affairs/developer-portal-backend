@@ -61,7 +61,7 @@ export default class DynamoService implements MonitoredService {
         resolve({
           serviceName: 'Dynamo',
           healthy: false,
-          err: err
+          err: err,
         });
       }
     });

@@ -185,7 +185,7 @@ export default function configureApp(): express.Application {
         res.status(500).json({ 
           action: err.action,
           message: err.message,
-          stack: err.stack 
+          stack: err.stack, 
         });
       }
     }

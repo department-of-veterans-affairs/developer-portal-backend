@@ -5,7 +5,7 @@ module.exports = {
     'ts-jest': {
       diagnostics: false,
       tsConfig: 'tsconfig.test.json',
-    }
+    },
   },
   coverageThreshold: {
     "**/*.ts": {
@@ -14,6 +14,6 @@ module.exports = {
   },
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/dist/'
+    '/dist/',
   ],
 };

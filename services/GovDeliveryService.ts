@@ -84,7 +84,7 @@ export default class GovDeliveryService implements MonitoredService {
     this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
     this.client = axios.create({
       baseURL: `https://${this.host}`,
-      headers: { 'X-AUTH-TOKEN': token }
+      headers: { 'X-AUTH-TOKEN': token },
     });
   }
 
@@ -118,7 +118,7 @@ export default class GovDeliveryService implements MonitoredService {
       subject: 'Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
       body: this.supportTemplate(supportRequest),
-      recipients: [ { email: this.supportEmailRecipient }]
+      recipients: [ { email: this.supportEmailRecipient }],
     };
 
     return this.sendEmail(email);

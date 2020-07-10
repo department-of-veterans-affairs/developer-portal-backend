@@ -6,7 +6,7 @@ describe('SlackService', () => {
   const hookConfig = {
     channel: '#gondor-chat',
     username: 'StewardBot',
-    icon_emoji: ':minas-tirith:'
+    icon_emoji: ':minas-tirith:',
   };
 
   it('sends a provided bearer token', () => {
@@ -43,7 +43,7 @@ describe('SlackService', () => {
         fallback: message,
         color: 'good',
         title: 'New User Application',
-      }]
+      }],
     });
   });
 
@@ -56,7 +56,7 @@ describe('SlackService', () => {
       response: {
         status: 400,
         data: 'did it wrong',
-      }
+      },
     });
 
     // cast to unknown first to avoid having to reimplement all of AxiosInstance

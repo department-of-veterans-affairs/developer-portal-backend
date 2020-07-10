@@ -8,7 +8,7 @@ describe('Application', () => {
   beforeEach(() => {
     applicationSettings = {
       name: 'application-name',
-      redirectURIs: ['http://developer.va.gov/']
+      redirectURIs: ['http://developer.va.gov/'],
     };
   });
 
@@ -52,7 +52,7 @@ describe('Application', () => {
           client_id: 'hobbit98',
           client_secret: 'had3breakfasts',
         },
-      }
+      },
     };
     const mockCreateApplication = jest.fn().mockResolvedValue(appRes);
 

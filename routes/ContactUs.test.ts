@@ -57,7 +57,7 @@ describe('contactUsHandler', () => {
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
         apis: ['benefits', 'facilities'],
-      }
+      },
     } as Request;
 
     await handler(mockReq, mockRes, mockNext);
@@ -84,7 +84,7 @@ describe('contactUsHandler', () => {
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
         apis: ['facilities', 'health'],
-      }
+      },
     } as Request;
 
     await handler(mockReq, mockRes, mockNext);
@@ -102,7 +102,7 @@ describe('contactUsHandler', () => {
         lastName: 'Gamgee',
         email: 'samwise@thefellowship.org',
         description: 'Need help getting to Mt. Doom',
-      }
+      },
     } as Request;
 
     await handler(mockReq, mockRes, mockNext);
