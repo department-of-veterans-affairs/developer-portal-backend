@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
+import DynamoService from '../services/DynamoService';
 import healthCheckHandler from '../routes/HealthCheck';
 
 describe('healthCheckHandler', () => {
@@ -9,7 +10,10 @@ describe('healthCheckHandler', () => {
   
   const mockOktaHealthCheck = jest.fn();
   const mockOkta = { healthCheck: mockOktaHealthCheck } as unknown as OktaService;
-  
+
+  const mockDynamoHealthCheck = jest.fn();
+  const mockDynamo = { healthCheck: mockDynamoHealthCheck } as unknown as DynamoService;
+
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   const mockReq = { body: {} } as Request;  
@@ -20,11 +24,14 @@ describe('healthCheckHandler', () => {
   beforeEach(() => {
     mockKongHealthCheck.mockClear();
     mockOktaHealthCheck.mockClear();
+    mockDynamoHealthCheck.mockClear();
+
     mockNext.mockClear();
     mockJson.mockClear();
 
     mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
     mockOktaHealthCheck.mockResolvedValue({ serviceName: 'Okta', healthy: true });
+    mockDynamoHealthCheck.mockResolvedValue({ serviceName: 'Dynamo', healthy: true });
   });
 
   describe('checks Kong', () => {
@@ -67,6 +74,26 @@ describe('healthCheckHandler', () => {
     });
   });
 
+  describe('checks DynamoDB', () => {
+    it('calls Dynamo healthCheck', async () => {
+      const handler = healthCheckHandler(mockKong, undefined, mockDynamo, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockDynamoHealthCheck).toHaveBeenCalled();
+    });
+
+    it('returns 503 if DynamoDB fails to report back healthy', async () => {
+      const err = new Error(`DynamoDB did not return a record: Missing region in config`);
+      const mockDynamoHealthCheckResponse = { serviceName: 'Dynamo', healthy: false, err: err };
+      mockDynamoHealthCheck.mockResolvedValue(mockDynamoHealthCheckResponse);
+
+      const handler = healthCheckHandler(mockKong, undefined, mockDynamo, undefined, undefined);
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster',failedHealthChecks: [ mockDynamoHealthCheckResponse ] });
+    });
+  });
+  
   it('sends error to the default error handler if an error occurs', async () => {
     const err = new Error('service does not exist');
     mockKongHealthCheck.mockRejectedValue(err);
@@ -80,7 +107,7 @@ describe('healthCheckHandler', () => {
   it('returns 200 if all services report back healthy', async () => {
     mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
     
-    const handler = healthCheckHandler(mockKong, undefined, undefined, undefined, undefined);
+    const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, undefined, undefined);
     await handler(mockReq, mockRes, mockNext);
     
     expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'vibrant', failedHealthChecks: [] });
