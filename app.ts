@@ -11,10 +11,11 @@ import GovDeliveryService from './services/GovDeliveryService';
 import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
+import SignupMetricsService from './services/SignupMetricsService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
-import applyWrapupHandler from './routes/internal/ApplyWrapup';
+import applyWrapupHandler from './routes/management/ApplyWrapup';
 
 function validationMiddleware(schema: Schema) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -149,6 +150,7 @@ export default function configureApp(): express.Application {
   const dynamo = configureDynamoService();
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
+  const signups = new SignupMetricsService(dynamo);
 
   app.post('/developer_application', 
     validationMiddleware(applySchema), 
@@ -160,7 +162,7 @@ export default function configureApp(): express.Application {
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.get('/internal/apply-wrapup', applyWrapupHandler(slack));
+  app.get('/management/metrics/signups', applyWrapupHandler(signups, slack));
 
   app.use(Sentry.Handlers.errorHandler());
 

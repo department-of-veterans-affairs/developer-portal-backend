@@ -1,5 +1,7 @@
 import axios, {AxiosInstance } from 'axios';
+import { Moment } from 'moment';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
+import { SignupCountResult } from './SignupMetricsService';
 
 /* 
 WebhookOptions override the defaults configured in the webhook
@@ -15,9 +17,9 @@ interface WebhookOptions {
 }
 
 export interface ApplyWrapup {
-  duration: 'week' | 'month';
-  numApplications: number;
-  numByApi: { name: string; num: number }[];
+  duration: string;
+  end: Moment;
+  signups: SignupCountResult;
 }
 
 interface Attachment {
@@ -36,14 +38,18 @@ interface Block {
   fields?: {
     type: string;
     text: string;
-    emoji: boolean;
+    emoji?: boolean;
   }[];
 }
 
 interface PostBody {
-  text: string;
+  text?: string;
   blocks?: Block[];
   attachments?:  Attachment[];
+}
+
+function capitalizeFirstLetter(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 export default class SlackService implements MonitoredService {
@@ -69,33 +75,73 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
   
-  public async sendWrapupMessage(req: ApplyWrapup): Promise<string> {
-    const numsByApi = req.numByApi.map(api => ({ type: 'plain_text', text: `${api.name}: ${api.num}`, emoji: false }));
+  public async sendWrapupMessage(span: ApplyWrapup, allTime: SignupCountResult): Promise<string> {
+    const apis = Object.keys(span.signups.apiCounts);
+    const numsByApi = apis.map(api => {
+      return {
+        type: 'mrkdwn',
+        text: `_${api}_: ${span.signups.apiCounts[api]} new requests (${allTime.apiCounts[api]} all-time)`, 
+      };
+    });
+    const duration = capitalizeFirstLetter(span.duration);
 
     const body: PostBody = {
-      text: `${req.duration} sandbox applications report`,
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `${req.numApplications} people applied for Sandbox keys this ${req.duration}.`
+            text: `*${duration}ly Sign-ups and Access Requests* for ${duration} Ending ${span.end.utc().format('MM/DD/YYYY')}`
           }
         },
-        { type: 'divider' },
         {
-          type: 'section',
-          fields: numsByApi,
+          type: 'divider'
         },
-        { type: 'divider' },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '_Numbers not what you expect? Read <https://google.com|how we calculate signups>._'
+            text: '*New User Sign-ups* (excludes established users requesting additional APIs)'
+          }
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: `_This week:_ ${span.signups.total} new users`
+            },
+            {
+              type: 'mrkdwn',
+              text: `_All-time:_ ${allTime.total} new users`
+            }
+          ]
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)'
+          }
+        },
+        {
+          type: 'section',
+          fields: numsByApi,
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._'
           }
         }
-      ],
+      ]
     };
 
     return this.post(body);

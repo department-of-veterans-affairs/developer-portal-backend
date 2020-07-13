@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import moment from 'moment';
 import SlackService, { ApplyWrapup }from './SlackService';
 
 describe('SlackService', () => {
@@ -58,46 +59,109 @@ describe('SlackService', () => {
     jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
     const service = new SlackService(hookUrl, hookConfig);
+    const end = moment('2003-12-17T00:00:00.000Z');
 
-    const wrapup: ApplyWrapup = {
+    const thisWeek: ApplyWrapup = {
       duration: 'week',
-      numApplications: 12,
-      numByApi: [
-        { name: 'Facilities', num: 7 },
-        { name: 'Forms', num: 6 },
-      ],
+      end,
+      signups: {
+        total: 2,
+        apiCounts: {
+          benefits: 1,
+          facilities: 0,
+          vaForms: 0,
+          confirmation: 0,
+          health: 2,
+          communityCare: 0,
+          verification: 0,
+          claims: 0,
+        }
+      },
     };
 
-    const res = await service.sendWrapupMessage(wrapup);
+    const allTime = { 
+      total: 12,
+      apiCounts: {
+        benefits: 1,
+        facilities: 2,
+        vaForms: 3,
+        confirmation: 4,
+        health: 5,
+        communityCare: 6,
+        verification: 7,
+        claims: 8,
+      },
+    };
+
+    const res = await service.sendWrapupMessage(thisWeek, allTime);
 
     expect(res).toEqual('ok');
     expect(mockPost).toHaveBeenCalledWith('', {
       channel: hookConfig.channel,
       username: hookConfig.username,
       icon_emoji: hookConfig.icon_emoji,
-      text: 'week sandbox applications report',
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '12 people applied for Sandbox keys this week.' 
+            text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003'
           }
         },
-        { type: 'divider' },
         {
-          type: 'section',
-          fields: [
-            { type: 'plain_text', text: 'Facilities: 7', emoji: false },
-            { type: 'plain_text', text: 'Forms: 6', emoji: false },
-          ],
+          type: 'divider',
         },
-        { type: 'divider' },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '_Numbers not what you expect? Read <https://google.com|how we calculate signups>._'
+            text: '*New User Sign-ups* (excludes established users requesting additional APIs)'
+          }
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: '_This week:_ 2 new users'
+            },
+            {
+              type: 'mrkdwn',
+              text: '_All-time:_ 12 new users'
+            }
+          ]
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)'
+          }
+        },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: '_benefits_: 1 new requests (1 all-time)'},
+            { type: 'mrkdwn', text: '_facilities_: 0 new requests (2 all-time)'},
+            { type: 'mrkdwn', text: '_vaForms_: 0 new requests (3 all-time)'},
+            { type: 'mrkdwn', text: '_confirmation_: 0 new requests (4 all-time)'},
+            { type: 'mrkdwn', text: '_health_: 2 new requests (5 all-time)'},
+            { type: 'mrkdwn', text: '_communityCare_: 0 new requests (6 all-time)'},
+            { type: 'mrkdwn', text: '_verification_: 0 new requests (7 all-time)'},
+            { type: 'mrkdwn', text: '_claims_: 0 new requests (8 all-time)'},
+          ],
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._'
           }
         }
       ]
