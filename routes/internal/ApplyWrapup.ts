@@ -5,8 +5,7 @@ import SlackService, { ApplyWrapup } from '../../services/SlackService';
 export default function applyWrapupHandler(slack: SlackService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!slack) {
-      console.log('got in hereeeeeeee');
-      res.status(503).json({ error: 'service not enabled'});
+      res.status(503).json({ error: 'service not enabled' });
       return;
     }
 
