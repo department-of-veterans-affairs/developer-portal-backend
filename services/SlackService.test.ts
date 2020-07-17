@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import moment from 'moment';
-import SlackService, { ApplyWrapup }from './SlackService';
+import SlackService from './SlackService';
 
 describe('SlackService', () => {
   const hookUrl = 'https://beacons.gondor.gov';
@@ -60,22 +60,20 @@ describe('SlackService', () => {
 
     const service = new SlackService(hookUrl, hookConfig);
     const end = moment('2003-12-17T00:00:00.000Z');
+    const formattedEnd = end.utc().format('MM/DD/YYYY');
+    const duration = 'week';
 
-    const thisWeek: ApplyWrapup = {
-      duration: 'week',
-      end,
-      signups: {
-        total: 2,
-        apiCounts: {
-          benefits: 1,
-          facilities: 0,
-          vaForms: 0,
-          confirmation: 0,
-          health: 2,
-          communityCare: 0,
-          verification: 0,
-          claims: 0,
-        }
+    const thisWeek = {
+      total: 2,
+      apiCounts: {
+        benefits: 1,
+        facilities: 0,
+        vaForms: 0,
+        confirmation: 0,
+        health: 2,
+        communityCare: 0,
+        verification: 0,
+        claims: 0,
       },
     };
 
@@ -93,7 +91,7 @@ describe('SlackService', () => {
       },
     };
 
-    const res = await service.sendWrapupMessage(thisWeek, allTime);
+    const res = await service.sendSignupsMessage(duration, formattedEnd, thisWeek, allTime);
 
     expect(res).toEqual('ok');
     expect(mockPost).toHaveBeenCalledWith('', {

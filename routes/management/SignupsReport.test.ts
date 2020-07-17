@@ -1,13 +1,12 @@
-import moment from 'moment';
 import { Request, Response } from 'express';
-import applyWrapupHandler from './ApplyWrapup';
+import signupsReportHandler, { signupsReportSchema } from './SignupsReport';
 import SlackService from '../../services/SlackService';
 import SignupMetricsService from '../../services/SignupMetricsService';
  
-describe('applyWrapupHandler', () => {
-  const mockSendWrapupMessage = jest.fn();
-  const mockSlack = { sendWrapupMessage: mockSendWrapupMessage } as unknown as SlackService;
-  mockSendWrapupMessage.mockResolvedValue('ok');
+describe('signupsReportHandler', () => {
+  const mockSendSignupsMessage = jest.fn();
+  const mockSlack = { sendSignupsMessage: mockSendSignupsMessage } as unknown as SlackService;
+  mockSendSignupsMessage.mockResolvedValue('ok');
 
   const mockCountSignups = jest.fn();
   const mockSignups = { countSignups: mockCountSignups } as unknown as SignupMetricsService;
@@ -74,7 +73,7 @@ describe('applyWrapupHandler', () => {
   });
 
   it('returns a 503 if the service is not configured', async () => {
-    const handler = applyWrapupHandler(mockSignups, undefined);
+    const handler = signupsReportHandler(mockSignups, undefined);
 
     await handler(mockReq, mockRes, mockNext);
 
@@ -83,36 +82,50 @@ describe('applyWrapupHandler', () => {
   });
 
   it('responds with a 200 when the request is okay', async () => {
-    const handler = applyWrapupHandler(mockSignups, mockSlack);
+    const handler = signupsReportHandler(mockSignups, mockSlack);
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendWrapupMessage).toHaveBeenCalledWith(
-      { duration: 'week', end: moment(), signups: smallResult },
+    expect(mockSendSignupsMessage).toHaveBeenCalledWith(
+      'week',
+      '12/17/2003',
+      smallResult,
       largeResult
     );
 
     expect(mockSendStatus).toHaveBeenCalledWith(200);
   });
 
-  it('sends a start date a month prior if a weekly query is requested', async () => {
-    const handler = applyWrapupHandler(mockSignups, mockSlack);
+  it('sends a start date a month prior if a monthly query is requested', async () => {
+    const handler = signupsReportHandler(mockSignups, mockSlack);
     const weekMockReq = { query: { span: 'month' } } as Request;
 
     await handler(weekMockReq, mockRes, mockNext);
 
-    expect(mockCountSignups).toHaveBeenCalledWith(
-      { startDate: moment().subtract(1, 'months'), endDate: moment() }
-    );
+    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+
+    expect(sentStartDate).toEqual('11/17/2003');
   });
 
   it('defaults to a start date a week prior', async () => {
-    const handler = applyWrapupHandler(mockSignups, mockSlack);
+    const handler = signupsReportHandler(mockSignups, mockSlack);
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockCountSignups).toHaveBeenCalledWith(
-      { startDate: moment().subtract(1, 'weeks'), endDate: moment() }
-    );
+    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+
+    expect(sentStartDate).toEqual('12/10/2003');
+  });
+});
+
+describe('validations', () => {
+  describe('span', () => {
+    it('is either week or month', () => {
+      const payload = { span: 'Gimli' };
+
+      const result = signupsReportSchema.validate(payload);
+
+      expect(result.error.message).toEqual('"span" must be one of [week, month]');
+    });
   });
 });

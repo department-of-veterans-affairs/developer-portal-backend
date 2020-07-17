@@ -1,10 +1,15 @@
 import moment, { Moment } from 'moment';
 import { Request, Response, NextFunction } from 'express';
+import Joi from '@hapi/joi';
 
-import SlackService, { ApplyWrapup } from '../../services/SlackService';
+import SlackService from '../../services/SlackService';
 import SignupMetricsService from '../../services/SignupMetricsService';
 
-export default function applyWrapupHandler(signups: SignupMetricsService, slack: SlackService | undefined) {
+export const signupsReportSchema = Joi.object().keys({
+  span: Joi.valid('week', 'month'),
+});
+
+export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService | undefined) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!slack) {
       res.status(503).json({ error: 'service not enabled' });
@@ -29,15 +34,10 @@ export default function applyWrapupHandler(signups: SignupMetricsService, slack:
     const allTimeQuery = signups.countSignups({ endDate: end });
 
     const [spanResult, allTimeResult] = await Promise.all([spanQuery, allTimeQuery]);
-
-    const spanWrapup: ApplyWrapup = {
-      end,
-      duration: span,
-      signups: spanResult,
-    };
+    const formattedEndDate = end.utc().format('MM/DD/YYYY');
 
     try {
-      await slack.sendWrapupMessage(spanWrapup, allTimeResult);
+      await slack.sendSignupsMessage(span, formattedEndDate, spanResult, allTimeResult);
       res.sendStatus(200);
     } catch(err) {
       err.action = `apply wrapup message`;

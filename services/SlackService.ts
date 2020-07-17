@@ -1,5 +1,4 @@
 import axios, {AxiosInstance } from 'axios';
-import { Moment } from 'moment';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
@@ -14,12 +13,6 @@ interface WebhookOptions {
   username: string;
   icon_emoji?: string;
   icon?: string;
-}
-
-export interface ApplyWrapup {
-  duration: string;
-  end: Moment;
-  signups: SignupCountResult;
 }
 
 interface Attachment {
@@ -75,15 +68,20 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
   
-  public async sendWrapupMessage(span: ApplyWrapup, allTime: SignupCountResult): Promise<string> {
-    const apis = Object.keys(span.signups.apiCounts);
+  public async sendSignupsMessage(
+    duration: string, 
+    endDate: string,
+    timeSpanSignups: SignupCountResult, 
+    allTimeSignups: SignupCountResult
+  ): Promise<string> {
+    const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
       return {
         type: 'mrkdwn',
-        text: `_${api}_: ${span.signups.apiCounts[api]} new requests (${allTime.apiCounts[api]} all-time)`, 
+        text: `_${api}_: ${timeSpanSignups.apiCounts[api]} new requests (${allTimeSignups.apiCounts[api]} all-time)`, 
       };
     });
-    const duration = capitalizeFirstLetter(span.duration);
+    const titleDuration = capitalizeFirstLetter(duration);
 
     const body: PostBody = {
       blocks: [
@@ -91,7 +89,7 @@ export default class SlackService implements MonitoredService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*${duration}ly Sign-ups and Access Requests* for ${duration} Ending ${span.end.utc().format('MM/DD/YYYY')}`
+            text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`
           }
         },
         {
@@ -109,11 +107,11 @@ export default class SlackService implements MonitoredService {
           fields: [
             {
               type: 'mrkdwn',
-              text: `_This week:_ ${span.signups.total} new users`
+              text: `_This week:_ ${timeSpanSignups.total} new users`
             },
             {
               type: 'mrkdwn',
-              text: `_All-time:_ ${allTime.total} new users`
+              text: `_All-time:_ ${allTimeSignups.total} new users`
             }
           ]
         },

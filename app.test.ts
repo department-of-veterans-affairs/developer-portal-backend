@@ -47,3 +47,14 @@ describe('App routing', () => {
     });
   });
 });
+
+describe('/management/metrics/signups', () => {
+  it('sends a 400 response and descriptive errors if validations fail', async () => {
+    const response = await request.get('/management/metrics/signups?span=Gimli');
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      errors: ['"span" must be one of [week, month]'],
+    });
+  });
+});

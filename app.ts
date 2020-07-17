@@ -15,11 +15,12 @@ import SignupMetricsService from './services/SignupMetricsService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
-import applyWrapupHandler from './routes/management/ApplyWrapup';
+import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
 
 function validationMiddleware(schema: Schema) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const { error } = schema.validate(req.body);
+    const combinedParams = { ...req.query, ...req.body };
+    const { error } = schema.validate(combinedParams);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
       res.status(400).json({ errors:  messages });
@@ -112,13 +113,21 @@ const configureDynamoService = (): DynamoService => {
     },
     maxRetries: 1,
   };
+
+  // To run against a local containerized DynamoDB, make sure to have
+  // DYNAMODB_ENDPOINT set.
+  // To run against a remote DynamoDB table, create an MFA session, transfer
+  // the creds to the following ENV vars, and remove DYNAMODB_ENDPOINT.
   if (process.env.NODE_ENV !== 'production') {
     config.update({
-      accessKeyId: 'NONE',
-      region: 'us-west-2',
-      secretAccessKey: 'NONE',
+      accessKeyId: process.env.DYNAMO_ACCESS_KEY_ID || 'NONE',
+      region: process.env.DYNAMO_REGION || 'us-west-2',
+      secretAccessKey: process.env.DYNAMO_ACCESS_KEY_SECRET || 'NONE',
+      sessionToken: process.env.DYNAMO_SESSION_TOKEN,
     });
-    dynamoConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+    if (process.env.DYNAMODB_ENDPOINT) {
+      dynamoConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+    }
   }
   return new DynamoService(dynamoConfig);
 };
@@ -162,7 +171,9 @@ export default function configureApp(): express.Application {
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.get('/management/metrics/signups', applyWrapupHandler(signups, slack));
+  app.get('/management/metrics/signups',
+    validationMiddleware(signupsReportSchema),
+    signupsReportHandler(signups, slack));
 
   app.use(Sentry.Handlers.errorHandler());
 
