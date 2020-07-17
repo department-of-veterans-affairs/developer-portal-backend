@@ -107,7 +107,7 @@ export default class SlackService implements MonitoredService {
           fields: [
             {
               type: 'mrkdwn',
-              text: `_This week:_ ${timeSpanSignups.total} new users`
+              text: `_This ${duration}:_ ${timeSpanSignups.total} new users`
             },
             {
               type: 'mrkdwn',
