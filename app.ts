@@ -171,7 +171,7 @@ export default function configureApp(): express.Application {
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.get('/management/metrics/signups',
+  app.get('/reports/signups',
     validationMiddleware(signupsReportSchema),
     signupsReportHandler(signups, slack));
 
