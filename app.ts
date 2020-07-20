@@ -17,10 +17,9 @@ import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
 
-function validationMiddleware(schema: Schema) {
+function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const combinedParams = { ...req.query, ...req.body };
-    const { error } = schema.validate(combinedParams);
+    const { error } = schema.validate(req[toValidate]);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
       res.status(400).json({ errors:  messages });
@@ -162,17 +161,17 @@ export default function configureApp(): express.Application {
   const signups = new SignupMetricsService(dynamo);
 
   app.post('/developer_application', 
-    validationMiddleware(applySchema), 
+    validationMiddleware(applySchema, 'body'), 
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
 
   app.post('/contact-us', 
-    validationMiddleware(contactSchema),
+    validationMiddleware(contactSchema, 'body'),
     contactUsHandler(govdelivery));
 
   app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
 
   app.get('/reports/signups',
-    validationMiddleware(signupsReportSchema),
+    validationMiddleware(signupsReportSchema, 'query'),
     signupsReportHandler(signups, slack));
 
   app.use(Sentry.Handlers.errorHandler());

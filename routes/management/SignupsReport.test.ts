@@ -15,8 +15,8 @@ describe('signupsReportHandler', () => {
   const mockJson = jest.fn();
   const mockSendStatus = jest.fn();
 
+  let mockReq;
   const mockNext = jest.fn();
-  const mockReq = { query: {} } as Request;
   const mockRes: Response = {
     status: mockStatus,
     json: mockJson,
@@ -60,6 +60,8 @@ describe('signupsReportHandler', () => {
   };
   
   beforeEach(() => {
+    mockReq = { query: {} } as Request;
+
     mockStatus.mockClear();
     mockJson.mockClear();
     mockSendStatus.mockClear();
@@ -116,6 +118,39 @@ describe('signupsReportHandler', () => {
 
     expect(sentStartDate).toEqual('12/10/2003');
   });
+
+  it('uses the "end" query param if one exists', async () => {
+    const handler = signupsReportHandler(mockSignups, mockSlack);
+    mockReq = { query: { end: '2002-12-18T20:03:48.799Z' } };
+
+    await handler(mockReq, mockRes, mockNext);
+
+    const sentEndDate = mockCountSignups.mock.calls[0][0].endDate.utc().format('MM/DD/YYYY');
+
+    expect(sentEndDate).toEqual('12/18/2002');
+  });
+
+  it('uses the "start" query param if one exists', async () => {
+    const handler = signupsReportHandler(mockSignups, mockSlack);
+    mockReq = { query: { start: '2001-12-19T20:03:48.799Z' } };
+
+    await handler(mockReq, mockRes, mockNext);
+
+    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+
+    expect(sentStartDate).toEqual('12/19/2001');
+  });
+
+  it('honors the query param span if only an end date is provided', async () => {
+    const handler = signupsReportHandler(mockSignups, mockSlack);
+    mockReq = { query: { end: '2001-12-19T20:03:48.799Z', span: 'month' } };
+
+    await handler(mockReq, mockRes, mockNext);
+
+    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+
+    expect(sentStartDate).toEqual('11/19/2001');
+  });
 });
 
 describe('validations', () => {
@@ -126,6 +161,26 @@ describe('validations', () => {
       const result = signupsReportSchema.validate(payload);
 
       expect(result.error.message).toEqual('"span" must be one of [week, month]');
+    });
+  });
+
+  describe('start', () => {
+    it('is an iso8601 date', () => {
+      const payload = { start: 'and my axe' };
+
+      const result = signupsReportSchema.validate(payload);
+
+      expect(result.error.message).toEqual('"start" must be in ISO 8601 date format');
+    });
+  });
+
+  describe('end', () => {
+    it('is an iso8601 date', () => {
+      const payload = { end: 'dangerous over short distances' };
+
+      const result = signupsReportSchema.validate(payload);
+
+      expect(result.error.message).toEqual('"end" must be in ISO 8601 date format');
     });
   });
 });
