@@ -9,8 +9,8 @@ module.exports = {
   },
   coverageThreshold: {
     '**/*.ts': {
-      statements: 80
-    }
+      statements: 80,
+    },
   },
   testPathIgnorePatterns: [
     '/node_modules/',

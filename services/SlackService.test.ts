@@ -103,8 +103,8 @@ describe('SlackService', () => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003'
-          }
+            text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003',
+          },
         },
         {
           type: 'divider',
@@ -113,31 +113,31 @@ describe('SlackService', () => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*New User Sign-ups* (excludes established users requesting additional APIs)'
-          }
+            text: '*New User Sign-ups* (excludes established users requesting additional APIs)',
+          },
         },
         {
           type: 'section',
           fields: [
             {
               type: 'mrkdwn',
-              text: '_This week:_ 2 new users'
+              text: '_This week:_ 2 new users',
             },
             {
               type: 'mrkdwn',
-              text: '_All-time:_ 12 new users'
-            }
-          ]
+              text: '_All-time:_ 12 new users',
+            },
+          ],
         },
         {
-          type: 'divider'
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)'
-          }
+            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)',
+          },
         },
         {
           type: 'section',
@@ -153,16 +153,16 @@ describe('SlackService', () => {
           ],
         },
         {
-          type: 'divider'
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._'
-          }
-        }
-      ]
+            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+          },
+        },
+      ],
     });
 
   });

@@ -89,57 +89,57 @@ export default class SlackService implements MonitoredService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`
-          }
+            text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`,
+          },
         },
         {
-          type: 'divider'
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*New User Sign-ups* (excludes established users requesting additional APIs)'
-          }
+            text: '*New User Sign-ups* (excludes established users requesting additional APIs)',
+          },
         },
         {
           type: 'section',
           fields: [
             {
               type: 'mrkdwn',
-              text: `_This ${duration}:_ ${timeSpanSignups.total} new users`
+              text: `_This ${duration}:_ ${timeSpanSignups.total} new users`,
             },
             {
               type: 'mrkdwn',
-              text: `_All-time:_ ${allTimeSignups.total} new users`
-            }
-          ]
+              text: `_All-time:_ ${allTimeSignups.total} new users`,
+            },
+          ],
         },
         {
-          type: 'divider'
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)'
-          }
+            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)',
+          },
         },
         {
           type: 'section',
           fields: numsByApi,
         },
         {
-          type: 'divider'
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._'
-          }
-        }
-      ]
+            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+          },
+        },
+      ],
     };
 
     return this.post(body);

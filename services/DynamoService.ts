@@ -25,7 +25,7 @@ export default class DynamoService implements MonitoredService {
     return new Promise((resolve, reject) => {
       const params = {
         Item: item,
-        TableName: tableName
+        TableName: tableName,
       };
 
       this.client.put(params, err => {
@@ -44,7 +44,7 @@ export default class DynamoService implements MonitoredService {
         {
           TableName: tableName,
           ProjectionExpression: projectionExp,
-          ...filters
+          ...filters,
         },
         (error: AWSError, data: ScanOutput) => {
           if (error) {
@@ -63,7 +63,7 @@ export default class DynamoService implements MonitoredService {
         {
           TableName: tableName,
           ExpressionAttributeValues: attributes,
-          KeyConditionExpression: keyCondition
+          KeyConditionExpression: keyCondition,
         },
         (error: AWSError, data: QueryOutput) => {
           if (error) {
@@ -84,7 +84,7 @@ export default class DynamoService implements MonitoredService {
       try {
         const params = {
           Limit: 1,
-          TableName: tableName
+          TableName: tableName,
         };
 
         this.client.scan(params, (err, data) => {
@@ -95,7 +95,7 @@ export default class DynamoService implements MonitoredService {
           }
           resolve({
             serviceName: 'Dynamo',
-            healthy: true
+            healthy: true,
           });
         });
       } catch (err) {
