@@ -14,7 +14,7 @@ describe("KongService", () => {
     service = new KongService({
       apiKey: 'fakeKey',
       host: 'fakeHost',
-      port: 8000
+      port: 8000,
     });
 
     event = {
@@ -50,7 +50,7 @@ describe("KongService", () => {
         url: "https://fakeHost:8000/internal/admin/consumers",
         body: { username: 'AdHocPaget' },
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(result.username).toEqual('AdHocPaget');
     });
@@ -75,13 +75,13 @@ describe("KongService", () => {
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'vba_documents' },
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(result.total).toEqual(2);
     });
@@ -95,13 +95,13 @@ describe("KongService", () => {
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'va_facilities' },
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(postMock).not.toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
         body: { group: 'vba_documents' },
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(result.total).toEqual(1);
     });
@@ -116,7 +116,7 @@ describe("KongService", () => {
       expect(postMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
       expect(result.key).toEqual('fakekey');
     });
@@ -128,7 +128,7 @@ describe("KongService", () => {
       expect(getMock).toHaveBeenCalledWith({
         url: "https://fakeHost:8000/internal/admin/consumers/_internal_DeveloperPortal",
         json: true,
-        headers: { apiKey: 'fakeKey' }
+        headers: { apiKey: 'fakeKey' },
       });
     });
 

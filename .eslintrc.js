@@ -23,6 +23,7 @@ module.exports = {
   rules: {
     'semi': ['error', 'always'],
     '@typescript-eslint/camelcase': 'off',
+    'comma-dangle': ["error", "always-multiline"],
   },
   overrides: [
     {

@@ -21,7 +21,7 @@ describe('GovDeliveryService', () => {
     client = new GovDeliveryService({
       token: 'fakeKey',
       host: 'tms.shiredelivery.com',
-      supportEmailRecipient: 'gandalf@istari.net'
+      supportEmailRecipient: 'gandalf@istari.net',
     });
     event = {
       apis: 'facilities,benefits',
