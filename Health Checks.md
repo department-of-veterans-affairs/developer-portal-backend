@@ -4,7 +4,7 @@
 The route `/health_check` can be used to verify the current health status of the developer-portal-backend. The overall health of the developer-portal-backend is considered "vibrant" if all monitored services are healthly, otherwise it is considered "lackluster."
 
 ## Adding a monitored service
-The `MonitoredService` interface can be implemented to expose the method `healthCheck` on any service. This health check should return a promise that resolves to a `ServiceHealthCheckResponse` object. This object includes a boolean value `healthy` based on whether the result of the health check was satisfactory. The health check should not throw errors but handle them internally and report them using the `ServiceHealthCheckResponse`. The service can then be added to the `MonitoredService` array in [`healthCheckHandler`](./routes/HealthCheck.ts) so that is included in requests to  `/health_check`. 
+The `MonitoredService` interface can be implemented to expose the method `healthCheck` on any service. This health check should return a promise that resolves to a `ServiceHealthCheckResponse` object. This object includes a boolean value `healthy` based on whether the result of the health check was satisfactory. The health check should not throw errors but handle them internally and report them using the `ServiceHealthCheckResponse`. The service can then be added to the `MonitoredService` array in [`healthCheckHandler`](./routes/HealthCheck.ts) so that is included in requests to `/health_check`. 
 
 ## Health Check Definitions
 
