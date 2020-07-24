@@ -15,7 +15,7 @@ describe('OktaService', () => {
           oauthClient: {
             client_id: 'fakeid',
             client_secret: 'fakesecret',
-          }
+          },
         },
       };
       
@@ -23,7 +23,7 @@ describe('OktaService', () => {
       const groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
   
       const application: OktaApplication = {
-        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication)
+        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
   
       const resp = await service.createApplication(application, 'testgroup');

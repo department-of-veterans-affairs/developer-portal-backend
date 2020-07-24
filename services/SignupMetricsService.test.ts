@@ -30,7 +30,7 @@ describe('SignupMetricsService', () => {
       const signup = {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'facilities'
+        apis: 'facilities',
       };
 
       mockScan.mockResolvedValue([signup]);
@@ -42,7 +42,7 @@ describe('SignupMetricsService', () => {
       const firstSignup = {
         email: 'frodo@theshire.com',
         createdAt: '2020-06-29T14:00:00.000Z',
-        apis: 'facilities'
+        apis: 'facilities',
       };
 
       mockScan.mockResolvedValue([
@@ -50,8 +50,8 @@ describe('SignupMetricsService', () => {
         {
           email: 'frodo@theshire.com',
           createdAt: '2020-06-29T20:00:00.000Z',
-          apis: 'health'
-        }
+          apis: 'health',
+        },
       ]);
 
       const result = await service.getUniqueSignups({});
@@ -63,13 +63,13 @@ describe('SignupMetricsService', () => {
         {
           email: 'frodo@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'facilities'
+          apis: 'facilities',
         },
         {
           email: 'frodo@theshire.com',
           createdAt: '2020-06-29T20:00:00.000Z',
-          apis: 'health'
-        }
+          apis: 'health',
+        },
       ]);
 
       const result = await service.getUniqueSignups({});
@@ -77,8 +77,8 @@ describe('SignupMetricsService', () => {
         {
           email: 'frodo@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'facilities,health'
-        }
+          apis: 'facilities,health',
+        },
       ]);
     });
   });
@@ -92,23 +92,23 @@ describe('SignupMetricsService', () => {
         {
           email: 'frodo.baggins@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'benefits,facilities,health,verification'
+          apis: 'benefits,facilities,health,verification',
         },
         {
           email: 'samwise.gamgee@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'benefits,claims,facilities,vaForms'
+          apis: 'benefits,claims,facilities,vaForms',
         },
         {
           email: 'pippin.took@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'claims,health,vaForms,verification'
+          apis: 'claims,health,vaForms,verification',
         },
         {
           email: 'merry.brandybuck@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'benefits,claims,facilities,health,confirmation'
-        }
+          apis: 'benefits,claims,facilities,health,confirmation',
+        },
       ]);
 
       mockPreviousSignups = jest.spyOn(service, 'getPreviousSignups').mockResolvedValue([]);
@@ -135,8 +135,8 @@ describe('SignupMetricsService', () => {
           {
             email: 'frodo.baggins@theshire.com',
             createdAt: '2020-06-29T14:00:00.000Z',
-            apis: 'benefits,facilities,health,verification'
-          }
+            apis: 'benefits,facilities,health,verification',
+          },
         ]);
 
         const result = await service.countSignups({});
@@ -155,7 +155,7 @@ describe('SignupMetricsService', () => {
           facilities: 3,
           health: 3,
           vaForms: 2,
-          verification: 2
+          verification: 2,
         });
       });
 
@@ -164,8 +164,8 @@ describe('SignupMetricsService', () => {
           {
             email: 'frodo.baggins@theshire.com',
             createdAt: '2020-01-29T14:00:00.000Z',
-            apis: 'claims'
-          }
+            apis: 'claims',
+          },
         ]);
 
         const result = await service.countSignups({});
@@ -178,7 +178,7 @@ describe('SignupMetricsService', () => {
           facilities: 3,
           health: 3,
           vaForms: 2,
-          verification: 2
+          verification: 2,
         });
       });
 
@@ -187,8 +187,8 @@ describe('SignupMetricsService', () => {
           {
             email: 'frodo.baggins@theshire.com',
             createdAt: '2020-01-29T14:00:00.000Z',
-            apis: 'benefits,facilities,health'
-          }
+            apis: 'benefits,facilities,health',
+          },
         ]);
 
         const result = await service.countSignups({});
@@ -201,7 +201,7 @@ describe('SignupMetricsService', () => {
           facilities: 2,
           health: 2,
           vaForms: 2,
-          verification: 2
+          verification: 2,
         });
       });
     });

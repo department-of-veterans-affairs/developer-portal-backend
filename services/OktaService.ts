@@ -43,7 +43,7 @@ export default class OktaService implements MonitoredService {
       return {
         serviceName: 'Okta',
         healthy: false,
-        err: err
+        err: err,
       };
     }
   }

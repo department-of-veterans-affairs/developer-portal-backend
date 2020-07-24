@@ -83,7 +83,7 @@ export default class SignupMetricsService {
       'email = :email and createdAt < :signupDate',
       {
         ':email': signup.email,
-        ':signupDate': signup.createdAt
+        ':signupDate': signup.createdAt,
       }
     );
 
@@ -101,8 +101,8 @@ export default class SignupMetricsService {
         health: 0,
         communityCare: 0,
         verification: 0,
-        claims: 0
-      }
+        claims: 0,
+      },
     };
 
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
@@ -137,23 +137,23 @@ export default class SignupMetricsService {
       filterParams = {
         ExpressionAttributeValues: {
           ':startDate': options.startDate.toISOString(),
-          ':endDate': options.endDate.toISOString()
+          ':endDate': options.endDate.toISOString(),
         },
-        FilterExpression: 'createdAt BETWEEN :startDate AND :endDate'
+        FilterExpression: 'createdAt BETWEEN :startDate AND :endDate',
       };
     } else if (options.startDate) {
       filterParams = {
         ExpressionAttributeValues: {
-          ':startDate': options.startDate.toISOString()
+          ':startDate': options.startDate.toISOString(),
         },
-        FilterExpression: 'createdAt >= :startDate'
+        FilterExpression: 'createdAt >= :startDate',
       };
     } else if (options.endDate) {
       filterParams = {
         ExpressionAttributeValues: {
-          ':endDate': options.endDate.toISOString()
+          ':endDate': options.endDate.toISOString(),
         },
-        FilterExpression: 'createdAt <= :endDate'
+        FilterExpression: 'createdAt <= :endDate',
       };
     }
 
@@ -165,7 +165,7 @@ export default class SignupMetricsService {
       return {
         email: item.email.toString(),
         createdAt: item.createdAt.toString(),
-        apis: item.apis.toString()
+        apis: item.apis.toString(),
       };
     });
   }

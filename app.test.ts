@@ -23,12 +23,12 @@ describe('App routing', () => {
         apis: 'benefits',
         email: 'eowyn@rohan.horse',
         lastName: 'Eorl',
-        termsOfService: true
+        termsOfService: true,
       });
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        errors: ['"firstName" is required', '"organization" is required']
+        errors: ['"firstName" is required', '"organization" is required'],
       });
     });
   });
@@ -42,8 +42,19 @@ describe('App routing', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        errors: ['"firstName" is required', '"lastName" is required']
+        errors: ['"firstName" is required', '"lastName" is required'],
       });
+    });
+  });
+});
+
+describe('/reports/signups', () => {
+  it('sends a 400 response and descriptive errors if validations fail', async () => {
+    const response = await request.get('/reports/signups?span=Gimli');
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      errors: ['"span" must be one of [week, month]'],
     });
   });
 });

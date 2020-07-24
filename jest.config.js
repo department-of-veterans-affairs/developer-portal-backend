@@ -4,14 +4,16 @@ module.exports = {
   globals: {
     'ts-jest': {
       diagnostics: false,
-      tsConfig: 'tsconfig.test.json'
-    }
+      tsConfig: 'tsconfig.test.json',
+    },
   },
   coverageThreshold: {
     '**/*.ts': {
-      statements: 80
-    }
+      statements: 80,
+    },
   },
-  testMatch: ['**/?(*.)+(integration|test).[jt]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/']
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+  ],
 };

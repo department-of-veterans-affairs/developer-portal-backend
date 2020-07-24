@@ -62,12 +62,12 @@ describe('developerApplicationHandler', () => {
         lastName: 'Baggins',
         organization: 'Fellowship of the Ring',
         termsOfService: true,
-      }
+      },
     } as Request;
 
     stubOAuthCreds = {
       client_id: 'my',
-      client_secret: 'precious'
+      client_secret: 'precious',
     };
 
     stubToken = 'onering';
@@ -356,7 +356,7 @@ describe('validations', () => {
     });
 
     it('is a uri', () => {
-      const payload = { ...defaultPayload, oAuthRedirectURI: 'horsiesAreCool', };
+      const payload = { ...defaultPayload, oAuthRedirectURI: 'horsiesAreCool' };
 
       const result = applySchema.validate(payload);
 
