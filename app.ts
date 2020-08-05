@@ -16,6 +16,7 @@ import developerApplicationHandler, { applySchema } from './routes/DeveloperAppl
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
+import UninitializedService from './services/UninitializedService';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -91,17 +92,17 @@ const configureOktaService = (): OktaService | undefined => {
 };
 
 const configureSlackService = (): SlackService | undefined => {
-  const { SLACK_WEBHOOK, SLACK_CHANNEL } = process.env;
+  const envVars = SlackService.getEnvironmentVariablePairs();
   let client;
-
-  if (SLACK_WEBHOOK && SLACK_CHANNEL) {
-    client = new SlackService(SLACK_WEBHOOK, {
-      channel: SLACK_CHANNEL,
-      username: 'Developer Portal',
-      icon_emoji: ':lighthouse:',
+  if (UninitializedService.isServiceInitializable(...Object.values(envVars))) {
+    client = new SlackService(envVars.slackURL.value, envVars.slackToken.value, {
+      channel: envVars.slackChannel.value,
+      bot: envVars.slackBotId.value
     });
+  } else {
+    const errorString = UninitializedService.generateMissingEnvVarMessage(...Object.values(envVars));
+    client = new UninitializedService('Slack', errorString);
   }
-
   return client;
 };
 

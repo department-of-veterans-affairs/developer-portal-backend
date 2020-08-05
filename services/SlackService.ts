@@ -1,5 +1,5 @@
 import axios, {AxiosInstance } from 'axios';
-import { MonitoredService, ServiceHealthCheckResponse } from '../types';
+import { MonitoredService, ServiceHealthCheckResponse, EnvironmentVariablePair } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
 /* 
@@ -8,11 +8,9 @@ in Slack. The username field is what the message will be posted as.
 The channel field is the name of a channel like #dev-signup-feed,
 including the hash.
 */
-interface WebhookOptions {
-  channel: string;
-  username: string;
-  icon_emoji?: string;
-  icon?: string;
+interface WebAPIOptions {
+  channel?: string;
+  bot?: string;
 }
 
 interface Attachment {
@@ -41,16 +39,41 @@ interface PostBody {
   attachments?:  Attachment[];
 }
 
+interface WebAPIHeaders {
+  'Authorization'?: string;
+  'Content-Type'?: string;
+}
+
+interface WebAPIConfig {
+  baseURL?: string;
+  headers: WebAPIHeaders;
+}
+
+interface EnvironmentVariables {
+  slackURL: EnvironmentVariablePair,
+  slackChannel: EnvironmentVariablePair,
+  slackBotId: EnvironmentVariablePair,
+  slackToken: EnvironmentVariablePair
+}
+
 function capitalizeFirstLetter(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
-  private options: WebhookOptions;
+  private options: WebAPIOptions | undefined;
+  private config: WebAPIConfig;
 
-  constructor(webhook: string, options: WebhookOptions) {
-    this.client = axios.create({ baseURL: webhook });
+  constructor(url?: string, token?: string, options?: WebAPIOptions) {
+    this.config = {
+      baseURL: url,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    this.client = axios.create(this.config);
     this.options = options;
   }
 
@@ -147,7 +170,7 @@ export default class SlackService implements MonitoredService {
 
   private async post(body: PostBody): Promise<string> {
     try {
-      const res = await this.client.post('', { ...this.options, ...body });
+      const res = await this.client.post('/api/chat.postMessage', { channel: this.options?.channel, ...body });
       return res.data;
     }
     catch (err) {
@@ -164,9 +187,38 @@ export default class SlackService implements MonitoredService {
 
   // Slack is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-    return await Promise.resolve({
+    let healthResponse: ServiceHealthCheckResponse = {
       serviceName: 'Slack',
-      healthy: true,
-    });
+      healthy: false
+    }
+    try {
+      healthResponse.healthy = await this.checkBot();
+      return await Promise.resolve(healthResponse);
+    } catch (err) {
+      console.error(err);
+      err.action = 'checking health of Slack';
+      healthResponse.err = err;
+      return await Promise.resolve(healthResponse);
+    }
+  }
+
+  public async checkBot() {
+    const config = {
+      params: {
+        bot: this.options?.bot
+      }
+    };
+    let response = await this.client.get('/api/bots.info', config);
+    return response.data.ok;
+  }
+
+  public static getEnvironmentVariablePairs(): EnvironmentVariables {
+    const { SLACK_URL, SLACK_CHANNEL, SLACK_BOT_ID, SLACK_TOKEN } = process.env;
+    return {
+      slackURL: { name: 'SLACK_URL', value: SLACK_URL },
+      slackChannel: { name: 'SLACK_CHANNEL', value: SLACK_CHANNEL },
+      slackBotId: { name: 'SLACK_BOT_ID', value: SLACK_BOT_ID },
+      slackToken: { name: 'SLACK_TOKEN', value: SLACK_TOKEN }
+    };
   }
 }
