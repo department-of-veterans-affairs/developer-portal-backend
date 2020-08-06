@@ -4,6 +4,7 @@ import Joi from '@hapi/joi';
 
 import SlackService from '../../services/SlackService';
 import SignupMetricsService from '../../services/SignupMetricsService';
+import UninitializedService from '../../services/UninitializedService';
 
 export const signupsReportSchema = Joi.object().keys({
   span: Joi.valid('week', 'month'),
@@ -34,9 +35,9 @@ function setStartAndEndDates(reqStart: string | undefined, reqEnd: string | unde
   return { start, end };
 }
 
-export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService | undefined) {
+export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService | UninitializedService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!slack) {
+    if (!slack || slack instanceof UninitializedService) {
       res.status(503).json({ error: 'service not enabled' });
       return;
     }

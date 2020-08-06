@@ -83,7 +83,7 @@ export interface MonitoredService {
 
 export interface EnvironmentVariablePair {
   name: string;
-  value: any;
+  value: string | number | undefined;
 }
 
 export interface ServiceHealthCheckResponse {

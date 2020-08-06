@@ -6,12 +6,13 @@ import OktaService from '../services/OktaService';
 import DynamoService from '../services/DynamoService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
+import UninitializedService from '../services/UninitializedService';
 
 export default function healthCheckHandler(kong: KongService, 
   okta: OktaService | undefined, 
   dynamo: DynamoService, 
   govdelivery: GovDeliveryService | undefined, 
-  slack: SlackService | undefined): RequestHandler {
+  slack: SlackService | UninitializedService): RequestHandler {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const healthCheck: HealthCheck = new HealthCheck;
 

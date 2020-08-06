@@ -91,13 +91,13 @@ const configureOktaService = (): OktaService | undefined => {
   return client;
 };
 
-const configureSlackService = (): SlackService | undefined => {
+const configureSlackService = (): SlackService | UninitializedService => {
   const envVars = SlackService.getEnvironmentVariablePairs();
   let client;
   if (UninitializedService.isServiceInitializable(...Object.values(envVars))) {
-    client = new SlackService(envVars.slackURL.value, envVars.slackToken.value, {
-      channel: envVars.slackChannel.value,
-      bot: envVars.slackBotId.value
+    client = new SlackService(envVars.slackURL.value as string, envVars.slackToken.value as string, {
+      channel: envVars.slackChannel.value as string,
+      bot: envVars.slackBotId.value as string,
     });
   } else {
     const errorString = UninitializedService.generateMissingEnvVarMessage(...Object.values(envVars));

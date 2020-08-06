@@ -12,16 +12,16 @@ export default class UninitializedService implements MonitoredService {
     }
 
     public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-        let response: ServiceHealthCheckResponse = {
+        const response: ServiceHealthCheckResponse = {
             serviceName: this.serviceName,
-            healthy: false
-        }
-        if(!!this.errorMessage){
+            healthy: false,
+        };
+        if(this.errorMessage){
             response.err = {
-                message: this.errorMessage
-            }
+                message: this.errorMessage,
+            };
         }
-        return response;
+        return await Promise.resolve(response);
     }
 
     public static generateMissingEnvVarMessage(...missingEnvironmentVariablePairs: EnvironmentVariablePair[]): string {

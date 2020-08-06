@@ -50,10 +50,10 @@ interface WebAPIConfig {
 }
 
 interface EnvironmentVariables {
-  slackURL: EnvironmentVariablePair,
-  slackChannel: EnvironmentVariablePair,
-  slackBotId: EnvironmentVariablePair,
-  slackToken: EnvironmentVariablePair
+  slackURL: EnvironmentVariablePair;
+  slackChannel: EnvironmentVariablePair;
+  slackBotId: EnvironmentVariablePair;
+  slackToken: EnvironmentVariablePair;
 }
 
 function capitalizeFirstLetter(word: string): string {
@@ -70,8 +70,8 @@ export default class SlackService implements MonitoredService {
       baseURL: url,
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     };
     this.client = axios.create(this.config);
     this.options = options;
@@ -187,10 +187,10 @@ export default class SlackService implements MonitoredService {
 
   // Slack is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-    let healthResponse: ServiceHealthCheckResponse = {
+    const healthResponse: ServiceHealthCheckResponse = {
       serviceName: 'Slack',
-      healthy: false
-    }
+      healthy: false,
+    };
     try {
       healthResponse.healthy = await this.checkBot();
       return await Promise.resolve(healthResponse);
@@ -202,13 +202,13 @@ export default class SlackService implements MonitoredService {
     }
   }
 
-  public async checkBot() {
+  public async checkBot(): Promise<boolean> {
     const config = {
       params: {
-        bot: this.options?.bot
-      }
+        bot: this.options?.bot,
+      },
     };
-    let response = await this.client.get('/api/bots.info', config);
+    const response = await this.client.get('/api/bots.info', config);
     return response.data.ok;
   }
 
@@ -218,7 +218,7 @@ export default class SlackService implements MonitoredService {
       slackURL: { name: 'SLACK_URL', value: SLACK_URL },
       slackChannel: { name: 'SLACK_CHANNEL', value: SLACK_CHANNEL },
       slackBotId: { name: 'SLACK_BOT_ID', value: SLACK_BOT_ID },
-      slackToken: { name: 'SLACK_TOKEN', value: SLACK_TOKEN }
+      slackToken: { name: 'SLACK_TOKEN', value: SLACK_TOKEN },
     };
   }
 }
