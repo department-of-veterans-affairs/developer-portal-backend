@@ -16,4 +16,5 @@ module.exports = {
     '/node_modules/',
     '/dist/',
   ],
+  testEnvironment: 'node',
 };
