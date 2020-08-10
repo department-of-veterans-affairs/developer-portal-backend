@@ -47,37 +47,40 @@ describe('App routing', () => {
     });
 
     it('sends 200 on successful dev application form submit', async () => {
-      nock.disableNetConnect()
-      nock.enableNetConnect('127.0.0.1')
-      const kong = nock(`http://${process.env.KONG_HOST}:8000`)
-        .get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
-          id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null
-        })
+      nock.disableNetConnect();
+      nock.enableNetConnect('127.0.0.1');
+
+      const kong = nock(`http://${process.env.KONG_HOST}:8000`);
+
+      kong.get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
+        id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
+      })
         .get('/internal/admin/consumers/FellowshipBaggins/acls').reply(200, {
           total: 2, data: [{ group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
-          { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } }]
+          { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } }],
         })
-        .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(200, {})
+        .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(200, { key: 'my-precious' });
 
-      const okta = nock(`https://${process.env.OKTA_ORG}.okta.com`)
-        .post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'the ring' } } })
+      const okta = nock(`https://${process.env.OKTA_ORG}.okta.com`);
+
+      okta.post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } } })
         .put(`/api/v1/apps/123/groups/00g1syt19eSr12rXz2p7`)
-        .reply(200, {})
+        .reply(200, { client_id: 'gollum', client_secret: 'mordor' });
 
       const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`, {
-        filteringScope: scope => /^http:\/\/dynamodb*/.test(scope)
-      })
-        .filteringPath(function (path) {
-          return "/";
-        })
-        .post('/').reply(200)
+        filteringScope: scope => /^http:\/\/dynamodb*/.test(scope),
+      }).filteringPath(() => "/");
 
-      const govDelivery = nock('https://fake-gov-delivery-host')
-        .post('/messages/email')
-        .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' })
+      dynamoDB.post('/').reply(200);
 
-      const slack = nock(process.env.SLACK_WEBHOOK)
-        .post('/').reply(200)
+      const govDelivery = nock('https://fake-gov-delivery-host');
+
+      govDelivery.post('/messages/email')
+        .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' });
+
+      const slack = nock(process.env.SLACK_WEBHOOK);
+
+      slack.post('/').reply(200);
 
       const devAppRequest = {
         apis: 'facilities,verification',
@@ -89,19 +92,25 @@ describe('App routing', () => {
         termsOfService: true,
         oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
         oAuthApplicationType: 'web',
-      }
+      };
 
-      const response = await request.post('/developer_application').send(devAppRequest)
+      const response = await request.post('/developer_application').send(devAppRequest);
 
-      nock.cleanAll()
-      nock.enableNetConnect()
+      nock.cleanAll();
+      nock.enableNetConnect();
 
-      expect(response.status).toEqual(200)
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        clientID: 'gollum',
+        clientSecret: 'mordor',
+        token: 'my-precious',
+      });
     });
 
     it('sends 500 and error message ', async () => {
-      const kong = nock(`http://${process.env.KONG_HOST}:8000`)
-        .get('/internal/admin/consumers/FellowshipBaggins').reply(500)
+      const kong = nock(`http://${process.env.KONG_HOST}:8000`);
+
+      kong.get('/internal/admin/consumers/FellowshipBaggins').reply(500);
 
       const devAppRequest = {
         apis: 'facilities,verification',
@@ -113,18 +122,18 @@ describe('App routing', () => {
         termsOfService: true,
         oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
         oAuthApplicationType: 'web',
-      }
+      };
 
-      const response = await request.post('/developer_application').send(devAppRequest)
+      const response = await request.post('/developer_application').send(devAppRequest);
 
-      expect(response.status).toEqual(500)
-      expect(response.text).toContain('failed creating kong consumer')
-    })
+      expect(response.status).toEqual(500);
+      expect(response.text).toContain('failed creating kong consumer');
+    });
   });
 
   describe('/contact-us', () => {
 
-    const govDelivery = nock('https://fake-gov-delivery-host')
+    const govDelivery = nock('https://fake-gov-delivery-host');
 
     it('sends a 400 response and descriptive errors if validations fail', async () => {
       const response = await request.post('/contact-us').send({
@@ -147,18 +156,18 @@ describe('App routing', () => {
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
         apis: ['benefits', 'facilities'],
-      }
+      };
 
       govDelivery
         .post('/messages/email')
-        .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' })
+        .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' });
 
       const response = await request.post('/contact-us').send(supportReq);
 
-      expect(response.status).toEqual(200)
-    })
+      expect(response.status).toEqual(200);
+    });
 
-    it('sends error message on 500 status', async () => {
+    it('sends error message on 500 status eee', async () => {
 
       const supportReq = {
         firstName: 'Samwise',
@@ -167,17 +176,17 @@ describe('App routing', () => {
         organization: 'The Fellowship of the Ring',
         description: 'Need help getting to Mt. Doom',
         apis: ['benefits', 'facilities'],
-      }
+      };
 
       govDelivery
         .post('/messages/email')
-        .reply(500)
+        .reply(500);
 
       const response = await request.post('/contact-us').send(supportReq);
 
-      expect(response.status).toEqual(500)
-      expect(response.text).toContain('sending contact us email')
-    })
+      expect(response.status).toEqual(500);
+      expect(response.text).toContain('sending contact us email');
+    });
   });
 });
 
