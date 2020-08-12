@@ -6,9 +6,9 @@
     "start": "node dist/server",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "lint": "eslint --ext .js,.ts .",
-    "test": "jest",
-    "test-ci": "jest --coverage",
-    "test:watch": "jest --watchAll",
+    "test": "jest --setupTestFrameworkScriptFile=./dotenv-config.js",
+    "test-ci": "jest --setupTestFrameworkScriptFile=./dotenv-config.js --coverage",
+    "test:watch": "jest --setupTestFrameworkScriptFile=./dotenv-config.js --watchAll",
     "build": "tsc"
   },
   "dependencies": {
@@ -41,6 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "command-line-args": "^5.1.1",
+    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "jest": "^25.1.0",
     "jest-junit-reporter": "^1.1.0",

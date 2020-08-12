@@ -2,22 +2,6 @@ import 'jest';
 import supertest from 'supertest';
 import nock from 'nock';
 
-//set server environment variables before the app is loaded
-process.env.KONG_KEY = 'fake-kong-key';
-process.env.KONG_HOST = 'fake-kong-host';
-process.env.GOVDELIVERY_HOST = 'fake-gov-delivery-host';
-process.env.GOVDELIVERY_KEY = 'fake-gov-delivery-key';
-process.env.SUPPORT_EMAIL = 'support@theshire.net';
-process.env.OKTA_TOKEN = 'fake-token';
-process.env.OKTA_ORG = 'the-shire-org';
-process.env.DYNAMODB_ENDPOINT = 'http://dynamodb';
-process.env.DYNAMODB_ACCESS_KEY_ID = 'NONE';
-process.env.DYNAMODB_REGION = 'us-west-2';
-process.env.DYNAMODB_ACCESS_KEY_SECRET = 'NONE';
-process.env.DYNAMODB_SESSION_TOKEN = 'fake-dynamo-db-session-token';
-process.env.SLACK_WEBHOOK = 'http://shire-web-hook';
-process.env.SLACK_CHANNEL = 'fake-slack-channel';
-
 import configureApp from './app';
 
 const request = supertest(configureApp());
