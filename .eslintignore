@@ -1,4 +1,4 @@
 node_modules/*
 .npm/
 .config/
-mocks/node_modules/*
+dev/mocks/node_modules/*
