@@ -64,15 +64,15 @@ const configureKongService = (): KongService => {
   // always a string and never undefined.
   const port = parseInt(`${KONG_PORT}`, 10) || 8000;
 
-  const kongfig: KongConfig = {
+  const kongConfig: KongConfig = {
     apiKey: KONG_KEY,
     host: KONG_HOST,
     port: port,
   };
   if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
-    kongfig.protocol = KONG_PROTOCOL;
+    kongConfig.protocol = KONG_PROTOCOL;
   }
-  return new KongService(kongfig);
+  return new KongService(kongConfig);
 };
 
 const configureOktaService = (): OktaService => {

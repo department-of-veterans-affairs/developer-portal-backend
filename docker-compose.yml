@@ -103,11 +103,11 @@ services:
     
   mock:
     build:
-      context: mocks/
-    image: developer-portal-backend-mock
+      context: dev/mocks/
+    image: developer-portal-services-mock
     ports:
       - 3001:3001
     volumes:
-      - ./mocks:/home/node
+      - ./dev/mocks:/home/node
       - /home/node/node_modules
     command: node json-mocks
