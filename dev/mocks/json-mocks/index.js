@@ -4,7 +4,7 @@ const mockServer = require('node-mock-server');
 const path = require('path');
 
 mockServer({
-	'restPath': path.join(__dirname, '/service'),
+	'restPath': path.join(__dirname, '/services'),
 	'uiPath': '/',
 	'title': 'Api mock server',
 	'version': 1,
