@@ -1,14 +1,16 @@
 import OktaService, { OktaApplicationResponse } from '../services/OktaService';
-import { ApplicationType,
-         GrantTypes,
-         OAuthApplication,
-         OktaApplication,
-         OktaUser,
-         ResponseTypes } from '../types';
+import {
+  ApplicationType,
+  GrantTypes,
+  OAuthApplication,
+  OktaApplication,
+  OktaUser,
+  ResponseTypes,
+} from '../types';
 
 const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
 const LOGIN_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
-const IDME_GROUP_ID = '00g1syt19eSr12rXz2p7';
+export const IDME_GROUP_ID = '00g1syt19eSr12rXz2p7';
 
 export interface ApplicationSettings {
   name: string;
