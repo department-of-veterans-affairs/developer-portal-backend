@@ -9,7 +9,7 @@ mockServer({
 	'title': 'Api mock server',
 	'version': 1,
 	'urlBase': 'http://localhost:3001',
-	'urlPath': '/service',
+	'urlPath': '/services',
 	'port': 3001,
 	'contentType': 'application/json',
 	'accessControlExposeHeaders': 'X-Total-Count',

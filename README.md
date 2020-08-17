@@ -24,11 +24,11 @@ KONG_PORT=8000
 KONG_PROTOCOL=http
 NODE_ENV=development
 DYNAMODB_ENDPOINT=http://dynamodb:8000
-SLACK_WEBHOOK=http://localhost:3001/rest/slack/chat.postMessage
+SLACK_WEBHOOK=http://localhost:3001/services/slack/chat.postMessage
 SLACK_CHANNEL="#the-fellowship"
-GOVDELIVERY_HOST=http://localhost:3001/rest/messages/email
+GOVDELIVERY_HOST=http://localhost:3001/services/govdelivery/messages/email
 GOVDELIVERY_KEY=123
-OKTA_HOST=http://mock:3001/rest
+OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
 ```
 
