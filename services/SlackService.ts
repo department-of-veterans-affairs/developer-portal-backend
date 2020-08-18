@@ -49,23 +49,16 @@ interface WebAPIConfig {
   headers: WebAPIHeaders;
 }
 
-interface EnvironmentVariables {
-  slackURL: EnvironmentVariablePair;
-  slackChannel: EnvironmentVariablePair;
-  slackBotId: EnvironmentVariablePair;
-  slackToken: EnvironmentVariablePair;
-}
-
 function capitalizeFirstLetter(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
-  private options: WebAPIOptions | undefined;
+  private options: WebAPIOptions;
   private config: WebAPIConfig;
 
-  constructor(url?: string, token?: string, options?: WebAPIOptions) {
+  constructor(url: string, token: string, options: WebAPIOptions) {
     this.config = {
       baseURL: url,
       headers: {
@@ -170,7 +163,7 @@ export default class SlackService implements MonitoredService {
 
   private async post(body: PostBody): Promise<string> {
     try {
-      const res = await this.client.post('/api/chat.postMessage', { channel: this.options?.channel, ...body });
+      const res = await this.client.post('/api/chat.postMessage', { channel: this.options.channel, ...body });
       return res.data;
     }
     catch (err) {
@@ -205,20 +198,10 @@ export default class SlackService implements MonitoredService {
   public async checkBot(): Promise<boolean> {
     const config = {
       params: {
-        bot: this.options?.bot,
+        bot: this.options.bot,
       },
     };
     const response = await this.client.get('/api/bots.info', config);
     return response.data.ok;
-  }
-
-  public static getEnvironmentVariablePairs(): EnvironmentVariables {
-    const { SLACK_URL, SLACK_CHANNEL, SLACK_BOT_ID, SLACK_TOKEN } = process.env;
-    return {
-      slackURL: { name: 'SLACK_URL', value: SLACK_URL },
-      slackChannel: { name: 'SLACK_CHANNEL', value: SLACK_CHANNEL },
-      slackBotId: { name: 'SLACK_BOT_ID', value: SLACK_BOT_ID },
-      slackToken: { name: 'SLACK_TOKEN', value: SLACK_TOKEN },
-    };
   }
 }

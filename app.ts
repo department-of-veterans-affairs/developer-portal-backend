@@ -16,7 +16,6 @@ import developerApplicationHandler, { applySchema } from './routes/DeveloperAppl
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
-import UninitializedService from './services/UninitializedService';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -92,7 +91,7 @@ const configureOktaService = (): OktaService => {
 const configureSlackService = (): SlackService => {
   const { SLACK_URL, SLACK_TOKEN, SLACK_CHANNEL, SLACK_BOT_ID } = process.env;
 
-  if(!SLACK_URL || !SLACK_TOKEN || !SLACK_CHANNEL || SLACK_BOT_ID){
+  if(!SLACK_URL || !SLACK_TOKEN || !SLACK_CHANNEL || !SLACK_BOT_ID){
     throw new Error('Slack Config Missing');
   }
 

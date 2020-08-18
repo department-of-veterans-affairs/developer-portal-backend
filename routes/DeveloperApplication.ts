@@ -11,7 +11,6 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config';
-import UninitializedService from '../services/UninitializedService';
 
 function validateApiList(val: string): string {
   let result: boolean;
@@ -42,10 +41,10 @@ export const applySchema = Joi.object().keys({
 }).options({ abortEarly: false });
 
 export default function developerApplicationHandler(kong: KongService,
-  okta: OktaService | undefined,
+  okta: OktaService,
   dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
-  slack: SlackService | UninitializedService) {
+  govdelivery: GovDeliveryService,
+  slack: SlackService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const form: FormSubmission = pick(req.body, [
       'firstName',
@@ -107,7 +106,7 @@ export default function developerApplicationHandler(kong: KongService,
     }
 
     try {
-      if (slack && !(slack instanceof UninitializedService)) {
+      if (slack) {
         logger.info({ message: 'sending success to slack' });
         await user.sendSlackSuccess(slack);
       }
