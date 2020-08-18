@@ -4,7 +4,7 @@ import { OktaApplication, OAuthApplication } from '../types';
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
     token: 'fakeToken',
-    org: 'fake-va-org',
+    host: 'https://fake-va-org.okta.com',
   });
 
   describe('createApplication', () => {

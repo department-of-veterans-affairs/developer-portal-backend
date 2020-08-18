@@ -40,70 +40,66 @@ function loggingMiddleware(tokens, req, res): string {
   });
 }
 
-const configureGovDeliveryService = (): GovDeliveryService | undefined => {
+const configureGovDeliveryService = (): GovDeliveryService => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
-  let client;
 
-  if (GOVDELIVERY_KEY && GOVDELIVERY_HOST) {
-    client = new GovDeliveryService({
-      host: GOVDELIVERY_HOST,
-      token: GOVDELIVERY_KEY,
-      supportEmailRecipient: SUPPORT_EMAIL || 'api@va.gov',
-    });
+  if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST) {
+    throw new Error('GovDelivery Config Missing');
   }
 
-  return client;
+  return new GovDeliveryService({
+    host: GOVDELIVERY_HOST,
+    token: GOVDELIVERY_KEY,
+    supportEmailRecipient: SUPPORT_EMAIL || 'api@va.gov',
+  });
 };
 
 const configureKongService = (): KongService => {
   const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env;
 
-  if (KONG_KEY && KONG_HOST) {
-    // String interpolation here ensures the first arg to parseInt is
-    // always a string and never undefined.
-    const port = parseInt(`${KONG_PORT}`, 10) || 8000;
-
-    const kongfig: KongConfig = {
-      apiKey: KONG_KEY,
-      host: KONG_HOST,
-      port: port,
-    };
-    if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
-      kongfig.protocol = KONG_PROTOCOL;
-    }
-    return new KongService(kongfig);
-  } else {
+  if(!KONG_KEY || !KONG_HOST){
     throw new Error('Kong Config Missing');
   }
+
+  // String interpolation here ensures the first arg to parseInt is
+  // always a string and never undefined.
+  const port = parseInt(`${KONG_PORT}`, 10) || 8000;
+
+  const kongConfig: KongConfig = {
+    apiKey: KONG_KEY,
+    host: KONG_HOST,
+    port: port,
+  };
+  if (KONG_PROTOCOL === 'http' || KONG_PROTOCOL === 'https') {
+    kongConfig.protocol = KONG_PROTOCOL;
+  }
+  return new KongService(kongConfig);
 };
 
-const configureOktaService = (): OktaService | undefined => {
-  const { OKTA_TOKEN, OKTA_ORG } = process.env;
-  let client;
+const configureOktaService = (): OktaService => {
+  const { OKTA_TOKEN, OKTA_ORG, OKTA_HOST } = process.env;
 
-  if (OKTA_TOKEN && OKTA_ORG) {
-    client = new OktaService({
-      org: OKTA_ORG,
-      token: OKTA_TOKEN,
-    });
+  if(!OKTA_TOKEN || !(OKTA_ORG || OKTA_HOST)){
+    throw new Error('Okta Config Missing');
   }
 
-  return client;
+  return new OktaService({
+    host: OKTA_HOST || `https://${OKTA_ORG}.okta.com`,
+    token: OKTA_TOKEN,
+  });
 };
 
-const configureSlackService = (): SlackService | UninitializedService => {
-  const envVars = SlackService.getEnvironmentVariablePairs();
-  let client;
-  if (UninitializedService.isServiceInitializable(...Object.values(envVars))) {
-    client = new SlackService(envVars.slackURL.value as string, envVars.slackToken.value as string, {
-      channel: envVars.slackChannel.value as string,
-      bot: envVars.slackBotId.value as string,
-    });
-  } else {
-    const errorString = UninitializedService.generateMissingEnvVarMessage(...Object.values(envVars));
-    client = new UninitializedService('Slack', errorString);
+const configureSlackService = (): SlackService => {
+  const { SLACK_URL, SLACK_TOKEN, SLACK_CHANNEL, SLACK_BOT_ID } = process.env;
+
+  if(!SLACK_URL || !SLACK_TOKEN || !SLACK_CHANNEL || SLACK_BOT_ID){
+    throw new Error('Slack Config Missing');
   }
-  return client;
+
+  return new SlackService(SLACK_URL, SLACK_TOKEN, {
+    channel: SLACK_CHANNEL,
+    bot: SLACK_BOT_ID,
+  });
 };
 
 const configureDynamoService = (): DynamoService => {

@@ -1,0 +1,13 @@
+{
+  "name": "developer-portal-backend-mocks",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node json-mocks",
+    "lint": "eslint --ext .js,.ts ."
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "node-mock-server": "^0.25.4"
+  }
+}
