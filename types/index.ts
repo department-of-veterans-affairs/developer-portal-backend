@@ -81,11 +81,6 @@ export interface MonitoredService {
   healthCheck: () => Promise<ServiceHealthCheckResponse>;
 }
 
-export interface EnvironmentVariablePair {
-  name: string;
-  value: string | number | undefined;
-}
-
 export interface ServiceHealthCheckResponse {
   serviceName: string;
   healthy: boolean;

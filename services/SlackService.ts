@@ -1,6 +1,7 @@
-import axios, {AxiosInstance } from 'axios';
-import { MonitoredService, ServiceHealthCheckResponse, EnvironmentVariablePair } from '../types';
+import axios, {AxiosInstance, AxiosResponse } from 'axios';
+import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
+import logger from '../config/logger';
 
 /* 
 WebhookOptions override the defaults configured in the webhook
@@ -47,6 +48,23 @@ interface WebAPIHeaders {
 interface WebAPIConfig {
   baseURL?: string;
   headers: WebAPIHeaders;
+}
+
+interface SlackBotInfo {
+  ok: boolean;
+  bot: {
+    id: string;
+    deleted: boolean;
+    name: string;
+    updated: number;
+    app_id: string;
+    user_id: string;
+    icons: {
+      image_36: string;
+      image_48: string;
+      image_72: string;
+    };
+  };
 }
 
 function capitalizeFirstLetter(word: string): string {
@@ -185,23 +203,22 @@ export default class SlackService implements MonitoredService {
       healthy: false,
     };
     try {
-      healthResponse.healthy = await this.checkBot();
-      return await Promise.resolve(healthResponse);
+      healthResponse.healthy = (await this.getBot()).data.ok;
+      return Promise.resolve(healthResponse);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       err.action = 'checking health of Slack';
       healthResponse.err = err;
-      return await Promise.resolve(healthResponse);
+      return Promise.resolve(healthResponse);
     }
   }
 
-  public async checkBot(): Promise<boolean> {
+  public async getBot(): Promise<AxiosResponse<SlackBotInfo>> {
     const config = {
       params: {
         bot: this.options.bot,
       },
     };
-    const response = await this.client.get('/api/bots.info', config);
-    return response.data.ok;
+    return await this.client.get('/api/bots.info', config);
   }
 }
