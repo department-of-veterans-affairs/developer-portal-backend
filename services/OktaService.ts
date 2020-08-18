@@ -13,10 +13,10 @@ export interface OktaApplicationResponse {
 export default class OktaService implements MonitoredService {
   public client: Client;
 
-  constructor({ org, token }) {
+  constructor({ host, token }) {
     this.client = new Client({
       token,
-      orgUrl: `https://${org}.okta.com`,
+      orgUrl: host,
       requestExecutor: new DefaultRequestExecutor(),
     });
   }

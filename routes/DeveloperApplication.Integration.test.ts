@@ -8,7 +8,7 @@ import { IDME_GROUP_ID } from '../models/Application';
 const request = supertest(configureApp());
 describe('/developer_application', () => {
     const kong = nock(`http://${process.env.KONG_HOST}:8000`);
-    const okta = nock(`https://${process.env.OKTA_ORG}.okta.com`);
+    const okta = nock(process.env.OKTA_HOST);
     const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
     const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
     const slack = nock(process.env.SLACK_WEBHOOK);

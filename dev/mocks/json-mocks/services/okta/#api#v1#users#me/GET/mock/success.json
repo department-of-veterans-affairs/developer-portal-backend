@@ -1,0 +1,51 @@
+{
+    "id": "king-of-gondor",
+    "status": "ACTIVE",
+    "created": "2013-06-24T16:39:18.000Z",
+    "activated": "2013-06-24T16:39:19.000Z",
+    "statusChanged": "2013-06-24T16:39:19.000Z",
+    "lastLogin": "2013-06-24T17:39:19.000Z",
+    "lastUpdated": "2013-07-02T21:36:25.344Z",
+    "passwordChanged": "2013-07-02T21:36:25.344Z",
+    "profile": {
+      "firstName": "Isildur",
+      "lastName": "Elendil",
+      "email": "isildur.elendil@dunedain.com",
+      "login": "high.king@dunedain.com",
+      "mobilePhone": "555-474-5387"
+    },
+    "credentials": {
+      "password": {},
+      "recovery_question": {
+        "question": "What finger did the ring fall from off of Sauron's hand?"
+      },
+      "provider": {
+        "type": "OKTA",
+        "name": "OKTA"
+      }
+    },
+    "_links": {
+      "resetPassword": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/lifecycle/reset_password"
+      },
+      "resetFactors": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/lifecycle/reset_factors"
+      },
+      "expirePassword": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/lifecycle/expire_password"
+      },
+      "forgotPassword": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/credentials/forgot_password"
+      },
+      "changeRecoveryQuestion": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/credentials/change_recovery_question"
+      },
+      "deactivate": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/lifecycle/deactivate"
+      },
+      "changePassword": {
+        "href": "https://localhost:3001/rest/api/v1/users/king-of-gondor/credentials/change_password"
+      }
+    }
+  }
+  
