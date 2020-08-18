@@ -6,9 +6,7 @@ import configureApp from '../app';
 import { IDME_GROUP_ID } from '../models/Application';
 
 const request = supertest(configureApp());
-
 describe('/developer_application', () => {
-
     const kong = nock(`http://${process.env.KONG_HOST}:8000`);
     const okta = nock(`https://${process.env.OKTA_ORG}.okta.com`);
     const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
@@ -70,9 +68,7 @@ describe('/developer_application', () => {
         });
     });
 
-
     it('sends 200 on successful dev application form submit', async () => {
-
         const response = await request.post('/developer_application').send(devAppRequest);
 
         expect(response.status).toEqual(200);
@@ -84,7 +80,6 @@ describe('/developer_application', () => {
     });
 
     it('sends 200 and creates new Kong customer', async () => {
-
         kong.post('/internal/admin/consumers', { username: 'FellowshipBaggins' }).reply(201, { id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null });
 
         const response = await request.post('/developer_application').send(devAppRequest);

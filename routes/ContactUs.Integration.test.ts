@@ -5,9 +5,7 @@ import nock from 'nock';
 import configureApp from '../app';
 
 const request = supertest(configureApp());
-
 describe('/contact-us', () => {
-
     const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
 
     const supportReq = {
@@ -18,7 +16,6 @@ describe('/contact-us', () => {
         description: 'Need help getting to Mt. Doom',
         apis: ['benefits', 'facilities'],
     };
-
 
     it('sends a 400 response and descriptive errors if validations fail', async () => {
         const response = await request.post('/contact-us').send({
@@ -33,7 +30,6 @@ describe('/contact-us', () => {
     });
 
     it('sends 200 on submit of Contact Us form and sends email from GovDelivery', async () => {
-
         govDelivery
             .post('/messages/email')
             .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' });
@@ -44,7 +40,6 @@ describe('/contact-us', () => {
     });
 
     it('sends error message on 500 status', async () => {
-
         govDelivery
             .post('/messages/email')
             .reply(500);
