@@ -19,13 +19,13 @@ export const APIS_TO_PROPER_NAMES = {
   verification: 'Veteran Verification API',
 };
 
- export const API_LIST = [
-   'benefits',
-   'claims',
-   'communityCare',
-   'confirmation',
-   'facilities',
-   'health',
-   'vaForms',
-   'verification',
- ];
+export const API_LIST = [
+  'benefits',
+  'claims',
+  'communityCare',
+  'confirmation',
+  'facilities',
+  'health',
+  'vaForms',
+  'verification',
+];

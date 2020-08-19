@@ -16,4 +16,9 @@ module.exports = {
     '/node_modules/',
     '/dist/',
   ],
+  testEnvironment: 'node',
+  setupFilesAfterEnv: [
+    './dotenv-config.js',
+  ],
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec|integration))\\.[jt]sx?$',
 };
