@@ -88,7 +88,7 @@ export default class KongService implements MonitoredService {
     ));
 
     const results: KongAcl[] = await Promise.all(addCalls);
-    
+
     return {
       total: results.length,
       data: results,
@@ -109,14 +109,14 @@ export default class KongService implements MonitoredService {
       return {
         serviceName: 'Kong',
         healthy: true,
-       };
+      };
     } catch (err) {
       err.action = 'checking health of Kong';
       return {
         serviceName: 'Kong',
         healthy: false,
         err: err,
-       };
+      };
     }
   }
 

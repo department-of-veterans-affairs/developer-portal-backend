@@ -6,9 +6,9 @@
     "start": "node dist/server",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "lint": "eslint --ext .js,.ts .",
-    "test": "jest --setupTestFrameworkScriptFile=./dotenv-config.js",
-    "test-ci": "jest --setupTestFrameworkScriptFile=./dotenv-config.js --coverage",
-    "test:watch": "jest --setupTestFrameworkScriptFile=./dotenv-config.js --watchAll",
+    "test": "jest",
+    "test-ci": "jest --coverage",
+    "test:watch": "jest --watchAll",
     "build": "tsc"
   },
   "dependencies": {

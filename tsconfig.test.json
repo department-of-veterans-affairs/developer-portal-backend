@@ -9,6 +9,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "**/*.integration.ts",
   ]
 }

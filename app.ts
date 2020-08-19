@@ -22,7 +22,7 @@ function validationMiddleware(schema: Schema, toValidate: string) {
     const { error } = schema.validate(req[toValidate]);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
-      res.status(400).json({ errors:  messages });
+      res.status(400).json({ errors: messages });
     } else {
       next();
     }
@@ -34,7 +34,7 @@ function loggingMiddleware(tokens, req, res): string {
     method: tokens.method(req, res),
     url: tokens.url(req, res),
     status: tokens.status(req, res),
-    contentLength: tokens.res(req, res, 'content-length'), 
+    contentLength: tokens.res(req, res, 'content-length'),
     responseTime: `${tokens['response-time'](req, res)} ms`,
   });
 }
@@ -56,7 +56,7 @@ const configureGovDeliveryService = (): GovDeliveryService => {
 const configureKongService = (): KongService => {
   const { KONG_KEY, KONG_HOST, KONG_PROTOCOL, KONG_PORT } = process.env;
 
-  if(!KONG_KEY || !KONG_HOST){
+  if (!KONG_KEY || !KONG_HOST) {
     throw new Error('Kong Config Missing');
   }
 
@@ -78,7 +78,7 @@ const configureKongService = (): KongService => {
 const configureOktaService = (): OktaService => {
   const { OKTA_TOKEN, OKTA_ORG, OKTA_HOST } = process.env;
 
-  if(!OKTA_TOKEN || !(OKTA_ORG || OKTA_HOST)){
+  if (!OKTA_TOKEN || !(OKTA_ORG || OKTA_HOST)) {
     throw new Error('Okta Config Missing');
   }
 
@@ -91,7 +91,7 @@ const configureOktaService = (): OktaService => {
 const configureSlackService = (): SlackService => {
   const { SLACK_WEBHOOK, SLACK_CHANNEL } = process.env;
 
-  if(!SLACK_WEBHOOK || !SLACK_CHANNEL){
+  if (!SLACK_WEBHOOK || !SLACK_CHANNEL) {
     throw new Error('Slack Config Missing');
   }
 
@@ -157,11 +157,11 @@ export default function configureApp(): express.Application {
   const slack = configureSlackService();
   const signups = new SignupMetricsService(dynamo);
 
-  app.post('/developer_application', 
-    validationMiddleware(applySchema, 'body'), 
+  app.post('/developer_application',
+    validationMiddleware(applySchema, 'body'),
     developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
 
-  app.post('/contact-us', 
+  app.post('/contact-us',
     validationMiddleware(contactSchema, 'body'),
     contactUsHandler(govdelivery));
 
@@ -184,20 +184,20 @@ export default function configureApp(): express.Application {
     // fields are logged from errors.
     logger.error({ message: err.message, action: err.action, stack: err.stack });
 
-    
-		// Because we hooking post-response processing into the global error handler, we
-		// get to leverage unified logging and error handling; but, it means the response
-		// may have already been committed, since we don't know if the error was thrown
-		// PRE or POST response. As such, we have to check to see if the response has
-		// been committed before we attempt to send anything to the user.
+
+    // Because we hooking post-response processing into the global error handler, we
+    // get to leverage unified logging and error handling; but, it means the response
+    // may have already been committed, since we don't know if the error was thrown
+    // PRE or POST response. As such, we have to check to see if the response has
+    // been committed before we attempt to send anything to the user.
     if (!res.headersSent) {
       if (process.env.NODE_ENV === 'production') {
         res.status(500).json({ error: 'encountered an error' });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           action: err.action,
           message: err.message,
-          stack: err.stack, 
+          stack: err.stack,
         });
       }
     }
