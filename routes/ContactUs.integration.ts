@@ -45,7 +45,7 @@ describe('/contact-us', () => {
       .reply(500);
 
     const response = await request.post('/contact-us').send(supportReq);
-    console.log(response.body.message);
+    
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('sending contact us email');
     expect(response.body.message).toEqual('Request failed with status code 500');

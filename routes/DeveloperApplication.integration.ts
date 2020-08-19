@@ -80,17 +80,6 @@ describe('/developer_application', () => {
     });
   });
 
-  it('sends 200 and gets a Kong customer', async () => {
-    const response = await request.post('/developer_application').send(devAppRequest);
-
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      clientID: 'gollum',
-      clientSecret: 'mordor',
-      token: 'my-precious',
-    });
-  });
-
   it('sends 500 and Kong error message ', async () => {
     const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
     const interceptor = kong.post(path);
@@ -113,7 +102,7 @@ describe('/developer_application', () => {
     okta.post(path).reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-    console.log('Okta fail:', response.body.message);
+    
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed saving to okta');
     expect(response.body.message).toContain('500');
