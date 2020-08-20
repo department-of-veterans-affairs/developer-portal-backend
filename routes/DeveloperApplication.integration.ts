@@ -11,7 +11,7 @@ describe('/developer_application', () => {
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
   const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
-  const slack = nock(process.env.SLACK_WEBHOOK);
+  const slack = nock(process.env.SLACK_URL);
 
   const devAppRequest = {
     apis: 'facilities,verification',
@@ -28,7 +28,7 @@ describe('/developer_application', () => {
   beforeEach(() => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
-
+    
     kong.get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
       id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
     })
@@ -47,7 +47,7 @@ describe('/developer_application', () => {
 
     govDelivery.post('/messages/email').reply(200);
 
-    slack.post('/').reply(200);
+    slack.post('/api/chat.postMessage').reply(200);
   });
 
   afterEach(() => {
@@ -113,7 +113,7 @@ describe('/developer_application', () => {
     const interceptor = dynamoDB.post(path);
     nock.removeInterceptor(interceptor);
 
-    dynamoDB.post('/').reply(500);
+    dynamoDB.post('/').reply(500).post('/').reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
   

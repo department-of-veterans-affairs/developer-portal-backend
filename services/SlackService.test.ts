@@ -227,28 +227,36 @@ describe('SlackService', () => {
 
       const service = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.healthCheck();
-      expect(mockGet).toHaveBeenCalledWith('/api/bots.info', {
-        params: {
-          bot: slackOptions.bot,
-        },
-      });
-      expect(res).toEqual({ serviceName: 'Slack', healthy: true });
+      expect(res.serviceName).toEqual('Slack');
+      expect(res.healthy).toBeFalsy;
     });
 
-    it('Slack is false when bot.info gives a 500', async () => {
-      const mockGet = jest.fn().mockImplementation(() => { throw new Error(); });
+    it('Slack is false when bot.info gives an ok false', async () => {
+      const mockGet = jest.fn().mockResolvedValue({
+        status: 200,
+        data: { ok: false },
+        headers: {},
+      });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
       jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
 
       const service = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.healthCheck();
-      expect(mockGet).toHaveBeenCalledWith('/api/bots.info', {
-        params: {
-          bot: slackOptions.bot,
-        },
-      });
-      expect(res).toEqual({ serviceName: 'Slack', healthy: true });
+      expect(res.serviceName).toEqual('Slack');
+      expect(res.healthy).toBeFalsy;
+    });
+
+    it('Slack is false when bot.info has an error', async () => {
+      const err = new Error();
+      const mockGet = jest.fn().mockImplementation(() => { throw err; });
+
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+
+      const service = new SlackService(slackURL, slackToken, slackOptions);
+      const res = await service.healthCheck();
+      expect(res).toEqual({ serviceName: 'Slack', healthy: false, err: err });
     });
   });
 
