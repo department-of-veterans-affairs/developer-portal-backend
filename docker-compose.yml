@@ -15,7 +15,6 @@ services:
     command: npm run watch
     depends_on:
       - kong
-      - mock
     restart: on-failure
     env_file: '.env'
 
