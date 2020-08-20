@@ -1,15 +1,14 @@
 import axios, {AxiosInstance, AxiosResponse } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
-import logger from '../config/logger';
 
 /* 
-WebhookOptions override the defaults configured in the webhook
-in Slack. The username field is what the message will be posted as.
-The channel field is the name of a channel like #dev-signup-feed,
-including the hash.
+WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
+As in when chat.postMessage is called you have to specify a channel. Bot is related to the
+healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
+and usable. There may be more options in the future.
 */
-interface WebAPIOptions {
+interface WebAPISlackOptions {
   channel?: string;
   bot?: string;
 }
@@ -45,7 +44,7 @@ interface WebAPIHeaders {
   'Content-Type'?: string;
 }
 
-interface WebAPIConfig {
+interface WebAPIRequestConfig {
   baseURL?: string;
   headers: WebAPIHeaders;
 }
@@ -73,18 +72,17 @@ function capitalizeFirstLetter(word: string): string {
 
 export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
-  private options: WebAPIOptions;
-  private config: WebAPIConfig;
+  private options: WebAPISlackOptions;
 
-  constructor(url: string, token: string, options: WebAPIOptions) {
-    this.config = {
+  constructor(url: string, token: string, options: WebAPISlackOptions) {
+    const config: WebAPIRequestConfig = {
       baseURL: url,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     };
-    this.client = axios.create(this.config);
+    this.client = axios.create(config);
     this.options = options;
   }
 
@@ -206,7 +204,6 @@ export default class SlackService implements MonitoredService {
       healthResponse.healthy = (await this.getBot()).data.ok;
       return Promise.resolve(healthResponse);
     } catch (err) {
-      logger.error(err);
       err.action = 'checking health of Slack';
       healthResponse.err = err;
       return Promise.resolve(healthResponse);

@@ -14,10 +14,10 @@ describe('SlackService', () => {
     const mockCreate = jest.spyOn(axios, 'create');
     new SlackService(slackURL, slackToken, slackOptions);
 
-    expect(mockCreate).toHaveBeenCalledWith({ 
-      baseURL: slackURL, 
-      headers: { 
-        'Authorization': `Bearer ${slackToken}`, 
+    expect(mockCreate).toHaveBeenCalledWith({
+      baseURL: slackURL,
+      headers: {
+        'Authorization': `Bearer ${slackToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -81,7 +81,7 @@ describe('SlackService', () => {
       },
     };
 
-    const allTime = { 
+    const allTime = {
       total: 12,
       apiCounts: {
         benefits: 1,
@@ -144,14 +144,14 @@ describe('SlackService', () => {
         {
           type: 'section',
           fields: [
-            { type: 'mrkdwn', text: '_benefits_: 1 new requests (1 all-time)'},
-            { type: 'mrkdwn', text: '_facilities_: 0 new requests (2 all-time)'},
-            { type: 'mrkdwn', text: '_vaForms_: 0 new requests (3 all-time)'},
-            { type: 'mrkdwn', text: '_confirmation_: 0 new requests (4 all-time)'},
-            { type: 'mrkdwn', text: '_health_: 2 new requests (5 all-time)'},
-            { type: 'mrkdwn', text: '_communityCare_: 0 new requests (6 all-time)'},
-            { type: 'mrkdwn', text: '_verification_: 0 new requests (7 all-time)'},
-            { type: 'mrkdwn', text: '_claims_: 0 new requests (8 all-time)'},
+            { type: 'mrkdwn', text: '_benefits_: 1 new requests (1 all-time)' },
+            { type: 'mrkdwn', text: '_facilities_: 0 new requests (2 all-time)' },
+            { type: 'mrkdwn', text: '_vaForms_: 0 new requests (3 all-time)' },
+            { type: 'mrkdwn', text: '_confirmation_: 0 new requests (4 all-time)' },
+            { type: 'mrkdwn', text: '_health_: 2 new requests (5 all-time)' },
+            { type: 'mrkdwn', text: '_communityCare_: 0 new requests (6 all-time)' },
+            { type: 'mrkdwn', text: '_verification_: 0 new requests (7 all-time)' },
+            { type: 'mrkdwn', text: '_claims_: 0 new requests (8 all-time)' },
           ],
         },
         {
@@ -194,44 +194,62 @@ describe('SlackService', () => {
     }
   });
 
-  it('passes bot-id to healthcheck', async () => {
-    const mockGet = jest.fn().mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      data: { ok: true },
+  describe('Healthcheck Validation', () => {
+    it('Slack is true when bot.info gives a 200', async () => {
+      const mockGet = jest.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'ok',
+        headers: {},
+        data: { ok: true },
+      });
+
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+
+      const service = new SlackService(slackURL, slackToken, slackOptions);
+      const res = await service.healthCheck();
+      expect(mockGet).toHaveBeenCalledWith('/api/bots.info', {
+        params: {
+          bot: slackOptions.bot,
+        },
+      });
+      expect(res).toEqual({ serviceName: 'Slack', healthy: true });
     });
 
-    // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+    it('Slack is false when bot.info gives a 500', async () => {
+      const mockGet = jest.fn().mockResolvedValue({
+        status: 500,
+        headers: {},
+      });
 
-    const service = new SlackService(slackURL, slackToken, slackOptions);
-    await service.healthCheck();
-    expect(mockGet).toHaveBeenCalledWith('/api/bots.info', { 
-     params: {
-       bot: slackOptions.bot,
-     },
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+
+      const service = new SlackService(slackURL, slackToken, slackOptions);
+      const res = await service.healthCheck();
+      expect(mockGet).toHaveBeenCalledWith('/api/bots.info', {
+        params: {
+          bot: slackOptions.bot,
+        },
+      });
+      expect(res).toEqual({ serviceName: 'Slack', healthy: true });
+    });
+
+    it('Slack is false when bot.info gives a 500', async () => {
+      const mockGet = jest.fn().mockImplementation(() => { throw new Error(); });
+
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+
+      const service = new SlackService(slackURL, slackToken, slackOptions);
+      const res = await service.healthCheck();
+      expect(mockGet).toHaveBeenCalledWith('/api/bots.info', {
+        params: {
+          bot: slackOptions.bot,
+        },
+      });
+      expect(res).toEqual({ serviceName: 'Slack', healthy: true });
     });
   });
 
-  it('checks bot status on healthcheck', async () => {
-    const mockGet = jest.fn().mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      data: { ok: true },
-    });
-
-    // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
-
-    const service = new SlackService(slackURL, slackToken, slackOptions);
-    const res = await service.healthCheck();
-    expect(mockGet).toHaveBeenCalledWith('/api/bots.info', { 
-     params: {
-       bot: slackOptions.bot,
-     },
-    });
-    expect(res).toEqual({ serviceName: 'Slack', healthy: true });
-  });
 });
