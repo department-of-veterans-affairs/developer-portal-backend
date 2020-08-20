@@ -4,7 +4,7 @@ module.exports = {
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: [
-      './tsconfig.json', 
+      './tsconfig.json',
       './tsconfig.test.json',
     ],
   },
@@ -24,6 +24,7 @@ module.exports = {
     'semi': ['error', 'always'],
     '@typescript-eslint/camelcase': 'off',
     'comma-dangle': ["error", "always-multiline"],
+    indent: ['error', 2],
   },
   overrides: [
     {

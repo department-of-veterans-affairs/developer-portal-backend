@@ -1,4 +1,4 @@
-import axios, {AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
@@ -36,7 +36,7 @@ interface Block {
 interface PostBody {
   text?: string;
   blocks?: Block[];
-  attachments?:  Attachment[];
+  attachments?: Attachment[];
 }
 
 interface WebAPIHeaders {
@@ -74,9 +74,9 @@ export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
   private options: WebAPISlackOptions;
 
-  constructor(url: string, token: string, options: WebAPISlackOptions) {
+  constructor(baseURL: string, token: string, options: WebAPISlackOptions) {
     const config: WebAPIRequestConfig = {
-      baseURL: url,
+      baseURL: baseURL,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -88,29 +88,29 @@ export default class SlackService implements MonitoredService {
 
   public sendSuccessMessage(message: string, title: string): Promise<string> {
     const body: PostBody = {
-        text: '',
-        attachments: [{
-          text: message,
-          fallback: message,
-          color: 'good',
-          title,
-        }],
+      text: '',
+      attachments: [{
+        text: message,
+        fallback: message,
+        color: 'good',
+        title,
+      }],
     };
 
     return this.post(body);
   }
-  
+
   public async sendSignupsMessage(
-    duration: string, 
+    duration: string,
     endDate: string,
-    timeSpanSignups: SignupCountResult, 
+    timeSpanSignups: SignupCountResult,
     allTimeSignups: SignupCountResult
   ): Promise<string> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
       return {
         type: 'mrkdwn',
-        text: `_${api}_: ${timeSpanSignups.apiCounts[api]} new requests (${allTimeSignups.apiCounts[api]} all-time)`, 
+        text: `_${api}_: ${timeSpanSignups.apiCounts[api]} new requests (${allTimeSignups.apiCounts[api]} all-time)`,
       };
     });
     const titleDuration = capitalizeFirstLetter(duration);
