@@ -9,8 +9,8 @@ healthcheck. We use the bot id as a idempotent call to see if the API is correct
 and usable. There may be more options in the future.
 */
 interface WebAPISlackOptions {
-  channel?: string;
-  bot?: string;
+  channel: string;
+  bot: string;
 }
 
 interface Attachment {
@@ -40,8 +40,8 @@ interface PostBody {
 }
 
 interface WebAPIHeaders {
-  'Authorization'?: string;
-  'Content-Type'?: string;
+  'Authorization': string;
+  'Content-Type': string;
 }
 
 interface WebAPIRequestConfig {
