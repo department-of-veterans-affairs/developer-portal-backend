@@ -89,13 +89,13 @@ const configureOktaService = (): OktaService => {
 };
 
 const configureSlackService = (): SlackService => {
-  const { SLACK_URL, SLACK_TOKEN, SLACK_CHANNEL, SLACK_BOT_ID } = process.env;
+  const { SLACK_BASE_URL, SLACK_TOKEN, SLACK_CHANNEL, SLACK_BOT_ID } = process.env;
 
-  if(!SLACK_URL || !SLACK_TOKEN || !SLACK_CHANNEL || !SLACK_BOT_ID){
+  if(!SLACK_BASE_URL || !SLACK_TOKEN || !SLACK_CHANNEL || !SLACK_BOT_ID){
     throw new Error('Slack Config Missing');
   }
 
-  return new SlackService(SLACK_URL, SLACK_TOKEN, {
+  return new SlackService(SLACK_BASE_URL, SLACK_TOKEN, {
     channel: SLACK_CHANNEL,
     bot: SLACK_BOT_ID,
   });
