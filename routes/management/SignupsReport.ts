@@ -34,7 +34,7 @@ function setStartAndEndDates(reqStart: string | undefined, reqEnd: string | unde
   return { start, end };
 }
 
-export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService | undefined) {
+export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     if (!slack) {
       res.status(503).json({ error: 'service not enabled' });

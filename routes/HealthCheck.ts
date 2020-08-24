@@ -11,7 +11,7 @@ export default function healthCheckHandler(kong: KongService,
   okta: OktaService | undefined, 
   dynamo: DynamoService, 
   govdelivery: GovDeliveryService | undefined, 
-  slack: SlackService | undefined): RequestHandler {
+  slack: SlackService): RequestHandler {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const healthCheck: HealthCheck = new HealthCheck;
 

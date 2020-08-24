@@ -10,6 +10,9 @@ docker run -p 3001:3001 -i developer-portal-services-mock:latest
 ```
 Then you can access the UI at localhost:3001
 
+## Using docker-compose
+developer-portal-backend uses docker-compose. If you `docker-compose up` in the base dir the default port is `3002` due to conflicts with some of the other tooling.
+
 ## Adding a new endpoint
 Using the UI you can select (+add new endpoint) and add what path you would like to use and select the HTTP verb
 

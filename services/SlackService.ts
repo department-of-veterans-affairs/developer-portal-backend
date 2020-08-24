@@ -1,18 +1,16 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
 /* 
-WebhookOptions override the defaults configured in the webhook
-in Slack. The username field is what the message will be posted as.
-The channel field is the name of a channel like #dev-signup-feed,
-including the hash.
+WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
+As in when chat.postMessage is called you have to specify a channel. Bot is related to the
+healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
+and usable. There may be more options in the future.
 */
-interface WebhookOptions {
+interface WebAPISlackOptions {
   channel: string;
-  username: string;
-  icon_emoji?: string;
-  icon?: string;
+  bot: string;
 }
 
 interface Attachment {
@@ -41,16 +39,50 @@ interface PostBody {
   attachments?: Attachment[];
 }
 
+interface WebAPIHeaders {
+  'Authorization': string;
+  'Content-Type': string;
+}
+
+interface WebAPIRequestConfig {
+  baseURL?: string;
+  headers: WebAPIHeaders;
+}
+
+interface SlackBotInfo {
+  ok: boolean;
+  bot: {
+    id: string;
+    deleted: boolean;
+    name: string;
+    updated: number;
+    app_id: string;
+    user_id: string;
+    icons: {
+      image_36: string;
+      image_48: string;
+      image_72: string;
+    };
+  };
+}
+
 function capitalizeFirstLetter(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 export default class SlackService implements MonitoredService {
   private client: AxiosInstance;
-  private options: WebhookOptions;
+  private options: WebAPISlackOptions;
 
-  constructor(webhook: string, options: WebhookOptions) {
-    this.client = axios.create({ baseURL: webhook });
+  constructor(baseURL: string, token: string, options: WebAPISlackOptions) {
+    const config: WebAPIRequestConfig = {
+      baseURL: baseURL,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+    this.client = axios.create(config);
     this.options = options;
   }
 
@@ -147,7 +179,7 @@ export default class SlackService implements MonitoredService {
 
   private async post(body: PostBody): Promise<string> {
     try {
-      const res = await this.client.post('', { ...this.options, ...body });
+      const res = await this.client.post('/api/chat.postMessage', { channel: this.options.channel, ...body });
       return res.data;
     }
     catch (err) {
@@ -164,9 +196,26 @@ export default class SlackService implements MonitoredService {
 
   // Slack is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-    return await Promise.resolve({
+    const healthResponse: ServiceHealthCheckResponse = {
       serviceName: 'Slack',
-      healthy: true,
-    });
+      healthy: false,
+    };
+    try {
+      healthResponse.healthy = (await this.getBot()).data.ok;
+      return Promise.resolve(healthResponse);
+    } catch (err) {
+      err.action = 'checking health of Slack';
+      healthResponse.err = err;
+      return Promise.resolve(healthResponse);
+    }
+  }
+
+  public async getBot(): Promise<AxiosResponse<SlackBotInfo>> {
+    const config = {
+      params: {
+        bot: this.options.bot,
+      },
+    };
+    return await this.client.get('/api/bots.info', config);
   }
 }

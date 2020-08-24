@@ -105,7 +105,7 @@ services:
       context: dev/mocks/
     image: developer-portal-services-mock
     ports:
-      - 3001:3001
+      - 3002:3001
     volumes:
       - ./dev/mocks:/home/node
       - /home/node/node_modules

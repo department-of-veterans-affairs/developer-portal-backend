@@ -41,10 +41,10 @@ export const applySchema = Joi.object().keys({
 }).options({ abortEarly: false });
 
 export default function developerApplicationHandler(kong: KongService,
-  okta: OktaService | undefined,
+  okta: OktaService,
   dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
-  slack: SlackService | undefined) {
+  govdelivery: GovDeliveryService,
+  slack: SlackService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const form: FormSubmission = pick(req.body, [
       'firstName',
