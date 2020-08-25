@@ -67,3 +67,6 @@ dist
 .lesshst
 .config
 test-report.xml
+
+# Local IDE configuration
+.vscode/

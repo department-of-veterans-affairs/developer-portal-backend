@@ -51,6 +51,7 @@ interface WebAPIRequestConfig {
 
 interface SlackBotInfo {
   ok: boolean;
+  error: string;
   bot: {
     id: string;
     deleted: boolean;
@@ -216,6 +217,10 @@ export default class SlackService implements MonitoredService {
         bot: this.options.bot,
       },
     };
-    return await this.client.get('/api/bots.info', config);
+    const botInfoResponse = await this.client.get('/api/bots.info', config);
+    if(botInfoResponse.data.error){
+      throw new Error(botInfoResponse.data.error);
+    }
+    return botInfoResponse;
   }
 }

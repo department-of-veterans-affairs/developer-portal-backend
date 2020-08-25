@@ -194,6 +194,21 @@ describe('SlackService', () => {
     }
   });
 
+  it('Slack throws an error when bot.info has an error message', async () => {
+    const mockGet = jest.fn().mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      data: { ok: false, error: 'channel_not_found' },
+    });
+
+    // cast to unknown first to avoid having to reimplement all of AxiosInstance
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+
+    const service = new SlackService(slackURL, slackToken, slackOptions);
+    await expect(service.getBot()).rejects.toEqual(new Error('channel_not_found'));
+  });
+
   describe('Healthcheck Validation', () => {
     it('Slack is true when bot.info gives a 200', async () => {
       const mockGet = jest.fn().mockResolvedValue({
