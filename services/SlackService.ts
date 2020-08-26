@@ -51,8 +51,8 @@ interface WebAPIRequestConfig {
 
 interface SlackBotInfo {
   ok: boolean;
-  error: string;
-  bot: {
+  error?: string;
+  bot?: {
     id: string;
     deleted: boolean;
     name: string;
