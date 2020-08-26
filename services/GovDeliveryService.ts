@@ -70,6 +70,21 @@ export interface EmailResponse {
   };
 }
 
+export interface EmailStatus {
+  id: number;
+  subject: string;
+  created_at: string;
+  status: string;
+  _links: {
+    self: string;
+    recipients: string;
+    failed: string;
+    sent: string;
+    clicked: string;
+    opened: string;
+  };
+}
+
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
   public supportEmailRecipient: string;
@@ -146,9 +161,22 @@ export default class GovDeliveryService implements MonitoredService {
 
   // GovDelivery is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-    return await Promise.resolve({
+    const healthResponse: ServiceHealthCheckResponse = {
       serviceName: 'GovDelivery',
-      healthy: true,
-    });
+      healthy: false,
+    };
+    try {
+      healthResponse.healthy = !!(await this.getEmailStatusList());
+      return Promise.resolve(healthResponse);
+    } catch (err) {
+      err.action = 'checking health of GovDelivery';
+      healthResponse.err = err;
+      return Promise.resolve(healthResponse);
+    }
+  }
+
+  private async getEmailStatusList(): Promise<Array<EmailStatus>> {
+    const res: AxiosResponse<Array<EmailStatus>> = await this.client.get('/messages/email');
+    return res.data;
   }
 }
