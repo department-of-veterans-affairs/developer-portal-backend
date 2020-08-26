@@ -129,7 +129,7 @@ describe('GovDeliveryService', () => {
   });
 
   describe('Healthcheck Validation', () => {
-    it('GovDelivery is true when /messages/email gives an empty array', async () => {
+    it('GovDelivery is true when healthcheck endpoint gives an empty array', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         statusText: 'ok',
@@ -145,10 +145,9 @@ describe('GovDeliveryService', () => {
         supportEmailRecipient: 'gandalf@istari.net',
       });
       const res = await client.healthCheck();
-      expect(mockGet).toHaveBeenCalledWith('/messages/email');
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: true });
     });
-    it('GovDelivery is false when /messages/email throws an error', async () => {
+    it('GovDelivery is false when healthcheck endpoint throws an error', async () => {
       const err = new Error();
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
@@ -160,7 +159,6 @@ describe('GovDeliveryService', () => {
         supportEmailRecipient: 'gandalf@istari.net',
       });
       const res = await client.healthCheck();
-      expect(mockGet).toHaveBeenCalledWith('/messages/email');
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
     });
   });
