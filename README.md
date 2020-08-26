@@ -50,35 +50,6 @@ Tests can be run with `npm test` or `npx jest`. The most _correct_ way to run te
 
 The code will be linted in CI, so it may be helfpul to run it locally before pushing the branch. That can be done with `npm run lint`. Because the `lib/` directory came from the previous Lambda codebase, it does not adhere to the same style and is not linted. It is being incrementally fixed to adhere to the new rules.
 
-## Debugging in VSCode
-To use the debugger with docker-compose
-In the `docker-compose.yml`
-1. Uncomment  `- 9229:9229` under `services.app.ports`
-2. Uncomment  `command: npm run watch:debug` and comment out `command: npm run watch` under `services.app`
-
-In VSCode open the command palette (`ctrl/cmd + shift + p`) and select `>Debug: Open launch.json` in the `configurations` array put:
-```
-        {
-            "type": "node",
-            "request": "attach",
-            "port": 9229,
-            "address": "localhost",
-            "name": "Docker: Attach to Node",
-            "remoteRoot": "/home/node",
-            "protocol": "inspector",
-            "restart": true
-        }
-```
-
-Now you can `docker-compose up` and once you see something like `Debugger listening on ws://0.0.0.0:9229/fd733b....` then you can `ctrl/cmd + shift + d` and Run `Docker: Attach to Node`.
-
-Then app should log out:
-```
-app_1                 | Debugger attached.
-```
-
-Once the debugger is attached it will break at the first line. If you press continue, then the server will start and you can debug as normal.
-
 ## Deployment
 For information about CICD, [view the README in the cicd directory](./cicd/README.md).
 
@@ -123,6 +94,35 @@ curl --request POST 'https://dev-api.va.gov/internal/developer-portal-backend/de
 ```
 
 ## Troubleshooting
+
+### Debugging in VSCode
+In your `.env` file add
+```
+RUN_COMMAND=watch:debug
+```
+
+In VSCode open the command palette (`ctrl/cmd + shift + p`) and select `>Debug: Open launch.json` in the `configurations` array put:
+```
+        {
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "address": "localhost",
+            "name": "Docker: Attach to Node",
+            "remoteRoot": "/home/node",
+            "protocol": "inspector",
+            "restart": true
+        }
+```
+
+Now you can `docker-compose up` and once you see something like `Debugger listening on ws://0.0.0.0:9229/fd733b....` then you can `ctrl/cmd + shift + d` and Run `Docker: Attach to Node`.
+
+Then app should log out:
+```
+app_1                 | Debugger attached.
+```
+
+Once the debugger is attached it will break at the first line. If you press continue, then the server will start and you can debug as normal.
 
 ### Logs
 To view logs, look in the `/dvp/dvp-dev-dev-portal-be` log group in CloudWatch. The prod log group is `/dvp/dvp-prod-dev-portal-be`. 

@@ -9,12 +9,12 @@ services:
     ports:
       - 9999:9999
       # Debug port
-      # - 9229:9229
+      - 9229:9229
     volumes:
       # map local to remote folder, exclude node_modules
       - .:/home/node
       - /home/node/node_modules
-    command: npm run watch
+    command: npm run ${RUN_COMMAND:-watch}
     # Debug command
     # command: npm run watch:debug
     depends_on:
