@@ -210,7 +210,7 @@ describe('SlackService', () => {
   });
 
   describe('Healthcheck Validation', () => {
-    it('Slack is true when bot.info gives a 200', async () => {
+    it('returns true when bot.info gives a 200', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         statusText: 'ok',
@@ -231,7 +231,7 @@ describe('SlackService', () => {
       expect(res).toEqual({ serviceName: 'Slack', healthy: true });
     });
 
-    it('Slack is false when bot.info gives a 500', async () => {
+    it('returns false when bot.info gives a 500', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 500,
         headers: {},
@@ -246,7 +246,7 @@ describe('SlackService', () => {
       expect(res.healthy).toBeFalsy;
     });
 
-    it('Slack is false when bot.info gives an ok false', async () => {
+    it('returns false when bot.info gives an ok false', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         data: { ok: false },
@@ -262,7 +262,7 @@ describe('SlackService', () => {
       expect(res.healthy).toBeFalsy;
     });
 
-    it('Slack is false when bot.info has an error', async () => {
+    it('returns false when bot.info has an error', async () => {
       const err = new Error();
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
