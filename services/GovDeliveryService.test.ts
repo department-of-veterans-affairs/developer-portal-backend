@@ -129,7 +129,7 @@ describe('GovDeliveryService', () => {
   });
 
   describe('Healthcheck Validation', () => {
-    it('GovDelivery is true when healthcheck endpoint gives an empty array', async () => {
+    it('returns true when healthcheck endpoint gives an empty array', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         statusText: 'ok',
@@ -147,7 +147,8 @@ describe('GovDeliveryService', () => {
       const res = await client.healthCheck();
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: true });
     });
-    it('GovDelivery is false when healthcheck endpoint throws an error', async () => {
+
+    it('returns false when healthcheck endpoint throws an error', async () => {
       const err = new Error();
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 

@@ -70,6 +70,12 @@ export interface EmailResponse {
   };
 }
 
+export interface EmailStatusRequestParams {
+  page_size?: number;
+  sort_by?: string;
+  sort_order?: string;
+}
+
 export interface EmailStatus {
   id: number;
   subject: string;
@@ -123,17 +129,17 @@ export default class GovDeliveryService implements MonitoredService {
       };
 
       return this.sendEmail(email);
-    } 
-    
+    }
+
     throw Error('User must have token or client_id initialized');
   }
-  
+
   public sendSupportEmail(supportRequest: SupportEmail): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: 'Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
       body: this.supportTemplate(supportRequest),
-      recipients: [ { email: this.supportEmailRecipient }],
+      recipients: [{ email: this.supportEmailRecipient }],
     };
 
     return this.sendEmail(email);
@@ -166,7 +172,8 @@ export default class GovDeliveryService implements MonitoredService {
       healthy: false,
     };
     try {
-      healthResponse.healthy = !!(await this.getEmailStatusList());
+      await this.getEmailStatusList({ page_size: 1 });
+      healthResponse.healthy = true;
       return Promise.resolve(healthResponse);
     } catch (err) {
       err.action = 'checking health of GovDelivery';
@@ -175,8 +182,14 @@ export default class GovDeliveryService implements MonitoredService {
     }
   }
 
-  private async getEmailStatusList(): Promise<Array<EmailStatus>> {
-    const res: AxiosResponse<Array<EmailStatus>> = await this.client.get('/messages/email');
+  private async getEmailStatusList(params?: EmailStatusRequestParams): Promise<Array<EmailStatus>> {
+    let options;
+    if (params) {
+      options = {
+        params,
+      };
+    }
+    const res: AxiosResponse<Array<EmailStatus>> = await this.client.get('/messages/email', options);
     return res.data;
   }
 }
