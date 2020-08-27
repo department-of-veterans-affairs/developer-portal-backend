@@ -194,7 +194,7 @@ describe('SlackService', () => {
     }
   });
 
-  it('Slack throws an error when bot.info has an error message', async () => {
+  it('throws an error when bot.info has an error message', async () => {
     const mockGet = jest.fn().mockResolvedValue({
       status: 200,
       statusText: 'ok',
