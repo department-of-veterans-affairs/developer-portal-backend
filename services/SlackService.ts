@@ -202,7 +202,7 @@ export default class SlackService implements MonitoredService {
       healthy: false,
     };
     try {
-      healthResponse.healthy = (await this.getBot()).data.ok;
+      healthResponse.healthy = await this.getBot().then(data => data.data.ok);
       return Promise.resolve(healthResponse);
     } catch (err) {
       err.action = 'checking health of Slack';

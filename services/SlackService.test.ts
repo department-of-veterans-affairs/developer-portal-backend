@@ -194,23 +194,8 @@ describe('SlackService', () => {
     }
   });
 
-  it('throws an error when bot.info has an error message', async () => {
-    const mockGet = jest.fn().mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      data: { ok: false, error: 'channel_not_found' },
-    });
-
-    // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
-
-    const service = new SlackService(slackURL, slackToken, slackOptions);
-    await expect(service.getBot()).rejects.toEqual(new Error('channel_not_found'));
-  });
-
   describe('Healthcheck Validation', () => {
-    it('returns true when bot.info gives a 200', async () => {
+    it('returns true when healthcheck endpoint returns an ok true', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         statusText: 'ok',
@@ -231,22 +216,7 @@ describe('SlackService', () => {
       expect(res).toEqual({ serviceName: 'Slack', healthy: true });
     });
 
-    it('returns false when bot.info gives a 500', async () => {
-      const mockGet = jest.fn().mockResolvedValue({
-        status: 500,
-        headers: {},
-      });
-
-      // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
-
-      const service = new SlackService(slackURL, slackToken, slackOptions);
-      const res = await service.healthCheck();
-      expect(res.serviceName).toEqual('Slack');
-      expect(res.healthy).toBeFalsy;
-    });
-
-    it('returns false when bot.info gives an ok false', async () => {
+    it('returns false when healthcheck endpoint returns an ok false', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         data: { ok: false },
@@ -263,7 +233,7 @@ describe('SlackService', () => {
     });
 
     it('returns false when bot.info has an error', async () => {
-      const err = new Error();
+      const err = new Error('ECONNREFUSED http://numenor-fake-slack');
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
