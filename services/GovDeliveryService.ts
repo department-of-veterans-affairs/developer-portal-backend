@@ -70,12 +70,6 @@ export interface EmailResponse {
   };
 }
 
-export interface EmailStatusRequestParams {
-  page_size?: number;
-  sort_by?: string;
-  sort_order?: string;
-}
-
 export interface EmailStatus {
   id: number;
   subject: string;
@@ -172,8 +166,8 @@ export default class GovDeliveryService implements MonitoredService {
       healthy: false,
     };
     try {
-      await this.getEmailStatusList({ page_size: 1 });
-      healthResponse.healthy = true;
+      healthResponse.healthy = await this.getEmailStatusList(1)
+        .then(response => response.status === 200);
       return Promise.resolve(healthResponse);
     } catch (err) {
       err.action = 'checking health of GovDelivery';
@@ -182,14 +176,15 @@ export default class GovDeliveryService implements MonitoredService {
     }
   }
 
-  private async getEmailStatusList(params?: EmailStatusRequestParams): Promise<Array<EmailStatus>> {
+  private async getEmailStatusList(pageSize: number): Promise<AxiosResponse<Array<EmailStatus>>> {
     let options;
-    if (params) {
+    if (pageSize) {
       options = {
-        params,
+        params: {
+          page_size: pageSize,
+        },
       };
     }
-    const res: AxiosResponse<Array<EmailStatus>> = await this.client.get('/messages/email', options);
-    return res.data;
+    return this.client.get('/messages/email', options);
   }
 }

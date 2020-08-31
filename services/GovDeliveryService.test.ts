@@ -129,12 +129,12 @@ describe('GovDeliveryService', () => {
   });
 
   describe('Healthcheck Validation', () => {
-    it('returns true when healthcheck endpoint gives an empty array', async () => {
+    it('returns true when healthcheck endpoint returns 200', async () => {
       const mockGet = jest.fn().mockResolvedValue({
         status: 200,
         statusText: 'ok',
         headers: {},
-        data: [],
+        data: [{}],
       });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
@@ -149,7 +149,7 @@ describe('GovDeliveryService', () => {
     });
 
     it('returns false when healthcheck endpoint throws an error', async () => {
-      const err = new Error();
+      const err = new Error('ECONNREFUSED tms.shiredelivery.com');
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
@@ -161,6 +161,7 @@ describe('GovDeliveryService', () => {
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
+      expect(res.err.action).toEqual('checking health of GovDelivery');
     });
   });
 });
