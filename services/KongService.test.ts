@@ -12,9 +12,9 @@ describe("KongService", () => {
   const postMock = jest.fn().mockName('postMock');
   beforeEach(() => {
     service = new KongService({
-      apiKey: 'fakeKey',
-      host: 'fakeHost',
-      port: 8000,
+      apiKey: process.env.KONG_KEY,
+      host: process.env.KONG_HOST,
+      port: process.env.KONG_PORT as unknown as number,
     });
 
     client = service.getClient();
@@ -40,6 +40,7 @@ describe("KongService", () => {
   describe('constructor', () => {
     it('should set defaults', () => {
       expect(client.defaults.baseURL).toMatch(/^https/);
+      expect(client.defaults.headers.apiKey).toEqual(process.env.KONG_KEY);
     });
   });
 
