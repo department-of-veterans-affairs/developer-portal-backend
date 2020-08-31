@@ -22,8 +22,6 @@
     "lodash.pick": "^4.4.0",
     "moment": "^2.27.0",
     "morgan": "~1.9.1",
-    "request": "^2.88.2",
-    "request-promise-native": "^1.0.8",
     "winston": "^3.2.1"
   },
   "devDependencies": {

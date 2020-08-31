@@ -1,21 +1,25 @@
 import 'jest';
 import KongService from './KongService';
 import User from '../models/User';
-import request from 'request-promise-native';
+import { AxiosInstance } from 'axios';
 
 describe("KongService", () => {
   let service: KongService;
+  let client: AxiosInstance;
   let event;
   let user: User;
-  const getMock = jest.spyOn(request, 'get').mockResolvedValue({});
-  const postMock = jest.spyOn(request, 'post').mockResolvedValue({});
-
+  const getMock = jest.fn().mockName('getMock');
+  const postMock = jest.fn().mockName('postMock');
   beforeEach(() => {
     service = new KongService({
       apiKey: 'fakeKey',
       host: 'fakeHost',
       port: 8000,
     });
+
+    client = service.getClient();
+    service.getClient = (): AxiosInstance =>
+      ({ get: getMock, post: postMock } as unknown as AxiosInstance);
 
     event = {
       apis: 'facilities,benefits',
@@ -35,28 +39,26 @@ describe("KongService", () => {
 
   describe('constructor', () => {
     it('should set defaults', () => {
-      expect(service.protocol).toEqual('https');
+      expect(client.defaults.baseURL).toMatch(/^https/);
     });
   });
 
   describe('createConsumer', () => {
     it('sends a request when the consumer does not exist', async () => {
       getMock.mockRejectedValue({});
-      postMock.mockResolvedValue({ username: 'AdHocPaget' });
+      postMock.mockResolvedValue({ data: { username: 'AdHocPaget' } });
 
       const result = await service.createConsumer(user);
-      
-      expect(postMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers",
-        body: { username: 'AdHocPaget' },
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
+
+      expect(postMock).toHaveBeenCalledWith(
+        "/internal/admin/consumers",
+        { username: 'AdHocPaget' },
+      );
       expect(result.username).toEqual('AdHocPaget');
     });
 
     it('does not create a new consumer when one already exists', async () => {
-      getMock.mockResolvedValue({ username: 'AdHocPaget' });
+      getMock.mockResolvedValue({ data: { username: 'AdHocPaget' } });
 
       const result = await service.createConsumer(user);
 
@@ -67,57 +69,45 @@ describe("KongService", () => {
 
   describe('createACLs', () => {
     it('adds groups', async () => {
-      getMock.mockResolvedValue({data: []});
+      getMock.mockResolvedValue({ data: { data: [] } });
 
       const result = await service.createACLs(user);
-      
-      expect(postMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
-        body: { group: 'va_facilities' },
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
-      expect(postMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
-        body: { group: 'vba_documents' },
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
+
+      expect(postMock).toHaveBeenCalledWith(
+        "/internal/admin/consumers/AdHocPaget/acls",
+        { group: 'va_facilities' },
+      );
+      expect(postMock).toHaveBeenCalledWith(
+        "/internal/admin/consumers/AdHocPaget/acls",
+        { group: 'vba_documents' },
+      );
       expect(result.total).toEqual(2);
     });
 
     it('does not add groups a consumer already belongs to', async () => {
-      getMock.mockResolvedValue({data: [{ group: 'vba_documents' }]});
+      getMock.mockResolvedValue({ data: { data: [{ group: 'vba_documents' }] } });
 
       const result = await service.createACLs(user);
-      
-      expect(postMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
-        body: { group: 'va_facilities' },
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
-      expect(postMock).not.toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/acls",
-        body: { group: 'vba_documents' },
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
+
+      expect(postMock).toHaveBeenCalledWith(
+        "/internal/admin/consumers/AdHocPaget/acls",
+        { group: 'va_facilities' },
+      );
+      expect(postMock).not.toHaveBeenCalledWith(
+        "/internal/admin/consumers/AdHocPaget/acls",
+        { group: 'vba_documents' },
+      );
       expect(result.total).toEqual(1);
     });
   });
 
   describe('createKeyAuth', () => {
     it('sends a request', async () => {
-      postMock.mockResolvedValue({ key: 'fakekey' });
+      postMock.mockResolvedValue({ data: { key: 'fakekey' } });
 
       const result = await service.createKeyAuth(user);
 
-      expect(postMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/AdHocPaget/key-auth",
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
+      expect(postMock).toHaveBeenCalledWith("/internal/admin/consumers/AdHocPaget/key-auth");
       expect(result.key).toEqual('fakekey');
     });
   });
@@ -125,11 +115,7 @@ describe("KongService", () => {
   describe('healthCheck', () => {
     it('sends a request', async () => {
       await service.healthCheck();
-      expect(getMock).toHaveBeenCalledWith({
-        url: "https://fakeHost:8000/internal/admin/consumers/_internal_DeveloperPortal",
-        json: true,
-        headers: { apiKey: 'fakeKey' },
-      });
+      expect(getMock).toHaveBeenCalledWith("/internal/admin/consumers/_internal_DeveloperPortal");
     });
 
     it('returns unhealthy when it catches an error', async () => {
@@ -145,7 +131,7 @@ describe("KongService", () => {
       const getMockValue = { message: 'Not found' };
       const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
       const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
-      getMock.mockResolvedValue(getMockValue);
+      getMock.mockResolvedValue({ data: getMockValue });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toStrictEqual(expectedReturn);
@@ -155,7 +141,7 @@ describe("KongService", () => {
       const getMockValue = { username: 'wrong_user' };
       const err = new Error(`Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`);
       const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
-      getMock.mockResolvedValue({ username: 'wrong_user' });
+      getMock.mockResolvedValue({ data: { username: 'wrong_user' } });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toStrictEqual(expectedReturn);
@@ -163,7 +149,7 @@ describe("KongService", () => {
 
     it('returns healthy when it receives the right consumer', async () => {
       const expectedReturn = { serviceName: 'Kong', healthy: true };
-      getMock.mockResolvedValue({ username: '_internal_DeveloperPortal' });
+      getMock.mockResolvedValue({ data: { username: '_internal_DeveloperPortal' } });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toStrictEqual(expectedReturn);
