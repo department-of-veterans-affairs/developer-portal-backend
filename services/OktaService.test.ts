@@ -18,16 +18,16 @@ describe('OktaService', () => {
           },
         },
       };
-      
+
       const createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
       const groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
-  
+
       const application: OktaApplication = {
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
-  
+
       const resp = await service.createApplication(application, 'testgroup');
-  
+
       expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
       expect(resp).toEqual(appRes);
