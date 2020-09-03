@@ -35,11 +35,14 @@ OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
 ```
 
-You can copy the `.local.env` file to `.env` to get up and running quickly.
+You can copy the `.env.test` file to `.env` to get up and running quickly.
 
 With a `.env` in place, use `docker-compose up` to run the application.
 
-To add support for more services, look up the dev environment variables in AWS Parameter Store under `/dvp/dev/developer-portal-backend` and add them to the `.env` file. Other variables include `GOVDELIVERY_HOST`, `GOVDELIVERY_KEY`, `OKTA_ORG`, `OKTA_TOKEN`, `SENTRY_DSN`, `SLACK_CHANNEL_ID`, and `SLACK_TOKEN`. 
+To add support for more services, look up the dev environment variables in AWS Parameter Store under `/dvp/dev/developer-portal-backend` and add them to the `.env` file. Other variables include `OKTA_ORG` and `SENTRY_DSN`.
+
+Some variables are difficult to locate from the source. To acquire the `SLACK_BOT_ID` from the Slack API, please use the `/api/auth.test` `POST` call. Documented [here](https://api.slack.com/methods/auth.test).
+
 
 ## Development
 The `docker-compose.yml` file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. 
