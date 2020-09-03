@@ -11,10 +11,12 @@ export interface OktaApplicationResponse {
   };
 }
 const authzEndpoints = {
-  'health': 'aus7y0ho1w0bSNLDV2p7',
-  'verification': 'aus7y0sefudDrg2HI2p7',
-  // need to add communityCare
-  'claims': 'aus7y0lyttrObgW622p7',
+  // both health apis use the same endpoint?
+  'health':        'aus7y0ho1w0bSNLDV2p7',
+  'communityCare': 'aus7y0ho1w0bSNLDV2p7',
+
+  'verification':  'aus7y0sefudDrg2HI2p7',
+  'claims':        'aus7y0lyttrObgW622p7',
 };
 export default class OktaService implements MonitoredService {
   public client: Client;
