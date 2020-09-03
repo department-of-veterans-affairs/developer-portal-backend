@@ -1,18 +1,7 @@
-import request from 'request-promise-native';
-import { format } from 'url';
+import axios, { AxiosInstance } from 'axios';
 import { apisToAcls } from '../config';
-import { KongConfig, KongUser, MonitoredService, Protocol, ServiceHealthCheckResponse } from '../types';
+import { KongConfig, KongUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
-
-interface ConsumerRequest {
-  username: string;
-}
-
-interface ACLRequest {
-  group: string;
-}
-
-type KongRequest = ConsumerRequest | ACLRequest;
 
 export interface KongConsumerResponse {
   id: string;
@@ -45,35 +34,44 @@ export interface KongKeyResponse {
 }
 
 export default class KongService implements MonitoredService {
-  public apiKey: string;
-  public host: string;
-  public port: number;
-  public protocol: Protocol;
   public kongPath = '/internal/admin/consumers';
   private adminConsumerName = '_internal_DeveloperPortal';
+  private client: AxiosInstance;
 
   constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
-    this.apiKey = apiKey;
-    this.host = host;
-    this.port = port;
-    this.protocol = protocol;
+    const config = {
+      baseURL: `${protocol}://${host}:${port}`,
+      headers: {
+        apiKey,
+      },
+    };
+    this.client = axios.create(config);
+  }
+
+  public getClient(): AxiosInstance {
+    return this.client;
   }
 
   public async createConsumer(user: KongUser): Promise<KongConsumerResponse> {
     try {
-      const kongUser: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}`));
+      const response = await this.getClient()
+        .get(`${this.kongPath}/${user.consumerName()}`);
+      const kongUser: KongConsumerResponse = response.data;
       if (kongUser) {
         return kongUser;
       }
     } catch (err) {
       logger.debug({ message: 'no existing consumer, creating new one' });
     }
-    return request.post(this.requestOptions(this.kongPath, { username: user.consumerName() }));
+    const response = await this.getClient()
+      .post(this.kongPath, { username: user.consumerName() });
+    return response.data;
   }
 
   public async createACLs(user: KongUser): Promise<KongAclsResponse> {
-    const res: KongAclsResponse = await request.get(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`));
-    const existingGroups = res.data.map(({ group }) => group);
+    const res = await this.getClient()
+      .get(`${this.kongPath}/${user.consumerName()}/acls`);
+    const existingGroups = res.data.data.map(({ group }) => group);
 
     const groupsToAdd = user.apiList.reduce((toAdd: string[], api: string) => {
       const validGroup = apisToAcls[api];
@@ -84,7 +82,9 @@ export default class KongService implements MonitoredService {
     }, []);
 
     const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) => (
-      request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/acls`, { group }))
+      this.getClient()
+        .post(`${this.kongPath}/${user.consumerName()}/acls`, { group })
+        .then(response => response.data)
     ));
 
     const results: KongAcl[] = await Promise.all(addCalls);
@@ -95,16 +95,19 @@ export default class KongService implements MonitoredService {
     };
   }
 
-  public createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
-    return request.post(this.requestOptions(`${this.kongPath}/${user.consumerName()}/key-auth`));
+  public async createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
+    const response = await this.getClient()
+      .post(`${this.kongPath}/${user.consumerName()}/key-auth`);
+    return response.data;
   }
 
   // Kong is considered healthy if the admin consumer is able to query itself on the connected instance
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     try {
-      const res: KongConsumerResponse = await request.get(this.requestOptions(`${this.kongPath}/${this.adminConsumerName}`));
-      if (res.username !== this.adminConsumerName) {
-        throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res)}`);
+      const res = await this.getClient()
+        .get(`${this.kongPath}/${this.adminConsumerName}`);
+      if (res.data.username !== this.adminConsumerName) {
+        throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res.data)}`);
       }
       return {
         serviceName: 'Kong',
@@ -117,23 +120,6 @@ export default class KongService implements MonitoredService {
         healthy: false,
         err: err,
       };
-    }
-  }
-
-  private requestOptions(path: string, body?: KongRequest): request.Options {
-    const url = format({
-      hostname: this.host,
-      pathname: path,
-      port: this.port,
-      protocol: this.protocol,
-    });
-    const headers = {
-      apiKey: this.apiKey,
-    };
-    if (body) {
-      return { body, url, headers, json: true };
-    } else {
-      return { url, headers, json: true };
     }
   }
 }
