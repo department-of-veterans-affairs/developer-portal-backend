@@ -31,25 +31,25 @@ export default class OktaService implements MonitoredService {
     const resp = await this.client.createApplication(app.toOktaApp());
     await this.client.createApplicationGroupAssignment(resp.id, groupID);
 
-    const applicableEndpoints = app.owner.apiList
+    const applicableEndpoints: string[] = app.owner.apiList
       .filter(endpoint => authzEndpoints[endpoint])
       .map(endpoint => authzEndpoints[endpoint]);
+
+    const policiesToUpdate: any[] = [];
 
     await Promise.all(applicableEndpoints.map(async (authServerId) => {
       const policies = await this.client.listAuthorizationServerPolicies(authServerId);
       const clientId = resp.credentials.oauthClient.client_id;
 
-      policies.each(async policy => {
-        policy.conditions.clients.include.push(clientId)
-        await this.client.updateAuthorizationServerPolicy(authServerId, policy.id, policy);
-        console.log("done updating", policy)
-      })
-        .then(() => {
-          console.log(`All policies have been updated for: ${clientId}`);
-        }).catch((error) => {
-          console.error(error);
-        });
+      policies.each(policy => {
+        policy.conditions.clients.include.push(clientId);
+        policiesToUpdate.push(this.client.updateAuthorizationServerPolicy(authServerId, policy.id, policy));
+      });
     }));
+
+    Promise.all(policiesToUpdate).then(() => {
+      console.log("done updating all policies");
+    });
 
     return resp;
   }
