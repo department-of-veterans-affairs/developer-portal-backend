@@ -35,6 +35,29 @@ describe('OktaService', () => {
     });
   });
 
+  describe('it knows the list of applicable authz endpoints', () => {
+    describe('valid inputs', () => {
+      it('health', () => {
+        expect(service.filterApplicableEndpoints(['health'])).toEqual(['aus7y0ho1w0bSNLDV2p7']);
+      });
+      it('health,communityCare,verification,claims', () => {
+        expect(service.filterApplicableEndpoints(['health', 'communityCare','verification','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus7y0sefudDrg2HI2p7', 'aus7y0lyttrObgW622p7']);
+      });
+      it('health and communityCare are the same endpoint', () => {
+        expect(service.filterApplicableEndpoints(['health','communityCare'])).toEqual(["aus7y0ho1w0bSNLDV2p7"]);
+      });
+    });
+
+    describe('ignores invalid input', () => {
+      it('health,invalid', () => {
+        expect(service.filterApplicableEndpoints(['health', 'invalid'])).toEqual(["aus7y0ho1w0bSNLDV2p7"]);
+      });
+      it('invalid', () => {
+        expect(service.filterApplicableEndpoints(['invalid'])).toEqual([]);
+      });
+    });
+  });
+
   describe('healthCheck', () => {
     const getUserMock: jest.SpyInstance = jest.spyOn(service.client, 'getUser');
 

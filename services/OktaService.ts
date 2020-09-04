@@ -33,9 +33,7 @@ export default class OktaService implements MonitoredService {
     const resp = await this.client.createApplication(app.toOktaApp());
     await this.client.createApplicationGroupAssignment(resp.id, groupID);
 
-    const applicableEndpoints: string[] = app.owner.apiList
-      .filter(endpoint => authzEndpoints[endpoint])
-      .map(endpoint => authzEndpoints[endpoint]);
+    const applicableEndpoints = this.filterApplicableEndpoints(app.owner.apiList);
 
     const policiesToUpdate: any[] = [];
 
@@ -75,5 +73,12 @@ export default class OktaService implements MonitoredService {
         err: err,
       };
     }
+  }
+
+  public filterApplicableEndpoints(apiList: string[]): string[] {
+    const filteredApiList: string[] = apiList
+      .filter(endpoint => authzEndpoints[endpoint])
+      .map(endpoint => authzEndpoints[endpoint]);
+    return [...new Set(filteredApiList)];
   }
 }
