@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
@@ -51,7 +51,8 @@ interface WebAPIRequestConfig {
 
 interface SlackBotInfo {
   ok: boolean;
-  bot: {
+  error?: string;
+  bot?: {
     id: string;
     deleted: boolean;
     name: string;
@@ -201,7 +202,8 @@ export default class SlackService implements MonitoredService {
       healthy: false,
     };
     try {
-      healthResponse.healthy = (await this.getBot()).data.ok;
+      const botInfoResponse = await this.getBot();
+      healthResponse.healthy = botInfoResponse.ok;
       return Promise.resolve(healthResponse);
     } catch (err) {
       err.action = 'checking health of Slack';
@@ -210,12 +212,16 @@ export default class SlackService implements MonitoredService {
     }
   }
 
-  public async getBot(): Promise<AxiosResponse<SlackBotInfo>> {
+  public async getBot(): Promise<SlackBotInfo> {
     const config = {
       params: {
         bot: this.options.bot,
       },
     };
-    return await this.client.get('/api/bots.info', config);
+    const botInfoResponse = await this.client.get('/api/bots.info', config);
+    if(botInfoResponse.data.error){
+      throw new Error(botInfoResponse.data.error);
+    }
+    return botInfoResponse.data;
   }
 }
