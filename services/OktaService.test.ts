@@ -22,8 +22,17 @@ describe('OktaService', () => {
       const createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
       const groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
 
+      const policyIncludeMock = jest.fn();
+      const policyObj = {id: 'policy_id', conditions: {clients: {include: {push: policyIncludeMock}}}};
+      jest.spyOn(service.client, 'listAuthorizationServerPolicies').mockResolvedValue({
+        policies: [policyObj],
+        each: function(cb) { return this.policies.forEach(cb); }
+      });
+
+      const updateAuthPolicyMock = jest.spyOn(service.client, 'updateAuthorizationServerPolicy').mockResolvedValue({});
+
       const application: OktaApplication = {
-        owner: {apiList: [], organization: 'organization', email: 'email'},
+        owner: { apiList: ['health','verification'], organization: 'organization', email: 'email' },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
@@ -31,6 +40,9 @@ describe('OktaService', () => {
 
       expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
+      expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith("aus7y0ho1w0bSNLDV2p7", 'policy_id', policyObj); // health
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith("aus7y0sefudDrg2HI2p7", 'policy_id', policyObj); // verification
       expect(resp).toEqual(appRes);
     });
   });

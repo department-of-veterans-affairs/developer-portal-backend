@@ -48,7 +48,7 @@ export default class OktaService implements MonitoredService {
     }));
 
     Promise.all(policiesToUpdate).then(() => {
-      console.log("done updating all policies");
+    //   console.log("done updating all policies");
     });
 
     return resp;
