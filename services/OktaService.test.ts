@@ -26,7 +26,7 @@ describe('OktaService', () => {
       const policyObj = {id: 'policy_id', conditions: {clients: {include: {push: policyIncludeMock}}}};
       jest.spyOn(service.client, 'listAuthorizationServerPolicies').mockResolvedValue({
         policies: [policyObj],
-        each: function(cb) { return this.policies.forEach(cb); }
+        each: function(cb) { return this.policies.forEach(cb); },
       });
 
       const updateAuthPolicyMock = jest.spyOn(service.client, 'updateAuthorizationServerPolicy').mockResolvedValue({});
