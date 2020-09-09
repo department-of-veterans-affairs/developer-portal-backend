@@ -4,6 +4,7 @@ import nock from 'nock';
 
 import configureApp from '../app';
 import { IDME_GROUP_ID } from '../models/Application';
+import { oktaAuthMocks } from './oktaAuthMocks';
 
 const request = supertest(configureApp());
 describe('/developer_application', () => {
@@ -70,6 +71,13 @@ describe('/developer_application', () => {
   });
 
   it('sends 200 on successful dev application form submit', async () => {
+    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
+
+    okta
+      .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200,oktaAuthPolicyUpdateResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200,oktaAuthPolicyUpdateResponse);
+
     const response = await request.post('/developer_application').send(devAppRequest);
 
     expect(response.status).toEqual(200);
@@ -113,10 +121,17 @@ describe('/developer_application', () => {
     const interceptor = dynamoDB.post(path);
     nock.removeInterceptor(interceptor);
 
+    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
+
+    okta
+      .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200, oktaAuthPolicyUpdateResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200, oktaAuthPolicyUpdateResponse);
+
     dynamoDB.post('/').reply(500).post('/').reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-  
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed saving to dynamo');
   });
