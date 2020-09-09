@@ -95,6 +95,35 @@ curl --request POST 'https://dev-api.va.gov/internal/developer-portal-backend/de
 
 ## Troubleshooting
 
+### Debugging in VSCode
+In your `.env` file add
+```
+RUN_COMMAND=watch:debug
+```
+
+In VSCode open the command palette (`ctrl/cmd + shift + p`) and select `>Debug: Open launch.json` in the `configurations` array put:
+```
+        {
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "address": "localhost",
+            "name": "Docker: Attach to Node",
+            "remoteRoot": "/home/node",
+            "protocol": "inspector",
+            "restart": true
+        }
+```
+
+Now you can `docker-compose up` and once you see something like `Debugger listening on ws://0.0.0.0:9229/fd733b....` then you can `ctrl/cmd + shift + d` and Run `Docker: Attach to Node`.
+
+Then app should log out:
+```
+app_1                 | Debugger attached.
+```
+
+Once the debugger is attached it will break at the first line. If you press continue, then the server will start and you can debug as normal.
+
 ### Logs
 To view logs, look in the `/dvp/dvp-dev-dev-portal-be` log group in CloudWatch. The prod log group is `/dvp/dvp-prod-dev-portal-be`. 
 

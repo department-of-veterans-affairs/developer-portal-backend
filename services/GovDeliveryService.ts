@@ -70,6 +70,21 @@ export interface EmailResponse {
   };
 }
 
+export interface EmailStatus {
+  id: number;
+  subject: string;
+  created_at: string;
+  status: string;
+  _links: {
+    self: string;
+    recipients: string;
+    failed: string;
+    sent: string;
+    clicked: string;
+    opened: string;
+  };
+}
+
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
   public supportEmailRecipient: string;
@@ -108,17 +123,17 @@ export default class GovDeliveryService implements MonitoredService {
       };
 
       return this.sendEmail(email);
-    } 
-    
+    }
+
     throw Error('User must have token or client_id initialized');
   }
-  
+
   public sendSupportEmail(supportRequest: SupportEmail): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: 'Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
       body: this.supportTemplate(supportRequest),
-      recipients: [ { email: this.supportEmailRecipient }],
+      recipients: [{ email: this.supportEmailRecipient }],
     };
 
     return this.sendEmail(email);
@@ -146,9 +161,30 @@ export default class GovDeliveryService implements MonitoredService {
 
   // GovDelivery is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
-    return await Promise.resolve({
+    const healthResponse: ServiceHealthCheckResponse = {
       serviceName: 'GovDelivery',
-      healthy: true,
-    });
+      healthy: false,
+    };
+    try {
+      healthResponse.healthy = await this.getEmailStatusList(1)
+        .then(response => response.status === 200);
+      return Promise.resolve(healthResponse);
+    } catch (err) {
+      err.action = 'checking health of GovDelivery';
+      healthResponse.err = err;
+      return Promise.resolve(healthResponse);
+    }
+  }
+
+  private async getEmailStatusList(pageSize: number): Promise<AxiosResponse<Array<EmailStatus>>> {
+    let options;
+    if (pageSize) {
+      options = {
+        params: {
+          page_size: pageSize,
+        },
+      };
+    }
+    return this.client.get('/messages/email', options);
   }
 }

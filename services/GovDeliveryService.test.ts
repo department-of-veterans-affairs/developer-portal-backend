@@ -127,5 +127,41 @@ describe('GovDeliveryService', () => {
       }));
     });
   });
-});
 
+  describe('Healthcheck Validation', () => {
+    it('returns true when healthcheck endpoint returns 200', async () => {
+      const mockGet = jest.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'ok',
+        headers: {},
+        data: [{}],
+      });
+
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      client = new GovDeliveryService({
+        token: 'fakeKey',
+        host: 'tms.shiredelivery.com',
+        supportEmailRecipient: 'gandalf@istari.net',
+      });
+      const res = await client.healthCheck();
+      expect(res).toEqual({ serviceName: 'GovDelivery', healthy: true });
+    });
+
+    it('returns false when healthcheck endpoint throws an error', async () => {
+      const err = new Error('ECONNREFUSED tms.shiredelivery.com');
+      const mockGet = jest.fn().mockImplementation(() => { throw err; });
+
+      // cast to unknown first to avoid having to reimplement all of AxiosInstance
+      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      client = new GovDeliveryService({
+        token: 'fakeKey',
+        host: 'tms.shiredelivery.com',
+        supportEmailRecipient: 'gandalf@istari.net',
+      });
+      const res = await client.healthCheck();
+      expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
+      expect(res.err.action).toEqual('checking health of GovDelivery');
+    });
+  });
+});
