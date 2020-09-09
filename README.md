@@ -25,17 +25,14 @@ KONG_PROTOCOL=http
 NODE_ENV=development
 DYNAMODB_ENDPOINT=http://dynamodb:8000
 SLACK_BASE_URL=http://mock:3001/services/slack
-SLACK_CHANNEL="#the-fellowship"
+SLACK_CHANNEL=#the-fellowship
 SLACK_BOT_ID=DenethorBot
 SLACK_TOKEN=keep-it-secret-keep-it-safe
-SLACK_WEBHOOK=http://mock:3001/services/slack/chat.postMessage
-GOVDELIVERY_HOST=http://mock:3001/services/govdelivery/messages/email
+GOVDELIVERY_HOST=http://mock:3001/services/govdelivery
 GOVDELIVERY_KEY=123
 OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
 ```
-
-You can copy the `.env.test` file to `.env` to get up and running quickly.
 
 With a `.env` in place, use `docker-compose up` to run the application.
 
@@ -43,6 +40,11 @@ To add support for more services, look up the dev environment variables in AWS P
 
 Some variables are difficult to locate from the source. To acquire the `SLACK_BOT_ID` from the Slack API, please use the `/api/auth.test` `POST` call. Documented [here](https://api.slack.com/methods/auth.test).
 
+Example CURL request:
+```sh
+curl --location --request POST '<Put SLACK_BASE_URL here>/api/auth.test' \
+--header 'Authorization: Bearer <Put SLACK_TOKEN here>'
+```
 
 ## Development
 The `docker-compose.yml` file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. 
