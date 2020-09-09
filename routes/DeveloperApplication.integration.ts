@@ -28,7 +28,7 @@ describe('/developer_application', () => {
   beforeEach(() => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
-    
+
     kong.get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
       id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
     })
@@ -88,7 +88,7 @@ describe('/developer_application', () => {
     kong.post(path).reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-    
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed creating kong consumer');
     expect(response.body.message).toContain('500');
@@ -102,7 +102,7 @@ describe('/developer_application', () => {
     okta.post(path).reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-    
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed saving to okta');
     expect(response.body.message).toContain('500');
