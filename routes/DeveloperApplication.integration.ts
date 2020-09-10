@@ -44,6 +44,13 @@ describe('/developer_application', () => {
       .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
       .reply(200, {});
 
+    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
+    const verificationApiEndpoint = 'aus7y0sefudDrg2HI2p7';
+    okta
+      .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaAuthResponse)
+      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/policyIdHere1`).reply(200, oktaAuthPolicyUpdateResponse)
+      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/policyIdHere2`).reply(200, oktaAuthPolicyUpdateResponse);
+
     dynamoDB.post('/').reply(200);
 
     govDelivery.post('/messages/email').reply(200);
@@ -71,13 +78,6 @@ describe('/developer_application', () => {
   });
 
   it('sends 200 on successful dev application form submit', async () => {
-    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
-
-    okta
-      .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere1').reply(200,oktaAuthPolicyUpdateResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere2').reply(200,oktaAuthPolicyUpdateResponse);
-
     const response = await request.post('/developer_application').send(devAppRequest);
 
     expect(response.status).toEqual(200);
@@ -120,13 +120,6 @@ describe('/developer_application', () => {
     const path = '/';
     const interceptor = dynamoDB.post(path);
     nock.removeInterceptor(interceptor);
-
-    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
-
-    okta
-      .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere1').reply(200, oktaAuthPolicyUpdateResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere2').reply(200, oktaAuthPolicyUpdateResponse);
 
     dynamoDB.post('/').reply(500).post('/').reply(500);
 
