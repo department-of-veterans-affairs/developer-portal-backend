@@ -1,7 +1,7 @@
 [
     {
         "type": "OAUTH_AUTHORIZATION_POLICY",
-        "id": "policyIdHere",
+        "id": "policyIdHere1",
         "status": "ACTIVE",
         "name": "default",
         "description": "default",
@@ -20,7 +20,7 @@
     },
     {
         "type": "OAUTH_AUTHORIZATION_POLICY",
-        "id": "policyIdHere",
+        "id": "policyIdHere2",
         "status": "ACTIVE",
         "name": "test-grantham",
         "description": "test-grantham",

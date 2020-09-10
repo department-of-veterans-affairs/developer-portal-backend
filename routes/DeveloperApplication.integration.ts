@@ -75,8 +75,8 @@ describe('/developer_application', () => {
 
     okta
       .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200,oktaAuthPolicyUpdateResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200,oktaAuthPolicyUpdateResponse);
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere1').reply(200,oktaAuthPolicyUpdateResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere2').reply(200,oktaAuthPolicyUpdateResponse);
 
     const response = await request.post('/developer_application').send(devAppRequest);
 
@@ -125,8 +125,8 @@ describe('/developer_application', () => {
 
     okta
       .get('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies').reply(200, oktaAuthResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200, oktaAuthPolicyUpdateResponse)
-      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere').reply(200, oktaAuthPolicyUpdateResponse);
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere1').reply(200, oktaAuthPolicyUpdateResponse)
+      .put('/api/v1/authorizationServers/aus7y0sefudDrg2HI2p7/policies/policyIdHere2').reply(200, oktaAuthPolicyUpdateResponse);
 
     dynamoDB.post('/').reply(500).post('/').reply(500);
 
