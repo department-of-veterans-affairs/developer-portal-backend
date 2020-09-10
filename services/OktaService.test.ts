@@ -52,11 +52,11 @@ describe('OktaService', () => {
       it('health', () => {
         expect(service.filterApplicableEndpoints(['health'])).toEqual(['aus7y0ho1w0bSNLDV2p7']);
       });
-      it('health,communityCare,verification,claims', () => {
-        expect(service.filterApplicableEndpoints(['health', 'communityCare','verification','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus7y0sefudDrg2HI2p7', 'aus7y0lyttrObgW622p7']);
+      it('health,claims', () => {
+        expect(service.filterApplicableEndpoints(['health','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus7y0lyttrObgW622p7']);
       });
-      it('health and communityCare are the same endpoint', () => {
-        expect(service.filterApplicableEndpoints(['health','communityCare'])).toEqual(["aus7y0ho1w0bSNLDV2p7"]);
+      it('health,communityCare,verification,claims', () => {
+        expect(service.filterApplicableEndpoints(['health', 'communityCare','verification','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus89xnh1xznM13SK2p7', 'aus7y0sefudDrg2HI2p7', 'aus7y0lyttrObgW622p7']);
       });
     });
 

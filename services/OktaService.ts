@@ -13,7 +13,7 @@ export interface OktaApplicationResponse {
 const authzEndpoints = {
   // both health apis use the same endpoint?
   'health':        'aus7y0ho1w0bSNLDV2p7',
-  'communityCare': 'aus7y0ho1w0bSNLDV2p7',
+  'communityCare': 'aus89xnh1xznM13SK2p7',
 
   'verification':  'aus7y0sefudDrg2HI2p7',
   'claims':        'aus7y0lyttrObgW622p7',
