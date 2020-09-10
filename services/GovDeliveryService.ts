@@ -93,7 +93,7 @@ export default class GovDeliveryService implements MonitoredService {
   public client: AxiosInstance;
 
   constructor({ token, host, supportEmailRecipient }) {
-    if(!host.startsWith('http://')){
+    if(!host.match(/^https?:\/\//)){
       host = `https://${host}`;
     }
     this.host = host;

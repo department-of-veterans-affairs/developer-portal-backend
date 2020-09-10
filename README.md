@@ -42,7 +42,7 @@ Some variables are difficult to locate from the source. To acquire the `SLACK_BO
 
 Example CURL request:
 ```sh
-curl --location --request POST '<Put SLACK_BASE_URL here>/api/auth.test' \
+curl --location --request POST 'https://lighthouseva.slack.com/api/auth.test' \
 --header 'Authorization: Bearer <Put SLACK_TOKEN here>'
 ```
 

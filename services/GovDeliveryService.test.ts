@@ -19,8 +19,8 @@ describe('GovDeliveryService', () => {
 
   beforeEach(() => {
     client = new GovDeliveryService({
-      token: 'fakeKey',
-      host: 'tms.shiredelivery.com',
+      token: process.env.GOVDELIVERY_KEY,
+      host: process.env.GOVDELIVERY_HOST,
       supportEmailRecipient: 'gandalf@istari.net',
     });
     event = {
@@ -140,8 +140,8 @@ describe('GovDeliveryService', () => {
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
       jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: 'fakeKey',
-        host: 'tms.shiredelivery.com',
+        token: process.env.GOVDELIVERY_KEY,
+        host: process.env.GOVDELIVERY_HOST,
         supportEmailRecipient: 'gandalf@istari.net',
       });
       const res = await client.healthCheck();
@@ -149,14 +149,14 @@ describe('GovDeliveryService', () => {
     });
 
     it('returns false when healthcheck endpoint throws an error', async () => {
-      const err = new Error('ECONNREFUSED tms.shiredelivery.com');
+      const err = new Error(`ECONNREFUSED ${process.env.GOVDELIVERY_HOST}`);
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
       jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: 'fakeKey',
-        host: 'tms.shiredelivery.com',
+        token: process.env.GOVDELIVERY_KEY,
+        host: process.env.GOVDELIVERY_HOST,
         supportEmailRecipient: 'gandalf@istari.net',
       });
       const res = await client.healthCheck();
