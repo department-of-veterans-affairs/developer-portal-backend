@@ -35,7 +35,7 @@ describe('OktaService', () => {
 
     it('creates an application in Okta and assigns a group to its id', async () => {
       const application: OktaApplication = {
-        owner: { apiList: ['health','verification'], organization: 'organization', email: 'email' },
+        owner: { apiList: ['health','communityCare','verification','claims'], organization: 'organization', email: 'email' },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
@@ -48,33 +48,34 @@ describe('OktaService', () => {
       const healthApiEndpoint = 'aus7y0ho1w0bSNLDV2p7';
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'policy_id', policyObj);
 
+      const communityCareApiEndpoint = 'aus89xnh1xznM13SK2p7';
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(communityCareApiEndpoint, 'policy_id', policyObj);
+
       const verificationApiEndpoint = 'aus7y0sefudDrg2HI2p7';
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(verificationApiEndpoint, 'policy_id', policyObj);
 
+      const claimsApiEndpoint = 'aus7y0lyttrObgW622p7';
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(claimsApiEndpoint, 'policy_id', policyObj);
+
       expect(resp).toEqual(appRes);
     });
-  });
 
-  xdescribe('it knows the list of applicable authz endpoints', () => {
-    describe('valid inputs', () => {
-      it('health', () => {
-        expect(service.filterApplicableEndpoints(['health'])).toEqual(['aus7y0ho1w0bSNLDV2p7']);
-      });
-      it('health,claims', () => {
-        expect(service.filterApplicableEndpoints(['health','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus7y0lyttrObgW622p7']);
-      });
-      it('health,communityCare,verification,claims', () => {
-        expect(service.filterApplicableEndpoints(['health', 'communityCare','verification','claims'])).toEqual(['aus7y0ho1w0bSNLDV2p7', 'aus89xnh1xznM13SK2p7', 'aus7y0sefudDrg2HI2p7', 'aus7y0lyttrObgW622p7']);
-      });
-    });
+    it('invalid input is a NOOP', async () => {
+      const application: OktaApplication = {
+        owner: { apiList: ['health','invalidInput'], organization: 'organization', email: 'email' },
+        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
+      };
 
-    describe('ignores invalid input', () => {
-      it('health,invalid', () => {
-        expect(service.filterApplicableEndpoints(['health', 'invalid'])).toEqual(["aus7y0ho1w0bSNLDV2p7"]);
-      });
-      it('invalid', () => {
-        expect(service.filterApplicableEndpoints(['invalid'])).toEqual([]);
-      });
+      const resp = await service.createApplication(application, 'testgroup');
+
+      expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
+      expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
+      expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
+
+      const healthApiEndpoint = 'aus7y0ho1w0bSNLDV2p7';
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'policy_id', policyObj);
+
+      expect(resp).toEqual(appRes);
     });
   });
 
