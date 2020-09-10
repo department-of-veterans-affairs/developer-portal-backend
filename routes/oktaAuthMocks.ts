@@ -16,6 +16,7 @@ type OktaAuthMocks = {
   oktaAuthResponse: OktaResponse[];
   oktaAuthPolicyUpdateResponse: OktaResponse;
 }
+// Note that these response objects have been truncated for brevity
 export function oktaAuthMocks(): OktaAuthMocks {
   const oktaAuthResponse = [
     {
@@ -36,36 +37,6 @@ export function oktaAuthMocks(): OktaAuthMocks {
           ],
         },
       },
-      //   created: "2020-08-04T17:12:49.000Z",
-      //   lastUpdated: "2020-08-28T18:46:38.000Z",
-      //   _links: {
-      //     self: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere",
-      //       hints: {
-      //         allow: [
-      //           "GET",
-      //           "PUT",
-      //           "DELETE",
-      //         ],
-      //       },
-      //     },
-      //     rules: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/rules",
-      //       hints: {
-      //         allow: [
-      //           "GET",
-      //         ],
-      //       },
-      //     },
-      //     deactivate: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/lifecycle/deactivate",
-      //       hints: {
-      //         allow: [
-      //           "POST",
-      //         ],
-      //       },
-      //     },
-      //   },
     },
     {
       type: "OAUTH_AUTHORIZATION_POLICY",
@@ -80,36 +51,6 @@ export function oktaAuthMocks(): OktaAuthMocks {
           include: [],
         },
       },
-      //   created: "2020-08-19T14:04:57.000Z",
-      //   lastUpdated: "2020-08-19T14:51:37.000Z",
-      //   _links: {
-      //     self: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere",
-      //       hints: {
-      //         allow: [
-      //           "GET",
-      //           "PUT",
-      //           "DELETE",
-      //         ],
-      //       },
-      //     },
-      //     rules: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/rules",
-      //       hints: {
-      //         allow: [
-      //           "GET",
-      //         ],
-      //       },
-      //     },
-      //     deactivate: {
-      //       href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/lifecycle/deactivate",
-      //       hints: {
-      //         allow: [
-      //           "POST",
-      //         ],
-      //       },
-      //     },
-      //   },
     },
   ];
 
@@ -131,36 +72,6 @@ export function oktaAuthMocks(): OktaAuthMocks {
         ],
       },
     },
-    // created: "2020-08-04T17:12:49.000Z",
-    // lastUpdated: "2020-09-09T19:09:44.000Z",
-    // _links: {
-    //   self: {
-    //     href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere",
-    //     hints: {
-    //       allow: [
-    //         "GET",
-    //         "PUT",
-    //         "DELETE",
-    //       ],
-    //     },
-    //   },
-    //   rules: {
-    //     href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/rules",
-    //     hints: {
-    //       allow: [
-    //         "GET",
-    //       ],
-    //     },
-    //   },
-    //   deactivate: {
-    //     href: "https://oktaDomain.okta.com/api/v1/authorizationServers/authzServerIdHere/policies/policyIdHere/lifecycle/deactivate",
-    //     hints: {
-    //       allow: [
-    //         "POST",
-    //       ],
-    //     },
-    //   },
-    // },
   };
   return { oktaAuthResponse, oktaAuthPolicyUpdateResponse };
 }
