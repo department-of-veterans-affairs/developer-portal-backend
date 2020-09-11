@@ -17,9 +17,9 @@ type OktaAuthMocks = {
   oktaAuthPolicyUpdateResponse: OktaResponse;
 }
 // Note that these response objects have been truncated for brevity
-export function oktaAuthMocks(): OktaAuthMocks {
+export const oktaAuthMocks: OktaAuthMocks = {
   // https://developer.okta.com/docs/reference/api/authorization-servers/#get-all-policies
-  const oktaAuthResponse = [
+  oktaAuthResponse: [
     {
       type: "OAUTH_AUTHORIZATION_POLICY",
       id: "policyIdHere1",
@@ -53,10 +53,10 @@ export function oktaAuthMocks(): OktaAuthMocks {
         },
       },
     },
-  ];
+  ],
 
   // https://developer.okta.com/docs/reference/api/authorization-servers/#update-a-policy
-  const oktaAuthPolicyUpdateResponse = {
+  oktaAuthPolicyUpdateResponse: {
     type: "OAUTH_AUTHORIZATION_POLICY",
     id: "policyIdHere",
     status: "ACTIVE",
@@ -74,6 +74,5 @@ export function oktaAuthMocks(): OktaAuthMocks {
         ],
       },
     },
-  };
-  return { oktaAuthResponse, oktaAuthPolicyUpdateResponse };
-}
+  },
+};

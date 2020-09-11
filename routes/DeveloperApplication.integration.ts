@@ -45,7 +45,7 @@ describe('/developer_application', () => {
       .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
       .reply(200, {});
 
-    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
+    const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks;
     const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
     okta
       .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaAuthResponse)
