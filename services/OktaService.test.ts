@@ -18,15 +18,15 @@ describe('OktaService', () => {
         },
       },
     };
-    let createMock, groupMock, policyIncludeMock, policyObj, updateAuthPolicyMock;
+    let createMock, groupMock, policyIncludeArray, policyObj, updateAuthPolicyMock;
 
     beforeEach(() => {
       jest.clearAllMocks();
       createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
       groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
 
-      policyIncludeMock = jest.fn();
-      policyObj = {id: 'policy_id', conditions: {clients: {include: {push: policyIncludeMock}}}};
+      policyIncludeArray = [];
+      policyObj = {id: 'policy_id', conditions: {clients: {include: policyIncludeArray}}};
       jest.spyOn(service.client, 'listAuthorizationServerPolicies').mockResolvedValue({
         policies: [policyObj],
         each: function(cb) { return this.policies.forEach(cb); },
@@ -45,7 +45,8 @@ describe('OktaService', () => {
 
       expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
-      expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
+      // one fakeid for each call
+      expect(policyIncludeArray).toEqual(['fakeid', 'fakeid', 'fakeid', 'fakeid']);
 
       const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'policy_id', policyObj);
@@ -76,7 +77,7 @@ describe('OktaService', () => {
 
       expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
-      expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
+      expect(policyIncludeArray).toEqual(["fakeid"]);
 
       const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
       expect(updateAuthPolicyMock.mock.calls).toEqual([[healthApiEndpoint, 'policy_id', policyObj]]);
