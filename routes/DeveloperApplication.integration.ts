@@ -49,8 +49,7 @@ describe('/developer_application', () => {
     const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
     okta
       .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaAuthResponse)
-      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/policyIdHere1`).reply(200, oktaAuthPolicyUpdateResponse)
-      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/policyIdHere2`).reply(200, oktaAuthPolicyUpdateResponse);
+      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`).reply(200, oktaAuthPolicyUpdateResponse);
 
     dynamoDB.post('/').reply(200);
 

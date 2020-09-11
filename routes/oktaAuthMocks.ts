@@ -22,7 +22,7 @@ export const oktaAuthMocks: OktaAuthMocks = {
   oktaAuthResponse: [
     {
       type: "OAUTH_AUTHORIZATION_POLICY",
-      id: "policyIdHere1",
+      id: "defaultPolicyIdHere",
       status: "ACTIVE",
       name: "default",
       description: "default",
@@ -41,7 +41,7 @@ export const oktaAuthMocks: OktaAuthMocks = {
     },
     {
       type: "OAUTH_AUTHORIZATION_POLICY",
-      id: "policyIdHere2",
+      id: "policyIdHere",
       status: "ACTIVE",
       name: "policy",
       description: "policy",

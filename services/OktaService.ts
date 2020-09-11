@@ -1,7 +1,7 @@
+import logger from '../config/logger';
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
-
 
 function filterApplicableEndpoints(apiList: string[]): string[] {
   const filteredApiList: string[] = apiList
@@ -35,19 +35,26 @@ export default class OktaService implements MonitoredService {
 
     const applicableEndpoints = filterApplicableEndpoints(app.owner.apiList);
 
-    const policiesToUpdate: Array<Promise<void>> = [];
-
     await Promise.all(applicableEndpoints.map(async (authServerId) => {
       const policies = await this.client.listAuthorizationServerPolicies(authServerId);
       const clientId = resp.credentials.oauthClient.client_id;
+      let defaultPolicy;
 
       policies.each(policy => {
-        policy.conditions.clients.include.push(clientId);
-        policiesToUpdate.push(this.client.updateAuthorizationServerPolicy(authServerId, policy.id, policy));
+        if (policy['name'] === 'default') {
+          defaultPolicy = policy;
+          return false;
+        }
       });
-    }));
+      if (defaultPolicy) {
+        defaultPolicy.conditions.clients.include.push(clientId);
+        await this.client.updateAuthorizationServerPolicy(authServerId, defaultPolicy.id, defaultPolicy);
+      } else {
+        // What should happen if this fails to find a default policy?
+        logger.error(`Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`);
+      }
 
-    Promise.all(policiesToUpdate);
+    }));
 
     return resp;
   }
