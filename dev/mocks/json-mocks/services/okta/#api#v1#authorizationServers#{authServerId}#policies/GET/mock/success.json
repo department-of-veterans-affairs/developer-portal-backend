@@ -22,8 +22,8 @@
         "type": "OAUTH_AUTHORIZATION_POLICY",
         "id": "policyIdHere2",
         "status": "ACTIVE",
-        "name": "test-grantham",
-        "description": "test-grantham",
+        "name": "policyName",
+        "description": "policyDescription",
         "priority": 2,
         "system": false,
         "conditions": {

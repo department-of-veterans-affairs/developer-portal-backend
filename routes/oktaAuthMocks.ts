@@ -60,8 +60,8 @@ export function oktaAuthMocks(): OktaAuthMocks {
     type: "OAUTH_AUTHORIZATION_POLICY",
     id: "policyIdHere",
     status: "ACTIVE",
-    name: "default",
-    description: "default",
+    name: "policyName",
+    description: "policyDescription",
     priority: 1,
     system: false,
     conditions: {
