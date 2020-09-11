@@ -5,6 +5,7 @@ import nock from 'nock';
 import configureApp from '../app';
 import { IDME_GROUP_ID } from '../models/Application';
 import { oktaAuthMocks } from './oktaAuthMocks';
+import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
 const request = supertest(configureApp());
 describe('/developer_application', () => {
@@ -45,7 +46,7 @@ describe('/developer_application', () => {
       .reply(200, {});
 
     const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks();
-    const verificationApiEndpoint = 'aus7y0sefudDrg2HI2p7';
+    const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
     okta
       .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaAuthResponse)
       .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/policyIdHere1`).reply(200, oktaAuthPolicyUpdateResponse)

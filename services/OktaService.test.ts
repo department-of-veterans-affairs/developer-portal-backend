@@ -1,6 +1,6 @@
 import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
-import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
+import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS, OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
@@ -47,16 +47,16 @@ describe('OktaService', () => {
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
       expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
 
-      const healthApiEndpoint = 'aus7y0ho1w0bSNLDV2p7';
+      const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'policy_id', policyObj);
 
-      const communityCareApiEndpoint = 'aus89xnh1xznM13SK2p7';
+      const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS['communityCare'];
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(communityCareApiEndpoint, 'policy_id', policyObj);
 
-      const verificationApiEndpoint = 'aus7y0sefudDrg2HI2p7';
+      const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(verificationApiEndpoint, 'policy_id', policyObj);
 
-      const claimsApiEndpoint = 'aus7y0lyttrObgW622p7';
+      const claimsApiEndpoint = OKTA_AUTHZ_ENDPOINTS['claims'];
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(claimsApiEndpoint, 'policy_id', policyObj);
 
       expect(resp).toEqual(appRes);
@@ -78,7 +78,7 @@ describe('OktaService', () => {
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
       expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
 
-      const healthApiEndpoint = 'aus7y0ho1w0bSNLDV2p7';
+      const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
       expect(updateAuthPolicyMock.mock.calls).toEqual([[healthApiEndpoint, 'policy_id', policyObj]]);
 
       expect(resp).toEqual(appRes);
