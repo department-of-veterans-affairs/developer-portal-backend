@@ -1,5 +1,6 @@
 import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
+import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
@@ -20,6 +21,7 @@ describe('OktaService', () => {
     let createMock, groupMock, policyIncludeMock, policyObj, updateAuthPolicyMock;
 
     beforeEach(() => {
+      jest.clearAllMocks();
       createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
       groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
 
@@ -60,9 +62,13 @@ describe('OktaService', () => {
       expect(resp).toEqual(appRes);
     });
 
-    it('invalid input is a NOOP', async () => {
+    it('non okta endpoints input are a NOOP', async () => {
+      const facilitiesEndpoint = KONG_CONSUMER_APIS.find(x => x = "facilities");
+      const healthEndpoint = OKTA_CONSUMER_APIS.find(x => x = "health");
+      const invaldEndpoint = "invalidEndpoint";
+
       const application: OktaApplication = {
-        owner: { apiList: ['health','invalidInput'], organization: 'organization', email: 'email' },
+        owner: { apiList: [healthEndpoint,facilitiesEndpoint,invaldEndpoint], organization: 'organization', email: 'email' },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
@@ -73,7 +79,7 @@ describe('OktaService', () => {
       expect(policyIncludeMock).toHaveBeenCalledWith("fakeid");
 
       const healthApiEndpoint = 'aus7y0ho1w0bSNLDV2p7';
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'policy_id', policyObj);
+      expect(updateAuthPolicyMock.mock.calls).toEqual([[healthApiEndpoint, 'policy_id', policyObj]]);
 
       expect(resp).toEqual(appRes);
     });
