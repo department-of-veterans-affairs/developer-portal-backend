@@ -1,17 +1,12 @@
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
+import { OKTA_AUTHZ_END_POINTS } from '../config/apis';
+
 
 function filterApplicableEndpoints(apiList: string[]): string[] {
-  const authzEndpoints = {
-    'health':        'aus7y0ho1w0bSNLDV2p7',
-    'communityCare': 'aus89xnh1xznM13SK2p7',
-    'verification':  'aus7y0sefudDrg2HI2p7',
-    'claims':        'aus7y0lyttrObgW622p7',
-  };
-
   const filteredApiList: string[] = apiList
-    .filter(endpoint => authzEndpoints[endpoint])
-    .map(endpoint => authzEndpoints[endpoint]);
+    .filter(endpoint => OKTA_AUTHZ_END_POINTS[endpoint])
+    .map(endpoint => OKTA_AUTHZ_END_POINTS[endpoint]);
   return [...new Set(filteredApiList)];
 }
 export interface OktaApplicationResponse {
