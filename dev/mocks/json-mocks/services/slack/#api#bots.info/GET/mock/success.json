@@ -1,0 +1,16 @@
+{
+    "ok": true,
+    "bot": {
+        "id": "<%=query.bot_id%>",
+        "deleted": false,
+        "name": "Developer Portal",
+        "updated": 1597760321,
+        "app_id": "A0000000000",
+        "user_id": "U0000000000",
+        "icons": {
+            "image_36": "https://avatars.slack-edge.com/2020-08-18/1300940977462_28330b62ae440412752c_36.png",
+            "image_48": "https://avatars.slack-edge.com/2020-08-18/1300940977462_28330b62ae440412752c_48.png",
+            "image_72": "https://avatars.slack-edge.com/2020-08-18/1300940977462_28330b62ae440412752c_72.png"
+        }
+    }
+}

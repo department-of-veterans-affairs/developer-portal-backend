@@ -93,12 +93,17 @@ export default class GovDeliveryService implements MonitoredService {
   public client: AxiosInstance;
 
   constructor({ token, host, supportEmailRecipient }) {
+    // TODO: Remove when GOVDELIVERY_HOST is updated in Parameter Store to include protocol
+    // Currently used to handle mock server using http protocol and Parameter Store variable not having a protocol
+    if(!host.match(/^https?:\/\//)){
+      host = `https://${host}`;
+    }
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
     this.client = axios.create({
-      baseURL: `https://${this.host}`,
+      baseURL: this.host,
       headers: { 'X-AUTH-TOKEN': token },
     });
   }
