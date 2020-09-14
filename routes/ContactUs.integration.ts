@@ -6,7 +6,7 @@ import configureApp from '../app';
 
 const request = supertest(configureApp());
 describe('/contact-us', () => {
-  const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
+  const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
 
   const supportReq = {
     firstName: 'Samwise',
