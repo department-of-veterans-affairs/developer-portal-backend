@@ -1,6 +1,6 @@
 import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
-import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS, OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
@@ -87,13 +87,9 @@ describe('OktaService', () => {
     });
 
     it('non okta endpoints input are a NOOP', async () => {
-      const facilitiesEndpoint = KONG_CONSUMER_APIS.find(x => (x = 'facilities'));
-      const healthEndpoint = OKTA_CONSUMER_APIS.find(x => (x = 'health'));
-      const invaldEndpoint = 'invalidEndpoint';
-
       const application: OktaApplication = {
         owner: {
-          apiList: [healthEndpoint, facilitiesEndpoint, invaldEndpoint],
+          apiList: ['health', 'facilities', 'invalid'],
           organization: 'organization',
           email: 'email',
         },
