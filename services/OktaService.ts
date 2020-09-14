@@ -25,36 +25,46 @@ export default class OktaService implements MonitoredService {
     this.client = new Client({
       token,
       orgUrl: host,
-      requestExecutor: new DefaultRequestExecutor(),
+      requestExecutor: new DefaultRequestExecutor()
     });
   }
 
-  public async createApplication(app: OktaApplication, groupID: string): Promise<OktaApplicationResponse> {
+  public async createApplication(
+    app: OktaApplication,
+    groupID: string
+  ): Promise<OktaApplicationResponse> {
     const resp = await this.client.createApplication(app.toOktaApp());
     await this.client.createApplicationGroupAssignment(resp.id, groupID);
 
     const applicableEndpoints = filterApplicableEndpoints(app.owner.apiList);
 
-    await Promise.all(applicableEndpoints.map(async (authServerId) => {
-      const policies = await this.client.listAuthorizationServerPolicies(authServerId);
-      const clientId = resp.credentials.oauthClient.client_id;
-      let defaultPolicy;
+    await Promise.all(
+      applicableEndpoints.map(async authServerId => {
+        const policies = await this.client.listAuthorizationServerPolicies(authServerId);
+        const clientId = resp.credentials.oauthClient.client_id;
+        let defaultPolicy;
 
-      policies.each(policy => {
-        if (policy['name'] === 'default') {
-          defaultPolicy = policy;
-          return false;
+        await policies.each(policy => {
+          if (policy['name'] === 'default') {
+            defaultPolicy = policy;
+            return false;
+          }
+        });
+        if (defaultPolicy) {
+          defaultPolicy.conditions.clients.include.push(clientId);
+          await this.client.updateAuthorizationServerPolicy(
+            authServerId,
+            defaultPolicy.id,
+            defaultPolicy
+          );
+        } else {
+          // What should happen if this fails to find a default policy?
+          logger.error(
+            `Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`
+          );
         }
-      });
-      if (defaultPolicy) {
-        defaultPolicy.conditions.clients.include.push(clientId);
-        await this.client.updateAuthorizationServerPolicy(authServerId, defaultPolicy.id, defaultPolicy);
-      } else {
-        // What should happen if this fails to find a default policy?
-        logger.error(`Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`);
-      }
-
-    }));
+      })
+    );
 
     return resp;
   }
@@ -68,16 +78,15 @@ export default class OktaService implements MonitoredService {
       }
       return {
         serviceName: 'Okta',
-        healthy: true,
+        healthy: true
       };
     } catch (err) {
       err.action = 'checking health of Okta';
       return {
         serviceName: 'Okta',
         healthy: false,
-        err: err,
+        err: err
       };
     }
   }
-
 }
