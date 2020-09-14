@@ -1,0 +1,16 @@
+[
+    {
+        "id": 126149927,
+        "subject": "Welcome to the Green Dragon Inn",
+        "created_at": "1954-07-29T20:47:36Z",
+        "status": "completed",
+        "_links": {
+            "self": "/messages/email/126149927",
+            "recipients": "/messages/email/126149927/recipients",
+            "failed": "/messages/email/126149927/recipients/failed",
+            "sent": "/messages/email/126149927/recipients/sent",
+            "clicked": "/messages/email/126149927/recipients/clicked",
+            "opened": "/messages/email/126149927/recipients/opened"
+        }
+    }
+]

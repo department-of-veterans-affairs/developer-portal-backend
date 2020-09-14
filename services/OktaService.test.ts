@@ -2,15 +2,6 @@ import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS, OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
-function createListAuthMock(serviceClient, policyId) {
-  const policyObj = {id: policyId, name: 'default', conditions: {clients: {include: []}}};
-  jest.spyOn(serviceClient, 'listAuthorizationServerPolicies').mockResolvedValueOnce({
-    policies: [policyObj],
-    each: function(cb) { return this.policies.forEach(cb); },
-  });
-  return policyObj;
-}
-
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
     token: 'fakeToken',
@@ -32,67 +23,95 @@ describe('OktaService', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
-      groupMock = jest.spyOn(service.client, 'createApplicationGroupAssignment').mockResolvedValue({});
+      groupMock = jest
+        .spyOn(service.client, 'createApplicationGroupAssignment')
+        .mockResolvedValue({});
 
-      updateAuthPolicyMock = jest.spyOn(service.client, 'updateAuthorizationServerPolicy').mockResolvedValue({});
+      updateAuthPolicyMock = jest
+        .spyOn(service.client, 'updateAuthorizationServerPolicy')
+        .mockResolvedValue({});
+
+      jest
+        .spyOn(service.client, 'listAuthorizationServerPolicies')
+        .mockImplementation((authServerId: string) => {
+          const policyObj = {
+            id: `${authServerId}-policy`,
+            name: 'default',
+            conditions: { clients: { include: [] } },
+          };
+          return {
+            policies: [policyObj],
+            each: function(cb) {
+              return this.policies.forEach(cb);
+            },
+          };
+        });
     });
 
     it('creates an application in Okta and assigns a group to its id', async () => {
-      const healthPolicy = createListAuthMock(service.client, 'healthId');
-      const communityCarePolicy = createListAuthMock(service.client, 'communityCareId');
-      const verificationPolicy = createListAuthMock(service.client, 'verificationId');
-      const claimsPolicy = createListAuthMock(service.client, 'claimsId');
-
       const application: OktaApplication = {
-        owner: { apiList: ['health','communityCare','verification','claims'], organization: 'organization', email: 'email' },
+        owner: {
+          apiList: ['health', 'communityCare', 'verification', 'claims'],
+          organization: 'organization',
+          email: 'email',
+        },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
       const resp = await service.createApplication(application, 'testgroup');
 
-      expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
+      expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
 
-      expect(healthPolicy.conditions.clients.include).toEqual(['fakeid']);
-      expect(communityCarePolicy.conditions.clients.include).toEqual(['fakeid']);
-      expect(verificationPolicy.conditions.clients.include).toEqual(['fakeid']);
-      expect(claimsPolicy.conditions.clients.include).toEqual(['fakeid']);
-
       const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'healthId', healthPolicy);
+      const healthPolicyId = `${healthApiEndpoint}-policy`;
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
+        id: healthPolicyId,
+        name: 'default',
+        conditions: { clients: { include: ['fakeid'] } },
+      });
 
       const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS['communityCare'];
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(communityCareApiEndpoint, 'communityCareId', communityCarePolicy);
-
-      const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(verificationApiEndpoint, 'verificationId', verificationPolicy);
-
-      const claimsApiEndpoint = OKTA_AUTHZ_ENDPOINTS['claims'];
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(claimsApiEndpoint, 'claimsId', claimsPolicy);
+      const communityCarePolicyId = `${communityCareApiEndpoint}-policy`;
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(
+        communityCareApiEndpoint,
+        communityCarePolicyId,
+        {
+          id: communityCarePolicyId,
+          name: 'default',
+          conditions: { clients: { include: ['fakeid'] } },
+        },
+      );
 
       expect(resp).toEqual(appRes);
     });
 
     it('non okta endpoints input are a NOOP', async () => {
-      const healthPolicy = createListAuthMock(service.client, 'healthId');
-
-      const facilitiesEndpoint = KONG_CONSUMER_APIS.find(x => x = "facilities");
-      const healthEndpoint = OKTA_CONSUMER_APIS.find(x => x = "health");
-      const invaldEndpoint = "invalidEndpoint";
+      const facilitiesEndpoint = KONG_CONSUMER_APIS.find(x => (x = 'facilities'));
+      const healthEndpoint = OKTA_CONSUMER_APIS.find(x => (x = 'health'));
+      const invaldEndpoint = 'invalidEndpoint';
 
       const application: OktaApplication = {
-        owner: { apiList: [healthEndpoint,facilitiesEndpoint,invaldEndpoint], organization: 'organization', email: 'email' },
+        owner: {
+          apiList: [healthEndpoint, facilitiesEndpoint, invaldEndpoint],
+          organization: 'organization',
+          email: 'email',
+        },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
       const resp = await service.createApplication(application, 'testgroup');
 
-      expect(createMock).toHaveBeenCalledWith({name: 'oidc_client'});
+      expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
-      expect(healthPolicy.conditions.clients.include).toEqual(['fakeid']);
 
       const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, 'healthId', healthPolicy);
+      const healthPolicyId = `${healthApiEndpoint}-policy`;
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
+        id: healthPolicyId,
+        name: 'default',
+        conditions: { clients: { include: ['fakeid'] } },
+      });
 
       expect(resp).toEqual(appRes);
     });
