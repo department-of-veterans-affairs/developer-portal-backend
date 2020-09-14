@@ -5,7 +5,7 @@ import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS, OKTA_AUTHZ_ENDPOINTS } from '..
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
     token: 'fakeToken',
-    host: 'https://fake-va-org.okta.com'
+    host: 'https://fake-va-org.okta.com',
   });
 
   describe('createApplication', () => {
@@ -14,9 +14,9 @@ describe('OktaService', () => {
       credentials: {
         oauthClient: {
           client_id: 'fakeid',
-          client_secret: 'fakesecret'
-        }
-      }
+          client_secret: 'fakesecret',
+        },
+      },
     };
     let createMock, groupMock, updateAuthPolicyMock;
 
@@ -37,13 +37,13 @@ describe('OktaService', () => {
           const policyObj = {
             id: `${authServerId}-policy`,
             name: 'default',
-            conditions: { clients: { include: [] } }
+            conditions: { clients: { include: [] } },
           };
           return {
             policies: [policyObj],
             each: function(cb) {
               return this.policies.forEach(cb);
-            }
+            },
           };
         });
     });
@@ -53,9 +53,9 @@ describe('OktaService', () => {
         owner: {
           apiList: ['health', 'communityCare', 'verification', 'claims'],
           organization: 'organization',
-          email: 'email'
+          email: 'email',
         },
-        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication)
+        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
       const resp = await service.createApplication(application, 'testgroup');
@@ -68,7 +68,7 @@ describe('OktaService', () => {
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
         id: healthPolicyId,
         name: 'default',
-        conditions: { clients: { include: ['fakeid'] } }
+        conditions: { clients: { include: ['fakeid'] } },
       });
 
       const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS['communityCare'];
@@ -79,8 +79,8 @@ describe('OktaService', () => {
         {
           id: communityCarePolicyId,
           name: 'default',
-          conditions: { clients: { include: ['fakeid'] } }
-        }
+          conditions: { clients: { include: ['fakeid'] } },
+        },
       );
 
       expect(resp).toEqual(appRes);
@@ -95,9 +95,9 @@ describe('OktaService', () => {
         owner: {
           apiList: [healthEndpoint, facilitiesEndpoint, invaldEndpoint],
           organization: 'organization',
-          email: 'email'
+          email: 'email',
         },
-        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication)
+        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
 
       const resp = await service.createApplication(application, 'testgroup');
@@ -110,7 +110,7 @@ describe('OktaService', () => {
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
         id: healthPolicyId,
         name: 'default',
-        conditions: { clients: { include: ['fakeid'] } }
+        conditions: { clients: { include: ['fakeid'] } },
       });
 
       expect(resp).toEqual(appRes);

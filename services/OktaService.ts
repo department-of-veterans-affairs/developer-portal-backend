@@ -25,13 +25,13 @@ export default class OktaService implements MonitoredService {
     this.client = new Client({
       token,
       orgUrl: host,
-      requestExecutor: new DefaultRequestExecutor()
+      requestExecutor: new DefaultRequestExecutor(),
     });
   }
 
   public async createApplication(
     app: OktaApplication,
-    groupID: string
+    groupID: string,
   ): Promise<OktaApplicationResponse> {
     const resp = await this.client.createApplication(app.toOktaApp());
     await this.client.createApplicationGroupAssignment(resp.id, groupID);
@@ -55,15 +55,15 @@ export default class OktaService implements MonitoredService {
           await this.client.updateAuthorizationServerPolicy(
             authServerId,
             defaultPolicy.id,
-            defaultPolicy
+            defaultPolicy,
           );
         } else {
           // What should happen if this fails to find a default policy?
           logger.error(
-            `Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`
+            `Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`,
           );
         }
-      })
+      }),
     );
 
     return resp;
@@ -78,14 +78,14 @@ export default class OktaService implements MonitoredService {
       }
       return {
         serviceName: 'Okta',
-        healthy: true
+        healthy: true,
       };
     } catch (err) {
       err.action = 'checking health of Okta';
       return {
         serviceName: 'Okta',
         healthy: false,
-        err: err
+        err: err,
       };
     }
   }
