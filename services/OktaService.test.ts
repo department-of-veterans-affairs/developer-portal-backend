@@ -31,12 +31,13 @@ describe('OktaService', () => {
         .spyOn(service.client, 'updateAuthorizationServerPolicy')
         .mockResolvedValue({});
 
+      // The policy with name === 'default' is the only one that we update
       jest
         .spyOn(service.client, 'listAuthorizationServerPolicies')
         .mockImplementation((authServerId: string) => {
           const policy1 = {
-            id: `${authServerId}-policy`,
-            name: 'policyName',
+            id: `${authServerId}-1-policy`,
+            name: 'policy1',
             conditions: { clients: { include: [] } },
           };
           const policy2 = {
@@ -45,8 +46,8 @@ describe('OktaService', () => {
             conditions: { clients: { include: [] } },
           };
           const policy3 = {
-            id: `${authServerId}-policy`,
-            name: 'policyName',
+            id: `${authServerId}-3-policy`,
+            name: 'policy3',
             conditions: { clients: { include: [] } },
           };
           return {
@@ -83,6 +84,9 @@ describe('OktaService', () => {
 
       const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS['communityCare'];
       const communityCarePolicyId = `${communityCareApiEndpoint}-policy`;
+
+      // one call for the health endpoint + one call for the communityCare endpoint
+      expect(updateAuthPolicyMock).toHaveBeenCalledTimes(2);
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(
         communityCareApiEndpoint,
         communityCarePolicyId,
@@ -92,13 +96,11 @@ describe('OktaService', () => {
           conditions: { clients: { include: ['fakeid'] } },
         },
       );
-      // one call for the health endpoint + one call for the communityCare endpoint
-      expect(updateAuthPolicyMock).toHaveBeenCalledTimes(2);
 
       expect(resp).toEqual(appRes);
     });
 
-    describe('invalid input', () => {
+    describe('ignores non okta endpoints', () => {
       it('ignores kong (key based) endpoint and only calls okta endpoint', async () => {
         const application: OktaApplication = {
           owner: {
@@ -116,13 +118,14 @@ describe('OktaService', () => {
 
         const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
         const healthPolicyId = `${healthApiEndpoint}-policy`;
+
+        // only called for the health endpoint
+        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
         expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
           id: healthPolicyId,
           name: 'default',
           conditions: { clients: { include: ['fakeid'] } },
         });
-        // only called for the health endpoint
-        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
 
         expect(resp).toEqual(appRes);
       });
@@ -144,13 +147,14 @@ describe('OktaService', () => {
 
         const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
         const healthPolicyId = `${healthApiEndpoint}-policy`;
+
+        // only called for the health endpoint
+        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
         expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
           id: healthPolicyId,
           name: 'default',
           conditions: { clients: { include: ['fakeid'] } },
         });
-        // only called for the health endpoint
-        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
 
         expect(resp).toEqual(appRes);
       });
