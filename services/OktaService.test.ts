@@ -82,34 +82,68 @@ describe('OktaService', () => {
           conditions: { clients: { include: ['fakeid'] } },
         },
       );
+      // one call for the health endpoint + one call for the communityCare endpoint
+      expect(updateAuthPolicyMock).toHaveBeenCalledTimes(2);
 
       expect(resp).toEqual(appRes);
     });
 
-    it('non okta endpoints input are a NOOP', async () => {
-      const application: OktaApplication = {
-        owner: {
-          apiList: ['health', 'facilities', 'invalid'],
-          organization: 'organization',
-          email: 'email',
-        },
-        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
-      };
+    describe('invalid input', () => {
+      it('ignores kong (key based) endpoint and only calls okta endpoint', async () => {
+        const application: OktaApplication = {
+          owner: {
+            apiList: ['health', 'facilities'],
+            organization: 'organization',
+            email: 'email',
+          },
+          toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
+        };
 
-      const resp = await service.createApplication(application, 'testgroup');
+        const resp = await service.createApplication(application, 'testgroup');
 
-      expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
-      expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
+        expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
+        expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
 
-      const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
-      const healthPolicyId = `${healthApiEndpoint}-policy`;
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
-        id: healthPolicyId,
-        name: 'default',
-        conditions: { clients: { include: ['fakeid'] } },
+        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
+        const healthPolicyId = `${healthApiEndpoint}-policy`;
+        expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
+          id: healthPolicyId,
+          name: 'default',
+          conditions: { clients: { include: ['fakeid'] } },
+        });
+        // only called for the health endpoint
+        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
+
+        expect(resp).toEqual(appRes);
       });
 
-      expect(resp).toEqual(appRes);
+      it('ignores other invalid endpoints and only calls okta endpoint', async () => {
+        const application: OktaApplication = {
+          owner: {
+            apiList: ['health', 'invalid'],
+            organization: 'organization',
+            email: 'email',
+          },
+          toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
+        };
+
+        const resp = await service.createApplication(application, 'testgroup');
+
+        expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
+        expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
+
+        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
+        const healthPolicyId = `${healthApiEndpoint}-policy`;
+        expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
+          id: healthPolicyId,
+          name: 'default',
+          conditions: { clients: { include: ['fakeid'] } },
+        });
+        // only called for the health endpoint
+        expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
+
+        expect(resp).toEqual(appRes);
+      });
     });
   });
 
