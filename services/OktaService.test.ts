@@ -34,13 +34,23 @@ describe('OktaService', () => {
       jest
         .spyOn(service.client, 'listAuthorizationServerPolicies')
         .mockImplementation((authServerId: string) => {
-          const policyObj = {
+          const policy1 = {
+            id: `${authServerId}-policy`,
+            name: 'policyName',
+            conditions: { clients: { include: [] } },
+          };
+          const policy2 = {
             id: `${authServerId}-policy`,
             name: 'default',
             conditions: { clients: { include: [] } },
           };
+          const policy3 = {
+            id: `${authServerId}-policy`,
+            name: 'policyName',
+            conditions: { clients: { include: [] } },
+          };
           return {
-            policies: [policyObj],
+            policies: [policy1,policy2,policy3],
             each: function(cb) {
               return this.policies.forEach(cb);
             },
