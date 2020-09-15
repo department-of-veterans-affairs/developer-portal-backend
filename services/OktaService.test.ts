@@ -51,7 +51,7 @@ describe('OktaService', () => {
     it('creates an application in Okta and assigns a group to its id', async () => {
       const application: OktaApplication = {
         owner: {
-          apiList: ['health', 'communityCare', 'verification', 'claims'],
+          apiList: ['health', 'communityCare'],
           organization: 'organization',
           email: 'email',
         },
