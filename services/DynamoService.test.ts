@@ -1,23 +1,31 @@
 import 'jest';
 import { AWSError, DynamoDB } from 'aws-sdk';
 import DynamoService from './DynamoService';
+import { DynamoConfig } from '../types';
 
 describe("DynamoService", () => {
   let service: DynamoService;
   let mockPut: jest.SpyInstance;
   let mockScan: jest.SpyInstance;
   let mockQuery: jest.SpyInstance;
+  let mockListTables: jest.SpyInstance;
 
   beforeEach(() => {
-    service = new DynamoService({
+    const config = {
       httpOptions: {
         timeout: 5000,
       },
       maxRetries: 1,
-    });
+      accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
+      region: process.env.DYNAMODB_REGION,
+      secretAccessKey: process.env.DYNAMODB_ACCESS_KEY_SECRET,
+      sessionToken: process.env.DYNAMODB_SESSION_TOKEN,
+    };
+    service = new DynamoService(config as unknown as DynamoConfig);
     mockPut = jest.spyOn(service.client, 'put');
     mockScan = jest.spyOn(service.client, 'scan');
     mockQuery = jest.spyOn(service.client, 'query');
+    mockListTables = jest.spyOn(service.dynamo, 'listTables');
 
     mockPut.mockClear();
     mockPut.mockImplementation((params, cb) => {
@@ -31,6 +39,11 @@ describe("DynamoService", () => {
     mockQuery.mockClear();
     mockQuery.mockImplementation((params, cb) => {
       cb(null, [{}]);
+    });
+
+    mockListTables.mockClear();
+    mockListTables.mockImplementation((params, cb) => {
+      cb(null, { TableNames: [ 'Users' ] });
     });
   });
 
@@ -150,14 +163,14 @@ describe("DynamoService", () => {
   describe('healthCheck', () => {
     it('scans a DynamoDB table', async () => {
       await service.healthCheck();
-      expect(mockScan).toHaveBeenCalledWith({ Limit:1, TableName: 'Users'}, expect.any(Function));
+      expect(mockListTables).toHaveBeenCalledWith({ Limit:1 }, expect.any(Function));
     });
 
     it('returns unhealthy when it receives an error', async () => {
       const mockValue = 'Missing region in config';
       const err = new Error(`DynamoDB encountered an error: ${mockValue}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementationOnce((params, cb) => {
+      mockListTables.mockImplementationOnce((params, cb) => {
         cb(new Error(mockValue));
       });
 
@@ -167,9 +180,9 @@ describe("DynamoService", () => {
 
     it('returns unhealthy when it does not receive a properly formed response', async () => {
       const mockValue = {};
-      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementation((params, cb) => {
+      mockListTables.mockImplementation((params, cb) => {
         cb(null, mockValue);
       });
 
@@ -177,11 +190,11 @@ describe("DynamoService", () => {
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns unhealthy when it does not receive a single record', async () => {
+    it('returns unhealthy when it does not contain a table', async () => {
       const mockValue = { Count: 0 };
-      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementation((params, cb) => {
+      mockListTables.mockImplementation((params, cb) => {
         cb(null, mockValue);
       });
 
