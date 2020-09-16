@@ -80,30 +80,32 @@ export default class DynamoService implements MonitoredService {
 
   // DynamoDB is considered healthy if a table scan can return a record
   public healthCheck(): Promise<ServiceHealthCheckResponse> {
-    return new Promise(resolve => {
+    const status: ServiceHealthCheckResponse = {
+      serviceName: 'Dynamo',
+      healthy: false,
+    };
+    return new Promise((resolve) => {
       try {
         const params = {
           Limit: 1,
         };
-        
         this.dynamo.listTables(params, (err, data) => {
           if (err) {
-            throw new Error(`DynamoDB encountered an error: ${err.message}`);
+            status.err = new Error(`DynamoDB encountered an error: ${err.message}`);
+            resolve(status);
+            return;
           } else if (!data || data.TableNames?.length !== 1) {
-            throw new Error(`DynamoDB did not have a table: ${JSON.stringify(data)}`);
+            status.err = new Error(`DynamoDB did not have a table: ${JSON.stringify(data)}`);
+            resolve(status);
+            return;
           }
-          resolve({
-            serviceName: 'Dynamo',
-            healthy: true,
-          });
+          status.healthy = true;
+          resolve(status);
         });
       } catch (err) {
         err.action = 'checking health of DynamoDB';
-        resolve({
-          serviceName: 'Dynamo',
-          healthy: false,
-          err: err,
-        });
+        status.err = err;
+        resolve(status);
       }
     });
   }
