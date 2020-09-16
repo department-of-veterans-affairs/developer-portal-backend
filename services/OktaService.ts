@@ -59,9 +59,7 @@ export default class OktaService implements MonitoredService {
           );
         } else {
           // What should happen if this fails to find a default policy?
-          logger.error(
-            `Failed to find default policy for OktaApplication: ${app} and authServerId: ${authServerId}`,
-          );
+          throw new Error('Could not find default policy');
         }
       }),
     );

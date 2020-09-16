@@ -100,6 +100,47 @@ describe('OktaService', () => {
       expect(resp).toEqual(appRes);
     });
 
+    it('throws error if there is no default policy', async () => {
+      // we have to reset the list of policies to not include one with the 'default' name
+      jest
+        .spyOn(service.client, 'listAuthorizationServerPolicies')
+        .mockImplementation((authServerId: string) => {
+          const policy1 = {
+            id: `${authServerId}-1-policy`,
+            name: 'policy1',
+            conditions: { clients: { include: [] } },
+          };
+          const policy2 = {
+            id: `${authServerId}-policy`,
+            name: 'policy2',
+            conditions: { clients: { include: [] } },
+          };
+          const policy3 = {
+            id: `${authServerId}-3-policy`,
+            name: 'policy3',
+            conditions: { clients: { include: [] } },
+          };
+          return {
+            policies: [policy1,policy2,policy3],
+            each: function(cb) {
+              return this.policies.forEach(cb);
+            },
+          };
+        });
+
+      const application: OktaApplication = {
+        owner: {
+          apiList: ['health'],
+          organization: 'organization',
+          email: 'email',
+        },
+        toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
+      };
+
+      await expect(service.createApplication(application, 'testgroup')).rejects.toThrow();
+    });
+
+
     describe('ignores non okta endpoints', () => {
       it('ignores kong (key based) endpoint and only calls okta endpoint', async () => {
         const application: OktaApplication = {
