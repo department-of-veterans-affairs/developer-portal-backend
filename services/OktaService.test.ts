@@ -74,7 +74,7 @@ describe('OktaService', () => {
       expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
       expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
 
-      const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
+      const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS.health;
       const healthPolicyId = `${healthApiEndpoint}-policy`;
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
         id: healthPolicyId,
@@ -82,7 +82,7 @@ describe('OktaService', () => {
         conditions: { clients: { include: ['fakeid'] } },
       });
 
-      const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS['communityCare'];
+      const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS.communityCare;
       const communityCarePolicyId = `${communityCareApiEndpoint}-policy`;
 
       // one call for the health endpoint + one call for the communityCare endpoint
@@ -157,7 +157,7 @@ describe('OktaService', () => {
         expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
         expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
 
-        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
+        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS.health;
         const healthPolicyId = `${healthApiEndpoint}-policy`;
 
         // only called for the health endpoint
@@ -186,7 +186,7 @@ describe('OktaService', () => {
         expect(createMock).toHaveBeenCalledWith({ name: 'oidc_client' });
         expect(groupMock).toHaveBeenCalledWith(appRes.id, 'testgroup');
 
-        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS['health'];
+        const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS.health;
         const healthPolicyId = `${healthApiEndpoint}-policy`;
 
         // only called for the health endpoint

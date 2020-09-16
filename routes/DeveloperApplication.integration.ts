@@ -46,7 +46,7 @@ describe('/developer_application', () => {
       .reply(200, {});
 
     const { oktaAuthResponse, oktaAuthPolicyUpdateResponse } = oktaAuthMocks;
-    const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS['verification'];
+    const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
     okta
       .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaAuthResponse)
       .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`).reply(200, oktaAuthPolicyUpdateResponse);

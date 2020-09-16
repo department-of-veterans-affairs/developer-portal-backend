@@ -45,7 +45,7 @@ export default class OktaService implements MonitoredService {
         let defaultPolicy;
 
         await policies.each(policy => {
-          if (policy['name'] === 'default') {
+          if (policy.name === 'default') {
             defaultPolicy = policy;
             return false;
           }
