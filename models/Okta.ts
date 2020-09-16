@@ -1,4 +1,4 @@
-type OktaResponse = {
+export type OktaPolicy = {
   type: string;
   id: string;
   status: string;
@@ -13,6 +13,6 @@ type OktaResponse = {
   };
 };
 export type OktaAuthMocks = {
-  oktaAuthResponse: OktaResponse[];
-  oktaAuthPolicyUpdateResponse: OktaResponse;
+  oktaPolicyCollection: OktaPolicy[];
+  oktaPolicy: OktaPolicy;
 };

@@ -3,7 +3,7 @@ import { OktaAuthMocks } from "../../models/Okta";
 // Note that these response objects have been truncated for brevity
 export const oktaAuthMocks: OktaAuthMocks = {
   // https://developer.okta.com/docs/reference/api/authorization-servers/#get-all-policies
-  oktaAuthResponse: [
+  oktaPolicyCollection: [
     {
       type: "OAUTH_AUTHORIZATION_POLICY",
       id: "defaultPolicyIdHere",
@@ -40,7 +40,7 @@ export const oktaAuthMocks: OktaAuthMocks = {
   ],
 
   // https://developer.okta.com/docs/reference/api/authorization-servers/#update-a-policy
-  oktaAuthPolicyUpdateResponse: {
+  oktaPolicy: {
     type: "OAUTH_AUTHORIZATION_POLICY",
     id: "policyIdHere",
     status: "ACTIVE",
