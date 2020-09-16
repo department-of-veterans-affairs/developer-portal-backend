@@ -1,21 +1,5 @@
-type OktaResponse = {
-  type: string;
-  id: string;
-  status: string;
-  name: string;
-  description: string;
-  priority: number;
-  system: boolean;
-  conditions: {
-    clients: {
-      include: string[];
-    };
-  };
-}
-type OktaAuthMocks = {
-  oktaAuthResponse: OktaResponse[];
-  oktaAuthPolicyUpdateResponse: OktaResponse;
-}
+import { OktaAuthMocks } from "../../models/Okta";
+
 // Note that these response objects have been truncated for brevity
 export const oktaAuthMocks: OktaAuthMocks = {
   // https://developer.okta.com/docs/reference/api/authorization-servers/#get-all-policies
