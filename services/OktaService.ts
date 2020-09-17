@@ -60,8 +60,8 @@ export default class OktaService implements MonitoredService {
             defaultPolicy,
           );
         } else {
-          logger.error({clientId: clientId,authServerId: authServerId});
-          throw new Error(`clientId: ${clientId}, authServerId: ${authServerId}`);
+          logger.error({message: "No default policy", clientId: clientId, authServerId: authServerId});
+          throw new Error(`No default policy for clientId: ${clientId}, authServerId: ${authServerId}`);
         }
       }),
     );
