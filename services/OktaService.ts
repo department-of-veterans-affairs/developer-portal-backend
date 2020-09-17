@@ -2,6 +2,7 @@ import logger from '../config/logger';
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OktaPolicyCollection, OktaPolicy } from "../models/Okta";
 
 function filterApplicableEndpoints(apiList: string[]): string[] {
   const filteredApiList: string[] = apiList
@@ -40,7 +41,7 @@ export default class OktaService implements MonitoredService {
 
     await Promise.all(
       applicableEndpoints.map(async authServerId => {
-        const policies = await this.client.listAuthorizationServerPolicies(authServerId);
+        const policies: OktaPolicyCollection = await this.client.listAuthorizationServerPolicies(authServerId);
         const clientId = resp.credentials.oauthClient.client_id;
         let defaultPolicy;
 

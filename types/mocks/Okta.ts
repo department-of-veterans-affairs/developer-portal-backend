@@ -1,7 +1,10 @@
-import { OktaAuthMocks } from "../../models/Okta";
+import { OktaPolicy } from "../../models/Okta";
 
 // Note that these response objects have been truncated for brevity
-export const oktaAuthMocks: OktaAuthMocks = {
+export const oktaAuthMocks: {
+  oktaPolicyCollection: OktaPolicy[];
+  oktaPolicy: OktaPolicy;
+} = {
   // https://developer.okta.com/docs/reference/api/authorization-servers/#get-all-policies
   oktaPolicyCollection: [
     {
@@ -14,12 +17,7 @@ export const oktaAuthMocks: OktaAuthMocks = {
       system: false,
       conditions: {
         clients: {
-          include: [
-            "client_id_1",
-            "client_id_2",
-            "client_id_3",
-            "client_id_4",
-          ],
+          include: ["client_id_1", "client_id_2", "client_id_3", "client_id_4"],
         },
       },
     },
@@ -50,12 +48,7 @@ export const oktaAuthMocks: OktaAuthMocks = {
     system: false,
     conditions: {
       clients: {
-        include: [
-          "client_id_1",
-          "client_id_2",
-          "client_id_3",
-          "client_id_4",
-        ],
+        include: ["client_id_1", "client_id_2", "client_id_3", "client_id_4"],
       },
     },
   },

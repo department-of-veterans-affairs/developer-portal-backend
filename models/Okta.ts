@@ -1,4 +1,4 @@
-export type OktaPolicy = {
+export interface OktaPolicy {
   type: string;
   id: string;
   status: string;
@@ -12,7 +12,6 @@ export type OktaPolicy = {
     };
   };
 };
-export type OktaAuthMocks = {
-  oktaPolicyCollection: OktaPolicy[];
-  oktaPolicy: OktaPolicy;
+export interface OktaPolicyCollection {
+  each: (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void>;
 };
