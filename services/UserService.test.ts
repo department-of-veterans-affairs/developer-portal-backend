@@ -12,7 +12,7 @@ const mockedUsersAB: User[] = [
     apis: 'ab',
     description: 'super chill',
     oAuthRedirectURI: 'http://elvish-swords.com',
-    oAuthApplicationType: 'default',
+    oAuthApplicationType: '',
     termsOfService: true,
   }),
 ];
@@ -26,28 +26,28 @@ const mockedUsers: User[] = mockedUsersAB.concat([
     apis: 'va,xz,dx',
     description: 'super cool',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
-    oAuthApplicationType: 'default',
+    oAuthApplicationType: '',
     termsOfService: true,
   }),
 ]);
 
 describe('UserService', ()=> {
-  const mockQuery = jest.fn();
+  const mockScan = jest.fn();
 
   const mockDynamoService = {
-    query: mockQuery,
+    hardScan: mockScan,
   } as unknown as DynamoService;
 
   const userService: UserService = new UserService(mockDynamoService);
 
   beforeEach(() => {
-    mockQuery.mockReset();
+    mockScan.mockReset();
   });
 
   describe('get users', () => {
     it('returns all users when no api list is given', async () => {
 
-      mockQuery.mockResolvedValue(mockedUsers);
+      mockScan.mockResolvedValue(mockedUsers);
 
       const expectedMockedUsers: User[] = Array.from(mockedUsers);
       expectedMockedUsers[0].createdAt = expect.any(Date);
@@ -60,7 +60,7 @@ describe('UserService', ()=> {
 
     it('returns the correct number of users when an api list is given', async () => {
 
-      mockQuery.mockResolvedValue(mockedUsersAB);
+      mockScan.mockResolvedValue(mockedUsersAB);
 
       const apiList: string[] = ['ab'];
       const users: User[] = await userService.getUsers(apiList);

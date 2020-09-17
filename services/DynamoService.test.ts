@@ -1,5 +1,6 @@
 import 'jest';
 import { AWSError, DynamoDB } from 'aws-sdk';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
 import DynamoService from './DynamoService';
 
 describe("DynamoService", () => {
@@ -96,6 +97,49 @@ describe("DynamoService", () => {
       mockScan.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
       
       const result = await service.scan(tableName, projectionExp, filterParams);
+
+      expect(result[0]).toEqual(tableRecord);
+    });
+
+    it('rejects when Dynamo returns and error', async () => {
+      expect.assertions(1);
+
+      const err = new Error('failed to retrieve from table') as AWSError;
+      mockScan.mockImplementation((_, cb) => { cb(err); });
+
+      try {
+        await service.scan(tableName, projectionExp, filterParams);
+      } catch (err) {
+        expect(err).toStrictEqual(err);
+      }
+    });
+  });
+
+  describe('hardScan', () => {
+    const tableName = 'Ents';
+    const tableRecord = { 
+      commonName: 'Treebeard',
+      sidarinName: 'Fangorn',
+      entishName: 'Not stored due to buffer overflow',
+      orcishName: '',
+    };
+    const projectionExp = 'commonName, sidarinName, entishName, orcishName';
+    const filterParams = {
+      ExpressionAttributeValues: { 
+        ':commonName': { S: 'Treebeard' },
+      },
+      FilterExpression: 'commonName = :commonName',
+    };
+
+    it('retrieves rows from the table', async () => {
+      mockScan.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
+      
+      const params: ScanInput = {
+        TableName: tableName,
+        ProjectionExpression: projectionExp,
+        ...filterParams,
+      };
+      const result = await service.hardScan(params);
 
       expect(result[0]).toEqual(tableRecord);
     });

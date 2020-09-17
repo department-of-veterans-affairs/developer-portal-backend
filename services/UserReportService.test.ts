@@ -13,7 +13,7 @@ const mockedUsersAB: User[] = [
     apis: 'ab',
     description: 'super chill',
     oAuthRedirectURI: 'http://elvish-swords.com',
-    oAuthApplicationType: 'default',
+    oAuthApplicationType: '',
     termsOfService: true,
   }),
 ];
@@ -27,29 +27,29 @@ const mockedUsers: User[] = mockedUsersAB.concat([
     apis: 'va,xz,dx',
     description: 'super cool',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
-    oAuthApplicationType: 'default',
+    oAuthApplicationType: '',
     termsOfService: true,
   }),
 ]);
 
 describe('UserReportService', () => {
-  const mockQuery = jest.fn();
+  const mockScan = jest.fn();
 
   const mockDynamoService = {
-    query: mockQuery,
+    hardScan: mockScan,
   } as unknown as DynamoService;
 
   const userService: UserService = new UserService(mockDynamoService);
   const userReportService: UserReportService = new UserReportService(userService);
 
   beforeEach(() => {
-    mockQuery.mockReset();
+    mockScan.mockReset();
   });
 
   describe('generate csv report', () => {
     it('returns a csv of all users when no api list is given', async () => {
 
-      mockQuery.mockResolvedValue(mockedUsers);
+      mockScan.mockResolvedValue(mockedUsers);
 
       const reportText = 'email\nfbag@hobbiton.com\nwizz@higherbeings.com';
 
@@ -59,7 +59,7 @@ describe('UserReportService', () => {
 
     it('returns a csv of filtered users based on the api list given', async () => {
 
-      mockQuery.mockResolvedValue(mockedUsersAB);
+      mockScan.mockResolvedValue(mockedUsersAB);
 
       const reportText = 'email\nfbag@hobbiton.com';
       const apiList = ['ab'];

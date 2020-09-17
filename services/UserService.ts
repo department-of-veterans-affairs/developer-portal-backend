@@ -1,8 +1,18 @@
-import { AttributeMap } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap, ScanInput } from 'aws-sdk/clients/dynamodb';
+
 import DynamoService from './DynamoService';
 import User from '../models/User';
 
-const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
+const DEFAULT_TABLE = 'Users';
+
+function userHasApiInList(user: User, apiList: string[]): boolean {
+
+  const matchingApis: string[] = user.apiList.filter((api: string) => {
+    return apiList.includes(api);
+  });
+
+  return matchingApis.length > 0;
+}
 
 export default class UserService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
@@ -14,13 +24,12 @@ export default class UserService {
 
   // TODO: Move user saving code to here
 
-  // TODO: Fix return type to User
   public async getUsers(apiFilter: string[] = []): Promise<User[]> {
-    const items: AttributeMap[] = await this.dynamoService.query(
-      this.tableName,
-      null as unknown as string,
-      null as unknown as object,
-    );
+    const params: ScanInput = {
+      TableName: this.tableName,
+    };
+
+    const items: AttributeMap[] = await this.dynamoService.hardScan(params);
 
     const results = items.map((item): User => {
       return new User({
@@ -31,26 +40,19 @@ export default class UserService {
         apis: item.apis.toString(),
         description: item.description.toString(),
         oAuthRedirectURI: item.oAuthRedirectURI.toString(),
-        oAuthApplicationType: item.oAuthApplicationType.toString(),
+        oAuthApplicationType: '',
         termsOfService: item.tosAccepted.toString() === 'true',
       });
     });
 
-    return results;
+    if (apiFilter.length === 0) {
+      return results;
+    }
 
     // // TODO - Remove and insert this filtering logic directly into a db query, if possible
-    // let filteredUsers = this.users.filter((user) => {
-    //   return userHasApiInList(user, apiFilter)
-    // });
-    // return filteredUsers;
+    const filteredUsers = results.filter((user) => {
+      return userHasApiInList(user, apiFilter);
+    });
+    return filteredUsers;
   }
 }
-
-// function userHasApiInList(user: User, apiList: string[]): boolean {
-
-//   let matchingApis: string[] = user.apiList.filter((api: string) => {
-//     return apiList.includes(api);
-//   })
-
-//   return matchingApis.length > 0;
-// }
