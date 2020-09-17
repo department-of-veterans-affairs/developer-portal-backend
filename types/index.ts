@@ -71,7 +71,7 @@ export interface OAuthApplication {
 }
 
 export interface OktaApplication {
-  owner?: OktaUser;
+  owner: OktaUser;
   client_id?: string;
   client_secret?: string;
   toOktaApp: () => OAuthApplication;
