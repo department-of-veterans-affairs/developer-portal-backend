@@ -1,6 +1,7 @@
 import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OktaPolicy } from "../models/Okta";
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
@@ -52,7 +53,7 @@ describe('OktaService', () => {
           };
           return {
             policies: [policy1,policy2,policy3],
-            each: function(cb) {
+            each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
               return this.policies.forEach(cb);
             },
           };
@@ -122,7 +123,7 @@ describe('OktaService', () => {
           };
           return {
             policies: [policy1,policy2,policy3],
-            each: function(cb) {
+            each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
               return this.policies.forEach(cb);
             },
           };

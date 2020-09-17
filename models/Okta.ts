@@ -11,7 +11,7 @@ export interface OktaPolicy {
       include: string[];
     };
   };
-};
+}
 export interface OktaPolicyCollection {
   each: (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void>;
-};
+}
