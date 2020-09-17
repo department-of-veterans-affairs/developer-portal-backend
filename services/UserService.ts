@@ -19,10 +19,10 @@ export default class UserService {
     const items: AttributeMap[] = await this.dynamoService.query(
       this.tableName,
       null as unknown as string,
-      null as unknown as object
+      null as unknown as object,
     );
 
-    let results = items.map((item): User => {
+    const results = items.map((item): User => {
       return new User({
         firstName: item.firstName.toString(),
         lastName: item.lastName.toString(),
@@ -32,8 +32,8 @@ export default class UserService {
         description: item.description.toString(),
         oAuthRedirectURI: item.oAuthRedirectURI.toString(),
         oAuthApplicationType: item.oAuthApplicationType.toString(),
-        termsOfService: item.tosAccepted.toString() === 'true'
-      })
+        termsOfService: item.tosAccepted.toString() === 'true',
+      });
     });
 
     return results;
@@ -46,11 +46,11 @@ export default class UserService {
   }
 }
 
-function userHasApiInList(user: User, apiList: string[]): boolean {
+// function userHasApiInList(user: User, apiList: string[]): boolean {
 
-  let matchingApis: string[] = user.apiList.filter((api: string) => {
-    return apiList.includes(api);
-  })
+//   let matchingApis: string[] = user.apiList.filter((api: string) => {
+//     return apiList.includes(api);
+//   })
 
-  return matchingApis.length > 0;
-}
+//   return matchingApis.length > 0;
+// }
