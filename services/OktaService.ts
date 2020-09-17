@@ -45,6 +45,7 @@ export default class OktaService implements MonitoredService {
         const clientId = resp.credentials.oauthClient.client_id;
         let defaultPolicy;
 
+        // policies.each returns a promise https://developer.okta.com/okta-sdk-nodejs/jsdocs/#toc31__anchor
         await policies.each(policy => {
           if (policy.name === 'default') {
             defaultPolicy = policy;
