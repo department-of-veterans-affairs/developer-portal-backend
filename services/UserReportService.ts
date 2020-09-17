@@ -12,8 +12,8 @@ export default class UserReportService {
     this.userService = userService;
   }
 
-  public generateCSVReport(apiList: string[] = []): string {
-    let users: User[] = this.userService.getUsers(apiList);
+  public async generateCSVReport(apiList: string[] = []): Promise<string> {
+    let users: User[] = await this.userService.getUsers(apiList);
 
     let csv: string = '';
 
@@ -21,6 +21,7 @@ export default class UserReportService {
       csv += `${field},`;
     })
 
+    csv = csv.slice(0, -1);
     csv += '\n';
 
     users.forEach((user) => {
@@ -29,6 +30,8 @@ export default class UserReportService {
       })
       csv += '\n';
     });
+
+    csv = csv.slice(0, -3);
     
     return csv;
   }
