@@ -21,18 +21,23 @@ export default class UserReportService {
       csv += `${field},`;
     })
 
-    csv = csv.slice(0, -1);
+    csv = trimTrailingCharacter(csv);
     csv += '\n';
 
     users.forEach((user) => {
       this.reportFields.forEach((field) => {
         csv += `${user[field]},`;
       })
+      csv = trimTrailingCharacter(csv);
       csv += '\n';
     });
 
-    csv = csv.slice(0, -3);
+    csv = trimTrailingCharacter(csv);
     
     return csv;
   }
+}
+
+function trimTrailingCharacter(aString: string): string {
+  return aString.slice(0, -1);
 }

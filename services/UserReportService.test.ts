@@ -51,7 +51,7 @@ describe('UserReportService', () => {
 
       mockQuery.mockResolvedValue(mockedUsers);
 
-      let reportText: string = 'email,\nfbag@hobbiton.com,\nwizz@higherbeings.com';
+      let reportText: string = 'email\nfbag@hobbiton.com\nwizz@higherbeings.com';
 
       let report = await userReportService.generateCSVReport();
       expect(report).toEqual(reportText);
@@ -61,7 +61,7 @@ describe('UserReportService', () => {
 
       mockQuery.mockResolvedValue(mockedUsersAB);
 
-      let reportText: string = 'email,\nfbag@hobbiton.com';
+      let reportText: string = 'email\nfbag@hobbiton.com';
       let apiList = ['ab']
 
       let report = await userReportService.generateCSVReport(apiList);
