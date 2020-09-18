@@ -10,6 +10,8 @@ export default class UserReportService {
   private userService: UserService;
   private reportFields: string[] = [
     'email',
+    'firstName',
+    'lastName',
   ];
 
   public constructor(userService: UserService) {

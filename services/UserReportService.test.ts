@@ -51,7 +51,7 @@ describe('UserReportService', () => {
 
       mockScan.mockResolvedValue(mockedUsers);
 
-      const reportText = 'email\nfbag@hobbiton.com\nwizz@higherbeings.com';
+      const reportText = 'email,firstName,lastName\nfbag@hobbiton.com,Frodo,Baggins\nwizz@higherbeings.com,Gandalf,Gray';
 
       const report = await userReportService.generateCSVReport();
       expect(report).toEqual(reportText);
@@ -61,7 +61,7 @@ describe('UserReportService', () => {
 
       mockScan.mockResolvedValue(mockedUsersAB);
 
-      const reportText = 'email\nfbag@hobbiton.com';
+      const reportText = 'email,firstName,lastName\nfbag@hobbiton.com,Frodo,Baggins';
       const apiList = ['ab'];
 
       const report = await userReportService.generateCSVReport(apiList);
