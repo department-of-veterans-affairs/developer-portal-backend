@@ -275,7 +275,7 @@ describe('SlackService', () => {
           fileType: 'csv',
           fileName: 'consumer-report',
           content: 'legolas,aragorn,the hobbitses',
-          channels: [ '#a-long-expected-party' ],
+          channels: '#a-long-expected-party',
         }
       );
     });

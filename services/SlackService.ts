@@ -45,7 +45,16 @@ interface FileUpload {
   fileType: string;
   fileName: string;
   content: string;
-  channels: string[];
+  /** Comma separated string of channels */
+  channels: string;
+}
+
+interface FileUploadResponse {
+  ok: boolean;
+  error: string;
+  needed: string;
+  provided: string;
+  warning: string;
 }
 
 interface WebAPIHeaders {
@@ -200,17 +209,22 @@ export default class SlackService implements MonitoredService {
       fileType: 'csv',
       fileName: 'consumer-report',
       content: csvContent,
-      channels: [ this.options.channel ],
+      channels: this.options.channel,
     };
 
-    return this.makeSlackRequest('/api/files.upload', body);
+    let response: FileUploadResponse = await this.makeSlackRequest('/api/files.upload', body);
+
+    if (!response.ok) {
+      throw new Error(`Failed uploading to Slack: Error: ${response.error}, Needed: ${response.needed}, Provided: ${response.provided}, Warning: ${response.warning}`);
+    }
+    return 'Successfully uploaded the file to Slack';
   }
 
   private async post(body: PostBody): Promise<string> {
     return this.makeSlackRequest('/api/chat.postMessage', { channel: this.options.channel, ...body });
   }
 
-  private async makeSlackRequest(apiEndpoint: string, body): Promise<string> {
+  private async makeSlackRequest(apiEndpoint: string, body): Promise<any> {
     try {
       const res = await this.client.post(apiEndpoint, body);
       return res.data;
