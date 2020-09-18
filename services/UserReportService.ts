@@ -12,6 +12,13 @@ export default class UserReportService {
     'email',
     'firstName',
     'lastName',
+    'apis',
+  ];
+  private reportHeaders: string[] = [
+    'Email',
+    'First Name',
+    'Last Name',
+    'APIs',
   ];
 
   public constructor(userService: UserService) {
@@ -23,8 +30,8 @@ export default class UserReportService {
 
     let csv = '';
 
-    this.reportFields.forEach((field) => {
-      csv += `${field},`;
+    this.reportHeaders.forEach((header) => {
+      csv += `${header},`;
     });
 
     csv = trimTrailingCharacter(csv);
@@ -32,7 +39,7 @@ export default class UserReportService {
 
     users.forEach((user) => {
       this.reportFields.forEach((field) => {
-        csv += `${user[field]},`;
+        csv += `"${user[field]}",`;
       });
       csv = trimTrailingCharacter(csv);
       csv += '\n';
