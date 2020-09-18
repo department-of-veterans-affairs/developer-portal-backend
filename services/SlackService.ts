@@ -210,7 +210,7 @@ export default class SlackService implements MonitoredService {
     return this.makeSlackRequest('/api/chat.postMessage', { channel: this.options.channel, ...body });
   }
 
-  private async makeSlackRequest(apiEndpoint: string, body: any): Promise<string> {
+  private async makeSlackRequest(apiEndpoint: string, body): Promise<string> {
     try {
       const res = await this.client.post(apiEndpoint, body);
       return res.data;

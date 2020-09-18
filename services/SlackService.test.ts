@@ -1,4 +1,3 @@
-import { Service } from 'aws-sdk';
 import axios, { AxiosInstance } from 'axios';
 import moment from 'moment';
 import SlackService from './SlackService';

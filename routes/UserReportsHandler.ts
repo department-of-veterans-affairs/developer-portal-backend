@@ -30,6 +30,5 @@ export default function userReportsHandler(userReportService: UserReportService,
       err.action = 'creating and sending user/consumer csv report';
       next(err);
     }
-  }
-
+  };
 }
