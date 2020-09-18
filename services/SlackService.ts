@@ -39,6 +39,15 @@ interface PostBody {
   attachments?: Attachment[];
 }
 
+interface FileUpload {
+  title: string;
+  initialComment: string;
+  fileType: string;
+  fileName: string;
+  content: string;
+  channels: string[];
+}
+
 interface WebAPIHeaders {
   'Authorization': string;
   'Content-Type': string;
@@ -178,16 +187,30 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
 
+  public async sendConsumerReport(apiList: string[], csvContent: string) {
+
+    const body: FileUpload = {
+      title: 'Consumer Report',
+      initialComment: apiList.join(','),
+      fileType: 'csv',
+      fileName: 'consumer-report',
+      content: csvContent,
+      channels: [ this.options.channel ],
+    };
+
+    return this.makeSlackRequest('/api/files.upload', body);
+  }
+
   private async post(body: PostBody): Promise<string> {
+    return this.makeSlackRequest('/api/chat.postMessage', { channel: this.options.channel, ...body });
+  }
+
+  private async makeSlackRequest(apiEndpoint: string, body: any): Promise<string> {
     try {
-      const res = await this.client.post('/api/chat.postMessage', { channel: this.options.channel, ...body });
+      const res = await this.client.post(apiEndpoint, body);
       return res.data;
     }
     catch (err) {
-      // Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
-      // We will want that information, so we're re-writing the message field of the error
-      // that axios throws on 400 and 500 responses, since our default error handling
-      // will accept and log that field.
       if (err.response) {
         err.message = `Status: ${err.response.status}, Data: ${err.response.data}, Original: ${err.message}`;
       }

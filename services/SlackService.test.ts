@@ -1,3 +1,4 @@
+import { Service } from 'aws-sdk';
 import axios, { AxiosInstance } from 'axios';
 import moment from 'moment';
 import SlackService from './SlackService';
@@ -245,4 +246,39 @@ describe('SlackService', () => {
     });
   });
 
+  describe('Consumer Report', () => {
+
+    it('sends a consumer report', async () => {
+
+      const mockPost = jest.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'ok',
+        headers: {},
+        data: 'ok',
+      });
+
+      jest.spyOn(axios, 'create').mockImplementation(() => (
+        { post: mockPost } as unknown as AxiosInstance
+      ));
+
+      const apiList: string[] = ['bow', 'sword'];
+      const csvContent = 'legolas,aragorn,the hobbitses';
+
+      const service: SlackService = new SlackService(slackURL, slackToken, slackOptions);
+      const res = await service.sendConsumerReport(apiList, csvContent);
+
+      expect(res).toEqual('ok');
+      expect(mockPost).toHaveBeenCalledWith(
+        '/api/files.upload',
+        {
+          title: 'Consumer Report',
+          initialComment: 'bow,sword',
+          fileType: 'csv',
+          fileName: 'consumer-report',
+          content: 'legolas,aragorn,the hobbitses',
+          channels: [ '#a-long-expected-party' ],
+        }
+      );
+    });
+  });
 });
