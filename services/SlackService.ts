@@ -187,11 +187,16 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
 
-  public async sendConsumerReport(apiList: string[], csvContent: string) {
+  public async sendConsumerReport(csvContent: string, apiList: string[] = []): Promise<string> {
+
+    let initialComment = apiList.join(',');
+    if (initialComment.length === 0) {
+      initialComment = 'all apis';
+    }
 
     const body: FileUpload = {
       title: 'Consumer Report',
-      initialComment: apiList.join(','),
+      initialComment: initialComment,
       fileType: 'csv',
       fileName: 'consumer-report',
       content: csvContent,

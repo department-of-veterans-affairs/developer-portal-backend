@@ -265,7 +265,7 @@ describe('SlackService', () => {
       const csvContent = 'legolas,aragorn,the hobbitses';
 
       const service: SlackService = new SlackService(slackURL, slackToken, slackOptions);
-      const res = await service.sendConsumerReport(apiList, csvContent);
+      const res = await service.sendConsumerReport(csvContent, apiList);
 
       expect(res).toEqual('ok');
       expect(mockPost).toHaveBeenCalledWith(
