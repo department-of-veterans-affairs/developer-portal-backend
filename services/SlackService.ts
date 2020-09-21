@@ -229,8 +229,6 @@ export default class SlackService implements MonitoredService {
       ],
     };
 
-    console.log(initialComment);
-
     const postResponse: any = await this.post(body);
 
     if (!postResponse.ok) {
