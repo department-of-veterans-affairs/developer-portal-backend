@@ -23,7 +23,7 @@ export interface ApplicationSettings {
 }
 
 export default class Application implements OktaApplication {
-  public owner?: OktaUser;
+  public owner: OktaUser;
   public settings: OAuthApplication;
   public client_id?: string;
   public client_secret?: string;
@@ -36,7 +36,7 @@ export default class Application implements OktaApplication {
     responseTypes = ['code'],
     grantTypes = ['authorization_code', 'refresh_token'],
     ...options
-  }: ApplicationSettings, owner?: OktaUser) {
+  }: ApplicationSettings, owner: OktaUser) {
     this.owner = owner;
     this.settings = {
       name: 'oidc_client',
