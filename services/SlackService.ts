@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import FormData from 'form-data';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { SignupCountResult } from './SignupMetricsService';
 
@@ -197,22 +198,60 @@ export default class SlackService implements MonitoredService {
   }
 
   public async sendConsumerReport(csvContent: string, apiList: string[] = []): Promise<string> {
+    
+    const apis: string = apiList.join(',');
 
-    let initialComment = apiList.join(',');
-    if (initialComment.length === 0) {
-      initialComment = 'all apis';
+    let apiString: string;
+    switch (apiList.length) {
+      case 0:
+        apiString = 'all apis';
+        break;
+      case 1:
+        apiString = `${apis} api`;
+        break;
+      default:
+        apiString = `${apis} apis`;
+        break;
     }
 
-    const body: FileUpload = {
-      title: 'Consumer Report',
-      initialComment: initialComment,
-      fileType: 'csv',
-      fileName: 'consumer-report',
-      content: csvContent,
-      channels: this.options.channel,
+    const initialComment = `*Consumer Report* for ${apiString}`;
+
+    // Post a thread
+    const body: PostBody = {
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: initialComment,
+          },
+        },
+      ],
     };
 
-    const response: FileUploadResponse = await this.makeSlackRequest('/api/files.upload', body);
+    console.log(initialComment);
+
+    const postResponse: any = await this.post(body);
+
+    if (!postResponse.ok) {
+      throw new Error(`Failed posting to Slack: Error: ${postResponse.error}, Needed: ${postResponse.needed}, Provided: ${postResponse.provided}, Warning: ${postResponse.warning}`);
+    }
+
+    const threadTs: string = postResponse.message.ts;
+
+    const formData = new FormData();
+    formData.append('channels', this.options.channel);
+    formData.append('initial_comment', initialComment);
+    formData.append('file', csvContent, {
+      filename: `Consumer Report - ${apiString}.csv`,
+    });
+    formData.append('thread_ts', threadTs);
+    
+    const config = {
+      headers: formData.getHeaders(),
+    };
+
+    const response: FileUploadResponse = await this.makeSlackRequest('/api/files.upload', formData, config);
 
     if (!response.ok) {
       throw new Error(`Failed uploading to Slack: Error: ${response.error}, Needed: ${response.needed}, Provided: ${response.provided}, Warning: ${response.warning}`);
@@ -220,13 +259,13 @@ export default class SlackService implements MonitoredService {
     return 'Successfully uploaded the file to Slack';
   }
 
-  private async post(body: PostBody): Promise<string> {
+  private async post(body: PostBody): Promise<any> {
     return this.makeSlackRequest('/api/chat.postMessage', { channel: this.options.channel, ...body });
   }
 
-  private async makeSlackRequest(apiEndpoint: string, body: object): Promise<any> {
+  private async makeSlackRequest(apiEndpoint: string, body: object, config?: object): Promise<any> {
     try {
-      const res = await this.client.post(apiEndpoint, body);
+      const res = await this.client.post(apiEndpoint, body, config);
       return res.data;
     }
     catch (err) {
