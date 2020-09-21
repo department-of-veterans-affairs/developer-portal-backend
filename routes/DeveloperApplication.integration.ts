@@ -4,6 +4,8 @@ import nock from 'nock';
 
 import configureApp from '../app';
 import { IDME_GROUP_ID } from '../models/Application';
+import { oktaAuthMocks } from '../types/mocks';
+import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
 const request = supertest(configureApp());
 describe('/developer_application', () => {
@@ -28,7 +30,7 @@ describe('/developer_application', () => {
   beforeEach(() => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
-    
+
     kong.get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
       id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
     })
@@ -42,6 +44,12 @@ describe('/developer_application', () => {
     okta.post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } } })
       .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
       .reply(200, {});
+
+    const { oktaPolicyCollection, oktaPolicy } = oktaAuthMocks;
+    const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
+    okta
+      .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaPolicyCollection)
+      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`).reply(200, oktaPolicy);
 
     dynamoDB.post('/').reply(200);
 
@@ -88,7 +96,7 @@ describe('/developer_application', () => {
     kong.post(path).reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-    
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed creating kong consumer');
     expect(response.body.message).toContain('500');
@@ -102,7 +110,7 @@ describe('/developer_application', () => {
     okta.post(path).reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-    
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed saving to okta');
     expect(response.body.message).toContain('500');
@@ -116,7 +124,7 @@ describe('/developer_application', () => {
     dynamoDB.post('/').reply(500).post('/').reply(500);
 
     const response = await request.post('/developer_application').send(devAppRequest);
-  
+
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('failed saving to dynamo');
   });
