@@ -18,7 +18,7 @@ import developerApplicationHandler, { applySchema } from './routes/DeveloperAppl
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
-import userReportsHandler from './routes/UserReportsHandler';
+import userReportsHandler, { userReportsSchema } from './routes/UserReportsHandler';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -175,7 +175,9 @@ export default function configureApp(): express.Application {
     validationMiddleware(signupsReportSchema, 'query'),
     signupsReportHandler(signups, slack));
 
-  app.get('/reports/csv', userReportsHandler(userReportService, slack));
+  app.get('/reports/csv',
+  validationMiddleware(userReportsSchema, 'query'),
+    userReportsHandler(userReportService, slack));
 
   app.use(Sentry.Handlers.errorHandler());
 
