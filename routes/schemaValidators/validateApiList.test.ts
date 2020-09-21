@@ -24,4 +24,4 @@ describe('validateApiList', () => {
     expect(() => validateApiList(apis))
       .toThrow('it was unable to process the provided data');
   });
-})
+});

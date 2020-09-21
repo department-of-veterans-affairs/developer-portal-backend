@@ -212,7 +212,7 @@ export default class SlackService implements MonitoredService {
       channels: this.options.channel,
     };
 
-    let response: FileUploadResponse = await this.makeSlackRequest('/api/files.upload', body);
+    const response: FileUploadResponse = await this.makeSlackRequest('/api/files.upload', body);
 
     if (!response.ok) {
       throw new Error(`Failed uploading to Slack: Error: ${response.error}, Needed: ${response.needed}, Provided: ${response.provided}, Warning: ${response.warning}`);
@@ -224,7 +224,7 @@ export default class SlackService implements MonitoredService {
     return this.makeSlackRequest('/api/chat.postMessage', { channel: this.options.channel, ...body });
   }
 
-  private async makeSlackRequest(apiEndpoint: string, body): Promise<any> {
+  private async makeSlackRequest(apiEndpoint: string, body: object): Promise<any> {
     try {
       const res = await this.client.post(apiEndpoint, body);
       return res.data;

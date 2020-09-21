@@ -176,7 +176,7 @@ export default function configureApp(): express.Application {
     signupsReportHandler(signups, slack));
 
   app.get('/reports/csv',
-  validationMiddleware(userReportsSchema, 'query'),
+    validationMiddleware(userReportsSchema, 'query'),
     userReportsHandler(userReportService, slack));
 
   app.use(Sentry.Handlers.errorHandler());

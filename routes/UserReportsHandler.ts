@@ -6,7 +6,7 @@ import validateApiList from './schemaValidators/validateApiList';
 
 export const userReportsSchema = Joi.object().keys({
   apis: Joi.custom(validateApiList),
-})
+});
 
 export default function userReportsHandler(userReportService: UserReportService, slackService: SlackService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
