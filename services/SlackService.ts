@@ -197,9 +197,10 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
 
-  public async sendConsumerReport(csvContent: string, apiList: string[] = []): Promise<string> {
+  public async sendConsumerReport(csvContent: string, apiList: string[] = [], requestedChannels?: string): Promise<string> {
     
     const apis: string = apiList.join(',');
+    const channels = requestedChannels ? requestedChannels : this.options.channel;
 
     let apiString: string;
     switch (apiList.length) {
@@ -238,7 +239,7 @@ export default class SlackService implements MonitoredService {
     const threadTs: string = postResponse.message.ts;
 
     const formData = new FormData();
-    formData.append('channels', this.options.channel);
+    formData.append('channels', channels);
     formData.append('initial_comment', initialComment);
     formData.append('file', csvContent, {
       filename: `Consumer Report - ${apiString}.csv`,

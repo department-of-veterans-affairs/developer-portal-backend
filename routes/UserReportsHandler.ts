@@ -6,6 +6,7 @@ import validateApiList from './schemaValidators/validateApiList';
 
 export const userReportsSchema = Joi.object().keys({
   apis: Joi.custom(validateApiList),
+  channels: Joi.string(),
 });
 
 export default function userReportsHandler(userReportService: UserReportService, slackService: SlackService) {
@@ -18,17 +19,17 @@ export default function userReportsHandler(userReportService: UserReportService,
     try {
       const queryParameters = {
         apis: req.query.apis,
+        channels: req.query.channels,
       };
 
       if (queryParameters.apis) {
 
         const apiList: string[] = queryParameters.apis.split(',');
         const report: string = await userReportService.generateCSVReport(apiList);
-        await slackService.sendConsumerReport(report, apiList);
+        await slackService.sendConsumerReport(report, apiList, queryParameters.channels);
       } else {
-
         const report: string = await userReportService.generateCSVReport();
-        await slackService.sendConsumerReport(report);
+        await slackService.sendConsumerReport(report, [], queryParameters.channels);
       }
 
       res.sendStatus(200);
