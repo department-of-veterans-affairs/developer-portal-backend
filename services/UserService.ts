@@ -71,7 +71,6 @@ export default class UserService {
     const userMap: Map<String, User> = new Map();
 
     users.forEach((user) => {
-      // TODO: Check if one is already in the map. Merge duplicate data
       userMap.set(user.email, user);
     });
 
