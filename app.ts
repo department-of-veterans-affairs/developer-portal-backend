@@ -175,7 +175,7 @@ export default function configureApp(): express.Application {
     validationMiddleware(signupsReportSchema, 'query'),
     signupsReportHandler(signups, slack));
 
-  app.get('/reports/csv',
+  app.get('/reports/consumers',
     validationMiddleware(userReportsSchema, 'query'),
     userReportsHandler(userReportService, slack));
 
