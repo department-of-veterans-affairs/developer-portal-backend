@@ -67,4 +67,18 @@ describe('UserService', ()=> {
       expect(users.length).toEqual(1);
     });
   });
+
+  describe('remove duplicate users', () => {
+    it('removes any duplicate users', () => {
+      const mockDuplicateUsers: User[] = mockedUsers.concat([
+        {
+          ...mockedUsers[0],
+          apis: 'benefits,facilities',
+        } as User,
+      ]);
+
+      let filteredUsers: User[] = userService.removeDuplicateUsers(mockDuplicateUsers);
+      expect(filteredUsers.length).toEqual(mockedUsers.length);
+    });
+  });
 });

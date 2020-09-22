@@ -26,8 +26,9 @@ export default class UserReportService {
   }
 
   public async generateCSVReport(apiList: string[] = []): Promise<string> {
-    const users: User[] = await this.userService.getUsers(apiList);
-
+    let users: User[] = await this.userService.getUsers(apiList);
+    users = this.userService.removeDuplicateUsers(users);
+    
     let csv = '';
 
     this.reportHeaders.forEach((header) => {

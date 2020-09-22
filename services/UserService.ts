@@ -62,4 +62,19 @@ export default class UserService {
 
     return results;
   }
+
+  public removeDuplicateUsers(users: User[]): User[] {
+    // Instead of using a Set to remove duplicate emails, we use a Map.
+    // This gives us easy entry if we want to merge user fields. For instance,
+    // we might want to merge the oauth redirect uris or use the latest tosAccepted
+    // value
+    const userMap: Map<String, User> = new Map();
+
+    users.forEach((user) => {
+      // TODO: Check if one is already in the map. Merge duplicate data
+      userMap.set(user.email, user);
+    });
+
+    return Array.from(userMap.values());
+  }
 }
