@@ -5,20 +5,6 @@ import User from '../models/User';
 
 const DEFAULT_TABLE = 'Users';
 
-/**
- * @param user 
- * @param apiList 
- * @returns whether the user has at least one of the given apis in their list
- */
-function userHasApiInList(user: User, apiList: string[]): boolean {
-
-  const matchingApis: string[] = user.apiList.filter((api: string) => {
-    return apiList.includes(api);
-  });
-
-  return matchingApis.length > 0;
-}
-
 export default class UserService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;

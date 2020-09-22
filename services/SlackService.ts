@@ -203,15 +203,15 @@ export default class SlackService implements MonitoredService {
 
     let apiString: string;
     switch (apiList.length) {
-      case 0:
-        apiString = 'all apis';
-        break;
-      case 1:
-        apiString = `${apis} api`;
-        break;
-      default:
-        apiString = `${apis} apis`;
-        break;
+    case 0:
+      apiString = 'all apis';
+      break;
+    case 1:
+      apiString = `${apis} api`;
+      break;
+    default:
+      apiString = `${apis} apis`;
+      break;
     }
 
     const initialComment = `*Consumer Report* for ${apiString}`;
