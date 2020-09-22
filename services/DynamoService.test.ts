@@ -180,7 +180,7 @@ describe("DynamoService", () => {
 
     it('returns unhealthy when it does not receive a properly formed response', async () => {
       const mockValue = {};
-      const err = new Error(`DynamoDB did not have a table: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
       mockListTables.mockImplementation((params, cb) => {
         setTimeout(() => cb(null, mockValue), 5);
@@ -192,7 +192,7 @@ describe("DynamoService", () => {
 
     it('returns unhealthy when it does not contain a table', async () => {
       const mockValue = { Count: 0 };
-      const err = new Error(`DynamoDB did not have a table: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
       mockListTables.mockImplementation((params, cb) => {
         setTimeout(() => cb(null, mockValue), 5);

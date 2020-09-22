@@ -90,12 +90,15 @@ export default class DynamoService implements MonitoredService {
           Limit: 1,
         };
         this.dynamo.listTables(params, (err, data) => {
-          if (err) {
-            status.err = new Error(`DynamoDB encountered an error: ${err.message}`);
-            resolve(status);
-            return;
-          } else if (!data || data.TableNames?.length !== 1) {
-            status.err = new Error(`DynamoDB did not have a table: ${JSON.stringify(data)}`);
+          try {
+            if (err) {
+              throw new Error(err.message);
+            } else if (!data || data.TableNames?.length !== 1) {
+              throw new Error(`Did not have a table: ${JSON.stringify(data)}`);
+            }
+          } catch (error) {
+            status.err = new Error(`DynamoDB encountered an error: ${error.message}`);
+            status.err.action = 'checking health of DynamoDB';
             resolve(status);
             return;
           }
