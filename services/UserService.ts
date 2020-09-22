@@ -25,14 +25,14 @@ export default class UserService {
     if (apiFilter.length > 0) {
 
       let filterExpression = 'contains(apis, :api)';
-      let expressionAttributeValues: DocumentClient.ExpressionAttributeValueMap = {
+      const expressionAttributeValues: DocumentClient.ExpressionAttributeValueMap = {
         ':api': apiFilter[0],
       };
 
       // Handle other elements [need to add the 'or(s)']
-      for (let i: number = 1; i < apiFilter.length; i++) {
+      for (let i = 1; i < apiFilter.length; i++) {
         const api: string = apiFilter[i];
-        const varName: string = `:api${i}`;
+        const varName = `:api${i}`;
         filterExpression += ` or contains(apis, ${varName})`;
         expressionAttributeValues[varName] = api;
       }
@@ -68,7 +68,7 @@ export default class UserService {
     // This gives us easy entry if we want to merge user fields. For instance,
     // we might want to merge the oauth redirect uris or use the latest tosAccepted
     // value
-    const userMap: Map<String, User> = new Map();
+    const userMap: Map<string, User> = new Map();
 
     users.forEach((user) => {
       userMap.set(user.email, user);

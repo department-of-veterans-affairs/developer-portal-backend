@@ -77,7 +77,7 @@ describe('UserService', ()=> {
         } as User,
       ]);
 
-      let filteredUsers: User[] = userService.removeDuplicateUsers(mockDuplicateUsers);
+      const filteredUsers: User[] = userService.removeDuplicateUsers(mockDuplicateUsers);
       expect(filteredUsers.length).toEqual(mockedUsers.length);
     });
   });
