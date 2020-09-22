@@ -1,4 +1,4 @@
-import { AttributeMap, ScanInput } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap, ExpressionAttributeValueMap, DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import DynamoService from './DynamoService';
 import User from '../models/User';
@@ -30,9 +30,33 @@ export default class UserService {
   // TODO: Move user saving code to here
 
   public async getUsers(apiFilter: string[] = []): Promise<User[]> {
-    const params: ScanInput = {
+
+    let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
     };
+
+    // Build the filter expression and update params
+    if (apiFilter.length > 0) {
+
+      let filterExpression = 'contains(apis, :api)';
+      let expressionAttributeValues: DocumentClient.ExpressionAttributeValueMap = {
+        ':api': apiFilter[0],
+      };
+
+      // Handle other elements [need to add the 'or(s)']
+      for (let i: number = 1; i < apiFilter.length; i++) {
+        const api: string = apiFilter[i];
+        const varName: string = `:api${i}`;
+        filterExpression += ` or contains(apis, ${varName})`;
+        expressionAttributeValues[varName] = api;
+      }
+
+      params = {
+        ...params,
+        FilterExpression: filterExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+      };
+    }
 
     const items: AttributeMap[] = await this.dynamoService.hardScan(params);
 
@@ -50,14 +74,6 @@ export default class UserService {
       });
     });
 
-    if (apiFilter.length === 0) {
-      return results;
-    }
-
-    // // TODO - Remove and insert this filtering logic directly into a db query, if possible
-    const filteredUsers = results.filter((user) => {
-      return userHasApiInList(user, apiFilter);
-    });
-    return filteredUsers;
+    return results;
   }
 }
