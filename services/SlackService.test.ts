@@ -265,7 +265,7 @@ describe('SlackService', () => {
           message: {
             ts: 1,
           },
-        }
+        },
       });
 
       jest.spyOn(axios, 'create').mockImplementation(() => (
