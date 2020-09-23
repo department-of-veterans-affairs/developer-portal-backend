@@ -16,6 +16,7 @@ env:
     DEPLOY_ENVS: "prod"
   parameter-store:
     GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
+    SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook"
 phases:
   pre_build:
     commands:
