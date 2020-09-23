@@ -1,6 +1,6 @@
 {
-  "name": "Test API",
-  "api_id": "2",
+  "name": "Dogs API",
+  "api_id": "1",
   "org_id": "default",
   "definition": {
       "location": "header",

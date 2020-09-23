@@ -1,6 +1,6 @@
 {
-  "name": "Test API",
-  "api_id": "1",
+  "name": "Jokes API",
+  "api_id": "2",
   "org_id": "default",
   "definition": {
       "location": "header",
@@ -20,20 +20,14 @@
               "extended_paths": {
                   "ignored": [],
                   "white_list": [],
-                  "black_list": [],
-                  "transform_headers": [
-                      {
-                          "delete_headers": ["Accept"],
-                          "add_headers": { "Accept": "application/json" }
-                      }
-                  ]
+                  "black_list": []
               }
           }
       }
   },
   "proxy": {
-      "listen_path": "/dad_bod/",
-      "target_url": "https://icanhazdadjoke.com/",
+      "listen_path": "/jokes/",
+      "target_url": "https://official-joke-api.appspot.com/",
       "strip_listen_path": true
   },
   "enable_batch_request_support": true
