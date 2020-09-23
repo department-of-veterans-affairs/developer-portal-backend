@@ -40,16 +40,20 @@ describe('SlackService', () => {
     const res = await service.sendSuccessMessage(message, 'New User Application');
 
     expect(res).toEqual('ok');
-    expect(mockPost).toHaveBeenCalledWith('/api/chat.postMessage', {
-      channel: slackOptions.channel,
-      text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color: 'good',
-        title: 'New User Application',
-      }],
-    });
+    expect(mockPost).toHaveBeenCalledWith(
+      '/api/chat.postMessage',
+      {
+        channel: slackOptions.channel,
+        text: '',
+        attachments: [{
+          text: message,
+          fallback: message,
+          color: 'good',
+          title: 'New User Application',
+        }],
+      },
+      undefined,
+    );
   });
 
   it('sends a formatted wrap-up message', async () => {
@@ -98,75 +102,78 @@ describe('SlackService', () => {
     const res = await service.sendSignupsMessage(duration, formattedEnd, thisWeek, allTime);
 
     expect(res).toEqual('ok');
-    expect(mockPost).toHaveBeenCalledWith('/api/chat.postMessage', {
-      channel: slackOptions.channel,
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*New User Sign-ups* (excludes established users requesting additional APIs)',
-          },
-        },
-        {
-          type: 'section',
-          fields: [
-            {
+    expect(mockPost).toHaveBeenCalledWith(
+      '/api/chat.postMessage',
+      {
+        channel: slackOptions.channel,
+        blocks: [
+          {
+            type: 'section',
+            text: {
               type: 'mrkdwn',
-              text: '_This week:_ 2 new users',
+              text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003',
             },
-            {
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'section',
+            text: {
               type: 'mrkdwn',
-              text: '_All-time:_ 12 new users',
+              text: '*New User Sign-ups* (excludes established users requesting additional APIs)',
             },
-          ],
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*API Access Requests* (includes new users, and established users requesting additional APIs)',
           },
-        },
-        {
-          type: 'section',
-          fields: [
-            { type: 'mrkdwn', text: '_benefits_: 1 new requests (1 all-time)' },
-            { type: 'mrkdwn', text: '_facilities_: 0 new requests (2 all-time)' },
-            { type: 'mrkdwn', text: '_vaForms_: 0 new requests (3 all-time)' },
-            { type: 'mrkdwn', text: '_confirmation_: 0 new requests (4 all-time)' },
-            { type: 'mrkdwn', text: '_health_: 2 new requests (5 all-time)' },
-            { type: 'mrkdwn', text: '_communityCare_: 0 new requests (6 all-time)' },
-            { type: 'mrkdwn', text: '_verification_: 0 new requests (7 all-time)' },
-            { type: 'mrkdwn', text: '_claims_: 0 new requests (8 all-time)' },
-          ],
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: '_This week:_ 2 new users',
+              },
+              {
+                type: 'mrkdwn',
+                text: '_All-time:_ 12 new users',
+              },
+            ],
           },
-        },
-      ],
-    });
-
+          {
+            type: 'divider',
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: '*API Access Requests* (includes new users, and established users requesting additional APIs)',
+            },
+          },
+          {
+            type: 'section',
+            fields: [
+              { type: 'mrkdwn', text: '_benefits_: 1 new requests (1 all-time)' },
+              { type: 'mrkdwn', text: '_facilities_: 0 new requests (2 all-time)' },
+              { type: 'mrkdwn', text: '_vaForms_: 0 new requests (3 all-time)' },
+              { type: 'mrkdwn', text: '_confirmation_: 0 new requests (4 all-time)' },
+              { type: 'mrkdwn', text: '_health_: 2 new requests (5 all-time)' },
+              { type: 'mrkdwn', text: '_communityCare_: 0 new requests (6 all-time)' },
+              { type: 'mrkdwn', text: '_verification_: 0 new requests (7 all-time)' },
+              { type: 'mrkdwn', text: '_claims_: 0 new requests (8 all-time)' },
+            ],
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+            },
+          },
+        ],
+      },
+      undefined
+    );
   });
 
   it('re-tags the error message if the error contains a response', async () => {
@@ -253,7 +260,12 @@ describe('SlackService', () => {
         status: 200,
         statusText: 'ok',
         headers: {},
-        data: 'ok',
+        data: {
+          ok: true,
+          message: {
+            ts: 1,
+          },
+        }
       });
 
       jest.spyOn(axios, 'create').mockImplementation(() => (
@@ -266,18 +278,7 @@ describe('SlackService', () => {
       const service: SlackService = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.sendConsumerReport(csvContent, apiList);
 
-      expect(res).toEqual('ok');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/api/files.upload',
-        {
-          title: 'Consumer Report',
-          initialComment: 'bow,sword',
-          fileType: 'csv',
-          fileName: 'consumer-report',
-          content: 'legolas,aragorn,the hobbitses',
-          channels: '#a-long-expected-party',
-        }
-      );
+      expect(res).toEqual('Successfully uploaded the file to Slack');
     });
   });
 });
