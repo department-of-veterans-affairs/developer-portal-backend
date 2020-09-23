@@ -47,7 +47,9 @@ export default class UserReportService {
     });
 
     csv = trimTrailingCharacter(csv);
-    
+
+    console.log(csv);
+
     return csv;
   }
 }

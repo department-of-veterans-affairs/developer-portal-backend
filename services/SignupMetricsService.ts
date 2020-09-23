@@ -1,4 +1,4 @@
-import { AttributeMap } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
 import DynamoService, { FilterParams } from './DynamoService';
 
@@ -78,7 +78,7 @@ export default class SignupMetricsService {
   }
 
   public async getPreviousSignups(signup: Signup): Promise<Signup[]> {
-    const items: AttributeMap[] = await this.dynamoService.query(
+    const items: DocumentClient.AttributeMap[] = await this.dynamoService.query(
       this.tableName,
       'email = :email and createdAt < :signupDate',
       {
@@ -160,7 +160,7 @@ export default class SignupMetricsService {
     return filterParams;
   }
 
-  private mapItemsToSignups(items: AttributeMap[]): Signup[] {
+  private mapItemsToSignups(items: DocumentClient.AttributeMap[]): Signup[] {
     return items.map(item => {
       return {
         email: item.email.toString(),

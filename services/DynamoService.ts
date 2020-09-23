@@ -1,16 +1,15 @@
-import { AWSError, DynamoDB } from 'aws-sdk';
-import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
+import { AWSError } from 'aws-sdk';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
-import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
 
-export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
+export type FilterParams = Pick<DocumentClient.ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
 
 export default class DynamoService implements MonitoredService {
-  public client: DynamoDB.DocumentClient;
+  public client: DocumentClient;
 
   constructor(config: DynamoConfig) {
-    this.client = new DynamoDB.DocumentClient(config);
+    this.client = new DocumentClient(config);
   }
 
   public putItem(item: object, tableName: string): Promise<void> {
@@ -38,15 +37,15 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public scan(tableName: string, projectionExp: string, filters: FilterParams): Promise<AttributeMap[]> {
-    return new Promise<AttributeMap[]>((resolve, reject) => {
+  public scan(tableName: string, projectionExp: string, filters: FilterParams): Promise<DocumentClient.AttributeMap[]> {
+    return new Promise<DocumentClient.AttributeMap[]>((resolve, reject) => {
       this.client.scan(
         {
           TableName: tableName,
           ProjectionExpression: projectionExp,
           ...filters,
         },
-        (error: AWSError, data: ScanOutput) => {
+        (error: AWSError, data: DocumentClient.ScanOutput) => {
           if (error) {
             reject(error);
           } else {
@@ -57,11 +56,11 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public hardScan(params: ScanInput): Promise<AttributeMap[]> {
-    return new Promise<AttributeMap[]>((resolve, reject) => {
+  public hardScan(params: DocumentClient.ScanInput): Promise<DocumentClient.AttributeMap[]> {
+    return new Promise<DocumentClient.AttributeMap[]>((resolve, reject) => {
       this.client.scan(
         params,
-        (error: AWSError, data: ScanOutput) => {
+        (error: AWSError, data: DocumentClient.ScanOutput) => {
           if (error) {
             reject(error);
           } else {
@@ -72,15 +71,15 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public query(tableName: string, keyCondition: string, attributes: {}): Promise<AttributeMap[]> {
-    return new Promise<AttributeMap[]>((resolve, reject) => {
+  public query(tableName: string, keyCondition: string, attributes: {}): Promise<DocumentClient.AttributeMap[]> {
+    return new Promise<DocumentClient.AttributeMap[]>((resolve, reject) => {
       this.client.query(
         {
           TableName: tableName,
           ExpressionAttributeValues: attributes,
           KeyConditionExpression: keyCondition,
         },
-        (error: AWSError, data: QueryOutput) => {
+        (error: AWSError, data: DocumentClient.QueryOutput) => {
           if (error) {
             reject(error);
           } else {

@@ -1,4 +1,4 @@
-import { AttributeMap, ExpressionAttributeValueMap, DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import DynamoService from './DynamoService';
 import User from '../models/User';
@@ -44,17 +44,17 @@ export default class UserService {
       };
     }
 
-    const items: AttributeMap[] = await this.dynamoService.hardScan(params);
+    const items: DocumentClient.AttributeMap[] = await this.dynamoService.hardScan(params);
 
     const results = items.map((item): User => {
       return new User({
-        firstName: item.firstName.toString(),
-        lastName: item.lastName.toString(),
-        organization: item.organization.toString(),
-        email: item.email.toString(),
-        apis: item.apis.toString(),
-        description: item.description.toString(),
-        oAuthRedirectURI: item.oAuthRedirectURI.toString(),
+        firstName: item.firstName,
+        lastName: item.lastName,
+        organization: item.organization,
+        email: item.email,
+        apis: item.apis,
+        description: item.description,
+        oAuthRedirectURI: item.oAuthRedirectURI,
         oAuthApplicationType: '',
         termsOfService: item.tosAccepted.toString() === 'true',
       });

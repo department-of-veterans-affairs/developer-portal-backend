@@ -1,6 +1,6 @@
 import 'jest';
-import { AWSError, DynamoDB } from 'aws-sdk';
-import { ScanInput } from 'aws-sdk/clients/dynamodb';
+import { AWSError } from 'aws-sdk';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoService from './DynamoService';
 
 describe("DynamoService", () => {
@@ -37,7 +37,7 @@ describe("DynamoService", () => {
 
   describe('constructor', () => {
     it('creates DynamoDB client', () => {
-      expect(service.client).toBeInstanceOf(DynamoDB.DocumentClient);
+      expect(service.client).toBeInstanceOf(DocumentClient);
     });
   });
 
@@ -134,7 +134,7 @@ describe("DynamoService", () => {
     it('retrieves rows from the table', async () => {
       mockScan.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
       
-      const params: ScanInput = {
+      const params: DocumentClient.ScanInput = {
         TableName: tableName,
         ProjectionExpression: projectionExp,
         ...filterParams,
