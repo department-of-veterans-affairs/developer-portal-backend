@@ -88,45 +88,53 @@ describe('/developer_application', () => {
     });
   });
 
-  it('sends 500 and Kong error message ', async () => {
-    const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
-    const interceptor = kong.post(path);
-    nock.removeInterceptor(interceptor);
+  describe('500 service failures', () => {
+    describe('KongService', () => {
+      it('sends 500 if it cannot POST to /internal/admin/consumers', async () => {
+        const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
+        const interceptor = kong.post(path);
+        nock.removeInterceptor(interceptor);
 
-    kong.post(path).reply(500);
+        kong.post(path).reply(500);
 
-    const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post('/developer_application').send(devAppRequest);
 
-    expect(response.status).toEqual(500);
-    expect(response.body.action).toEqual('failed creating kong consumer');
-    expect(response.body.message).toContain('500');
-  });
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed creating kong consumer');
+        expect(response.body.message).toContain('500');
+      });
+    });
 
-  it('sends error message for okta failure', async () => {
-    const path = '/api/v1/apps';
-    const interceptor = okta.post(path);
-    nock.removeInterceptor(interceptor);
+    describe('OktaService', () => {
+      it('sends 500 if it cannot POST to /api/v1/apps', async () => {
+        const path = '/api/v1/apps';
+        const interceptor = okta.post(path);
+        nock.removeInterceptor(interceptor);
 
-    okta.post(path).reply(500);
+        okta.post(path).reply(500);
 
-    const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post('/developer_application').send(devAppRequest);
 
-    expect(response.status).toEqual(500);
-    expect(response.body.action).toEqual('failed saving to okta');
-    expect(response.body.message).toContain('500');
-  });
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed saving to okta');
+        expect(response.body.message).toContain('500');
+      });
+    });
 
-  it('sends error message for dynamo failure', async () => {
-    const path = '/';
-    const interceptor = dynamoDB.post(path);
-    nock.removeInterceptor(interceptor);
+    describe('DynamoDB', () => {
+      it('sends error message for dynamo failure', async () => {
+        const path = '/';
+        const interceptor = dynamoDB.post(path);
+        nock.removeInterceptor(interceptor);
 
-    dynamoDB.post('/').reply(500).post('/').reply(500);
+        dynamoDB.post('/').reply(500).post('/').reply(500);
 
-    const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post('/developer_application').send(devAppRequest);
 
-    expect(response.status).toEqual(500);
-    expect(response.body.action).toEqual('failed saving to dynamo');
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed saving to dynamo');
+      });
+    });
   });
 
 });
