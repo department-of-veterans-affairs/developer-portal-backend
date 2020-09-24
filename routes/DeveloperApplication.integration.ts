@@ -119,6 +119,21 @@ describe('/developer_application', () => {
         expect(response.body.action).toEqual('failed saving to okta');
         expect(response.body.message).toContain('500');
       });
+
+      it('sends 500 if it cannot PUT to /api/v1/authorizationServers...', async () => {
+        const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
+        const path = `/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`;
+        const interceptor = okta.put(path);
+        nock.removeInterceptor(interceptor);
+
+        okta.put(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed saving to okta');
+        expect(response.body.message).toContain('500');
+      });
     });
 
     describe('DynamoDB', () => {
