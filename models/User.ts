@@ -7,7 +7,7 @@ import SlackService from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import DynamoService from '../services/DynamoService';
-import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from "../config/apis";
+import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
 
