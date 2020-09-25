@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { apisToAcls } from '../config';
+import { apisToAcls } from '../config/apis';
 import { KongConfig, KongUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
 

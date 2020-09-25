@@ -64,7 +64,7 @@ export const apisToAcls = keyBasedEndpointList.reduce((obj, item) => {
 
 export const APIS_TO_PROPER_NAMES = {};
 for (const endpoint of [...oauthEndpointList, ...keyBasedEndpointList]) {
-  APIS_TO_PROPER_NAMES[endpoint.internalName] = endpoint.properName
+  APIS_TO_PROPER_NAMES[endpoint.internalName] = endpoint.properName;
 }
 
 export const KONG_CONSUMER_APIS: string[] = keyBasedEndpointList
