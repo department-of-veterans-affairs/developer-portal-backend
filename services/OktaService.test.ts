@@ -1,6 +1,6 @@
 import OktaService, { OktaApplicationResponse } from './OktaService';
 import { OktaApplication, OAuthApplication } from '../types';
-import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OKTA_AUTHZ_ENDPOINTS } from '../config';
 import { OktaPolicy } from "../models/Okta";
 
 describe('OktaService', () => {

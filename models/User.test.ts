@@ -1,6 +1,6 @@
 import 'jest';
 import { FormSubmission } from '../types/FormSubmission';
-import { OKTA_CONSUMER_APIS } from '../config/apis';
+import { OKTA_CONSUMER_APIS } from '../config';
 import User from './User';
 import KongService from '../services/KongService';
 import GovDeliveryService from '../services/GovDeliveryService';

@@ -1,7 +1,7 @@
 import logger from '../config/logger';
 import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
-import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OKTA_AUTHZ_ENDPOINTS } from "../config";
 import { OktaPolicyCollection } from "../models/Okta";
 
 function filterApplicableEndpoints(apiList: string[]): string[] {

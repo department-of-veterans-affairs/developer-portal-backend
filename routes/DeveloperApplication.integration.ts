@@ -5,7 +5,7 @@ import nock from 'nock';
 import configureApp from '../app';
 import { IDME_GROUP_ID } from '../models/Application';
 import { oktaAuthMocks } from '../types/mocks';
-import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { OKTA_AUTHZ_ENDPOINTS } from '../config';
 
 const request = supertest(configureApp());
 describe('/developer_application', () => {
