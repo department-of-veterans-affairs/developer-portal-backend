@@ -11,6 +11,7 @@ describe('UserReportsHandler', () => {
   const mockSendConsumerReport = jest.fn();
   const mockGenerateCSVReport = jest.fn();
   const mockResponseJson = jest.fn();
+  const mockResponseStatus = jest.fn();
 
   const userReportsService = {
     generateCSVReport: mockGenerateCSVReport,
@@ -23,6 +24,7 @@ describe('UserReportsHandler', () => {
   const stubNext: NextFunction = jest.fn();
   const stubRes: Response = {
     json: mockResponseJson,
+    status: mockResponseStatus,
   } as unknown as Response;
 
   beforeEach(() => {
@@ -35,7 +37,7 @@ describe('UserReportsHandler', () => {
     mockSendConsumerReport.mockReset();
     mockGenerateCSVReport.mockReset();
     mockResponseJson.mockReset();
-
+    mockResponseStatus.mockReset();
     mockGenerateCSVReport.mockReturnValue({
       ok: true,
     });
@@ -57,6 +59,15 @@ describe('UserReportsHandler', () => {
       await handler(stubReq, stubRes, stubNext);
 
       expect(stubNext).toHaveBeenCalledWith(testError);
+    });
+
+    it('Respond with 503 and error message', async () => {
+      mockResponseStatus.mockReturnValue(stubRes);
+      const handler = UserReportsHandler(userReportsService, null);
+      await handler(stubReq, stubRes, stubNext);
+      
+      expect(mockResponseStatus).toHaveBeenCalledWith(503);
+      expect(mockResponseJson).toHaveBeenCalledWith({ error: 'service not enabled' });
     });
   });
 
