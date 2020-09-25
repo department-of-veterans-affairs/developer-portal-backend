@@ -1,13 +1,4 @@
-type OAuthEndpoint = {
-  properName: string;
-  internalName: string;
-  authzEndpoint: string | undefined;
-};
-type KeyBasedEndpoint = {
-  properName: string;
-  internalName: string;
-  acl: string;
-};
+import { KeyBasedEndpoint, OAuthEndpoint } from '../types';
 
 const oauthEndpointList: OAuthEndpoint[] = [
   {
