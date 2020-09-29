@@ -2,72 +2,67 @@ import { KeyBasedEndpoint, OAuthEndpoint } from '../types';
 
 const oauthEndpointList: OAuthEndpoint[] = [
   {
-    properName: "Health API",
-    internalName: "health",
+    properName: 'Health API',
+    internalName: 'health',
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
   },
   {
-    properName: "Veteran Verification API",
-    internalName: "verification",
+    properName: 'Veteran Verification API',
+    internalName: 'verification',
     authzEndpoint: process.env.AUTHZ_SERVER_VERIFICATION,
   },
   {
-    properName: "Community Care Eligibility API",
-    internalName: "communityCare",
+    properName: 'Community Care Eligibility API',
+    internalName: 'communityCare',
     authzEndpoint: process.env.AUTHZ_SERVER_COMMUNITYCARE,
   },
   {
-    properName: "Claims API",
-    internalName: "claims",
+    properName: 'Claims API',
+    internalName: 'claims',
     authzEndpoint: process.env.AUTHZ_SERVER_CLAIMS,
   },
 ];
 
 const keyBasedEndpointList: KeyBasedEndpoint[] = [
   {
-    properName: "Benefits Intake API",
-    internalName: "benefits",
-    acl: "vba_documents",
+    properName: 'Benefits Intake API',
+    internalName: 'benefits',
+    acl: 'vba_documents',
   },
   {
-    properName: "VA Facilities API",
-    internalName: "facilities",
-    acl: "va_facilities",
+    properName: 'VA Facilities API',
+    internalName: 'facilities',
+    acl: 'va_facilities',
   },
   {
-    properName: "VA Form API",
-    internalName: "vaForms",
-    acl: "va_forms",
+    properName: 'VA Form API',
+    internalName: 'vaForms',
+    acl: 'va_forms',
   },
   {
-    properName: "Veteran Confirmation API",
-    internalName: "confirmation",
-    acl: "veteran_confirmation",
+    properName: 'Veteran Confirmation API',
+    internalName: 'confirmation',
+    acl: 'veteran_confirmation',
   },
 ];
 
-export const apisToAcls = keyBasedEndpointList.reduce((obj, item) => {
-  return {
-    ...obj,
-    [item.internalName]: item.acl,
-  };
+export const apisToAcls = keyBasedEndpointList.reduce((acc,endpoint) => {
+  acc[endpoint.internalName] = endpoint.acl;
+  return acc;
 }, {});
 
-export const APIS_TO_PROPER_NAMES = {};
-for (const endpoint of [...oauthEndpointList, ...keyBasedEndpointList]) {
-  APIS_TO_PROPER_NAMES[endpoint.internalName] = endpoint.properName;
-}
+export const APIS_TO_PROPER_NAMES = [...oauthEndpointList, ...keyBasedEndpointList].reduce((acc,endpoint) => {
+  acc[endpoint.internalName] = endpoint.properName;
+  return acc;
+}, {});
 
 export const KONG_CONSUMER_APIS: string[] = keyBasedEndpointList
   .map((x) => x.internalName);
 
-export const OKTA_AUTHZ_ENDPOINTS = oauthEndpointList
-  .reduce((obj, item) => {
-    return {
-      ...obj,
-      [item.internalName]: item.authzEndpoint,
-    };
-  }, {});
+export const OKTA_AUTHZ_ENDPOINTS = oauthEndpointList.reduce((acc,endpoint) => {
+  acc[endpoint.internalName] = endpoint.authzEndpoint;
+  return acc;
+}, {});
 
 export const OKTA_CONSUMER_APIS: string[] = Object.keys(OKTA_AUTHZ_ENDPOINTS);
 
