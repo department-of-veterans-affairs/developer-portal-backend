@@ -103,6 +103,25 @@ describe('/developer_application', () => {
         expect(response.body.action).toEqual('failed creating kong consumer');
         expect(response.body.message).toContain('500');
       });
+
+      it('sends 500 if it cannot POST to /internal/admin/consumers/FellowshipBaggins/acls', async () => {
+        const path = '/internal/admin/consumers/FellowshipBaggins/acls';
+        const interceptor = kong.get(path);
+        nock.removeInterceptor(interceptor);
+
+        // make kong only return one of the requested groups - thus triggering the ACL post call
+        kong.get('/internal/admin/consumers/FellowshipBaggins/acls').reply(200, {
+          total: 1, data: [{ group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } }],
+        })
+
+        kong.post(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed creating kong consumer');
+        expect(response.body.message).toContain('500');
+      });
     });
 
     describe('OktaService', () => {
