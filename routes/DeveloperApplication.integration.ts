@@ -77,14 +77,51 @@ describe('/developer_application', () => {
     });
   });
 
-  it('sends 200 on successful dev application form submit', async () => {
-    const response = await request.post('/developer_application').send(devAppRequest);
+  describe('200 success', () => {
+    it('for only keybased endpoint', async () => {
+      const response = await request.post('/developer_application').send({
+        apis: 'facilities',
+        email: 'frodo@fellowship.org',
+        firstName: 'Frodo',
+        lastName: 'Baggins',
+        organization: 'Fellowship',
+        termsOfService: true,
+      });
 
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      clientID: 'gollum',
-      clientSecret: 'mordor',
-      token: 'my-precious',
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        token: 'my-precious',
+      });
+    });
+
+    it('for only oauth endpoint', async () => {
+      const response = await request.post('/developer_application').send({
+        apis: 'verification',
+        email: 'frodo@fellowship.org',
+        firstName: 'Frodo',
+        lastName: 'Baggins',
+        organization: 'Fellowship',
+        termsOfService: true,
+        oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
+        oAuthApplicationType: 'web',
+      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        clientID: 'gollum',
+        clientSecret: 'mordor',
+      });
+    });
+
+    it('for both keybased and oauth endpoints', async () => {
+      const response = await request.post('/developer_application').send(devAppRequest);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        clientID: 'gollum',
+        clientSecret: 'mordor',
+        token: 'my-precious',
+      });
     });
   });
 
