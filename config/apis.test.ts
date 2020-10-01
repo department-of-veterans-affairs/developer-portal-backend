@@ -63,15 +63,15 @@ describe('API constants', () => {
   });
 
   it('API_LIST', () => {
-    expect(API_LIST.sort()).toEqual([
+    expect(API_LIST).toEqual([
       'benefits',
-      'claims',
-      'communityCare',
-      'confirmation',
       'facilities',
-      'health',
       'vaForms',
+      'confirmation',
+      'health',
       'verification',
-    ].sort());
+      'communityCare',
+      'claims',
+    ]);
   });
 });
