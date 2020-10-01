@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { apisToAcls } from '../config/apis';
+import { APIS_TO_ACLS } from '../config/apis';
 import { KongConfig, KongUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
 
@@ -74,7 +74,7 @@ export default class KongService implements MonitoredService {
     const existingGroups = res.data.data.map(({ group }) => group);
 
     const groupsToAdd = user.apiList.reduce((toAdd: string[], api: string) => {
-      const validGroup = apisToAcls[api];
+      const validGroup = APIS_TO_ACLS[api];
       if (validGroup && (!existingGroups.includes(validGroup))) {
         toAdd.push(validGroup);
       }

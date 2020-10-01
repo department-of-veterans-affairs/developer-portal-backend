@@ -46,7 +46,7 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   },
 ];
 
-export const apisToAcls = keyAuthAPIList.reduce((acc,endpoint) => {
+export const APIS_TO_ACLS = keyAuthAPIList.reduce((acc,endpoint) => {
   acc[endpoint.key] = endpoint.acl;
   return acc;
 }, {});

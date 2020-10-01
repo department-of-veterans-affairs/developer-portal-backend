@@ -1,7 +1,7 @@
 import 'jest';
 
 import {
-  apisToAcls,
+  APIS_TO_ACLS,
   APIS_TO_PROPER_NAMES,
   KONG_CONSUMER_APIS,
   OKTA_AUTHZ_ENDPOINTS,
@@ -10,8 +10,8 @@ import {
 } from './apis';
 
 describe('API constants', () => {
-  it('apisToAcls', () => {
-    expect(apisToAcls).toEqual({
+  it('APIS_TO_ACLS', () => {
+    expect(APIS_TO_ACLS).toEqual({
       // appeals: 'appeals',
       benefits: 'vba_documents',
       confirmation: 'veteran_confirmation',
