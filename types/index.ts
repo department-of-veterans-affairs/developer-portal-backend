@@ -101,13 +101,13 @@ export interface DynamoConfig {
   endpoint?: string | undefined;
 }
 
-export type OAuthEndpoint = {
-  properName: string;
-  internalName: string;
+export type OAuthAPI = {
+  name: string;
+  key: string;
   authzEndpoint: string | undefined;
 };
-export type KeyBasedEndpoint = {
-  properName: string;
-  internalName: string;
+export type KeyAuthAPI = {
+  name: string;
+  key: string;
   acl: string;
 };
