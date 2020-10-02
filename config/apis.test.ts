@@ -12,18 +12,15 @@ import {
 describe('API constants', () => {
   it('APIS_TO_ACLS', () => {
     expect(APIS_TO_ACLS).toEqual({
-      // appeals: 'appeals',
       benefits: 'vba_documents',
       confirmation: 'veteran_confirmation',
       facilities: 'va_facilities',
       vaForms: 'va_forms',
-      // verification: 'veteran_verification',
     });
   });
 
   it('APIS_TO_PROPER_NAMES', () => {
     expect(APIS_TO_PROPER_NAMES).toEqual({
-      // appeals: 'Appeals Status API',
       benefits: 'Benefits Intake API',
       claims: 'Claims API',
       communityCare: 'Community Care Eligibility API',
