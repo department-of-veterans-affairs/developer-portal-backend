@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { APIS_TO_PROPER_NAMES } from '../config';
+import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
 

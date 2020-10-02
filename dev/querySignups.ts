@@ -2,7 +2,7 @@ import { config } from 'aws-sdk';
 import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-line-args';
 import moment, { Moment } from 'moment';
 import { sprintf } from 'sprintf-js';
-import { APIS_TO_PROPER_NAMES } from '../config';
+import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import SignupMetricsService, { SignupCountResult } from '../services/SignupMetricsService';
 import DynamoService from '../services/DynamoService';
 

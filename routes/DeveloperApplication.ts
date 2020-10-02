@@ -10,7 +10,7 @@ import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
-import { API_LIST } from '../config';
+import { API_LIST } from '../config/apis';
 
 function validateApiList(val: string): string {
   let result: boolean;
