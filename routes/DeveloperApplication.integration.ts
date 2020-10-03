@@ -31,13 +31,14 @@ describe('/developer_application', () => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
 
-    kong.get('/internal/admin/consumers/FellowshipBaggins').reply(200, {
-      id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
-    })
-      .get('/internal/admin/consumers/FellowshipBaggins/acls').reply(200, {
-        total: 2, data: [{ group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
-          { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } }],
-      })
+    kong.get('/internal/admin/consumers/FellowshipBaggins').reply(404)
+      .get('/internal/admin/consumers/FellowshipBaggins/acls').reply(404)
+      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'va_facilities'}).reply(201,
+        { group: 'facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+      )
+      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'veteran_verification'}).reply(201,
+        { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+      )
       .post('/internal/admin/consumers', { username: 'FellowshipBaggins' }).reply(201, { id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null })
       .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(201, { key: 'my-precious' });
 
@@ -123,6 +124,56 @@ describe('/developer_application', () => {
         token: 'my-precious',
       });
     });
+
+    describe('pre-existing kong', () => {
+      it('consumer', async () => {
+        const path = '/internal/admin/consumers/FellowshipBaggins';
+        const interceptor = kong.get(path);
+        nock.removeInterceptor(interceptor);
+
+        kong.get(path).reply(200, {
+          id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
+        });
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          clientID: 'gollum',
+          clientSecret: 'mordor',
+          token: 'my-precious',
+        });
+      });
+
+      it('consumer and acls', async () => {
+        const consumerPath = '/internal/admin/consumers/FellowshipBaggins';
+        const interceptor = kong.get(consumerPath);
+        nock.removeInterceptor(interceptor);
+
+        const aclPath = `${consumerPath}/acls`;
+        const aclInterceptor = kong.get(aclPath);
+        nock.removeInterceptor(aclInterceptor);
+
+        kong.get(consumerPath).reply(200, {
+          id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
+        })
+          .get(aclPath).reply(200, {
+            total: 2, data: [
+              { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+              { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+            ],
+          });
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          clientID: 'gollum',
+          clientSecret: 'mordor',
+          token: 'my-precious',
+        });
+      });
+    });
   });
 
   describe('500 service failures', () => {
@@ -143,14 +194,12 @@ describe('/developer_application', () => {
 
       it('sends 500 if it cannot POST to /internal/admin/consumers/FellowshipBaggins/acls', async () => {
         const path = '/internal/admin/consumers/FellowshipBaggins/acls';
-        const interceptor = kong.get(path);
+        const interceptor = kong.post(path);
+
+        // it's making two post requests and we have to stub them both out for nock
         nock.removeInterceptor(interceptor);
-
-        // make kong only return one of the requested groups - thus triggering the ACL post call
-        kong.get('/internal/admin/consumers/FellowshipBaggins/acls').reply(200, {
-          total: 1, data: [{ group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } }],
-        })
-
+        nock.removeInterceptor(interceptor);
+        kong.post(path).reply(500);
         kong.post(path).reply(500);
 
         const response = await request.post('/developer_application').send(devAppRequest);
