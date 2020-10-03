@@ -100,3 +100,14 @@ export interface DynamoConfig {
   maxRetries: number;
   endpoint?: string | undefined;
 }
+
+export type OAuthAPI = {
+  name: string;
+  key: string;
+  authzEndpoint: string | undefined;
+};
+export type KeyAuthAPI = {
+  name: string;
+  key: string;
+  acl: string;
+};
