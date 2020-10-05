@@ -1,8 +1,8 @@
 import 'jest';
 import User from '../models/User';
 import DynamoService from './DynamoService';
-import UserService from './UserService';
-import UserReportService from './UserReportService';
+import ConsumerRepository from '../repository/ConsumerRepository';
+import ConsumerReportService from './ConsumerReportService';
 
 const mockedUsersAB: User[] = [
   new User({
@@ -32,15 +32,15 @@ const mockedUsers: User[] = mockedUsersAB.concat([
   }),
 ]);
 
-describe('UserReportService', () => {
+describe('ConsumerReportService', () => {
   const mockScan = jest.fn();
 
   const mockDynamoService = {
     hardScan: mockScan,
   } as unknown as DynamoService;
 
-  const userService: UserService = new UserService(mockDynamoService);
-  const userReportService: UserReportService = new UserReportService(userService);
+  const ConsumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
+  const ConsumerReportServ: ConsumerReportService = new ConsumerReportService(ConsumerRepo);
 
   beforeEach(() => {
     mockScan.mockReset();
@@ -53,7 +53,7 @@ describe('UserReportService', () => {
 
       const reportText = 'Email,First Name,Last Name,APIs\n"fbag@hobbiton.com","Frodo","Baggins","ab"\n"wizz@higherbeings.com","Gandalf","Gray","va,xz,dx"';
 
-      const report = await userReportService.generateCSVReport();
+      const report = await ConsumerReportServ.generateCSVReport();
       expect(report).toEqual(reportText);
     });
 
@@ -64,7 +64,7 @@ describe('UserReportService', () => {
       const reportText = 'Email,First Name,Last Name,APIs\n"fbag@hobbiton.com","Frodo","Baggins","ab"';
       const apiList = ['ab'];
 
-      const report = await userReportService.generateCSVReport(apiList);
+      const report = await ConsumerReportServ.generateCSVReport(apiList);
       expect(report).toEqual(reportText);
     });
   });

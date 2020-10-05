@@ -11,14 +11,11 @@ import GovDeliveryService from './services/GovDeliveryService';
 import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
-import UserService from './services/UserService';
-import UserReportService from './services/UserReportService';
 import SignupMetricsService from './services/SignupMetricsService';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
-import userReportsHandler, { userReportsSchema } from './routes/UserReportsHandler';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -158,8 +155,6 @@ export default function configureApp(): express.Application {
   const govdelivery = configureGovDeliveryService();
   const slack = configureSlackService();
   const signups = new SignupMetricsService(dynamo);
-  const userService = new UserService(dynamo);
-  const userReportService = new UserReportService(userService);
 
   app.post('/developer_application',
     validationMiddleware(applySchema, 'body'),
@@ -174,10 +169,6 @@ export default function configureApp(): express.Application {
   app.get('/reports/signups',
     validationMiddleware(signupsReportSchema, 'query'),
     signupsReportHandler(signups, slack));
-
-  app.get('/reports/consumers',
-    validationMiddleware(userReportsSchema, 'query'),
-    userReportsHandler(userReportService, slack));
 
   app.use(Sentry.Handlers.errorHandler());
 

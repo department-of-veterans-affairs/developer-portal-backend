@@ -1,19 +1,18 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
-import DynamoService from './DynamoService';
+import DynamoService from '../services/DynamoService';
 import User from '../models/User';
 
-const DEFAULT_TABLE = 'Users';
+const DEFAULT_TABLE = 'dvp-dev-developer-portal-users';
+// const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
 
-export default class UserService {
+export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;
 
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
   }
-
-  // TODO: Move user saving code to here
 
   public async getUsers(apiFilter: string[] = []): Promise<User[]> {
 
@@ -24,18 +23,19 @@ export default class UserService {
     // Build the filter expression and update params
     if (apiFilter.length > 0) {
 
-      let filterExpression = 'contains(apis, :api)';
-      const expressionAttributeValues: DocumentClient.ExpressionAttributeValueMap = {
-        ':api': apiFilter[0],
-      };
+      let filterExpression = '';
+      const expressionAttributeValues = {};
 
-      // Handle other elements [need to add the 'or(s)']
-      for (let i = 1; i < apiFilter.length; i++) {
-        const api: string = apiFilter[i];
-        const varName = `:api${i}`;
-        filterExpression += ` or contains(apis, ${varName})`;
+      apiFilter.forEach((api, index) => {
+        const varName = `:api${index}`;
         expressionAttributeValues[varName] = api;
-      }
+      
+        // Build filter expression - only prefix with `or` if not the first element in the array
+        if (index > 0) {
+          filterExpression += ' or ';
+        }
+        filterExpression += `contains(apis, ${varName})`;
+      });
 
       params = {
         ...params,
@@ -56,7 +56,7 @@ export default class UserService {
         description: item.description,
         oAuthRedirectURI: item.oAuthRedirectURI,
         oAuthApplicationType: '',
-        termsOfService: item.tosAccepted.toString() === 'true',
+        termsOfService: item.tosAccepted,
       });
     });
 

@@ -2,8 +2,8 @@ import { config } from 'aws-sdk';
 import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-line-args';
 
 import DynamoService from '../services/DynamoService';
-import UserService from '../services/UserService';
-import UserReportService from '../services/UserReportService';
+import ConsumerRepository from '../repository/ConsumerRepository';
+import ConsumerReportService from '../services/ConsumerReportService';
 
 // CLI Configuration
 const cliOptions: OptionDefinition[] = [
@@ -30,28 +30,21 @@ config.update({
   region: 'us-gov-west-1'
 });
 
-config.update({
-  accessKeyId: process.env.DYNAMO_ACCESS_KEY_ID || 'NONE',
-  region: process.env.DYNAMO_REGION || 'us-west-2',
-  secretAccessKey: process.env.DYNAMO_ACCESS_KEY_SECRET || 'NONE',
-  sessionToken: process.env.DYNAMO_SESSION_TOKEN,
-});
-
 const dynamoService = new DynamoService({
   httpOptions: {
     timeout: 5000
   },
   maxRetries: 1,
-  endpoint: 'http://dynamodb:8000',
 });
-const userService = new UserService(dynamoService);
-const userReportService = new UserReportService(userService);
+const ConsumerRepo = new ConsumerRepository(dynamoService);
+const ConsumerReportServ = new ConsumerReportService(ConsumerRepo);
 
 const parsedApis: string[] = args.apis.split(',');
+//spot check for empty array with no args, may need to fix that
 console.log(parsedApis);
 console.log(parsedApis.length);
 
-userReportService.generateCSVReport(parsedApis)
+ConsumerReportServ.generateCSVReport(parsedApis)
   .then((report: string) => {
     console.log(report);
   })

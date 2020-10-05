@@ -1,9 +1,9 @@
 import 'jest';
-import DynamoService from './DynamoService';
-import UserService from './UserService';
+import DynamoService from '../services/DynamoService';
+import ConsumerRepository from './ConsumerRepository';
 import User from '../models/User';
 
-const mockedUsersAB: User[] = [
+const mockUserList: User[] = [
   new User({
     firstName: 'Frodo',
     lastName: 'Baggins',
@@ -15,9 +15,6 @@ const mockedUsersAB: User[] = [
     oAuthApplicationType: '',
     termsOfService: true,
   }),
-];
-
-const mockedUsers: User[] = mockedUsersAB.concat([
   new User({
     firstName: 'Gandalf',
     lastName: 'Gray',
@@ -29,16 +26,22 @@ const mockedUsers: User[] = mockedUsersAB.concat([
     oAuthApplicationType: '',
     termsOfService: true,
   }),
-]);
+];
 
-describe('UserService', ()=> {
+const mockedUsersAB: User = mockUserList[0];
+
+const expectedMockedUsers: User[] = Array.from(mockUserList);
+expectedMockedUsers[0].createdAt = expect.any(Date);
+expectedMockedUsers[1].createdAt = expect.any(Date);
+
+describe('ConsumerRepository', ()=> {
   const mockScan = jest.fn();
 
   const mockDynamoService = {
     hardScan: mockScan,
   } as unknown as DynamoService;
 
-  const userService: UserService = new UserService(mockDynamoService);
+  const ConsumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
 
   beforeEach(() => {
     mockScan.mockReset();
@@ -46,39 +49,36 @@ describe('UserService', ()=> {
 
   describe('get users', () => {
     it('returns all users when no api list is given', async () => {
+      mockScan.mockResolvedValue(mockUserList);
 
-      mockScan.mockResolvedValue(mockedUsers);
-
-      const expectedMockedUsers: User[] = Array.from(mockedUsers);
-      expectedMockedUsers[0].createdAt = expect.any(Date);
-      expectedMockedUsers[1].createdAt = expect.any(Date);
-
-      const users: User[] = await userService.getUsers();
+      const users: User[] = await ConsumerRepo.getUsers();
 
       expect(users).toEqual(expectedMockedUsers);
     });
 
     it('returns the correct number of users when an api list is given', async () => {
 
-      mockScan.mockResolvedValue(mockedUsersAB);
+      mockScan.mockResolvedValue([mockedUsersAB]);
 
       const apiList: string[] = ['ab'];
-      const users: User[] = await userService.getUsers(apiList);
+      const users: User[] = await ConsumerRepo.getUsers(apiList);
       expect(users.length).toEqual(1);
     });
   });
 
   describe('remove duplicate users', () => {
     it('removes any duplicate users', () => {
-      const mockDuplicateUsers: User[] = mockedUsers.concat([
+      const mockDuplicateUsers: User[] = mockUserList.concat([
         {
-          ...mockedUsers[0],
+          ...mockUserList[0],
           apis: 'benefits,facilities',
         } as User,
       ]);
-
-      const filteredUsers: User[] = userService.removeDuplicateUsers(mockDuplicateUsers);
-      expect(filteredUsers.length).toEqual(mockedUsers.length);
+      
+      const filteredUsers: User[] = ConsumerRepo.removeDuplicateUsers(mockDuplicateUsers);
+      
+      expect(filteredUsers.length).toEqual(mockUserList.length);
+      expect(filteredUsers).toContain(mockDuplicateUsers[2]);
     });
   });
 });

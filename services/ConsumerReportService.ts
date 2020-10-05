@@ -1,13 +1,13 @@
 import User from '../models/User';
-import UserService from './UserService';
+import ConsumerRepository from '../repository/ConsumerRepository';
 
 function trimTrailingCharacter(aString: string): string {
   return aString.slice(0, -1);
 }
 
-export default class UserReportService {
+export default class ConsumerReportService {
 
-  private userService: UserService;
+  private ConsumerRepository: ConsumerRepository;
   private reportFields: string[] = [
     'email',
     'firstName',
@@ -21,14 +21,14 @@ export default class UserReportService {
     'APIs',
   ];
 
-  public constructor(userService: UserService) {
-    this.userService = userService;
+  public constructor(ConsumerRepository: ConsumerRepository) {
+    this.ConsumerRepository = ConsumerRepository;
   }
 
   public async generateCSVReport(apiList: string[] = []): Promise<string> {
-    let users: User[] = await this.userService.getUsers(apiList);
-    users = this.userService.removeDuplicateUsers(users);
-    
+    let users: User[] = await this.ConsumerRepository.getUsers(apiList);
+    users = this.ConsumerRepository.removeDuplicateUsers(users);
+   
     let csv = '';
 
     this.reportHeaders.forEach((header) => {
@@ -37,7 +37,6 @@ export default class UserReportService {
 
     csv = trimTrailingCharacter(csv);
     csv += '\n';
-
     users.forEach((user) => {
       this.reportFields.forEach((field) => {
         csv += `"${user[field]}",`;
@@ -47,8 +46,6 @@ export default class UserReportService {
     });
 
     csv = trimTrailingCharacter(csv);
-
-    console.log(csv);
 
     return csv;
   }
