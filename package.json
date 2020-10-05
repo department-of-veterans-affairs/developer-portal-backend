@@ -8,6 +8,7 @@
     "watch:debug": "nodemon --watch '*.ts' --exec 'node --require ts-node/register --inspect-brk=0.0.0.0:9229 server.ts'",
     "lint": "eslint --ext .js,.ts .",
     "test": "jest",
+    "test:debug": "node --inspect-brk=0.0.0.0:9229 node_modules/.bin/jest --runInBand",
     "test-ci": "jest --coverage",
     "test:watch": "jest --watchAll",
     "build": "tsc"

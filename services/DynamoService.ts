@@ -8,8 +8,10 @@ export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'Filter
 
 export default class DynamoService implements MonitoredService {
   public client: DynamoDB.DocumentClient;
+  public dynamo: DynamoDB;
 
   constructor(config: DynamoConfig) {
+    this.dynamo = new DynamoDB(config);
     this.client = new DynamoDB.DocumentClient(config);
   }
 
@@ -78,33 +80,35 @@ export default class DynamoService implements MonitoredService {
 
   // DynamoDB is considered healthy if a table scan can return a record
   public healthCheck(): Promise<ServiceHealthCheckResponse> {
-    const tableName: string = process.env.DYNAMODB_TABLE || 'Users';
-
-    return new Promise(resolve => {
+    const status: ServiceHealthCheckResponse = {
+      serviceName: 'Dynamo',
+      healthy: false,
+    };
+    return new Promise((resolve) => {
       try {
         const params = {
           Limit: 1,
-          TableName: tableName,
         };
-
-        this.client.scan(params, (err, data) => {
-          if (err) {
-            throw new Error(`DynamoDB encountered an error: ${err.message}`);
-          } else if (!data || data.Count !== 1) {
-            throw new Error(`DynamoDB did not return a record: ${JSON.stringify(data)}`);
+        this.dynamo.listTables(params, (err, data) => {
+          try {
+            if (err) {
+              throw new Error(err.message);
+            } else if (!data || data.TableNames?.length !== 1) {
+              throw new Error(`Did not have a table: ${JSON.stringify(data)}`);
+            }
+          } catch (error) {
+            status.err = new Error(`DynamoDB encountered an error: ${error.message}`);
+            status.err.action = 'checking health of DynamoDB';
+            resolve(status);
+            return;
           }
-          resolve({
-            serviceName: 'Dynamo',
-            healthy: true,
-          });
+          status.healthy = true;
+          resolve(status);
         });
       } catch (err) {
         err.action = 'checking health of DynamoDB';
-        resolve({
-          serviceName: 'Dynamo',
-          healthy: false,
-          err: err,
-        });
+        status.err = err;
+        resolve(status);
       }
     });
   }
