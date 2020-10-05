@@ -1,36 +1,51 @@
 import 'jest';
 import { AWSError, DynamoDB } from 'aws-sdk';
 import DynamoService from './DynamoService';
+import { DynamoConfig } from '../types';
 
 describe("DynamoService", () => {
   let service: DynamoService;
   let mockPut: jest.SpyInstance;
   let mockScan: jest.SpyInstance;
   let mockQuery: jest.SpyInstance;
+  let mockListTables: jest.SpyInstance;
 
   beforeEach(() => {
-    service = new DynamoService({
+    const config = {
       httpOptions: {
         timeout: 5000,
       },
       maxRetries: 1,
-    });
+      accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
+      region: process.env.DYNAMODB_REGION,
+      secretAccessKey: process.env.DYNAMODB_ACCESS_KEY_SECRET,
+      sessionToken: process.env.DYNAMODB_SESSION_TOKEN,
+    };
+    service = new DynamoService(config as unknown as DynamoConfig);
     mockPut = jest.spyOn(service.client, 'put');
     mockScan = jest.spyOn(service.client, 'scan');
     mockQuery = jest.spyOn(service.client, 'query');
+    mockListTables = jest.spyOn(service.dynamo, 'listTables');
 
     mockPut.mockClear();
     mockPut.mockImplementation((params, cb) => {
-      cb(null, [{}]);
+      // setTimeout to simulate actual async responses
+      // because Dynamo client doesn't use Promises
+      setTimeout(() => cb(null, [{}]), 5);
     });
     mockScan.mockClear();
     mockScan.mockImplementation((params, cb) => {
-      cb(null, { Count: 1 });
+      setTimeout(() => cb(null, { Count: 1 }), 5);
     });
 
     mockQuery.mockClear();
     mockQuery.mockImplementation((params, cb) => {
-      cb(null, [{}]);
+      setTimeout(() => cb(null, [{}]), 5);
+    });
+
+    mockListTables.mockClear();
+    mockListTables.mockImplementation((params, cb) => {
+      setTimeout(() => cb(null, { TableNames: [ 'Users' ] }), 5);
     });
   });
 
@@ -59,9 +74,7 @@ describe("DynamoService", () => {
       //Fail the test if the expectation in the catch is never reached.
       expect.assertions(1);
       const err = 'Never is too long a word even for me . . . ';
-      mockPut.mockImplementationOnce((params, cb) => {
-        cb(new Error(err));
-      });
+      mockPut.mockImplementationOnce((params, cb) => setTimeout(() => cb(new Error(err)), 5));
 
       try {
         await service.putItem(item, tableName);
@@ -93,7 +106,7 @@ describe("DynamoService", () => {
     };
 
     it('retrieves rows from the table', async () => {
-      mockScan.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
+      mockScan.mockImplementation((_, cb) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
       
       const result = await service.scan(tableName, projectionExp, filterParams);
 
@@ -104,7 +117,7 @@ describe("DynamoService", () => {
       expect.assertions(1);
 
       const err = new Error('failed to retrieve from table') as AWSError;
-      mockScan.mockImplementation((_, cb) => { cb(err); });
+      mockScan.mockImplementation((_, cb) => setTimeout(() => cb(err), 5));
 
       try {
         await service.scan(tableName, projectionExp, filterParams);
@@ -126,7 +139,7 @@ describe("DynamoService", () => {
     const keyCondition = 'commonName = :commonName';
 
     it('retrieves rows from the table', async () => {
-      mockQuery.mockImplementation((_, cb) => { cb(null, { Items: [tableRecord] } ); });
+      mockQuery.mockImplementation((_, cb) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
       
       const result = await service.query(tableName, keyCondition, attributes);
 
@@ -137,7 +150,7 @@ describe("DynamoService", () => {
       expect.assertions(1);
 
       const err = new Error('failed to retrieve from table') as AWSError;
-      mockQuery.mockImplementation((_, cb) => { cb(err); });
+      mockQuery.mockImplementation((_, cb) => setTimeout(() => cb(err), 5));
 
       try {
         await service.query(tableName, keyCondition, attributes);
@@ -150,15 +163,15 @@ describe("DynamoService", () => {
   describe('healthCheck', () => {
     it('scans a DynamoDB table', async () => {
       await service.healthCheck();
-      expect(mockScan).toHaveBeenCalledWith({ Limit:1, TableName: 'Users'}, expect.any(Function));
+      expect(mockListTables).toHaveBeenCalledWith({ Limit:1 }, expect.any(Function));
     });
 
     it('returns unhealthy when it receives an error', async () => {
       const mockValue = 'Missing region in config';
       const err = new Error(`DynamoDB encountered an error: ${mockValue}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementationOnce((params, cb) => {
-        cb(new Error(mockValue));
+      mockListTables.mockImplementationOnce((params, cb) => {
+        setTimeout(() => cb(new Error(mockValue)), 5);
       });
 
       const healthCheck = await service.healthCheck();
@@ -167,22 +180,22 @@ describe("DynamoService", () => {
 
     it('returns unhealthy when it does not receive a properly formed response', async () => {
       const mockValue = {};
-      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementation((params, cb) => {
-        cb(null, mockValue);
+      mockListTables.mockImplementation((params, cb) => {
+        setTimeout(() => cb(null, mockValue), 5);
       });
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toStrictEqual(expectedReturn);
     });
 
-    it('returns unhealthy when it does not receive a single record', async () => {
+    it('returns unhealthy when it does not contain a table', async () => {
       const mockValue = { Count: 0 };
-      const err = new Error(`DynamoDB did not return a record: ${JSON.stringify(mockValue)}`);
+      const err = new Error(`DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
-      mockScan.mockImplementation((params, cb) => {
-        cb(null, mockValue);
+      mockListTables.mockImplementation((params, cb) => {
+        setTimeout(() => cb(null, mockValue), 5);
       });
 
       const healthCheck = await service.healthCheck();
