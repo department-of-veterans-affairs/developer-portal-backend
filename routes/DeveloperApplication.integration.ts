@@ -79,7 +79,7 @@ describe('/developer_application', () => {
   });
 
   describe('200 success', () => {
-    it('for only keybased endpoint', async () => {
+    it('for only key endpoint', async () => {
       const response = await request.post('/developer_application').send({
         apis: 'facilities',
         email: 'frodo@fellowship.org',
@@ -114,7 +114,7 @@ describe('/developer_application', () => {
       });
     });
 
-    it('for both keybased and oauth endpoints', async () => {
+    it('for both key and oauth endpoints', async () => {
       const response = await request.post('/developer_application').send(devAppRequest);
 
       expect(response.status).toEqual(200);
@@ -178,6 +178,23 @@ describe('/developer_application', () => {
 
   describe('500 service failures', () => {
     describe('KongService', () => {
+      it('does not fail with 500 response to /internal/admin/consumers/FellowshipBaggins', async () => {
+        const path = '/internal/admin/consumers/FellowshipBaggins';
+        const interceptor = kong.get(path);
+        nock.removeInterceptor(interceptor);
+
+        kong.post(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          clientID: 'gollum',
+          clientSecret: 'mordor',
+          token: 'my-precious',
+        });
+      });
+
       it('sends 500 if it cannot POST to /internal/admin/consumers', async () => {
         const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
         const interceptor = kong.post(path);
@@ -196,10 +213,7 @@ describe('/developer_application', () => {
         const path = '/internal/admin/consumers/FellowshipBaggins/acls';
         const interceptor = kong.post(path);
 
-        // it's making two post requests and we have to stub them both out for nock
         nock.removeInterceptor(interceptor);
-        nock.removeInterceptor(interceptor);
-        kong.post(path).reply(500);
         kong.post(path).reply(500);
 
         const response = await request.post('/developer_application').send(devAppRequest);

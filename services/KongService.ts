@@ -72,7 +72,7 @@ export default class KongService implements MonitoredService {
     const res = await this.getClient()
       .get(`${this.kongPath}/${user.consumerName()}/acls`)
       .catch(() => {
-        // axios fails for anything outside the 2xx response range
+        // axios throws for anything outside the 2xx response range
       });
 
     const existingGroups: string[] = res ? res.data.data.map(({ group }) => group) : [];
