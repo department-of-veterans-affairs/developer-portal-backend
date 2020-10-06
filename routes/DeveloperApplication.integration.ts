@@ -262,6 +262,21 @@ describe('/developer_application', () => {
         expect(response.body.message).toContain('500');
       });
 
+      it('sends 500 if it cannot GET /api/v1/authorizationServers/API_ENDPOINT/policies', async () => {
+        const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
+        const path = `/api/v1/authorizationServers/${verificationApiEndpoint}/policies`;
+        const interceptor = okta.get(path);
+        nock.removeInterceptor(interceptor);
+
+        okta.get(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed saving to okta');
+        expect(response.body.message).toContain('500');
+      });
+
       it('sends 500 if it cannot PUT to /api/v1/authorizationServers/API_ENDPOINT/policies/POLICY_ID', async () => {
         const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
         const path = `/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`;
