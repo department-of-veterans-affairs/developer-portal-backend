@@ -15,14 +15,18 @@ describe('/developer_application', () => {
   const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
   const slack = nock(process.env.SLACK_BASE_URL);
 
-  const devAppRequest = {
-    apis: 'facilities,verification',
+  const baseAppRequest = {
     description: 'save the world',
     email: 'frodo@fellowship.org',
     firstName: 'Frodo',
     lastName: 'Baggins',
     organization: 'Fellowship',
     termsOfService: true,
+  };
+
+  const devAppRequest = {
+    ...baseAppRequest,
+    apis: 'facilities,verification',
     oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
     oAuthApplicationType: 'web',
   };
@@ -81,12 +85,8 @@ describe('/developer_application', () => {
   describe('200 success', () => {
     it('for only key endpoint', async () => {
       const response = await request.post('/developer_application').send({
+        ...baseAppRequest,
         apis: 'facilities',
-        email: 'frodo@fellowship.org',
-        firstName: 'Frodo',
-        lastName: 'Baggins',
-        organization: 'Fellowship',
-        termsOfService: true,
       });
 
       expect(response.status).toEqual(200);
@@ -97,12 +97,8 @@ describe('/developer_application', () => {
 
     it('for only oauth endpoint', async () => {
       const response = await request.post('/developer_application').send({
+        ...baseAppRequest,
         apis: 'verification',
-        email: 'frodo@fellowship.org',
-        firstName: 'Frodo',
-        lastName: 'Baggins',
-        organization: 'Fellowship',
-        termsOfService: true,
         oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
         oAuthApplicationType: 'web',
       });
