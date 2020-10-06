@@ -82,7 +82,7 @@ describe('/developer_application', () => {
   });
 
   describe('200 success', () => {
-    it('for only key endpoint', async () => {
+    it('request with only key auth api', async () => {
       const response = await request.post('/developer_application').send({
         ...baseAppRequest,
         apis: 'facilities',
@@ -94,7 +94,7 @@ describe('/developer_application', () => {
       });
     });
 
-    it('for only oauth endpoint', async () => {
+    it('request with only oauth api', async () => {
       const response = await request.post('/developer_application').send({
         ...baseAppRequest,
         apis: 'verification',
@@ -109,7 +109,7 @@ describe('/developer_application', () => {
       });
     });
 
-    it('for both key and oauth endpoints', async () => {
+    it('request with both key auth and oauth apis', async () => {
       const response = await request.post('/developer_application').send(devAppRequest);
 
       expect(response.status).toEqual(200);
@@ -120,7 +120,7 @@ describe('/developer_application', () => {
       });
     });
 
-    describe('pre-existing kong', () => {
+    describe('when a consumer and their acls (optionally) already exist', () => {
       const consumerPath = '/internal/admin/consumers/FellowshipBaggins';
       const consumerInterceptor = kong.get(consumerPath);
 
@@ -131,7 +131,7 @@ describe('/developer_application', () => {
         });
       });
 
-      it('consumer', async () => {
+      it('only consumer', async () => {
         const response = await request.post('/developer_application').send(devAppRequest);
 
         expect(response.status).toEqual(200);
@@ -148,7 +148,7 @@ describe('/developer_application', () => {
         nock.removeInterceptor(aclInterceptor);
 
         kong.get(aclPath).reply(200, {
-          total: 2, data: [
+          total: 1, data: [
             { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
           ],
         });
@@ -295,6 +295,7 @@ describe('/developer_application', () => {
 
     describe('DynamoDB', () => {
       it('sends error message for dynamo failure', async () => {
+        // PutItem operations/calls made with DynamoService.putItem
         const path = '/';
         const interceptor = dynamoDB.post(path);
         nock.removeInterceptor(interceptor);
