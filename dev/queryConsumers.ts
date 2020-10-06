@@ -36,15 +36,15 @@ const dynamoService = new DynamoService({
   },
   maxRetries: 1,
 });
-const ConsumerRepo = new ConsumerRepository(dynamoService);
-const ConsumerReportServ = new ConsumerReportService(ConsumerRepo);
+const consumerRepo = new ConsumerRepository(dynamoService);
+const consumerReportService = new ConsumerReportService(consumerRepo);
 
 const parsedApis: string[] = args.apis.split(',');
 //spot check for empty array with no args, may need to fix that
 console.log(parsedApis);
 console.log(parsedApis.length);
 
-ConsumerReportServ.generateCSVReport(parsedApis)
+consumerReportService.generateCSVReport(parsedApis)
   .then((report: string) => {
     console.log(report);
   })

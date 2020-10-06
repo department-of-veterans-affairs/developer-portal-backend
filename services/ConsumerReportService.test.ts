@@ -39,8 +39,8 @@ describe('ConsumerReportService', () => {
     hardScan: mockScan,
   } as unknown as DynamoService;
 
-  const ConsumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
-  const ConsumerReportServ: ConsumerReportService = new ConsumerReportService(ConsumerRepo);
+  const consumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
+  const consumerReportServ: ConsumerReportService = new ConsumerReportService(consumerRepo);
 
   beforeEach(() => {
     mockScan.mockReset();
@@ -53,7 +53,7 @@ describe('ConsumerReportService', () => {
 
       const reportText = `email,first_Name,last_Name,APIs\nfbag@hobbiton.com,Frodo,Baggins,ab\nwizz@higherbeings.com,Gandalf,Gray,"va,xz,dx"`;
 
-      const report = await ConsumerReportServ.generateCSVReport();
+      const report = await consumerReportServ.generateCSVReport();
       expect(report).toEqual(reportText);
     });
 
@@ -64,7 +64,7 @@ describe('ConsumerReportService', () => {
       const reportText = 'email,first_Name,last_Name,APIs\nfbag@hobbiton.com,Frodo,Baggins,ab';
       const apiList = ['ab'];
 
-      const report = await ConsumerReportServ.generateCSVReport(apiList);
+      const report = await consumerReportServ.generateCSVReport(apiList);
       expect(report).toEqual(reportText);
     });
   });
