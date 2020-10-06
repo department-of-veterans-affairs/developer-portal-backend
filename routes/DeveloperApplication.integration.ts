@@ -141,7 +141,35 @@ describe('/developer_application', () => {
         });
       });
 
-      it('consumer and acls', async () => {
+      it('consumer and one pre-existing acl', async () => {
+        const consumerPath = '/internal/admin/consumers/FellowshipBaggins';
+        const interceptor = kong.get(consumerPath);
+        nock.removeInterceptor(interceptor);
+
+        const aclPath = `${consumerPath}/acls`;
+        const aclInterceptor = kong.get(aclPath);
+        nock.removeInterceptor(aclInterceptor);
+
+        kong.get(consumerPath).reply(200, {
+          id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
+        })
+          .get(aclPath).reply(200, {
+            total: 2, data: [
+              { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+            ],
+          });
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          clientID: 'gollum',
+          clientSecret: 'mordor',
+          token: 'my-precious',
+        });
+      });
+
+      it('consumer and two pre-existing acls', async () => {
         const consumerPath = '/internal/admin/consumers/FellowshipBaggins';
         const interceptor = kong.get(consumerPath);
         nock.removeInterceptor(interceptor);
