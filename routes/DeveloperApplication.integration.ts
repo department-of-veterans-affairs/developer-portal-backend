@@ -192,6 +192,20 @@ describe('/developer_application', () => {
   describe('500 service failures', () => {
     describe('KongService', () => {
       it('sends 500 if it cannot POST to /internal/admin/consumers', async () => {
+        const path = '/internal/admin/consumers';
+        const interceptor = kong.post(path);
+        nock.removeInterceptor(interceptor);
+
+        kong.post(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed creating kong consumer');
+        expect(response.body.message).toContain('500');
+      });
+
+      it('sends 500 if it cannot POST to /internal/admin/consumers/key-auth', async () => {
         const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
         const interceptor = kong.post(path);
         nock.removeInterceptor(interceptor);
