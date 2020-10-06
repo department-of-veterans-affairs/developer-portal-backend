@@ -47,8 +47,7 @@ describe('/developer_application', () => {
       .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(201, { key: 'my-precious' });
 
     okta.post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } } })
-      .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
-      .reply(200, {});
+      .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`).reply(200, {});
 
     const { oktaPolicyCollection, oktaPolicy } = oktaAuthMocks;
     const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
@@ -249,7 +248,21 @@ describe('/developer_application', () => {
         expect(response.body.message).toContain('500');
       });
 
-      it('sends 500 if it cannot PUT to /api/v1/authorizationServers...', async () => {
+      it('sends 500 if it cannot PUT to /api/v1/apps/123/groups/IDME_GROUP_ID', async () => {
+        const path = `/api/v1/apps/123/groups/${IDME_GROUP_ID}`;
+        const interceptor = okta.put(path);
+        nock.removeInterceptor(interceptor);
+
+        okta.put(path).reply(500);
+
+        const response = await request.post('/developer_application').send(devAppRequest);
+
+        expect(response.status).toEqual(500);
+        expect(response.body.action).toEqual('failed saving to okta');
+        expect(response.body.message).toContain('500');
+      });
+
+      it('sends 500 if it cannot PUT to /api/v1/authorizationServers/API_ENDPOINT/policies/POLICY_ID', async () => {
         const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
         const path = `/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`;
         const interceptor = okta.put(path);
