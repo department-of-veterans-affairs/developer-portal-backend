@@ -174,23 +174,6 @@ describe('/developer_application', () => {
 
   describe('500 service failures', () => {
     describe('KongService', () => {
-      it('does not fail with 500 response to /internal/admin/consumers/FellowshipBaggins', async () => {
-        const path = '/internal/admin/consumers/FellowshipBaggins';
-        const interceptor = kong.get(path);
-        nock.removeInterceptor(interceptor);
-
-        kong.post(path).reply(500);
-
-        const response = await request.post('/developer_application').send(devAppRequest);
-
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          clientID: 'gollum',
-          clientSecret: 'mordor',
-          token: 'my-precious',
-        });
-      });
-
       it('sends 500 if it cannot POST to /internal/admin/consumers', async () => {
         const path = '/internal/admin/consumers/FellowshipBaggins/key-auth';
         const interceptor = kong.post(path);
