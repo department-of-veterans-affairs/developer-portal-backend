@@ -1,5 +1,5 @@
 import { AWSError, DynamoDB } from 'aws-sdk';
-import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
+import { ScanInput, ScanOutput, QueryOutput, DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
 import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
@@ -49,6 +49,21 @@ export default class DynamoService implements MonitoredService {
           ...filters,
         },
         (error: AWSError, data: ScanOutput) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(data.Items || []);
+          }
+        }
+      );
+    });
+  }
+
+  public hardScan(params: DocumentClient.ScanInput): Promise<DocumentClient.AttributeMap[]> {
+    return new Promise<DocumentClient.AttributeMap[]>((resolve, reject) => {
+      this.client.scan(
+        params,
+        (error: AWSError, data: DocumentClient.ScanOutput) => {
           if (error) {
             reject(error);
           } else {
