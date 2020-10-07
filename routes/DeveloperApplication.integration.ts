@@ -109,6 +109,18 @@ describe('/developer_application', () => {
       });
     });
 
+    it('request with only oauth api and an empty oAuthRedirectURI', async () => {
+      const response = await request.post('/developer_application').send({
+        ...baseAppRequest,
+        apis: 'verification',
+        oAuthRedirectURI: '',
+        oAuthApplicationType: 'web',
+      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({});
+    });
+
     it('request with both key auth and oauth apis', async () => {
       const response = await request.post('/developer_application').send(devAppRequest);
 
