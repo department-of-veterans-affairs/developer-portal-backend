@@ -82,7 +82,7 @@ describe('/developer_application', () => {
   });
 
   describe('200 success', () => {
-    it('request with only key auth api', async () => {
+    it('succeeds for a request with only key auth api', async () => {
       const response = await request.post('/developer_application').send({
         ...baseAppRequest,
         apis: 'facilities',
@@ -94,7 +94,7 @@ describe('/developer_application', () => {
       });
     });
 
-    it('request with only oauth api', async () => {
+    it('succeeds for a request with only oauth api', async () => {
       const response = await request.post('/developer_application').send({
         ...baseAppRequest,
         apis: 'verification',
@@ -109,7 +109,7 @@ describe('/developer_application', () => {
       });
     });
 
-    it('request with only oauth api and an empty oAuthRedirectURI', async () => {
+    it('succeeds (with an empty response) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
       const response = await request.post('/developer_application').send({
         ...baseAppRequest,
         apis: 'verification',
@@ -121,7 +121,7 @@ describe('/developer_application', () => {
       expect(response.body).toEqual({});
     });
 
-    it('request with both key auth and oauth apis', async () => {
+    it('succeeds for a request with both key auth and oauth apis', async () => {
       const response = await request.post('/developer_application').send(devAppRequest);
 
       expect(response.status).toEqual(200);
