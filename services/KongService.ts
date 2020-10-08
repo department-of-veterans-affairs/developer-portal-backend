@@ -70,8 +70,12 @@ export default class KongService implements MonitoredService {
 
   public async createACLs(user: KongUser): Promise<KongAclsResponse> {
     const res = await this.getClient()
-      .get(`${this.kongPath}/${user.consumerName()}/acls`);
-    const existingGroups = res.data.data.map(({ group }) => group);
+      .get(`${this.kongPath}/${user.consumerName()}/acls`)
+      .catch(() => {
+        // axios throws for anything outside the 2xx response range
+      });
+
+    const existingGroups: string[] = res ? res.data.data.map(({ group }) => group) : [];
 
     const groupsToAdd = user.apiList.reduce((toAdd: string[], api: string) => {
       const validGroup = APIS_TO_ACLS[api];
