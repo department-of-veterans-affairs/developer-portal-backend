@@ -312,7 +312,7 @@ describe('/developer_application', () => {
         const interceptor = dynamoDB.post(path);
         nock.removeInterceptor(interceptor);
 
-        dynamoDB.post('/').reply(500).post('/').reply(500);
+        dynamoDB.post('/').reply(500);
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
