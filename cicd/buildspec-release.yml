@@ -16,7 +16,7 @@ env:
     AUTO_DEPLOY_ENVS: "dev staging"
   parameter-store:
     GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
-    SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook"
+    SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
 phases:
   pre_build:
     commands:
@@ -25,7 +25,7 @@ phases:
     - echo Setting tag for new release...
     # To get the new release version, we will increment the last version number found in Github
     - NEW_RELEASE_TAG=$(increment.sh $(hub tag|sort --version-sort |tail -1)); export NEW_RELEASE_TAG
-    - slackpost.sh "Creating and tagging a new release for ${FRIENDLY_NAME}..."
+    - slackpost.sh -t started "Creating and tagging a new release for ${FRIENDLY_NAME}..."
     - echo Creating release...
     # We use the 'hub' command to create a release here with the contents of 'master'. If the command exits successfully, we then
     # git fetch to get the new tag created, and we use that tag to get a commit SHA for the new release.
@@ -48,13 +48,13 @@ phases:
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
           BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
           TAG_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/tag_output.txt)
-          slackpost.sh -d "$TAG_OUTPUT\n<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Tagging failed."
+          slackpost.sh  -t failure "${TAG_OUTPUT}\n Tagging failed."
           exit 1
         fi
       else
         PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
         BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
-        slackpost.sh -d "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>" "Release failed."
+        slackpost.sh -t failure "Release failed."
         exit 1
       fi
   build:
@@ -63,5 +63,3 @@ phases:
       # by spaces, e.g.: deploy_to_ecs.sh <tag> <service> <friendly-name> [dev staging]
       - echo Triggering deploys...
       - SRC_DIR=${CODEBUILD_SRC_DIR} CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} deploy_to_ecs.sh ${NEW_RELEASE_TAG} ${SERVICE_NAME} ${FRIENDLY_NAME} "${AUTO_DEPLOY_ENVS}"
-  post_build:
-    commands:
