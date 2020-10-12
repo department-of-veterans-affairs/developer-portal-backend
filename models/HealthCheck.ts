@@ -1,6 +1,6 @@
 import logger from '../config/logger';
 import Sentry from '../config/Sentry';
-import { ServiceHealthCheckResponse } from '../types';
+import { MonitoredService, ServiceHealthCheckResponse } from '../types';
 
 export interface HealthCheckResults {
   healthStatus: string;
@@ -9,12 +9,20 @@ export interface HealthCheckResults {
 
 export default class HealthCheck {
   public healthCheckResults: HealthCheckResults
+  private services: MonitoredService[]
 
-  constructor() {
+  constructor(services) {
     this.healthCheckResults = { healthStatus: 'vibrant', failedHealthChecks: [] };
+    this.services = services;
   }
 
-  public addResult(result: ServiceHealthCheckResponse): void {
+  public async check(): Promise<void> {
+    const resultPromises: Promise<ServiceHealthCheckResponse>[] = this.services.map(service => service.healthCheck());
+    const results = await Promise.all(resultPromises);
+    results.forEach(result => this.addResult(result));
+  }
+
+  private addResult(result: ServiceHealthCheckResponse): void {
     if (!result.healthy) {
       if (result.err) {
         result.err = { message: result.err.message, action: result.err.action, stack: result.err.stack };
