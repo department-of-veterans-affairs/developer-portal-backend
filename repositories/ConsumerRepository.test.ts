@@ -38,7 +38,7 @@ describe('ConsumerRepository', ()=> {
   const mockScan = jest.fn();
 
   const mockDynamoService = {
-    hardScan: mockScan,
+    scan: mockScan,
   } as unknown as DynamoService;
 
   const ConsumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
@@ -51,34 +51,19 @@ describe('ConsumerRepository', ()=> {
     it('returns all users when no api list is given', async () => {
       mockScan.mockResolvedValue(mockUserList);
 
-      const users: User[] = await ConsumerRepo.getUsers();
+      const users: User[] = await ConsumerRepo.getConsumer();
 
       expect(users).toEqual(expectedMockedUsers);
     });
 
-    it('returns the correct number of users when an api list is given', async () => {
+    it('should call dynamo scan method', async () => {
 
       mockScan.mockResolvedValue([mockedUsersAB]);
 
       const apiList: string[] = ['ab'];
-      const users: User[] = await ConsumerRepo.getUsers(apiList);
-      expect(users.length).toEqual(1);
+      const users: User[] = await ConsumerRepo.getConsumer(apiList);
+      expect(mockScan).toHaveBeenCalled();
     });
   });
 
-  describe('remove duplicate users', () => {
-    it('removes any duplicate users', () => {
-      const mockDuplicateUsers: User[] = mockUserList.concat([
-        {
-          ...mockUserList[0],
-          apis: 'benefits,facilities',
-        } as User,
-      ]);
-      
-      const filteredUsers: User[] = ConsumerRepo.removeDuplicateUsers(mockDuplicateUsers);
-      
-      expect(filteredUsers.length).toEqual(mockUserList.length);
-      expect(filteredUsers).toContain(mockDuplicateUsers[2]);
-    });
-  });
 });

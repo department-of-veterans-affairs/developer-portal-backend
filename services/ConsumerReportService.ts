@@ -1,25 +1,26 @@
 import User from '../models/User';
-import ConsumerRepository from '../repository/ConsumerRepository';
+import ConsumerRepository from '../repositories/ConsumerRepository';
 import ObjectsToCsv from 'objects-to-csv';
 
 export default class ConsumerReportService {
 
-  private ConsumerRepository: ConsumerRepository;
+  private consumerRepository: ConsumerRepository;
 
-  public constructor(ConsumerRepository: ConsumerRepository) {
-    this.ConsumerRepository = ConsumerRepository;
+  public constructor(consumerRepository: ConsumerRepository) {
+    this.consumerRepository = consumerRepository;
   }
 
   public async generateCSVReport(apiList: string[] = []): Promise<string> {
-    let users: User[] = await this.ConsumerRepository.getUsers(apiList);
-    users = this.ConsumerRepository.removeDuplicateUsers(users);
+    const consumers: User[] = await this.consumerRepository.getConsumer(apiList);
 
-    const data = users.map(user => (
-      {email: user.email,
-      first_Name: user.firstName,
-      last_Name: user.lastName,
-      APIs: user.apis}
-    ))
+    const data = consumers.map(consumer => (
+      {
+        email: consumer.email,
+        first_Name: consumer.firstName,
+        last_Name: consumer.lastName,
+        APIs: consumer.apis,
+      }
+    ));
 
     const csv = new ObjectsToCsv(data);
  
@@ -27,6 +28,6 @@ export default class ConsumerReportService {
     await csv.toDisk('./consumer-report.csv');
     const consumerReport = await csv.toString();
 
-    return consumerReport
+    return consumerReport;
   }
 }

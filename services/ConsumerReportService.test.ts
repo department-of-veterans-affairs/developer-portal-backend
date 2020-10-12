@@ -1,7 +1,7 @@
 import 'jest';
 import User from '../models/User';
 import DynamoService from './DynamoService';
-import ConsumerRepository from '../repository/ConsumerRepository';
+import ConsumerRepository from '../repositories/ConsumerRepository';
 import ConsumerReportService from './ConsumerReportService';
 
 const mockedUsersAB: User[] = [
@@ -36,7 +36,7 @@ describe('ConsumerReportService', () => {
   const mockScan = jest.fn();
 
   const mockDynamoService = {
-    hardScan: mockScan,
+    scan: mockScan,
   } as unknown as DynamoService;
 
   const consumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);

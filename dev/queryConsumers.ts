@@ -2,7 +2,7 @@ import { config } from 'aws-sdk';
 import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-line-args';
 
 import DynamoService from '../services/DynamoService';
-import ConsumerRepository from '../repository/ConsumerRepository';
+import ConsumerRepository from '../repositories/ConsumerRepository';
 import ConsumerReportService from '../services/ConsumerReportService';
 
 // CLI Configuration

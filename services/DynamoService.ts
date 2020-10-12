@@ -59,21 +59,6 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public hardScan(params: DocumentClient.ScanInput): Promise<DocumentClient.AttributeMap[]> {
-    return new Promise<DocumentClient.AttributeMap[]>((resolve, reject) => {
-      this.client.scan(
-        params,
-        (error: AWSError, data: DocumentClient.ScanOutput) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(data.Items || []);
-          }
-        }
-      );
-    });
-  }
-
   public query(tableName: string, keyCondition: string, attributes: {}): Promise<AttributeMap[]> {
     return new Promise<AttributeMap[]>((resolve, reject) => {
       this.client.query(

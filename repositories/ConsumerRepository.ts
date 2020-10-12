@@ -9,11 +9,25 @@ export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;
 
+  private removeDuplicateUsers(consumer: User[]): User[] {
+    // Instead of using a Set to remove duplicate emails, we use a Map.
+    // This gives us easy entry if we want to merge user fields. For instance,
+    // we might want to merge the oauth redirect uris or use the latest tosAccepted
+    // value
+    const consumerMap: Map<string, User> = new Map();
+
+    consumer.forEach((user) => {
+      consumerMap.set(user.email, user);
+    });
+
+    return Array.from(consumerMap.values());
+  }
+
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
   }
 
-  public async getUsers(apiFilter: string[] = []): Promise<User[]> {
+  public async getConsumer(apiFilter: string[] = []): Promise<User[]> {
 
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
@@ -26,7 +40,7 @@ export default class ConsumerRepository {
       const expressionAttributeValues = {};
 
       apiFilter.forEach((api, index) => {
-        const varName = `:api${index}`;
+        const varName = `:api_${api}`;
         expressionAttributeValues[varName] = api;
       
         // Build filter expression - only prefix with `or` if not the first element in the array
@@ -42,8 +56,16 @@ export default class ConsumerRepository {
         ExpressionAttributeValues: expressionAttributeValues,
       };
     }
-
-    const items: DocumentClient.AttributeMap[] = await this.dynamoService.hardScan(params);
+   
+    const items: DocumentClient.AttributeMap[] =
+      await this.dynamoService.scan(
+        params.TableName, 
+        'email, firstName, lastName, apis', 
+        {
+          FilterExpression: params.FilterExpression,
+          ExpressionAttributeValues: params.ExpressionAttributeValues,
+        },
+      );
 
     const results = items.map((item): User => {
       return new User({
@@ -59,20 +81,8 @@ export default class ConsumerRepository {
       });
     });
 
-    return results;
+    const uniqueUsersResults = this.removeDuplicateUsers(results);
+    return uniqueUsersResults;
   }
 
-  public removeDuplicateUsers(users: User[]): User[] {
-    // Instead of using a Set to remove duplicate emails, we use a Map.
-    // This gives us easy entry if we want to merge user fields. For instance,
-    // we might want to merge the oauth redirect uris or use the latest tosAccepted
-    // value
-    const userMap: Map<string, User> = new Map();
-
-    users.forEach((user) => {
-      userMap.set(user.email, user);
-    });
-
-    return Array.from(userMap.values());
-  }
 }
