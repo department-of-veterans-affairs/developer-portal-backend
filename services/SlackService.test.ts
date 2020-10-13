@@ -201,23 +201,23 @@ describe('SlackService', () => {
       status: 200,
       data: { 
         ok: false,
-        error: 'channel_not_found' 
+        error: 'channel_not_found', 
       },
       headers: {},
     });
 
-     // cast to unknown first to avoid having to reimplement all of AxiosInstance
-     jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+    // cast to unknown first to avoid having to reimplement all of AxiosInstance
+    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
-     const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
-     const service = new SlackService(slackURL, slackToken, slackOptions);
+    const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
+    const service = new SlackService(slackURL, slackToken, slackOptions);
  
-     try {
-       await service.sendSuccessMessage(message, 'New User Application');
-     } catch (err) {
-       console.log(err);
-       expect(err.message).toEqual('channel_not_found');
-     }
+    try {
+      await service.sendSuccessMessage(message, 'New User Application');
+    } catch (err) {
+      console.log(err);
+      expect(err.message).toEqual('channel_not_found');
+    }
   });
 
   describe('Healthcheck Validation', () => {
