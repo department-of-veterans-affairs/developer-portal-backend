@@ -8,10 +8,10 @@ export interface HealthCheckResults {
 }
 
 export default class HealthCheck {
-  public healthCheckResults: HealthCheckResults
+  private healthCheckResults: HealthCheckResults
   private services: MonitoredService[]
 
-  constructor(services) {
+  constructor(services: MonitoredService[]) {
     this.healthCheckResults = { healthStatus: 'vibrant', failedHealthChecks: [] };
     this.services = services;
   }
