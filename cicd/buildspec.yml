@@ -4,8 +4,6 @@ env:
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
 phases:
   install:
-    runtime-versions:
-      docker: 18
     commands:
       # There is considerable slow down in the provisioning phase when using Amazon provided images.
       # Therefore we use our own Alpine based image. In order to activate the Docker Daemon these lines are needed.
