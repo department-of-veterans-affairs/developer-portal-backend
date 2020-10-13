@@ -13,7 +13,7 @@ phases:
     commands:
       - echo Logging into ECR
       #- $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-      - $(aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      - $(aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com)
       - echo Starting CI...
       - echo Building the CI Docker image...
       - docker build --pull --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
