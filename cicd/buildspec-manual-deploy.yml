@@ -69,6 +69,6 @@ phases:
           else
             PROJECT=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $1}')
             BUILD=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $2}')
-            slackpost.sh -failure  "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
+            slackpost.sh -failure  "$(cat ${CODEBUILD_SRC_DIR}/deploy_output.txt)" "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
           fi
         done
