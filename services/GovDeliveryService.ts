@@ -3,6 +3,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
+import User from '../models/User';
 
 interface EmailRecipient {
   email: string;
@@ -19,10 +20,12 @@ interface WelcomeEmail {
   apis: string;
   firstName: string;
   key?: string;
+  kongUsername?: string;
   token_issued: boolean;
   oauth: boolean;
   clientID?: string;
   clientSecret?: string;
+  redirectURI?: string;
 }
 
 export interface SupportEmail {
@@ -108,7 +111,7 @@ export default class GovDeliveryService implements MonitoredService {
     });
   }
 
-  public sendWelcomeEmail(user: GovDeliveryUser): Promise<EmailResponse> {
+  public sendWelcomeEmail(user: User): Promise<EmailResponse> {
     if (user.token || (user.oauthApplication && user.oauthApplication.client_id)) {
       const email: EmailRequest = {
         subject: 'Welcome to the VA API Platform',
@@ -120,7 +123,9 @@ export default class GovDeliveryService implements MonitoredService {
           firstName: user.firstName,
           oauth: !!user.oauthApplication,
           key: user.token,
+          kongUsername: user.kongConsumerId ? user.consumerName() : '',
           token_issued: !!user.token,
+          redirectURI:  user.oAuthRedirectURI,
         }),
         recipients: [{
           email: user.email,

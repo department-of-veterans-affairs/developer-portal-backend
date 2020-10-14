@@ -23,6 +23,7 @@ export interface GovDeliveryUser {
   apiList: string[];
   email: string;
   firstName: string;
+  kongUsername?: string;
   oauthApplication?: OktaApplication;
 }
 
@@ -74,6 +75,7 @@ export interface OktaApplication {
   owner: OktaUser;
   client_id?: string;
   client_secret?: string;
+  redirect_uri?: string;
   toOktaApp: () => OAuthApplication;
 }
 
