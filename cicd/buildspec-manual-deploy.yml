@@ -1,5 +1,22 @@
+######################################################################
+#  Developer Portal Backend CodeBuild Manual Deploy
+#  
+#
+# Tool Links:
+#  - CodeBuild - https://docs.aws.amazon.com/codebuild/index.html
+#  - CodeBuild Environmental Variables - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+#  - Runner for CodeBuild Enironment - https://github.com/department-of-veterans-affairs/lighthouse-codebuild-containers/tree/main/ecs-deployer
+#  - AWS CLI 2.0 - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html
+#  - hub - https://github.com/github/hub 
+#
+# All Custom scripts are on the CodeBuild Environment container. 
+# https://github.com/department-of-veterans-affairs/lighthouse-codebuild-containers/tree/main/
+#
+# Custom Scripts:
+#  - slackpost.sh
+#
+######################################################################
 version: 0.2
-
 env:
   git-credential-helper: yes
   variables:
@@ -16,13 +33,13 @@ env:
     DEPLOY_ENVS: "prod"
   parameter-store:
     GITHUB_TOKEN: "/dvp/devops/va_bot_github_token"
-    SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook"
+    SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
 phases:
   pre_build:
     commands:
     - echo Logging into ECR
-    - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
-    - slackpost.sh "Beginning a deploy for ${FRIENDLY_NAME} in envs - ${DEPLOY_ENVS}..."
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+    - slackpost.sh -t started "Beginning a deploy for ${FRIENDLY_NAME} in envs - ${DEPLOY_ENVS}..."
     - echo Getting latest tag...
     # To get the latest release version, we will increment the last version number found in Github
     - |
@@ -48,13 +65,10 @@ phases:
             -e "${SERVICE}" AWS_APP_NAME "${FRIENDLY_NAME}" \
             --timeout 1200 "${CLUSTER}" "${SERVICE}" \
             | tee "$CODEBUILD_SRC_DIR"/deploy_output.txt; then
-            slackpost.sh "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} complete."
+            slackpost.sh -t success "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} complete."
           else
             PROJECT=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $1}')
             BUILD=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $2}')
-            slackpost.sh -d "$(cat "${CODEBUILD_SRC_DIR}"/deploy_output.txt)" "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
-            slackpost.sh "<https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/${PROJECT}/build/${PROJECT}%3A${BUILD}/log?region=${AWS_REGION}|CodeBuild Project>"
+            slackpost.sh -t failure  "$(cat ${CODEBUILD_SRC_DIR}/deploy_output.txt)" "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
           fi
         done
-  post_build:
-    commands:
