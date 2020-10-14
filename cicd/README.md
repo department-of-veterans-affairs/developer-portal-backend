@@ -12,12 +12,11 @@ CICD Workflow
   - Handles slack notifications
 
 
-## CI (https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-backend-ci/history?region=us-gov-west-1)
-- Codebuild CI job at /buildspec.yml runs on every code push to the repository
+## [CI](https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-backend-ci/history?region=us-gov-west-1)
+- Codebuild CI job at cicd/buildspec-ci.yml runs on every code push to the repository
   - uses the pre-built environment from Codebuild
   - uses docker 18 runtime
   - prebuild (failure fails entire job)
-    - installs AWS CLI
     - builds the CI Docker image (docker build --target base)
     - lints the code
     - runs the CI tests
@@ -28,7 +27,7 @@ CICD Workflow
   - post_build
     - pushes the Docker image to ECR
 
-## Release/Deploy (https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-backend-release/history?region=us-gov-west-1)
+## [Release/Deploy](https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-backend-release/history?region=us-gov-west-1)
 - when PR is merged to master, it will trigger cicd/buildspec-release.yml in Codebuild for the project dev-portal-backend-release.
   - Uses the vasdvp/lighthouse-codebuild-dsva-fargate image
     - cicd/buildspec-release.yml
@@ -42,7 +41,7 @@ CICD Workflow
       - deploy_to_ecs.sh 
         - configurable for allowed environments
 
-## Manual Deploy (https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-manual-deploy/history?region=us-gov-west-1)
+## [Manual Deploy](https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/dev-portal-manual-deploy/history?region=us-gov-west-1)
 - Arbitrary deploys of a revision can be accomplished with the Manual deploy job.
   - DEPLOY_ENVS
     - Set DEPLOY_ENVS to a space separated list of environments you would like to deploy to, i.e.: `prod staging`
