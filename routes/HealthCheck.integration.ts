@@ -39,82 +39,164 @@ describe('/health_check', () => {
   });
 
   describe('lackluster', () => {
-    // mocking the individual services health check path to return a 500 is just one of the ways the health check could fail...
-    // they could also fail for a 403 or a unexpected / unproccessable payload
+    describe('kong', () => {
+      it('responds with lackluster if kong path responds with 500', async () => {
+        const interceptor = kong.get(kongMockPath);
+        nock.removeInterceptor(interceptor);
 
-    it('responds with lackluster if kong does not report as healthy', async () => {
-      const interceptor = kong.get(kongMockPath);
-      nock.removeInterceptor(interceptor);
+        kong.get(kongMockPath).reply(500);
 
-      kong.get(kongMockPath).reply(500);
+        const response = await request.get('/health_check');
 
-      const response = await request.get('/health_check');
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Kong');
+      });
 
-      expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('lackluster');
-      expect(response.body.failedHealthChecks.length).toEqual(1);
-      expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-      expect(response.body.failedHealthChecks[0].serviceName).toEqual('Kong');
+      it('responds with lackluster if kong path responds with wrong consumer', async () => {
+        const interceptor = kong.get(kongMockPath);
+        nock.removeInterceptor(interceptor);
+
+        kong.get(kongMockPath).reply(200, {username: 'wrongUser'});
+
+        const response = await request.get('/health_check');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Kong');
+      });
     });
 
-    it('responds with lackluster if okta does not report as healthy', async () => {
-      const interceptor = okta.get(oktaMockPath);
-      nock.removeInterceptor(interceptor);
+    describe('okta', () => {
+      it('responds with lackluster if okta path responds with 500', async () => {
+        const interceptor = okta.get(oktaMockPath);
+        nock.removeInterceptor(interceptor);
 
-      okta.get(oktaMockPath).reply(500);
+        okta.get(oktaMockPath).reply(500);
 
-      const response = await request.get('/health_check');
+        const response = await request.get('/health_check');
 
-      expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('lackluster');
-      expect(response.body.failedHealthChecks.length).toEqual(1);
-      expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-      expect(response.body.failedHealthChecks[0].serviceName).toEqual('Okta');
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Okta');
+      });
+
+      it('responds with lackluster if okta path responds with 404', async () => {
+        const interceptor = okta.get(oktaMockPath);
+        nock.removeInterceptor(interceptor);
+
+        okta.get(oktaMockPath).reply(404, {});
+
+        const response = await request.get('/health_check');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Okta');
+      });
     });
 
-    it('responds with lackluster if dynamoDB does not report as healthy', async () => {
-      const interceptor = dynamoDB.post(dynamoMockPath);
-      nock.removeInterceptor(interceptor);
+    describe('dynamoDB', () => {
+      it('responds with lackluster if dynamoDB path responds with 500', async () => {
+        const interceptor = dynamoDB.post(dynamoMockPath);
+        nock.removeInterceptor(interceptor);
 
-      dynamoDB.post(dynamoMockPath).reply(500);
+        dynamoDB.post(dynamoMockPath).reply(500);
 
-      const response = await request.get('/health_check');
+        const response = await request.get('/health_check');
 
-      expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('lackluster');
-      expect(response.body.failedHealthChecks.length).toEqual(1);
-      expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-      expect(response.body.failedHealthChecks[0].serviceName).toEqual('Dynamo');
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Dynamo');
+      });
+
+      it('responds with lackluster if dynamoDB responds with no tables', async () => {
+        const interceptor = dynamoDB.post(dynamoMockPath);
+        nock.removeInterceptor(interceptor);
+
+        dynamoDB.post(dynamoMockPath).reply(200, '{"TableNames":[]}');
+
+        const response = await request.get('/health_check');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Dynamo');
+      });
     });
 
-    it('responds with lackluster if govDelivery does not report as healthy', async () => {
-      const interceptor = govDelivery.get(govDeliveryMockPath);
-      nock.removeInterceptor(interceptor);
+    describe('govDelivery', () => {
+      it('responds with lackluster if govDelivery path responds with 500', async () => {
+        const interceptor = govDelivery.get(govDeliveryMockPath);
+        nock.removeInterceptor(interceptor);
 
-      govDelivery.post(govDeliveryMockPath).reply(500);
+        govDelivery.post(govDeliveryMockPath).reply(500);
 
-      const response = await request.get('/health_check');
+        const response = await request.get('/health_check');
 
-      expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('lackluster');
-      expect(response.body.failedHealthChecks.length).toEqual(1);
-      expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-      expect(response.body.failedHealthChecks[0].serviceName).toEqual('GovDelivery');
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('GovDelivery');
+      });
+
+      it('responds with lackluster if govDelivery path responds with 404', async () => {
+        const interceptor = govDelivery.get(govDeliveryMockPath);
+        nock.removeInterceptor(interceptor);
+
+        govDelivery.post(govDeliveryMockPath).reply(404);
+
+        const response = await request.get('/health_check');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('GovDelivery');
+      });
     });
 
-    it('responds with lackluster if slack does not report as healthy', async () => {
-      const interceptor = slack.get(slackMockPath);
-      nock.removeInterceptor(interceptor);
+    describe('slack', () => {
+      it('responds with lackluster if slack path responds with 500', async () => {
+        const interceptor = slack.get(slackMockPath);
+        nock.removeInterceptor(interceptor);
 
-      slack.post(slackMockPath).reply(500);
+        slack.post(slackMockPath).reply(500);
 
-      const response = await request.get('/health_check');
+        const response = await request.get('/health_check');
 
-      expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('lackluster');
-      expect(response.body.failedHealthChecks.length).toEqual(1);
-      expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-      expect(response.body.failedHealthChecks[0].serviceName).toEqual('Slack');
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Slack');
+      });
+
+      it('responds with lackluster if slack path responds with "200, {ok: false}"', async () => {
+        const interceptor = slack.get(slackMockPath);
+        nock.removeInterceptor(interceptor);
+
+        slack.post(slackMockPath).reply(200, {ok: false});
+
+        const response = await request.get('/health_check');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.healthStatus).toEqual('lackluster');
+        expect(response.body.failedHealthChecks.length).toEqual(1);
+        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
+        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Slack');
+      });
     });
   });
 });
