@@ -1,18 +1,31 @@
+######################################################################
+#  Developer Portal Backend CodeBuild CI
+#  
+#
+# Tool Links:
+#  - CodeBuild - https://docs.aws.amazon.com/codebuild/index.html
+#  - CodeBuild Environmental Variables - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+#  - Runner for CodeBuild Enironment - https://github.com/department-of-veterans-affairs/lighthouse-codebuild-containers/tree/main/docker-runner
+#  - AWS CLI 2.0 - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html
+# 
+######################################################################
 version: 0.2
-
 phases:
   install:
-    runtime-versions:
-      docker: 18
+    commands:
+      # There is considerable slow down in the provisioning phase when using Amazon provided images.
+      # Therefore we use our own Alpine based image. In order to activate the Docker Daemon these lines are needed.
+      - /usr/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
   pre_build:
     commands:
       - echo Logging into ECR
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - echo Starting CI...
       - echo Building the CI Docker image...
       - docker build --pull --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - docker images
-      - echo Linting...
+      - echo Running Lint tests...
       - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run lint
       - echo Running CI tests
       - docker run --cidfile $CODEBUILD_SRC_DIR/ci.cid --entrypoint '' -w "/home/node" -e TEST_REPORT_PATH=/home/node -i --env-file '.env.test' dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run test-ci
