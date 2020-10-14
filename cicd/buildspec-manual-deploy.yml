@@ -38,8 +38,8 @@ phases:
   pre_build:
     commands:
     - echo Logging into ECR
-      - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-    - slackpost.sh -started "Beginning a deploy for ${FRIENDLY_NAME} in envs - ${DEPLOY_ENVS}..."
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+    - slackpost.sh -t started "Beginning a deploy for ${FRIENDLY_NAME} in envs - ${DEPLOY_ENVS}..."
     - echo Getting latest tag...
     # To get the latest release version, we will increment the last version number found in Github
     - |
@@ -65,10 +65,10 @@ phases:
             -e "${SERVICE}" AWS_APP_NAME "${FRIENDLY_NAME}" \
             --timeout 1200 "${CLUSTER}" "${SERVICE}" \
             | tee "$CODEBUILD_SRC_DIR"/deploy_output.txt; then
-            slackpost.sh -success "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} complete."
+            slackpost.sh -t success "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} complete."
           else
             PROJECT=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $1}')
             BUILD=$(echo "${CODEBUILD_BUILD_ID}"|awk -F":" '{print $2}')
-            slackpost.sh -failure  "$(cat ${CODEBUILD_SRC_DIR}/deploy_output.txt)" "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
+            slackpost.sh -t failure  "$(cat ${CODEBUILD_SRC_DIR}/deploy_output.txt)" "Deploy of version ${DEPLOY_TAG} of ${SERVICE_NAME} to ${ENV} failed."
           fi
         done
