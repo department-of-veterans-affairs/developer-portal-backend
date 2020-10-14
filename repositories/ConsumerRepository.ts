@@ -3,13 +3,11 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoService from '../services/DynamoService';
 import User from '../models/User';
 
-const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
-
 export default class ConsumerRepository {
-  private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
+  private tableName: string = process.env.DYNAMODB_TABLE || '';
   private dynamoService: DynamoService;
 
-  private removeDuplicateUsers(consumer: User[]): User[] {
+  private removeDuplicates(consumer: User[]): User[] {
     // Instead of using a Set to remove duplicate emails, we use a Map.
     // This gives us easy entry if we want to merge user fields. For instance,
     // we might want to merge the oauth redirect uris or use the latest tosAccepted
@@ -27,7 +25,7 @@ export default class ConsumerRepository {
     this.dynamoService = dynamoService;
   }
 
-  public async getConsumer(apiFilter: string[] = []): Promise<User[]> {
+  public async getConsumers(apiFilter: string[] = []): Promise<User[]> {
 
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
@@ -81,7 +79,7 @@ export default class ConsumerRepository {
       });
     });
 
-    const uniqueUsersResults = this.removeDuplicateUsers(results);
+    const uniqueUsersResults = this.removeDuplicates(results);
     return uniqueUsersResults;
   }
 

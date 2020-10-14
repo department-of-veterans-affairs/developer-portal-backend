@@ -56,15 +56,5 @@ describe('ConsumerReportService', () => {
       expect(report).toContain('wizz@higherbeings.com');
     });
 
-    it('returns a csv of filtered users based on the api list given', async () => {
-
-      mockScan.mockResolvedValue(mockedUsersAB);
-
-      const reportText = 'email,first_Name,last_Name,APIs\nfbag@hobbiton.com,Frodo,Baggins,ab';
-      const apiList = ['ab'];
-      const report = await consumerReportServ.generateCSVReport(apiList);
-      
-      expect(report).toContain(reportText);
-    });
   });
 });

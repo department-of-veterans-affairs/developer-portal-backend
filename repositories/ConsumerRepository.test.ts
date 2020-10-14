@@ -41,7 +41,7 @@ describe('ConsumerRepository', ()=> {
     scan: mockScan,
   } as unknown as DynamoService;
 
-  const ConsumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
+  const consumerRepo: ConsumerRepository = new ConsumerRepository(mockDynamoService);
 
   beforeEach(() => {
     mockScan.mockReset();
@@ -51,18 +51,30 @@ describe('ConsumerRepository', ()=> {
     it('returns all users when no api list is given', async () => {
       mockScan.mockResolvedValue(mockUserList);
 
-      const users: User[] = await ConsumerRepo.getConsumer();
+      const users: User[] = await consumerRepo.getConsumers();
 
       expect(users).toEqual(expectedMockedUsers);
     });
 
-    it('should call dynamo scan method', async () => {
-
-      mockScan.mockResolvedValue([mockedUsersAB]);
+    it('should call dynamo scan method with proper params', async () => { 
+      mockScan.mockResolvedValue([mockedUsersAB]);  
+      
+      const tableName = process.env.DYNAMODB_TABLE;
+      const projectionExp = 'email, firstName, lastName, apis'
+      const expressionAttributeValues = {":api_ab": "ab"}
+      const filterExpression = "contains(apis, :api_ab)"
 
       const apiList: string[] = ['ab'];
-      const users: User[] = await ConsumerRepo.getConsumer(apiList);
-      expect(mockScan).toHaveBeenCalled();
+      const users: User[] = await consumerRepo.getConsumers(apiList);
+
+      expect(mockScan)
+        .toHaveBeenCalledWith(
+          tableName, 
+          projectionExp, 
+          {
+            ExpressionAttributeValues: expressionAttributeValues,
+            FilterExpression: filterExpression,
+          });
     });
   });
 

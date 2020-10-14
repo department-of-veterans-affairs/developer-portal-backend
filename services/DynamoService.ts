@@ -1,5 +1,5 @@
 import { AWSError, DynamoDB } from 'aws-sdk';
-import { ScanInput, ScanOutput, QueryOutput, DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
 import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';

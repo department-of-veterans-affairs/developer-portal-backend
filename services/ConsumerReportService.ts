@@ -11,7 +11,7 @@ export default class ConsumerReportService {
   }
 
   public async generateCSVReport(apiList: string[] = []): Promise<string> {
-    const consumers: User[] = await this.consumerRepository.getConsumer(apiList);
+    const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
 
     const data = consumers.map(consumer => (
       {
