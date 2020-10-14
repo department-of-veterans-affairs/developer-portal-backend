@@ -1,5 +1,4 @@
-CICD Workflow
-
+# CICD Workflow
 
 ## CICD scripts are included in the Docker image used for the Codebuild job 
 - /usr/local/bin/increment.sh
