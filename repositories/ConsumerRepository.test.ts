@@ -60,9 +60,9 @@ describe('ConsumerRepository', ()=> {
       mockScan.mockResolvedValue([mockedUsersAB]);  
       
       const tableName = process.env.DYNAMODB_TABLE;
-      const projectionExp = 'email, firstName, lastName, apis'
-      const expressionAttributeValues = {":api_ab": "ab"}
-      const filterExpression = "contains(apis, :api_ab)"
+      const projectionExp = 'email, firstName, lastName, apis';
+      const expressionAttributeValues = {":api_ab": "ab"};
+      const filterExpression = "contains(apis, :api_ab)";
 
       const apiList: string[] = ['ab'];
       const users: User[] = await consumerRepo.getConsumers(apiList);
