@@ -8,9 +8,9 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 
 export default function healthCheckHandler(kong: KongService,
-  okta: OktaService | undefined,
+  okta: OktaService,
   dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
+  govdelivery: GovDeliveryService,
   slack: SlackService): RequestHandler {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
