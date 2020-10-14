@@ -1,7 +1,7 @@
 CICD Workflow
 
 
-## CICD scripts are included in the Docker image used for the Codebuild job: vasdvp/lighthouse-codebuild-dsva-fargate:latest
+## CICD scripts are included in the Docker image used for the Codebuild job 
 - /usr/local/bin/increment.sh
   - smart incrementer for version numbers
 - /usr/local/bin/tag_containers.py
