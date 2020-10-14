@@ -215,7 +215,6 @@ describe('SlackService', () => {
     try {
       await service.sendSuccessMessage(message, 'New User Application');
     } catch (err) {
-      console.log(err);
       expect(err.message).toEqual('channel_not_found');
     }
   });
