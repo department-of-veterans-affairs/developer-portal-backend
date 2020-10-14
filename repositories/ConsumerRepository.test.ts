@@ -65,7 +65,7 @@ describe('ConsumerRepository', ()=> {
       const filterExpression = "contains(apis, :api_ab)";
 
       const apiList: string[] = ['ab'];
-      const users: User[] = await consumerRepo.getConsumers(apiList);
+      await consumerRepo.getConsumers(apiList);
 
       expect(mockScan)
         .toHaveBeenCalledWith(

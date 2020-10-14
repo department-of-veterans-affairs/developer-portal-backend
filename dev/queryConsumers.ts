@@ -26,6 +26,8 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
   throw new Error('Must run the consumer report utility in an MFA session');
 }
 
+process.env.DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || 'dvp-prod-developer-portal-users';
+
 config.update({
   region: 'us-gov-west-1'
 });
@@ -39,9 +41,9 @@ const dynamoService = new DynamoService({
 const consumerRepo = new ConsumerRepository(dynamoService);
 const consumerReportService = new ConsumerReportService(consumerRepo);
 
-const parsedApis: string[] = args.apis.split(',');
+const parsedApis: string[] = args.apis ? args.apis.split(',') : [];
 
-consumerReportService.generateCSVReport(parsedApis)
+consumerReportService.generateCSVReport({apiList: parsedApis, writeToDisk: true})
   .then((report: string) => {
     console.log(report);
   })

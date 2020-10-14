@@ -2,6 +2,11 @@ import User from '../models/User';
 import ConsumerRepository from '../repositories/ConsumerRepository';
 import ObjectsToCsv from 'objects-to-csv';
 
+interface CSVReportOptions {
+  apiList: string[];
+  writeToDisk: boolean;
+}
+
 export default class ConsumerReportService {
 
   private consumerRepository: ConsumerRepository;
@@ -10,9 +15,10 @@ export default class ConsumerReportService {
     this.consumerRepository = consumerRepository;
   }
 
-  public async generateCSVReport(apiList: string[] = []): Promise<string> {
-    const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
+  public async generateCSVReport({apiList = [], writeToDisk =  true}: CSVReportOptions): Promise<string> {
 
+    const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
+    
     const data = consumers.map(consumer => (
       {
         email: consumer.email,
@@ -23,9 +29,11 @@ export default class ConsumerReportService {
     ));
 
     const csv = new ObjectsToCsv(data);
- 
-    // Save to file:
-    await csv.toDisk('./consumer-report.csv');
+      
+    if (writeToDisk) {
+      // Save to file:
+      await csv.toDisk('./consumer-report.csv');
+    }
     const consumerReport = await csv.toString();
 
     return consumerReport;
