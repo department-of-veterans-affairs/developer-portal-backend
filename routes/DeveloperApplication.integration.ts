@@ -198,6 +198,40 @@ describe('/developer_application', () => {
         });
       });
     });
+
+    it('succeeds even if govDelivery fails', async () => {
+      const path = '/messages/email';
+      const interceptor = govDelivery.post(path);
+      nock.removeInterceptor(interceptor);
+
+      govDelivery.post(path).reply(500);
+
+      const response = await request.post('/developer_application').send(devAppRequest);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        clientID: 'gollum',
+        clientSecret: 'mordor',
+        token: 'my-precious',
+      });
+    });
+
+    it('succeeds even if slack fails', async () => {
+      const path = '/api/chat.postMessage';
+      const interceptor = slack.post(path);
+      nock.removeInterceptor(interceptor);
+
+      slack.post(path).reply(500);
+
+      const response = await request.post('/developer_application').send(devAppRequest);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        clientID: 'gollum',
+        clientSecret: 'mordor',
+        token: 'my-precious',
+      });
+    });
   });
 
   describe('500 service failures', () => {
