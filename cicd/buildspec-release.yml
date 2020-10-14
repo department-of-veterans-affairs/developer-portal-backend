@@ -40,11 +40,11 @@ phases:
   pre_build:
     commands:
     - echo Logging into ECR
-      - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
     - echo Setting tag for new release...
     # To get the new release version, we will increment the last version number found in Github
     - NEW_RELEASE_TAG=$(increment.sh $(hub tag|sort --version-sort |tail -1)); export NEW_RELEASE_TAG
-    - slackpost.sh -started "Creating and tagging a new release for ${FRIENDLY_NAME}..."
+    - slackpost.sh -t started "Creating and tagging a new release for ${FRIENDLY_NAME}..."
     - echo Creating release...
     # We use the 'hub' command to create a release here with the contents of 'master'. If the command exits successfully, we then
     # git fetch to get the new tag created, and we use that tag to get a commit SHA for the new release.
@@ -62,18 +62,18 @@ phases:
         fi
         echo Tagging ECR image...
         if python3 /usr/local/bin/tag_containers.py -n ${CI_JOB_NAME} -i ${TAG_COMMIT_HASH} -r ${REPOSITORY} -v ${NEW_RELEASE_TAG} -o ${CODEBUILD_SRC_DIR}/tag_output.txt; then
-          slackpost.sh -success "Tagged ${REPOSITORY}:${NEW_RELEASE_TAG}"
+          slackpost.sh -t success "Tagged ${REPOSITORY}:${NEW_RELEASE_TAG}"
         else
           PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
           BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
           TAG_OUTPUT=$(cat ${CODEBUILD_SRC_DIR}/tag_output.txt)
-          slackpost.sh -failure "$TAG_OUTPUT\nTagging failed."
+          slackpost.sh -t failure "$TAG_OUTPUT\nTagging failed."
           exit 1
         fi
       else
         PROJECT=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $1}')
         BUILD=$(echo ${CODEBUILD_BUILD_ID}|awk -F":" '{print $2}')
-        slackpost.sh -failure "Release failed."
+        slackpost.sh -t failure "Release failed."
         exit 1
       fi
   build:
