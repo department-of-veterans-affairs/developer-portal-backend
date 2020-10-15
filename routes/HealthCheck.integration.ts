@@ -32,9 +32,11 @@ describe('/health_check', () => {
     it('sends 200 when all services report as healthy', async () => {
       const response = await request.get('/health_check');
 
+      expect(response.body).toEqual({
+        healthStatus: 'vibrant',
+        failedHealthChecks: [],
+      });
       expect(response.status).toEqual(200);
-      expect(response.body.healthStatus).toEqual('vibrant');
-      expect(response.body.failedHealthChecks).toEqual([]);
     });
   });
 
@@ -48,11 +50,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Kong',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Kong');
       });
 
       it('responds with lackluster if kong path responds with wrong consumer', async () => {
@@ -63,11 +69,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Kong',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Kong');
       });
     });
 
@@ -80,11 +90,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Okta',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Okta');
       });
 
       it('responds with lackluster if okta path responds with 404', async () => {
@@ -95,11 +109,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Okta',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Okta');
       });
     });
 
@@ -112,11 +130,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Dynamo',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Dynamo');
       });
 
       it('responds with lackluster if dynamoDB responds with no tables', async () => {
@@ -127,11 +149,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Dynamo',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Dynamo');
       });
     });
 
@@ -144,11 +170,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'GovDelivery',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('GovDelivery');
       });
 
       it('responds with lackluster if govDelivery path responds with 404', async () => {
@@ -159,11 +189,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'GovDelivery',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('GovDelivery');
       });
     });
 
@@ -176,11 +210,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Slack',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Slack');
       });
 
       it('responds with lackluster if slack path responds with "200, {ok: false}"', async () => {
@@ -191,11 +229,15 @@ describe('/health_check', () => {
 
         const response = await request.get('/health_check');
 
+        expect(response.body).toEqual({
+          healthStatus: 'lackluster',
+          failedHealthChecks: [{
+            healthy: false,
+            serviceName: 'Slack',
+            err: expect.any(Object),
+          }],
+        });
         expect(response.status).toEqual(200);
-        expect(response.body.healthStatus).toEqual('lackluster');
-        expect(response.body.failedHealthChecks.length).toEqual(1);
-        expect(response.body.failedHealthChecks[0].healthy).toEqual(false);
-        expect(response.body.failedHealthChecks[0].serviceName).toEqual('Slack');
       });
     });
   });
