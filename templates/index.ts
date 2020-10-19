@@ -5,7 +5,7 @@ export const WELCOME_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 {{# if token_issued}}
 <div>Here's your key for accessing the development environment: <pre>{{ key }}</pre></div><br />
 
-<div>Your client username is: <pre>{{ kongUsername }}</pre> please reference this in any support request.</div><br />
+<div>Your client username is: <pre>{{ kongUsername }}</pre>. Please reference this in any support request.</div><br />
 
 <div>You can use your key by including it as an HTTP request header <pre>apiKey: {{ key }}</pre> in your requests to the API. You can find additional documentation at <a href="https://developer.va.gov">developer.va.gov</a></div><br />
 {{/if}}
