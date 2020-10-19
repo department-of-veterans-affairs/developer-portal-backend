@@ -14,7 +14,7 @@ export default function healthCheckHandler(kong: KongService,
   slack: SlackService): RequestHandler {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack].filter(service => !!service) as MonitoredService[];
+      const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack];
       const healthCheck = new HealthCheck(services);
       await healthCheck.check();
       res.json(healthCheck.getResults());
