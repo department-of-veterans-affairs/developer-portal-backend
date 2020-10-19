@@ -67,3 +67,5 @@ dist
 .lesshst
 .config
 test-report.xml
+
+consumer-report.csv
