@@ -100,25 +100,6 @@ describe('/health_check', () => {
         });
         expect(response.status).toEqual(200);
       });
-
-      it('responds with lackluster if okta path responds with 404', async () => {
-        const interceptor = okta.get(oktaMockPath);
-        nock.removeInterceptor(interceptor);
-
-        okta.get(oktaMockPath).reply(404, {});
-
-        const response = await request.get('/health_check');
-
-        expect(response.body).toEqual({
-          healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Okta',
-            err: expect.any(Object),
-          }],
-        });
-        expect(response.status).toEqual(200);
-      });
     });
 
     describe('dynamoDB', () => {
@@ -181,11 +162,11 @@ describe('/health_check', () => {
         expect(response.status).toEqual(200);
       });
 
-      it('responds with lackluster if govDelivery path responds with 404', async () => {
+      it('responds with lackluster if govDelivery path responds with 401', async () => {
         const interceptor = govDelivery.get(govDeliveryMockPath);
         nock.removeInterceptor(interceptor);
 
-        govDelivery.post(govDeliveryMockPath).reply(404);
+        govDelivery.post(govDeliveryMockPath).reply(401);
 
         const response = await request.get('/health_check');
 
