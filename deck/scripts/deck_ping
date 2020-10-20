@@ -1,0 +1,4 @@
+#!/bin/bash
+
+output=$(deck ping)
+echo "$output"

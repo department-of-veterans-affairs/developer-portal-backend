@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# != 1 ]; then
+   echo "Must specify a filename. Example: 'seed' or 'default'"
+   exit 1;
+fi
+
+output=$(deck dump --output-file ../configs/$1)
+echo "Dump completed. Please refer to ../configs/$1.yaml"

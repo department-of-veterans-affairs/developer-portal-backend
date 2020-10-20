@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# != 1 ]; then
+   echo "Must specify a file to sync - pulls from ../configs/*"
+   exit 1;
+fi
+
+output=$(deck sync --state ../configs/$1.yaml)
+echo "$output"
