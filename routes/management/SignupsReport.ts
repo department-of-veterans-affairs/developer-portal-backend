@@ -51,10 +51,10 @@ export default function signupsReportHandler(signups: SignupMetricsService, slac
 
     const allTimeQuery = signups.countSignups({});
 
-    const [spanResult, allTimeResult] = await Promise.all([spanQuery, allTimeQuery]);
-    const formattedEndDate = end.utc().format('MM/DD/YYYY');
-
     try {
+      const [spanResult, allTimeResult] = await Promise.all([spanQuery, allTimeQuery]);
+      const formattedEndDate = end.utc().format('MM/DD/YYYY');
+
       await slack.sendSignupsMessage(span, formattedEndDate, spanResult, allTimeResult);
       res.sendStatus(200);
     } catch(err) {
