@@ -245,9 +245,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed creating kong consumer',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed creating kong consumer');
-        expect(response.body.message).toContain('500');
       });
 
       it('sends 500 if it cannot POST to /internal/admin/consumers/key-auth', async () => {
@@ -259,9 +262,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed creating kong consumer',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed creating kong consumer');
-        expect(response.body.message).toContain('500');
       });
 
       it('sends 500 if it cannot POST to /internal/admin/consumers/FellowshipBaggins/acls', async () => {
@@ -273,9 +279,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed creating kong consumer',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed creating kong consumer');
-        expect(response.body.message).toContain('500');
       });
     });
 
@@ -289,9 +298,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed saving to okta',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed saving to okta');
-        expect(response.body.message).toContain('500');
       });
 
       it('sends 500 if it cannot PUT to /api/v1/apps/123/groups/IDME_GROUP_ID', async () => {
@@ -303,9 +315,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed saving to okta',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed saving to okta');
-        expect(response.body.message).toContain('500');
       });
 
       it('sends 500 if it cannot GET /api/v1/authorizationServers/API_ENDPOINT/policies', async () => {
@@ -318,9 +333,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed saving to okta',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed saving to okta');
-        expect(response.body.message).toContain('500');
       });
 
       it('sends 500 if it cannot PUT to /api/v1/authorizationServers/API_ENDPOINT/policies/POLICY_ID', async () => {
@@ -333,9 +351,12 @@ describe('/developer_application', () => {
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed saving to okta',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed saving to okta');
-        expect(response.body.message).toContain('500');
       });
     });
 
@@ -346,14 +367,18 @@ describe('/developer_application', () => {
         const interceptor = dynamoDB.post(path);
         nock.removeInterceptor(interceptor);
 
-        dynamoDB.post('/').reply(500);
+        // For some reason putItem makes two calls...
+        dynamoDB.post('/').reply(500).post('/').reply(500);
 
         const response = await request.post('/developer_application').send(devAppRequest);
 
+        expect(response.body).toEqual({
+          action: 'failed saving to dynamo',
+          message: expect.stringContaining('500'),
+          stack: expect.any(String),
+        });
         expect(response.status).toEqual(500);
-        expect(response.body.action).toEqual('failed saving to dynamo');
       });
     });
   });
-
 });
