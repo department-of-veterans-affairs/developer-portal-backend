@@ -44,14 +44,14 @@ export default function signupsReportHandler(signups: SignupMetricsService, slac
     const span = req.query.span || 'week';
     const { start, end } = setStartAndEndDates(req.query.start, req.query.end, span);
 
-    const spanQuery = signups.countSignups({
-      startDate: start,
-      endDate: end,
-    });
-
-    const allTimeQuery = signups.countSignups({});
-
     try {
+      const spanQuery = signups.countSignups({
+        startDate: start,
+        endDate: end,
+      });
+
+      const allTimeQuery = signups.countSignups({});
+
       const [spanResult, allTimeResult] = await Promise.all([spanQuery, allTimeQuery]);
       const formattedEndDate = end.utc().format('MM/DD/YYYY');
 
