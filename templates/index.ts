@@ -13,6 +13,7 @@ export const WELCOME_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 {{#if oauth }}
 <div>Here's your OAuth Client ID: <pre>{{ clientID }}</pre></div><br />
 
+{{! pkce auth flow wont have a client secret }}
 {{#if clientSecret}}
 <div>Here's your OAuth Client Secret: <pre>{{ clientSecret }}</pre></div><br />
 {{/if}}
