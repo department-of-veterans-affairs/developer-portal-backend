@@ -44,10 +44,107 @@ services:
     regex_priority: 0
     strip_path: true
     https_redirect_status_code: 426
+- connect_timeout: 60000
+  host: cat-fact.herokuapp.com
+  name: cats
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: cats
+    paths:
+    - /meow
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+- connect_timeout: 60000
+  host: randomfox.ca
+  name: fox
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: fox-image
+    paths:
+    - /fox
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+      - name: acl
+        config:
+          blacklist: null
+          hide_groups_header: true
+          whitelist: 
+            - test-users
+            - guacamole-fans
+        enabled: true
+        run_on: first
+        protocols:
+        - http
+        - https
+- connect_timeout: 60000
+  host: official-joke-api.appspot.com
+  name: jokes
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: random-joke
+    paths:
+    - /joke
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: acl
+      config:
+        blacklist: null
+        hide_groups_header: true
+        whitelist: 
+          - test-users
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
 consumers:
 - username: _internal_DeveloperPortal
   keyauth_credentials:
   - key: taco
+- username: bob
+  keyauth_credentials:
+  - key: burrito
+  acls:
+  - group: test-users
+- username: karen
+  keyauth_credentials:
+  - key: enchilada
+  acls:
+  - group: test-users
+- username: frank
+  keyauth_credentials:
+  - key: guacamole
+  acls:
+  - group: guacamole-fans
 plugins:
 - name: key-auth
   config:
