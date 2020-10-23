@@ -1,54 +1,58 @@
 import HealthCheck from './HealthCheck';
 import logger from '../config/logger';
 import Sentry from '../config/Sentry';
+import { MonitoredService } from '../types';
 
 describe('HealthCheck model', () => {
-  let healthCheck: HealthCheck;
+  describe('check()', () => {
+    const healthyService = ({
+      healthCheck: () =>
+        Promise.resolve({ serviceName: "healthyService", healthy: true }),
+    } as unknown) as MonitoredService;
 
-  beforeEach(() => {
-    healthCheck = new HealthCheck;
-  });
+    const unHealthyService = ({
+      healthCheck: () =>
+        Promise.resolve({
+          serviceName: "unHealthyService",
+          healthy: false,
+          err: new Error(
+            `Kong did not return the expected consumer: { message: 'Not found' }`
+          ),
+        }),
+    } as unknown) as MonitoredService;
 
-  describe('addResult', () => {
-    it('healthStatus remains "vibrant" if a result is healthy', () => {
-      const mockResult = { serviceName: 'Kong', healthy: true };
-      healthCheck.addResult(mockResult);
+    it('healthStatus remains "vibrant" if a result is healthy', async () => {
+      const healthCheck = new HealthCheck([healthyService]);
+      await healthCheck.check();
 
-      expect(healthCheck.healthCheckResults.healthStatus).toEqual('vibrant');
+      expect(healthCheck.getResults().healthStatus).toEqual('vibrant');
+      expect(healthCheck.getResults().failedHealthChecks).toEqual([]);
     });
 
-    it('sets healthStatus to "lackluster" if a result is unhealthy', () => {
-      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
-      const mockResult = { serviceName: 'Kong', healthy: false, err: err };
-      healthCheck.addResult(mockResult);
-      
-      expect(healthCheck.healthCheckResults.healthStatus).toEqual('lackluster');
-    });
-    
-    it('adds result to failedHealthChecks array if a result is unhealthy', () => {
-      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
-      const mockResult = { serviceName: 'Kong', healthy: false, err: err };
-      healthCheck.addResult(mockResult);
+    it('healthStatus is "lackluster" if one of the services result is unhealthy', async () => {
+      const healthCheck = new HealthCheck([unHealthyService, healthyService]);
+      await healthCheck.check();
 
-      expect(healthCheck.healthCheckResults.failedHealthChecks).toContain(mockResult);
+      expect(healthCheck.getResults().healthStatus).toEqual('lackluster');
+      expect(healthCheck.getResults().failedHealthChecks.length).toEqual(1);
+      expect(healthCheck.getResults().failedHealthChecks[0].healthy).toEqual(false);
+      expect(healthCheck.getResults().failedHealthChecks[0].serviceName).toEqual('unHealthyService');
     });
 
-    it('sends result to logger if a result is unhealthy', () => {
+    it('sends result to logger if a result is unhealthy', async () => {
       logger.error = jest.fn();
 
-      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
-      const mockResult = { serviceName: 'Kong', healthy: false, err: err };
-      healthCheck.addResult(mockResult);
+      const healthCheck = new HealthCheck([unHealthyService, healthyService]);
+      await healthCheck.check();
 
       expect(logger.error).toHaveBeenCalled();
     });
 
-    it('sends result to Sentry if a result is unhealthy', () => {
+    it('sends result to Sentry if a result is unhealthy', async () => {
       Sentry.captureException = jest.fn();
 
-      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
-      const mockResult = { serviceName: 'Kong', healthy: false, err: err };
-      healthCheck.addResult(mockResult);
+      const healthCheck = new HealthCheck([unHealthyService, healthyService]);
+      await healthCheck.check();
 
       expect(Sentry.captureException).toHaveBeenCalled();
     });
