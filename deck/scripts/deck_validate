@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# != 1 ]; then
+   echo "Must specify a filename. Pulls from ../configs/*"
+   exit 1;
+fi
+
+output=$(deck validate --state ../configs/$1.yaml)
+echo "$output"

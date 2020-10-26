@@ -63,6 +63,17 @@ services:
     regex_priority: 0
     strip_path: true
     https_redirect_status_code: 426
+  plugins:
+  - name: ip-restriction
+    config:
+      blacklist: null
+      whitelist:
+      - 172.24.0.1
+    enabled: true
+    run_on: first
+    protocols:
+    - http
+    - https
 - connect_timeout: 60000
   host: randomfox.ca
   name: fox
@@ -126,6 +137,61 @@ services:
       protocols:
       - http
       - https
+    - name: ip-restriction
+      route: random-joke
+      config: 
+        blacklist: null
+        whitelist:
+        - 172.24.0.1
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+  - name: humor-joke
+    paths:
+    - /humor
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: acl
+      config:
+        blacklist: null
+        hide_groups_header: true
+        whitelist: 
+          - test-users
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+    - name: rate-limiting
+      config:
+        day: null
+        fault_tolerant: true
+        hide_client_headers: false
+        hour: null
+        limit_by: consumer
+        minute: 5
+        month: null
+        policy: local
+        redis_database: 0
+        redis_host: null
+        redis_password: null
+        redis_port: 6379
+        redis_timeout: 2000
+        second: 2
+        year: null
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
 - connect_timeout: 60000
   host: httpbin.org
   name: termination
@@ -153,6 +219,62 @@ services:
         content_type: null
         message: Hello from the Terminator!
         status_code: 200
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+- connect_timeout: 60000
+  host: httpbin.org
+  name: echo
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: echo-route
+    paths:
+    - /echo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: request-transformer
+      route: echo-route
+      config: 
+        add:
+          body: []
+          headers: []
+          querystring: []
+        append:
+          body: []
+          headers: []
+          querystring: []
+        http_method: null
+        remove:
+          body:
+          - hasBody
+          headers:
+          - hasHeader
+          querystring:
+          - hasQuery
+        rename:
+          body: []
+          headers: []
+          querystring: []
+        replace:
+          body:
+          - replaceBody:replaced
+          headers:
+          - replaceHeader:replaced
+          querystring:
+          - replaceQuery:replaced
+          uri: null
       enabled: true
       run_on: first
       protocols:
@@ -208,6 +330,30 @@ plugins:
     redis_timeout: 2000
     second: 5
     year: null
+  enabled: true
+  run_on: first
+  protocols:
+  - http
+  - https
+- name: rate-limiting
+  config:
+    day: null
+    fault_tolerant: true
+    hide_client_headers: false
+    hour: null
+    limit_by: consumer
+    minute: 2
+    month: null
+    policy: local
+    redis_database: 0
+    redis_host: null
+    redis_password: null
+    redis_port: 6379
+    redis_timeout: 2000
+    second: 1
+    year: null
+  consumer: karen
+  route: humor-joke
   enabled: true
   run_on: first
   protocols:
