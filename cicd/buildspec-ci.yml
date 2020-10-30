@@ -24,7 +24,7 @@ phases:
   pre_build:
     commands:
       - echo Logging into Docker
-      - echo "${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
+      - echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
       - echo Starting CI...
       - echo Building the CI Docker image...
       - docker build --pull --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
