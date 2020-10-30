@@ -75,156 +75,6 @@ services:
     - http
     - https
 - connect_timeout: 60000
-  host: randomfox.ca
-  name: fox
-  port: 80
-  protocol: http
-  read_timeout: 60000
-  retries: 2
-  write_timeout: 60000
-  routes:
-  - name: fox-image
-    paths:
-    - /fox
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    strip_path: true
-    https_redirect_status_code: 426
-    plugins:
-      - name: acl
-        config:
-          blacklist: null
-          hide_groups_header: true
-          whitelist: 
-            - test-users
-            - guacamole-fans
-        enabled: true
-        run_on: first
-        protocols:
-        - http
-        - https
-- connect_timeout: 60000
-  host: official-joke-api.appspot.com
-  name: jokes
-  port: 80
-  protocol: http
-  read_timeout: 60000
-  retries: 2
-  write_timeout: 60000
-  routes:
-  - name: random-joke
-    paths:
-    - /joke
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    strip_path: true
-    https_redirect_status_code: 426
-    plugins:
-    - name: acl
-      config:
-        blacklist: null
-        hide_groups_header: true
-        whitelist: 
-          - test-users
-      enabled: true
-      run_on: first
-      protocols:
-      - http
-      - https
-    - name: ip-restriction
-      route: random-joke
-      config: 
-        blacklist: null
-        whitelist:
-        - 172.24.0.1
-      enabled: true
-      run_on: first
-      protocols:
-      - http
-      - https
-  - name: humor-joke
-    paths:
-    - /humor
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    strip_path: true
-    https_redirect_status_code: 426
-    plugins:
-    - name: acl
-      config:
-        blacklist: null
-        hide_groups_header: true
-        whitelist: 
-          - test-users
-      enabled: true
-      run_on: first
-      protocols:
-      - http
-      - https
-    - name: rate-limiting
-      config:
-        day: null
-        fault_tolerant: true
-        hide_client_headers: false
-        hour: null
-        limit_by: consumer
-        minute: 5
-        month: null
-        policy: local
-        redis_database: 0
-        redis_host: null
-        redis_password: null
-        redis_port: 6379
-        redis_timeout: 2000
-        second: 2
-        year: null
-      enabled: true
-      run_on: first
-      protocols:
-      - http
-      - https
-- connect_timeout: 60000
-  host: httpbin.org
-  name: termination
-  port: 80
-  protocol: http
-  read_timeout: 60000
-  retries: 2
-  write_timeout: 60000
-  routes:
-  - name: termination-route
-    paths:
-    - /arnold
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    strip_path: true
-    https_redirect_status_code: 426
-    plugins:
-    - name: request-termination
-      route: termination-route
-      config:
-        body: null
-        content_type: null
-        message: Hello from the Terminator!
-        status_code: 200
-      enabled: true
-      run_on: first
-      protocols:
-      - http
-      - https
-- connect_timeout: 60000
   host: httpbin.org
   name: echo
   port: 80
@@ -245,8 +95,7 @@ services:
     https_redirect_status_code: 426
     plugins:
     - name: request-transformer
-      route: echo-route
-      config: 
+      config:
         add:
           body: []
           headers: []
@@ -280,25 +129,154 @@ services:
       protocols:
       - http
       - https
-consumers:
-- username: _internal_DeveloperPortal
-  keyauth_credentials:
-  - key: taco
-- username: bob
-  keyauth_credentials:
-  - key: burrito
-  acls:
-  - group: test-users
-- username: karen
-  keyauth_credentials:
-  - key: enchilada
-  acls:
-  - group: test-users
-- username: frank
-  keyauth_credentials:
-  - key: guacamole
-  acls:
-  - group: guacamole-fans
+- connect_timeout: 60000
+  host: randomfox.ca
+  name: fox
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: fox-image
+    paths:
+    - /fox
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: acl
+      config:
+        blacklist: null
+        hide_groups_header: true
+        whitelist:
+        - test-users
+        - guacamole-fans
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+- connect_timeout: 60000
+  host: official-joke-api.appspot.com
+  name: jokes
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: humor-joke
+    paths:
+    - /humor
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: acl
+      config:
+        blacklist: null
+        hide_groups_header: true
+        whitelist:
+        - test-users
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+    - name: rate-limiting
+      config:
+        day: null
+        fault_tolerant: true
+        hide_client_headers: false
+        hour: null
+        limit_by: consumer
+        minute: 5
+        month: null
+        policy: local
+        redis_database: 0
+        redis_host: null
+        redis_password: null
+        redis_port: 6379
+        redis_timeout: 2000
+        second: 2
+        year: null
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+  - name: random-joke
+    paths:
+    - /joke
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: acl
+      config:
+        blacklist: null
+        hide_groups_header: true
+        whitelist:
+        - test-users
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+    - name: ip-restriction
+      config:
+        blacklist: null
+        whitelist:
+        - 172.24.0.1
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
+- connect_timeout: 60000
+  host: httpbin.org
+  name: termination
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 2
+  write_timeout: 60000
+  routes:
+  - name: termination-route
+    paths:
+    - /arnold
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    strip_path: true
+    https_redirect_status_code: 426
+    plugins:
+    - name: request-termination
+      config:
+        body: null
+        content_type: null
+        message: Hello from the Terminator!
+        status_code: 200
+      enabled: true
+      run_on: first
+      protocols:
+      - http
+      - https
 plugins:
 - name: key-auth
   config:
@@ -336,13 +314,14 @@ plugins:
   - http
   - https
 - name: rate-limiting
+  route: fox-image
   config:
     day: null
     fault_tolerant: true
     hide_client_headers: false
     hour: null
     limit_by: consumer
-    minute: 2
+    minute: 5
     month: null
     policy: local
     redis_database: 0
@@ -350,10 +329,31 @@ plugins:
     redis_password: null
     redis_port: 6379
     redis_timeout: 2000
-    second: 1
+    second: 2
     year: null
+  enabled: true
+  run_on: first
+  protocols:
+  - http
+  - https
+- name: rate-limiting
   consumer: karen
-  route: humor-joke
+  config:
+    day: null
+    fault_tolerant: true
+    hide_client_headers: false
+    hour: null
+    limit_by: consumer
+    minute: 5
+    month: null
+    policy: local
+    redis_database: 0
+    redis_host: null
+    redis_password: null
+    redis_port: 6379
+    redis_timeout: 2000
+    second: 2
+    year: null
   enabled: true
   run_on: first
   protocols:

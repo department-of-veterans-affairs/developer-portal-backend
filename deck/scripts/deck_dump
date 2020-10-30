@@ -5,5 +5,5 @@ if [ $# != 1 ]; then
    exit 1;
 fi
 
-output=$(deck dump --output-file ../configs/$1)
+output=$(deck dump --output-file ../configs/$1 --skip-consumers)
 echo "Dump completed. Please refer to ../configs/$1.yaml"

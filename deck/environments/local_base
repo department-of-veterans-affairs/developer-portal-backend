@@ -1,0 +1,2 @@
+# kong_consumers
+export KONG_ELB="localhost:8001"

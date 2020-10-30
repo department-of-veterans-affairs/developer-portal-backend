@@ -1,0 +1,271 @@
+#!/usr/bin/env bash
+# vim: shiftwidth=4 tabstop=4 expandtab
+
+set -o errexit
+
+scratch_dir=$(mktemp -d)
+trap '[[ -n "$scratch_dir" ]] && [[ -d "$scratch_dir" ]] && rm -r "$scratch_dir"' EXIT
+
+# Creates temp file that will be removed when this script exits.
+function mktmpfile {
+  mktemp -q "${scratch_dir}/kong_consumers.XXXXXXXX"
+}
+
+function usage {
+  echo "$0 <env> list"
+  echo "$0 <env> create <consumer_name>"
+  echo "$0 <env> rename <consumer_id|consumer_name> <new_consumer_name>"
+  echo "$0 <env> show <consumer_id|consumer_name>"
+  echo "$0 <env> show-keys <consumer_id>"
+  echo "$0 <env> acl-add <consumer_id> <group>"
+  echo "$0 <env> revoke <consumer_id|consumer_name>"
+  echo "$0 <env> revoke-key <apikey_id>"
+  echo "$0 <env> gen-key <consumer_id|consumer_name>"
+  echo "$0 <env> add-key <consumer_id|consumer_name> <key>"
+#   echo "$0 <env> shell"
+  exit 1
+}
+
+env="$1"
+case "$env" in
+	help|--help|-h)
+        usage
+        ;;
+    local)
+        source "../environments/${env}_base"
+        ;;
+    *)
+        echo "No such environment."
+        usage
+        ;;
+esac
+
+tmp_consumers=$(mktemp -q)
+# socks="socks5h://127.0.0.1:2001"
+
+function kong_curl {
+    path="$1"
+    shift
+    # curl -u $HTTP_AUTH --proxy "$socks" "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
+    curl "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
+}
+
+function cmd_add_consumer {
+    consumer_name="$1"
+    kong_curl consumers/ -X POST --data "username=${consumer_name}"
+    id_val=$(jq -r '.id' < "$tmp_consumers")
+    if [[ "$id_val" == "null" ]] || [[ -z "$id_val" ]]; then
+        echo "failed to create new consumer"
+        exit 1
+    else
+        echo "Created ${consumer_name} with id: ${id_val}"
+        exit 0
+    fi
+}
+
+function cmd_rename_consumer {
+    local readonly consumer="$1"
+    local readonly username="$2"
+    # manual_consumer_guard "${consumer}"
+    kong_curl "consumers/${consumer}" -X PATCH --data "username=${username}"
+    jq < "$tmp_consumers"
+}
+
+# Fetches a given page of consumers.
+# $1 is a scratch file to write the API response to.
+# $2 is an Kong Admin API path and query string to specify the particular page to fetch.
+function fetch_consumer_list {
+    if [[ -z "$1" ]]; then
+        url_suffix="consumers/"
+    else
+        url_suffix="$1"
+    fi
+    kong_curl "$url_suffix"
+}
+
+# Fetches a complete list of consumers and prints it to stdout in a nicely formatted table.
+function cmd_list_consumers {
+    # A file to accumulate pages worth of consumers.
+    tmp_full_list=$(mktmpfile)
+
+    # Special value for initial page. Subsequent pages use value returned by the API.
+    next_val=""
+
+    while true; do
+        fetch_consumer_list "$next_val"
+        jq '.data[]' < "$tmp_consumers" >> "$tmp_full_list" < "$tmp_consumers"
+        next_val=$(jq -r '.next' < "$tmp_consumers")
+        if [[ "$next_val" == "null" ]]; then
+            break
+        fi
+    done
+
+    jq -r '[.username, .id, (.created_at | todateiso8601)] | @tsv' < "$tmp_full_list" | column -t | sort
+}
+
+function cmd_revoke_consumer_keys {
+    consumerName="$1"
+    kong_curl "consumers/$consumerName/key-auth"
+    keys=$(jq -r ".data[].id" < "$tmp_consumers")
+
+    while read -r keyid; do
+        kong_curl "consumers/$consumerName/key-auth/$keyid" -X DELETE
+    done <<< "$keys"
+
+    echo "deleted all keys for $consumerName"
+}
+
+function cmd_revoke_key {
+    key="$1"
+
+    kong_curl "key-auths/$key/consumer"
+    consumerId=$(jq -r ".id" < "$tmp_consumers")
+
+    kong_curl "consumers/$consumerId/key-auth/$key" -X DELETE
+
+    echo "key $key revoked"
+}
+
+function cmd_show_consumer {
+    consumer_id="$1"
+    kong_curl "consumers/${consumer_id}/"
+    jq '.' < "$tmp_consumers"
+
+    kong_curl "consumers/${consumer_id}/acls"
+    jq '.' < "$tmp_consumers"
+}
+
+function cmd_show_keys {
+    # Kong docs for the key-auth plugin showing how to use this endpoint: https://docs.konghq.com/hub/kong-inc/key-auth/
+    consumer_id="$1"
+    keys_url="$KONG_ELB/consumers/$consumer_id/key-auth"
+    # curl --silent -u "$HTTP_AUTH" --proxy "socks5h://127.0.0.1:2001" "$keys_url" -o "$tmp_consumers"
+    curl --silent "$keys_url" -o "$tmp_consumers"
+    jq -r '.data[] | {created_at: .created_at | todateiso8601, key}' < "$tmp_consumers"
+}
+
+# Exits abnormally if yaml2json does not exist.
+function yaml2json_guard {
+    which yaml2json > /dev/null 2>&1 || (
+        echo "This script requires the yaml2json command in order to inspect the kongfig configuration files."
+        echo "You can install it with this command:"
+        echo
+        echo "    npm install -g yamljs"
+        exit 1
+    )
+}
+
+# This function prevents changing consumers who appear in the kongfig configuration file.
+function manual_consumer_guard {
+    yaml2json_guard
+
+    kong_curl "consumers/${1}/"
+    local username=$(jq -r '.username' < "$tmp_consumers")
+    if [[ -n "$username" ]]; then
+        local kongfig_file="kong_configs/${env}_kong.yml"
+        local tmp_usernames_file=$(mktmpfile)
+        yaml2json "$kongfig_file" | jq -r '.consumers[].username' > "$tmp_usernames_file"
+        # The && here is counter-intuitive because grep returns an error if the given string is not found.
+        grep -q "$username" "$tmp_usernames_file" && {
+            echo "You should not use this script to modify consumers who are managed via $kongfig_file"
+            echo
+            cat "$tmp_usernames_file"
+            echo
+            echo "found $username in list above"
+            echo
+            exit 1
+        } || true
+    fi
+}
+
+function cmd_acl_add {
+    consumer_id="$1"
+    group_name="$2"
+
+    # manual_consumer_guard "$consumer_id"
+    kong_curl "consumers/${consumer_id}/acls" --request POST --data "group=$group_name"
+    jq '.' < "$tmp_consumers"
+}
+
+function cmd_generate_key {
+    consumer_id="$1"
+    kong_curl "consumers/${consumer_id}/key-auth" --request POST
+    jq '.' < "$tmp_consumers"
+}
+
+# Adds a specific key to a user. This is useful when you need to recreate a user that relied
+# on that specific key in the past. For most cases, you'll want to use gen-key and let Kong
+# handle creating the new key.
+function cmd_add_key {
+    consumer_id="$1"
+    key="$2"
+    kong_curl "consumers/${consumer_id}/key-auth" --request POST --data "key=$key"
+    jq '.' < "$tmp_consumers"
+}
+
+# Launches a sub-shell with just enough of the environment exported to be able
+# to use kong_curl from the command line. Used for interactive iteration rather
+# than scripting anything generic.
+# function cmd_shell {
+#     #export socks
+#     #declare -x socks
+#     #declare -x HTTP_AUTH
+#     declare -x KONG_ELB
+#     declare -xf kong_curl
+#     declare -x tmp_consumers=/dev/stdout
+#     bash --rcfile <(
+#       echo "PS1=\"[kong_consumers ${env}] \""
+#       echo "echo \"You're now in a sub-shell with the kong_curl function available. Have fun. Type exit or CTRL-D when you want to get back to your normal shell.\""
+#     ) -i
+# }
+
+case "$2" in
+    list)
+        cmd_list_consumers
+        ;;
+    create)
+        [[ -z "$3" ]] && usage
+        cmd_add_consumer "$3"
+        ;;
+    show)
+        [[ -z "$3" ]] && usage
+        cmd_show_consumer "$3"
+        ;;
+    rename)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        cmd_rename_consumer "$3" "$4"
+        ;;
+    gen-key)
+        [[ -z "$3" ]] && usage
+        cmd_generate_key "$3"
+        ;;
+    show-keys)
+        [[ -z "$3" ]] && usage
+        cmd_show_keys "$3"
+        ;;
+    acl-add)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        cmd_acl_add "$3" "$4"
+        ;;
+    revoke)
+        [[ -z "$3" ]] && usage
+        cmd_revoke_consumer_keys "$3"
+        ;;
+    revoke-key)
+        [[ -z "$3" ]] && usage
+        cmd_revoke_key "$3" "$4"
+        ;;
+    add-key)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        cmd_add_key "$3" "$4"
+        ;;
+    # shell)
+    #     cmd_shell
+    #     ;;
+    *)
+        usage
+        ;;
+esac
