@@ -37,7 +37,7 @@ const configureGovDeliveryService = (): GovDeliveryService => {
   return new GovDeliveryService({
     host: GOVDELIVERY_HOST,
     token: GOVDELIVERY_KEY,
-    supportEmailRecipient: SUPPORT_EMAIL || 'api@va.gov',
+    supportEmailRecipient: SUPPORT_EMAIL,
   });
 };
 
