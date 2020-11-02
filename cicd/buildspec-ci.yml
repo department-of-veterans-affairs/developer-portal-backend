@@ -24,6 +24,7 @@ phases:
   pre_build:
     commands:
       - echo Logging into Docker
+      # Login to Docker Hub prior to pulling Dockerfile's base image vasdvp/lighthouse-node-application-base:node12. This prevents rate limiting.
       - echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
       - echo Starting CI...
       - echo Building the CI Docker image...
@@ -43,6 +44,7 @@ phases:
     commands:
       - docker images
       - echo Build completed on `date`
+      # Login to ECR to push build artifact.
       - echo Logging into ECR
       - aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - echo Pushing the Docker image...
