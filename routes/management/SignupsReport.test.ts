@@ -74,15 +74,6 @@ describe('signupsReportHandler', () => {
       .mockResolvedValueOnce(largeResult);
   });
 
-  it('returns a 503 if the service is not configured', async () => {
-    const handler = signupsReportHandler(mockSignups, undefined);
-
-    await handler(mockReq, mockRes, mockNext);
-
-    expect(mockStatus).toHaveBeenCalledWith(503);
-    expect(mockJson).toHaveBeenCalledWith({ error: 'service not enabled' });
-  });
-
   it('responds with a 200 when the request is okay', async () => {
     const handler = signupsReportHandler(mockSignups, mockSlack);
 
