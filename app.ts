@@ -1,7 +1,6 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import { config } from 'aws-sdk';
 import morgan from 'morgan';
-import { Schema, ValidationErrorItem } from '@hapi/joi';
 
 import logger from './config/logger';
 import Sentry from './config/Sentry';
@@ -12,22 +11,11 @@ import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
 import SignupMetricsService from './services/SignupMetricsService';
+import configureRoutes, { validationMiddleware } from './routes';
 import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
 import contactUsHandler, { contactSchema } from './routes/ContactUs';
 import healthCheckHandler from './routes/HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
-
-function validationMiddleware(schema: Schema, toValidate: string) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const { error } = schema.validate(req[toValidate]);
-    if (error) {
-      const messages = error.details.map((i: ValidationErrorItem) => i.message);
-      res.status(400).json({ errors: messages });
-    } else {
-      next();
-    }
-  };
-}
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -152,19 +140,30 @@ export default function configureApp(): express.Application {
   const kong = configureKongService();
   const okta = configureOktaService();
   const dynamo = configureDynamoService();
-  const govdelivery = configureGovDeliveryService();
+  const govDelivery = configureGovDeliveryService();
   const slack = configureSlackService();
   const signups = new SignupMetricsService(dynamo);
 
+  // NEW ROUTES
+  configureRoutes(app, {
+    dynamo,
+    govDelivery,
+    kong,
+    okta,
+    signups,
+    slack,
+  });
+
+  // OLD ROUTES
   app.post('/developer_application',
     validationMiddleware(applySchema, 'body'),
-    developerApplicationHandler(kong, okta, dynamo, govdelivery, slack));
+    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack));
 
   app.post('/contact-us',
     validationMiddleware(contactSchema, 'body'),
-    contactUsHandler(govdelivery));
+    contactUsHandler(govDelivery));
 
-  app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govdelivery, slack));
+  app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
 
   app.get('/reports/signups',
     validationMiddleware(signupsReportSchema, 'query'),

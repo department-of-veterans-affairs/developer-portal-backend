@@ -5,9 +5,16 @@ import nock from 'nock';
 import configureApp from '../../app';
 
 const request = supertest(configureApp());
-describe('/reports/signups', () => {
-  const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-  const slack = nock(process.env.SLACK_BASE_URL);
+const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
+const slack = nock(process.env.SLACK_BASE_URL);
+
+describe.each([
+  '/reports/signups',
+  '/admin/reports/signups',
+])('%s', (route: string) => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
 
   it('sends a message to slack', async () => {
     // This test is just basically just a sanity check in it's current implementation...
@@ -17,7 +24,7 @@ describe('/reports/signups', () => {
     slack.post('/api/chat.postMessage').reply(200);
 
     expect(slack.isDone()).toEqual(false);
-    const response = await request.get('/reports/signups').send({});
+    const response = await request.get(route).send({});
     expect(slack.isDone()).toEqual(true);
 
     expect(response.status).toEqual(200);
@@ -29,7 +36,7 @@ describe('/reports/signups', () => {
 
     slack.post('/api/chat.postMessage').reply(500);
 
-    const response = await request.get('/reports/signups').send({});
+    const response = await request.get(route).send({});
 
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
@@ -40,7 +47,7 @@ describe('/reports/signups', () => {
 
     slack.post('/api/chat.postMessage').reply(200);
 
-    const response = await request.get('/reports/signups').send({});
+    const response = await request.get(route).send({});
 
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
