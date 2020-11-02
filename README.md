@@ -138,9 +138,8 @@ awslogs get -ws 30m /dvp/dvp-dev-dev-portal-be
 ```
 
 ### Sentry
-Exceptions are captured in [Sentry](http://sentry.vfs.va.gov/vets-gov/). [SOCKS proxy access](https://github.com/department-of-veterans-affairs/va.gov-team/blob/master/platform/working-with-vsp/orientation/request-access-to-tools.md) is required to see Sentry. 
-- [developer-portal-backend-dev](http://sentry.vfs.va.gov/vets-gov/developer-portal-backend-dev/)
-- [developer-portal-backend-production](http://sentry.vfs.va.gov/vets-gov/developer-portal-backend-production/)
+Exceptions are captured in [Sentry](http://sentry.vfs.va.gov/). [SOCKS proxy access](https://github.com/department-of-veterans-affairs/va.gov-team/blob/master/platform/working-with-vsp/orientation/request-access-to-tools.md) is required to see Sentry. 
+- [dvp-developer-portal-api](http://sentry.vfs.va.gov/vsp/dvp-developer-portal-api/). Use the "environment" dropdown at the top of the Sentry UI to toggle environment-specific error filtering.
 
 Need to modify how Sentry is configured in the application? SOCKS proxy access is required to reach our Sentry instance from your local machine. To test out error reporting in a local environment you would need to configure the Sentry client to proxy through it. It's likely easier to deploy another route that consistently throws an exception.
 
