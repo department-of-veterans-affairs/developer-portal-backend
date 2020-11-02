@@ -7,7 +7,7 @@ import configureApp from '../app';
 const request = supertest(configureApp());
 describe.each([
   '/contact-us',
-  '/public/contact-us',
+  '/internal/developer-portal/public/contact-us',
 ])('%s', (route: string) => {
   const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
 

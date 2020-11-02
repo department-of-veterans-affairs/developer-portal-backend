@@ -10,7 +10,7 @@ import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 const request = supertest(configureApp());
 describe.each([
   '/developer_application',
-  '/public/developer_application',
+  '/internal/developer-portal/public/developer_application',
 ])('%s', (route: string) => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);

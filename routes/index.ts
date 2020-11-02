@@ -32,6 +32,14 @@ interface AppServices {
   signups: SignupMetricsService;
 }
 
+/**
+ * The rev proxy only sends paths prefixed with either /services or /internal to Kong. All
+ * developer portal routes start with /internal/developer-portal, and since we do not strip the
+ * matched path at the gateway, all routes in this app must begin with this prefix.
+ * 
+ * see https://github.com/department-of-veterans-affairs/devops/blob/master/ansible/deployment/config/revproxy-vagov/templates/nginx_api_server.conf.j2#L171-L229
+ */
+const GATEWAY_PATH_PREFIX = '/internal/developer-portal';
 const configureRoutes = (app: Express, services: AppServices): void => {
   const {
     kong,
@@ -55,7 +63,7 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery));
   
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
-  app.use('/public', publicRoutes);
+  app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
   /**
    * PROTECTED
@@ -64,7 +72,7 @@ const configureRoutes = (app: Express, services: AppServices): void => {
   adminRoutes.get('/reports/signups',
     validationMiddleware(signupsReportSchema, 'query'),
     signupsReportHandler(signups, slack));
-  app.use('/admin', adminRoutes);
+  app.use(`${GATEWAY_PATH_PREFIX}/admin`, adminRoutes);
 };
 
 export default configureRoutes;

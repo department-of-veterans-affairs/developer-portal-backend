@@ -7,7 +7,7 @@ import configureApp from '../app';
 const request = supertest(configureApp());
 describe.each([
   '/health_check',
-  '/public/health_check',
+  '/internal/developer-portal/public/health_check',
 ])('%s', (route: string) => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);

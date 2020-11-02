@@ -10,7 +10,7 @@ const slack = nock(process.env.SLACK_BASE_URL);
 
 describe.each([
   '/reports/signups',
-  '/admin/reports/signups',
+  '/internal/developer-portal/admin/reports/signups',
 ])('%s', (route: string) => {
   beforeEach(() => {
     nock.cleanAll();
