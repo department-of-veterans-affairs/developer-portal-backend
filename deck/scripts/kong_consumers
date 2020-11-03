@@ -236,6 +236,12 @@ function view_consumer_plugins {
     kong_plugin_curl "consumers/$consumer_id/plugins" --request GET < "$tmp_consumers"
 }
 
+function get_rate_limiting_plugin {
+    consumer_id=$1
+    rate_limit_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" --request GET | jq '.data[] | select(.name == "rate-limiting") .id' | tr -d \")
+    echo $rate_limit_id
+}
+
 # Creates rate limiting for consumer - can pass values for time, but will default to config.second in else
 function create_consumer_rate_limiting {
     consumer_id="$3"
@@ -263,10 +269,10 @@ function update_consumer_rate_limiting {
     shift
     shift
     shift
-    rate_limit_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" | jq '.data[0].id' | tr -d \")
-    parameters=""
-    
     if [ "$#" != 0 ]; then
+      rate_limit_id=$(get_rate_limiting_plugin $consumer_id)
+      parameters=""
+    
       for time in $*
       do
         parameters=$parameters" config.$time"
@@ -282,7 +288,7 @@ function update_consumer_rate_limiting {
 # Removes rate limiting plugin from consumer with consumer id or name
 function delete_consumer_rate_limiting {
     consumer_id=$1
-    rate_limit_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" | jq '.data[0].id' | tr -d \")
+    rate_limit_id=$(get_rate_limiting_plugin $consumer_id)
     kong_plugin_curl "consumers/$consumer_id/plugins/$rate_limit_id" --request DELETE
     echo "Deleted plugin with id: $rate_limit_id"
 }
