@@ -5,7 +5,10 @@ import nock from 'nock';
 import configureApp from '../app';
 
 const request = supertest(configureApp());
-describe('/contact-us', () => {
+describe.each([
+  '/contact-us',
+  '/internal/developer-portal/public/contact-us',
+])('%s', (route: string) => {
   const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
 
   const supportReq = {
@@ -18,7 +21,7 @@ describe('/contact-us', () => {
   };
 
   it('sends a 400 response and descriptive errors if validations fail', async () => {
-    const response = await request.post('/contact-us').send({
+    const response = await request.post(route).send({
       email: 'samwise@thefellowship.org',
       description: 'Need help getting to Mt. Doom',
     });
@@ -34,7 +37,7 @@ describe('/contact-us', () => {
       .post('/messages/email')
       .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' });
 
-    const response = await request.post('/contact-us').send(supportReq);
+    const response = await request.post(route).send(supportReq);
 
     expect(response.status).toEqual(200);
   });
@@ -44,7 +47,7 @@ describe('/contact-us', () => {
       .post('/messages/email')
       .reply(500);
 
-    const response = await request.post('/contact-us').send(supportReq);
+    const response = await request.post(route).send(supportReq);
     
     expect(response.status).toEqual(500);
     expect(response.body.action).toEqual('sending contact us email');

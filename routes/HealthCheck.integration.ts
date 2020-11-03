@@ -5,7 +5,10 @@ import nock from 'nock';
 import configureApp from '../app';
 
 const request = supertest(configureApp());
-describe('/health_check', () => {
+describe.each([
+  '/health_check',
+  '/internal/developer-portal/public/health_check',
+])('%s', (route: string) => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
@@ -30,7 +33,7 @@ describe('/health_check', () => {
 
   describe('vibrant', () => {
     it('sends 200 when all services report as healthy', async () => {
-      const response = await request.get('/health_check');
+      const response = await request.get(route);
 
       expect(response.body).toEqual({
         healthStatus: 'vibrant',
@@ -48,7 +51,7 @@ describe('/health_check', () => {
 
         kong.get(kongMockPath).reply(500);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -67,7 +70,7 @@ describe('/health_check', () => {
 
         kong.get(kongMockPath).reply(200, {username: 'wrongUser'});
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -88,7 +91,7 @@ describe('/health_check', () => {
 
         okta.get(oktaMockPath).reply(500);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -109,7 +112,7 @@ describe('/health_check', () => {
 
         dynamoDB.post(dynamoMockPath).reply(500);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -128,7 +131,7 @@ describe('/health_check', () => {
 
         dynamoDB.post(dynamoMockPath).reply(200, '{"TableNames":[]}');
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -149,7 +152,7 @@ describe('/health_check', () => {
 
         govDelivery.post(govDeliveryMockPath).reply(500);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -168,7 +171,7 @@ describe('/health_check', () => {
 
         govDelivery.post(govDeliveryMockPath).reply(401);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -189,7 +192,7 @@ describe('/health_check', () => {
 
         slack.post(slackMockPath).reply(500);
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',
@@ -208,7 +211,7 @@ describe('/health_check', () => {
 
         slack.post(slackMockPath).reply(200, {ok: false});
 
-        const response = await request.get('/health_check');
+        const response = await request.get(route);
 
         expect(response.body).toEqual({
           healthStatus: 'lackluster',

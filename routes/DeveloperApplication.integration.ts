@@ -8,7 +8,10 @@ import { oktaAuthMocks } from '../types/mocks';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
 const request = supertest(configureApp());
-describe('/developer_application', () => {
+describe.each([
+  '/developer_application',
+  '/internal/developer-portal/public/developer_application',
+])('%s', (route: string) => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
@@ -68,7 +71,7 @@ describe('/developer_application', () => {
   });
 
   it('sends a 400 response and descriptive errors if validations fail', async () => {
-    const response = await request.post('/developer_application').send({
+    const response = await request.post(route).send({
       apis: 'benefits',
       email: 'eowyn@rohan.horse',
       lastName: 'Eorl',
@@ -83,7 +86,7 @@ describe('/developer_application', () => {
 
   describe('200 success', () => {
     it('succeeds for a request with only key auth api', async () => {
-      const response = await request.post('/developer_application').send({
+      const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'facilities',
       });
@@ -95,7 +98,7 @@ describe('/developer_application', () => {
     });
 
     it('succeeds for a request with only oauth api', async () => {
-      const response = await request.post('/developer_application').send({
+      const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
         oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
@@ -110,7 +113,7 @@ describe('/developer_application', () => {
     });
 
     it('succeeds (with an empty response) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
-      const response = await request.post('/developer_application').send({
+      const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
         oAuthRedirectURI: '',
@@ -122,7 +125,7 @@ describe('/developer_application', () => {
     });
 
     it('succeeds for a request with both key auth and oauth apis', async () => {
-      const response = await request.post('/developer_application').send(devAppRequest);
+      const response = await request.post(route).send(devAppRequest);
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -144,7 +147,7 @@ describe('/developer_application', () => {
       });
 
       it('only consumer', async () => {
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -165,7 +168,7 @@ describe('/developer_application', () => {
           ],
         });
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -188,7 +191,7 @@ describe('/developer_application', () => {
           ],
         });
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -206,7 +209,7 @@ describe('/developer_application', () => {
 
       govDelivery.post(path).reply(500);
 
-      const response = await request.post('/developer_application').send(devAppRequest);
+      const response = await request.post(route).send(devAppRequest);
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -223,7 +226,7 @@ describe('/developer_application', () => {
 
       slack.post(path).reply(500);
 
-      const response = await request.post('/developer_application').send(devAppRequest);
+      const response = await request.post(route).send(devAppRequest);
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -243,7 +246,7 @@ describe('/developer_application', () => {
 
         kong.post(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
@@ -260,7 +263,7 @@ describe('/developer_application', () => {
 
         kong.post(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
@@ -277,7 +280,7 @@ describe('/developer_application', () => {
         nock.removeInterceptor(interceptor);
         kong.post(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
@@ -296,7 +299,7 @@ describe('/developer_application', () => {
 
         okta.post(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
@@ -313,7 +316,7 @@ describe('/developer_application', () => {
 
         okta.put(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
@@ -331,7 +334,7 @@ describe('/developer_application', () => {
 
         okta.get(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
@@ -349,7 +352,7 @@ describe('/developer_application', () => {
 
         okta.put(path).reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
@@ -370,7 +373,7 @@ describe('/developer_application', () => {
         // For some reason putItem makes two calls...
         dynamoDB.post('/').reply(500).post('/').reply(500);
 
-        const response = await request.post('/developer_application').send(devAppRequest);
+        const response = await request.post(route).send(devAppRequest);
 
         expect(response.body).toEqual({
           action: 'failed saving to dynamo',
