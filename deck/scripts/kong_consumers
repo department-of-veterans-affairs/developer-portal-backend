@@ -24,6 +24,7 @@ function usage {
   echo "$0 <env> add-key <consumer_id|consumer_name> <key>"
   echo "$0 <env> view-consumer-plugins <consumer_id|consumer_name>"
   echo "$0 <env> create-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
+  echo "$0 <env> update-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
   echo "$0 <env> delete-consumer-rate <consumer_id|consumer_name>"
 #   echo "$0 <env> add-plugin <consumer_id|consumer_name> <plugin_name>"
 #   echo "$0 <env> shell"
@@ -251,8 +252,31 @@ function create_consumer_rate_limiting {
     else
       parameters=$parameters" --data config.second=5"
     fi
-    
+
     kong_plugin_curl "consumers/$consumer_id/plugins" --request POST --data $parameters < "$tmp_consumers"
+}
+
+# Updates a field within the rate limiting plugin. To reset to null, leave the value blank
+# ex: ./kong_consumers <env> update-consumer-rate <consumer_id|consumer_name> day=     will set value of day to null
+function update_consumer_rate_limiting {
+    consumer_id="$3"
+    shift
+    shift
+    shift
+    rate_limit_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" | jq '.data[0].id' | tr -d \")
+    parameters=""
+    
+    if [ "$#" != 0 ]; then
+      for time in $*
+      do
+        parameters=$parameters" config.$time"
+      done
+    else
+      echo "You must add a value to update"
+      exit 1
+    fi
+
+    kong_plugin_curl "plugins/$rate_limit_id" --request PATCH --data $parameters < "$tmp_consumers"
 }
 
 # Removes rate limiting plugin from consumer with consumer id or name
@@ -318,6 +342,10 @@ case "$2" in
     create-consumer-rate)
         [[ -z "$1" ]] && usage
         create_consumer_rate_limiting "$@" 
+        ;;
+    update-consumer-rate)
+        [[ -z "$1" ]] && usage
+        update_consumer_rate_limiting "$@" 
         ;;
     delete-consumer-rate)
         [[ -z "$1" ]] && usage
