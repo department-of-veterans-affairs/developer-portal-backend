@@ -22,6 +22,10 @@ function usage {
   echo "$0 <env> revoke-key <apikey_id>"
   echo "$0 <env> gen-key <consumer_id|consumer_name>"
   echo "$0 <env> add-key <consumer_id|consumer_name> <key>"
+  echo "$0 <env> view-consumer-plugins <consumer_id|consumer_name>"
+  echo "$0 <env> create-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
+  echo "$0 <env> delete-consumer-rate <consumer_id|consumer_name>"
+#   echo "$0 <env> add-plugin <consumer_id|consumer_name> <plugin_name>"
 #   echo "$0 <env> shell"
   exit 1
 }
@@ -48,6 +52,12 @@ function kong_curl {
     shift
     # curl -u $HTTP_AUTH --proxy "$socks" "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
     curl "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
+}
+
+function kong_plugin_curl {
+    path="$1"
+    shift
+    curl "http://$KONG_ELB/$path" --silent "$tmp_consumers" $* | jq "."
 }
 
 function cmd_add_consumer {
@@ -219,6 +229,45 @@ function cmd_add_key {
 #     ) -i
 # }
 
+# Views all plugins associated with consumer id or name
+function view_consumer_plugins {
+    consumer_id="$1"
+    kong_plugin_curl "consumers/$consumer_id/plugins" --request GET < "$tmp_consumers"
+}
+
+# Creates rate limiting for consumer - can pass values for time, but will default to config.second in else
+function create_consumer_rate_limiting {
+    consumer_id="$3"
+    shift
+    shift
+    shift
+    parameters=" name=rate-limiting"
+
+    if [ "$#" != 0 ]; then
+      for time in $*
+      do
+        parameters=$parameters" --data config.$time"
+      done
+    else
+      parameters=$parameters" --data config.second=5"
+    fi
+    
+    kong_plugin_curl "consumers/$consumer_id/plugins" --request POST --data $parameters < "$tmp_consumers"
+}
+
+# Removes rate limiting plugin from consumer with consumer id or name
+function delete_consumer_rate_limiting {
+    consumer_id=$1
+    rate_limit_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" | jq '.data[0].id' | tr -d \")
+    kong_plugin_curl "consumers/$consumer_id/plugins/$rate_limit_id" --request DELETE
+    echo "Deleted plugin with id: $rate_limit_id"
+}
+
+function add_consumer_ip {
+    consumer_id="$1"
+    kong_curl "consumers/$consumer_id/plugins" --request GET jq '.' < "$tmp_consumers"
+}
+
 case "$2" in
     list)
         cmd_list_consumers
@@ -261,6 +310,23 @@ case "$2" in
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
         cmd_add_key "$3" "$4"
+        ;;
+    view-consumer-plugins)
+        [[ -z "$3" ]] && usage
+        view_consumer_plugins "$3"
+        ;;
+    create-consumer-rate)
+        [[ -z "$1" ]] && usage
+        create_consumer_rate_limiting "$@" 
+        ;;
+    delete-consumer-rate)
+        [[ -z "$1" ]] && usage
+        delete_consumer_rate_limiting "$3" 
+        ;;
+    add-consumer-ip)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        add_consumer_ip "$3" "$4"
         ;;
     # shell)
     #     cmd_shell
