@@ -26,6 +26,9 @@ function usage {
   echo "$0 <env> create-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
   echo "$0 <env> update-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
   echo "$0 <env> delete-consumer-rate <consumer_id|consumer_name>"
+  echo "$0 <env> add-consumer-ip <consumer_id|consumer_name> <whitelist|blacklist=ip>"
+  echo "$0 <env> update-consumer-ip <consumer_id|consumer_name> <whitelist|blacklist=ip>"
+  echo "$0 <env> delete-consumer-ip <consumer_id|consumer_name>"
 #   echo "$0 <env> add-plugin <consumer_id|consumer_name> <plugin_name>"
 #   echo "$0 <env> shell"
   exit 1
@@ -293,9 +296,34 @@ function delete_consumer_rate_limiting {
     echo "Deleted plugin with id: $rate_limit_id"
 }
 
-function add_consumer_ip {
-    consumer_id="$1"
-    kong_curl "consumers/$consumer_id/plugins" --request GET jq '.' < "$tmp_consumers"
+# Captures ID of ip-restriction plugin for passed in consumer
+function get_ip_restriction_plugin {
+    consumer_id=$1
+    ip_restriction_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" --request GET | jq '.data[] | select(.name == "ip-restriction") .id' | tr -d \")
+    echo $ip_restriction_id
+}
+
+# Adds ip-restriction to a consumer by passing in consumer name/id and whitelist/blacklist ip
+function add_consumer_ip_restriction {
+    consumer_id=$1
+    ip_config=$2
+    kong_plugin_curl "consumers/$consumer_id/plugins" --request POST --data "name=ip-restriction" --data "config.$ip_config"
+}
+
+# Updates a specific consumers ip-restriction plugin using whitelist/blacklist ip
+function update_consumer_ip_restriction {
+    consumer_id=$1
+    parameters="config.$2"
+    ip_restriction_id=$(get_ip_restriction_plugin $consumer_id)
+    kong_plugin_curl "plugins/$ip_restriction_id" --request PATCH --data $parameters < "$tmp_consumers"
+}
+
+# Removes the consumers ip-restriction plugin via consumer name or id
+function delete_consumer_ip_restriction {
+    consumer_id=$1
+    ip_restriction_id=$(get_ip_restriction_plugin $consumer_id)
+    kong_plugin_curl "consumers/$consumer_id/plugins/$ip_restriction_id" --request DELETE
+    echo "Deleted plugin with id: $ip_restriction_id"
 }
 
 case "$2" in
@@ -360,7 +388,16 @@ case "$2" in
     add-consumer-ip)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
-        add_consumer_ip "$3" "$4"
+        add_consumer_ip_restriction "$3" "$4"
+        ;;
+    update-consumer-ip)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        update_consumer_ip_restriction "$3" "$4"
+        ;;
+    delete-consumer-ip)
+        [[ -z "$3" ]] && usage
+        delete_consumer_ip_restriction "$3"
         ;;
     # shell)
     #     cmd_shell
