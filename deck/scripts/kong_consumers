@@ -17,7 +17,9 @@ function usage {
   echo "$0 <env> rename <consumer_id|consumer_name> <new_consumer_name>"
   echo "$0 <env> show <consumer_id|consumer_name>"
   echo "$0 <env> show-keys <consumer_id>"
+  echo "$0 <env> acl-view <consumer_name|consumer_id>"
   echo "$0 <env> acl-add <consumer_id> <group>"
+  echo "$0 <env> acl-remove <consumer_name|consumer_id> <group>"
   echo "$0 <env> revoke <consumer_id|consumer_name>"
   echo "$0 <env> revoke-key <apikey_id>"
   echo "$0 <env> gen-key <consumer_id|consumer_name>"
@@ -192,6 +194,18 @@ function manual_consumer_guard {
     fi
 }
 
+function get_acls_group_id {
+    consumer_id=$1
+    group_name=$2
+    group_id=$(kong_plugin_curl "consumers/$consumer_id/acls" --request GET | jq '.data[] | select(.group == "'$group_name'") .id' | tr -d \")
+    echo $group_id
+}
+
+function cmd_acl_view {
+    consumer_id=$1
+    kong_plugin_curl "consumers/$consumer_id/acls"
+}
+
 function cmd_acl_add {
     consumer_id="$1"
     group_name="$2"
@@ -199,6 +213,14 @@ function cmd_acl_add {
     # manual_consumer_guard "$consumer_id"
     kong_curl "consumers/${consumer_id}/acls" --request POST --data "group=$group_name"
     jq '.' < "$tmp_consumers"
+}
+
+function cmd_acl_remove {
+    consumer_id=$1
+    acl_remove=$2
+    group_id=$(get_acls_group_id $consumer_id $acl_remove)
+    kong_plugin_curl "consumers/$consumer_id/acls/$group_id" --request DELETE jq '.' < "$tmp_consumers"
+    echo 'Deleted user group with name '$acl_remove' from user '$consumer_id
 }
 
 function cmd_generate_key {
@@ -351,10 +373,19 @@ case "$2" in
         [[ -z "$3" ]] && usage
         cmd_show_keys "$3"
         ;;
+    acl-view)
+        [[ -z "$3" ]] && usage
+        cmd_acl_view "$3"
+        ;;
     acl-add)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
         cmd_acl_add "$3" "$4"
+        ;;
+    acl-remove)
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        cmd_acl_remove "$3" "$4"
         ;;
     revoke)
         [[ -z "$3" ]] && usage
