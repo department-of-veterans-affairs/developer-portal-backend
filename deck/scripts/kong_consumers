@@ -17,7 +17,6 @@ function usage {
   echo "$0 <env> rename <consumer_id|consumer_name> <new_consumer_name>"
   echo "$0 <env> show <consumer_id|consumer_name>"
   echo "$0 <env> show-keys <consumer_id>"
-  echo "$0 <env> acl-view <consumer_name|consumer_id>"
   echo "$0 <env> acl-add <consumer_id> <group>"
   echo "$0 <env> acl-remove <consumer_name|consumer_id> <group>"
   echo "$0 <env> revoke <consumer_id|consumer_name>"
@@ -52,6 +51,8 @@ tmp_consumers=$(mktemp -q)
 # socks="socks5h://127.0.0.1:2001"
 rate_limiting_plugin_name="rate-limiting"
 ip_restriction_plugin_name="ip-restriction"
+
+rate_limit_timings=('second','minute','hour','day','month','year')
 
 function kong_curl {
     path="$1"
@@ -264,6 +265,16 @@ function get_plugin_id_by_name {
     echo $rate_limit_id
 }
 
+function validate_rate_timing {
+    time=$1
+    stripped_time=$(echo $time | tr -cd '[:alpha:]')
+    if [[ ${rate_limit_timings[*]} =~ ${stripped_time} ]]; then
+      echo 1
+    else
+      echo $stripped_time
+    fi
+}
+
 # Creates rate limiting for consumer - can pass values for time, but will default to config.second in else
 function add_consumer_rate_limiting {
     consumer_id="$3"
@@ -272,10 +283,16 @@ function add_consumer_rate_limiting {
     shift
     parameters=" name=$rate_limiting_plugin_name"
 
-    if [ "$#" != 0 ]; then
+    if [ "$#" -gt 0 ]; then
       for time in $*
       do
-        parameters=$parameters" --data config.$time"
+        is_valid_time=$(validate_rate_timing $time)
+        if [ $is_valid_time == 1 ]; then
+          parameters=$parameters" --data config.$time"
+        else
+          echo "Please insert a valid time selection - invalid: $is_valid_time"
+          exit 1
+        fi
       done
     else
       parameters=$parameters" --data config.second=5"
@@ -291,13 +308,19 @@ function update_consumer_rate_limiting {
     shift
     shift
     shift
-    if [ "$#" != 0 ]; then
+    if [ "$#" -gt 0 ]; then
       rate_limit_id=$(get_plugin_id_by_name $consumer_id $rate_limiting_plugin_name)
       parameters=""
     
       for time in $*
       do
-        parameters=$parameters" config.$time"
+        is_valid_time=$(validate_rate_timing $time)
+        if [ $is_valid_time == 1 ]; then
+          parameters=$parameters" config.$time"
+        else
+          echo "Please insert a valid time selection - invalid: $is_valid_time"
+          exit 1
+        fi
       done
     else
       echo "You must add a value to update"
