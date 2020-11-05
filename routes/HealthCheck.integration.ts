@@ -5,10 +5,8 @@ import nock from 'nock';
 import configureApp from '../app';
 
 const request = supertest(configureApp());
-describe.each([
-  '/health_check',
-  '/internal/developer-portal/public/health_check',
-])('%s', (route: string) => {
+const route = '/internal/developer-portal/public/health_check';
+describe('/internal/developer-portal/public/health_check', () => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
