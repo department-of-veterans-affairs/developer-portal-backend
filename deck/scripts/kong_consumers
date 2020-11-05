@@ -24,14 +24,12 @@ function usage {
   echo "$0 <env> revoke-key <apikey_id>"
   echo "$0 <env> gen-key <consumer_id|consumer_name>"
   echo "$0 <env> add-key <consumer_id|consumer_name> <key>"
-  echo "$0 <env> view-consumer-plugins <consumer_id|consumer_name>"
-  echo "$0 <env> add-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
-  echo "$0 <env> update-consumer-rate <consumer_id|consumer_name> <second|minute|hour|day|month|year>"
-  echo "$0 <env> delete-consumer-rate <consumer_id|consumer_name>"
-  echo "$0 <env> add-consumer-ip <consumer_id|consumer_name> <whitelist|blacklist=ip>"
-  echo "$0 <env> update-consumer-ip <consumer_id|consumer_name> <whitelist|blacklist=ip>"
-  echo "$0 <env> delete-consumer-ip <consumer_id|consumer_name>"
-#   echo "$0 <env> add-plugin <consumer_id|consumer_name> <plugin_name>"
+  echo "$0 <env> rate-create <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
+  echo "$0 <env> rate-update <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
+  echo "$0 <env> rate-delete <consumer_id|consumer_name>"
+  echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip>"
+  echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip>"
+  echo "$0 <env> ip-delete <consumer_id|consumer_name>"
 #   echo "$0 <env> shell"
   exit 1
 }
@@ -146,10 +144,17 @@ function cmd_revoke_key {
 
 function cmd_show_consumer {
     consumer_id="$1"
+
+    echo "Consumer:"
     kong_curl "consumers/${consumer_id}/"
     jq '.' < "$tmp_consumers"
 
+    echo "ACLS:"
     kong_curl "consumers/${consumer_id}/acls"
+    jq '.' < "$tmp_consumers"
+
+    echo "Plugins:"
+    kong_curl "consumers/$consumer_id/plugins" 
     jq '.' < "$tmp_consumers"
 }
 
@@ -203,11 +208,6 @@ function get_acls_group_id {
     echo $group_id
 }
 
-function cmd_acl_view {
-    consumer_id=$1
-    kong_plugin_curl "consumers/$consumer_id/acls"
-}
-
 function cmd_acl_add {
     consumer_id="$1"
     group_name="$2"
@@ -257,12 +257,6 @@ function cmd_add_key {
 #     ) -i
 # }
 
-# Views all plugins associated with consumer id or name
-function view_consumer_plugins {
-    consumer_id="$1"
-    kong_plugin_curl "consumers/$consumer_id/plugins" --request GET < "$tmp_consumers"
-}
-
 function get_plugin_id_by_name {
     consumer_id=$1
     plugin_name=$2
@@ -291,7 +285,7 @@ function add_consumer_rate_limiting {
 }
 
 # Updates a field within the rate limiting plugin. To reset to null, leave the value blank
-# ex: ./kong_consumers <env> update-consumer-rate <consumer_id|consumer_name> day=     will set value of day to null
+# ex: ./kong_consumers <env> rate-update <consumer_id|consumer_name> day=     will set value of day to null
 function update_consumer_rate_limiting {
     consumer_id="$3"
     shift
@@ -369,10 +363,6 @@ case "$2" in
         [[ -z "$3" ]] && usage
         cmd_show_keys "$3"
         ;;
-    acl-view)
-        [[ -z "$3" ]] && usage
-        cmd_acl_view "$3"
-        ;;
     acl-add)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
@@ -396,33 +386,29 @@ case "$2" in
         [[ -z "$4" ]] && usage
         cmd_add_key "$3" "$4"
         ;;
-    view-consumer-plugins)
-        [[ -z "$3" ]] && usage
-        view_consumer_plugins "$3"
-        ;;
-    add-consumer-rate)
+    rate-create)
         [[ -z "$1" ]] && usage
         add_consumer_rate_limiting "$@" 
         ;;
-    update-consumer-rate)
+    rate-update)
         [[ -z "$1" ]] && usage
         update_consumer_rate_limiting "$@" 
         ;;
-    delete-consumer-rate)
+    rate-delete)
         [[ -z "$1" ]] && usage
         delete_consumer_rate_limiting "$3" 
         ;;
-    add-consumer-ip)
+    ip-create)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
         add_consumer_ip_restriction "$3" "$4"
         ;;
-    update-consumer-ip)
+    ip-update)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
         update_consumer_ip_restriction "$3" "$4"
         ;;
-    delete-consumer-ip)
+    ip-delete)
         [[ -z "$3" ]] && usage
         delete_consumer_ip_restriction "$3"
         ;;
