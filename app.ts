@@ -11,11 +11,7 @@ import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
 import SignupMetricsService from './services/SignupMetricsService';
-import configureRoutes, { validationMiddleware } from './routes';
-import developerApplicationHandler, { applySchema } from './routes/DeveloperApplication';
-import contactUsHandler, { contactSchema } from './routes/ContactUs';
-import healthCheckHandler from './routes/HealthCheck';
-import signupsReportHandler, { signupsReportSchema } from './routes/management/SignupsReport';
+import configureRoutes from './routes';
 
 function loggingMiddleware(tokens, req, res): string {
   return JSON.stringify({
@@ -153,21 +149,6 @@ export default function configureApp(): express.Application {
     signups,
     slack,
   });
-
-  // OLD ROUTES
-  app.post('/developer_application',
-    validationMiddleware(applySchema, 'body'),
-    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack));
-
-  app.post('/contact-us',
-    validationMiddleware(contactSchema, 'body'),
-    contactUsHandler(govDelivery));
-
-  app.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
-
-  app.get('/reports/signups',
-    validationMiddleware(signupsReportSchema, 'query'),
-    signupsReportHandler(signups, slack));
 
   app.use(Sentry.Handlers.errorHandler());
 

@@ -11,7 +11,7 @@ import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
 
-export function validationMiddleware(schema: Schema, toValidate: string) {
+function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const { error } = schema.validate(req[toValidate]);
     if (error) {

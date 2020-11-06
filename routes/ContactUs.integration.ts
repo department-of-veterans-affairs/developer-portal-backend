@@ -5,10 +5,8 @@ import nock from 'nock';
 import configureApp from '../app';
 
 const request = supertest(configureApp());
-describe.each([
-  '/contact-us',
-  '/internal/developer-portal/public/contact-us',
-])('%s', (route: string) => {
+const route = '/internal/developer-portal/public/contact-us';
+describe(route, () => {
   const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
 
   const supportReq = {

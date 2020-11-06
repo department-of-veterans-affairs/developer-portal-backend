@@ -8,10 +8,8 @@ const request = supertest(configureApp());
 const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
 const slack = nock(process.env.SLACK_BASE_URL);
 
-describe.each([
-  '/reports/signups',
-  '/internal/developer-portal/admin/reports/signups',
-])('%s', (route: string) => {
+const route = '/internal/developer-portal/admin/reports/signups';
+describe(route, () => {
   beforeEach(() => {
     nock.cleanAll();
   });
@@ -29,6 +27,15 @@ describe.each([
 
     expect(response.status).toEqual(200);
     expect(response.text).toEqual('OK');
+  });
+
+  it('sends a 400 response and descriptive errors if validations fail', async () => {
+    const response = await request.get(`${route}?span=Gimli`);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      errors: ['"span" must be one of [week, month]'],
+    });
   });
 
   it('sends a 500 response if slack responds with 500', async () => {
