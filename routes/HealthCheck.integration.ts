@@ -6,7 +6,7 @@ import configureApp from '../app';
 
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/health_check';
-describe('/internal/developer-portal/public/health_check', () => {
+describe(route, () => {
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
