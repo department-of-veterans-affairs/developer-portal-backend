@@ -54,6 +54,7 @@ ip_restriction_plugin_name="ip-restriction"
 
 rate_limit_timings=('second','minute','hour','day','month','year')
 ip_restriction_filters=('service','route')
+ip_restriction_lists=('whitelist','blacklist')
 
 function kong_curl {
     path="$1"
@@ -292,7 +293,8 @@ function add_consumer_rate_limiting {
       exit 1
     fi
 
-    kong_plugin_curl "consumers/$consumer_id/plugins" --request POST --data $parameters < "$tmp_consumers"
+    kong_curl "consumers/$consumer_id/plugins" --request POST --data $parameters 
+    jq '.' < "$tmp_consumers"
 }
 
 # Updates a field within the rate limiting plugin. To reset to null, leave the value blank
@@ -321,25 +323,20 @@ function update_consumer_rate_limiting {
       exit 1
     fi
 
-    kong_plugin_curl "plugins/$rate_limit_id" --request PATCH --data $parameters < "$tmp_consumers"
+    kong_curl "plugins/$rate_limit_id" --request PATCH --data $parameters 
+    jq '.' < "$tmp_consumers"
 }
 
 # Removes rate limiting plugin from consumer with consumer id or name
 function delete_consumer_rate_limiting {
     consumer_id=$1
     rate_limit_id=$(get_plugin_id_by_name $consumer_id $rate_limiting_plugin_name)
-    kong_plugin_curl "consumers/$consumer_id/plugins/$rate_limit_id" --request DELETE
-    echo "Deleted plugin with id: $rate_limit_id"
+    kong_curl "consumers/$consumer_id/plugins/$rate_limit_id" --request DELETE
 }
 
-function strip_ip_restriction_filter {
+function split_ip_restriction_filter {
     a=($(echo "$@" | tr '=' '\n'))
-    echo "${a[0]}"
-}
-
-function return_ip_restriction_id {
-    a=($(echo "$@" | tr '=' '\n'))
-    echo "${a[1]}"
+    echo "filter=${a[0]}; id=${a[1]}"
 }
 
 function validate_ip_restriction_filter {
@@ -354,8 +351,8 @@ function validate_ip_restriction_filter {
 function get_ip_plugin_without_filter {
     consumer_id=$1
     plugin_name=$2
-    plugin_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" --request GET | jq '.data[] | select((.name == "'$plugin_name'") and select(.service.id == null) and select(.route.id == null)) .id' | tr -d \")
-    echo $plugin_id
+    kong_curl "consumers/$consumer_id/plugins" --request GET
+    echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.service.id == null) and select(.route.id == null)) .id' < $tmp_consumers)  | tr -d \"
 }
 
 function get_ip_plugin_with_filter {
@@ -363,56 +360,67 @@ function get_ip_plugin_with_filter {
     plugin_name=$2
     filter=$3
     id=$4
-    plugin_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" --request GET | jq '.data[] | select((.name == "'$plugin_name'") and select(.'$filter'.id == "'$id'")) .id' | tr -d \")
-    echo $plugin_id
+    kong_curl "consumers/$consumer_id/plugins" --request GET
+    echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.'$filter'.id == "'$id'")) .id' < "$tmp_consumers") | tr -d \"
 }
 
 # Adds ip-restriction to a consumer by passing in consumer name/id and whitelist/blacklist ip
 function add_consumer_ip_restriction {
-    consumer_id=$3
-    ip_config=$4
-    shift
-    shift
-    shift
-    shift
-    parameters="config.$ip_config"
-    if [ "$#" -gt 0 ]; then
-      found_filter=$(strip_ip_restriction_filter $@)
-      is_valid_filter=$(validate_ip_restriction_filter $found_filter)
+    consumer_id=$1
+    ip_config=$2
+    search_filter=$3
+    eval $(split_ip_restriction_filter $ip_config)
+    split_ips=$(echo "$id" | tr ',' '\n')
+    for ip in $split_ips
+    do
+      parameters="$parameters --data config.$filter=$ip"
+    done
+    if [ $search_filter ]; then
+      eval $(split_ip_restriction_filter $search_filter)
+      is_valid_filter=$(validate_ip_restriction_filter $filter)
       if [ $is_valid_filter == 1 ]; then
-        strip_filter_id=$(return_ip_restriction_id $@)
-        echo "Stripped filter id $strip_filter_id"
-        parameters="$parameters --data $found_filter.id=$strip_filter_id"
+        parameters="$parameters --data $filter.id=$id"
       else
-        echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
+        echo "Sorry, you have an invalid input: $is_valid_filter"
         exit 1
       fi
     fi
-    kong_plugin_curl "consumers/$consumer_id/plugins" --request POST --data "name=$ip_restriction_plugin_name" --data $parameters
+
+    kong_curl "consumers/$consumer_id/plugins" --request POST --data "name=$ip_restriction_plugin_name" $parameters
+    jq '.' < "$tmp_consumers"
 }
 
-# Updates a specific consumers ip-restriction plugin using whitelist/blacklist ip
+# Updates a specific consumers ip-restriction plugin using whitelist/blacklist ip 
+# and optional search filter of route/service id
 function update_consumer_ip_restriction {
     consumer_id=$3
     parameters="config.$4"
+    found_filter=0
     shift
     shift
     shift
     shift
     if [ "$#" -gt 0 ]; then
-      found_filter=$(strip_ip_restriction_filter $@)
-      is_valid_filter=$(validate_ip_restriction_filter $found_filter)
-      if [ $is_valid_filter == 1 ]; then
-        strip_filter_id=$(return_ip_restriction_id $@)
-        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $found_filter $strip_filter_id)
-      else
-        echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
-        exit 1
-      fi
-    else
+      for param in $@
+      do
+        eval $(split_ip_restriction_filter $param)
+        is_valid_filter=$(validate_ip_restriction_filter $filter)
+        if [ $is_valid_filter == 1 ]; then
+            ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
+            found_filter=1
+        elif [ $is_valid_filter == 2 ]; then
+            parameters="$parameters --data config.$param"
+        else
+            echo "Sorry, you have an invalid input: $is_valid_filter"
+            exit 1
+        fi
+      done
+    fi
+    if [ $found_filter != 1 ]; then
       ip_restriction_id=$(get_ip_plugin_without_filter $consumer_id $ip_restriction_plugin_name)
     fi
-    kong_plugin_curl "plugins/$ip_restriction_id" --request PATCH --data $parameters < "$tmp_consumers"
+    kong_curl "plugins/$ip_restriction_id" --request PATCH --data $parameters 
+    jq '.' < "$tmp_consumers"
 }
 
 # Removes the consumers ip-restriction plugin via consumer name or id
@@ -421,22 +429,19 @@ function delete_consumer_ip_restriction {
     shift
     shift
     shift
-    echo "$@"
     if [ "$#" -gt 0 ]; then
-      found_filter=$(strip_ip_restriction_filter $@)
-      is_valid_filter=$(validate_ip_restriction_filter $found_filter)
+      eval $(split_ip_restriction_filter $@)
+      is_valid_filter=$(validate_ip_restriction_filter $filter)
       if [ $is_valid_filter == 1 ]; then
-        strip_filter_id=$(return_ip_restriction_id $@)
-        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $found_filter $strip_filter_id)
+        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
       else
         echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
         exit 1
       fi
     else
-      ip_restriction_id=$(get_plugin_id_by_name $consumer_id $ip_restriction_plugin_name)
+      ip_restriction_id=$(get_ip_plugin_without_filter $consumer_id $ip_restriction_plugin_name)
     fi
-    kong_plugin_curl "consumers/$consumer_id/plugins/$ip_restriction_id" --request DELETE
-    echo "Deleted plugin with id: $ip_restriction_id"
+    kong_curl "consumers/$consumer_id/plugins/$ip_restriction_id" --request DELETE
 }
 
 case "$2" in
@@ -502,7 +507,7 @@ case "$2" in
     ip-create)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
-        add_consumer_ip_restriction "$@"
+        add_consumer_ip_restriction "$3" "$4" "$5"
         ;;
     ip-update)
         [[ -z "$3" ]] && usage
