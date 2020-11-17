@@ -26,9 +26,9 @@ function usage {
   echo "$0 <env> rate-create <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
   echo "$0 <env> rate-update <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
   echo "$0 <env> rate-remove <consumer_id|consumer_name>"
-  echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id>"
-  echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id>"
-  echo "$0 <env> ip-remove <consumer_id|consumer_name> <service|route=id>"
+  echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip> <filter=id>"
+  echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip> <filter=id>"
+  echo "$0 <env> ip-remove <consumer_id|consumer_name> <filter=id>"
 #   echo "$0 <env> shell"
   exit 1
 }
@@ -364,7 +364,8 @@ function get_ip_plugin_with_filter {
     echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.'$filter'.id == "'$id'")) .id' < "$tmp_consumers") | tr -d \"
 }
 
-# Adds ip-restriction to a consumer by passing in consumer name/id and whitelist/blacklist ip
+# Adds ip-restriction to a consumer by passing in consumer name/id, whitelist/blacklist ip
+# and optional route/service id
 function add_consumer_ip_restriction {
     consumer_id=$1
     ip_config=$2
@@ -393,44 +394,40 @@ function add_consumer_ip_restriction {
 # Updates a specific consumers ip-restriction plugin using whitelist/blacklist ip 
 # and optional search filter of route/service id
 function update_consumer_ip_restriction {
-    consumer_id=$3
-    parameters="config.$4"
-    found_filter=0
-    shift
-    shift
-    shift
-    shift
-    if [ "$#" -gt 0 ]; then
-      for param in $@
-      do
-        eval $(split_ip_restriction_filter $param)
-        is_valid_filter=$(validate_ip_restriction_filter $filter)
-        if [ $is_valid_filter == 1 ]; then
-            ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
-            found_filter=1
-        elif [ $is_valid_filter == 2 ]; then
-            parameters="$parameters --data config.$param"
-        else
-            echo "Sorry, you have an invalid input: $is_valid_filter"
-            exit 1
-        fi
-      done
-    fi
-    if [ $found_filter != 1 ]; then
+    consumer_id=$1
+    ip_config=$2
+    search_filter=$3
+    eval $(split_ip_restriction_filter $ip_config)
+    split_ips=$(echo "$id" | tr ',' '\n')
+
+    for ip in $split_ips
+    do
+      parameters="$parameters --data config.$filter=$ip"
+    done
+    if [ $search_filter ]; then
+      eval $(split_ip_restriction_filter $search_filter)
+      is_valid_filter=$(validate_ip_restriction_filter $filter)
+      if [ $is_valid_filter == 1 ]; then
+        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
+      else
+        echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
+        exit 1
+      fi
+    else
       ip_restriction_id=$(get_ip_plugin_without_filter $consumer_id $ip_restriction_plugin_name)
     fi
-    kong_curl "plugins/$ip_restriction_id" --request PATCH --data $parameters 
+
+    kong_curl "plugins/$ip_restriction_id" --request PATCH $parameters 
     jq '.' < "$tmp_consumers"
 }
 
 # Removes the consumers ip-restriction plugin via consumer name or id
+# and optional search filter of route/service id
 function delete_consumer_ip_restriction {
-    consumer_id=$3
-    shift
-    shift
-    shift
-    if [ "$#" -gt 0 ]; then
-      eval $(split_ip_restriction_filter $@)
+    consumer_id=$1
+    search_filter=$2
+    if [ $search_filter ]; then
+      eval $(split_ip_restriction_filter $search_filter)
       is_valid_filter=$(validate_ip_restriction_filter $filter)
       if [ $is_valid_filter == 1 ]; then
         ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
@@ -512,11 +509,11 @@ case "$2" in
     ip-update)
         [[ -z "$3" ]] && usage
         [[ -z "$4" ]] && usage
-        update_consumer_ip_restriction "$@"
+        update_consumer_ip_restriction "$3" "$4" "$5"
         ;;
     ip-remove)
         [[ -z "$3" ]] && usage
-        delete_consumer_ip_restriction "$@"
+        delete_consumer_ip_restriction "$3" "$4"
         ;;
     # shell)
     #     cmd_shell
