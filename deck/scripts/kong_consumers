@@ -15,7 +15,7 @@ function usage {
   echo "$0 <env> list"
   echo "$0 <env> create <consumer_name>"
   echo "$0 <env> rename <consumer_id|consumer_name> <new_consumer_name>"
-  echo "$0 <env> show <consumer_id|consumer_name>"
+  echo "$0 <env> show <consumer_id|consumer_name> <plugins?>"
   echo "$0 <env> show-keys <consumer_id>"
   echo "$0 <env> acl-add <consumer_id> <group>"
   echo "$0 <env> acl-remove <consumer_id|consumer_name> <group_id>"
@@ -26,9 +26,9 @@ function usage {
   echo "$0 <env> rate-create <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
   echo "$0 <env> rate-update <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
   echo "$0 <env> rate-remove <consumer_id|consumer_name>"
-  echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip> <filter=id>"
-  echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip> <filter=id>"
-  echo "$0 <env> ip-remove <consumer_id|consumer_name> <filter=id>"
+  echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id?>"
+  echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id?>"
+  echo "$0 <env> ip-remove <consumer_id|consumer_name> <service|route=id?>"
 #   echo "$0 <env> shell"
   exit 1
 }
@@ -152,13 +152,15 @@ function cmd_show_consumer {
     kong_curl "consumers/${consumer_id}/"
     jq '.' < "$tmp_consumers"
 
-    echo "ACLS:"
+    echo "ACL:"
     kong_curl "consumers/${consumer_id}/acls"
     jq '.' < "$tmp_consumers"
 
-    echo "Plugins:"
-    kong_curl "consumers/$consumer_id/plugins" 
-    jq '.' < "$tmp_consumers"
+    if [ $2 ]; then
+      echo "Plugins:"
+      kong_curl "consumers/$consumer_id/plugins" 
+      jq '.' < "$tmp_consumers"
+    fi
 }
 
 function cmd_show_keys {
@@ -451,7 +453,7 @@ case "$2" in
         ;;
     show)
         [[ -z "$3" ]] && usage
-        cmd_show_consumer "$3"
+        cmd_show_consumer "$3" "$4"
         ;;
     rename)
         [[ -z "$3" ]] && usage
