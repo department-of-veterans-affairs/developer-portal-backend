@@ -23,9 +23,9 @@ function usage {
   echo "$0 <env> revoke-key <apikey_id>"
   echo "$0 <env> gen-key <consumer_id|consumer_name>"
   echo "$0 <env> add-key <consumer_id|consumer_name> <key>"
-  echo "$0 <env> rate-create <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
-  echo "$0 <env> rate-update <consumer_id|consumer_name> <second|minute|hour|day|month|year=rate>"
-  echo "$0 <env> rate-remove <consumer_id|consumer_name>"
+  echo "$0 <env> rate-create <consumer_id|consumer_name> <rate=value> <service|route=id?>"
+  echo "$0 <env> rate-update <consumer_id|consumer_name> <rate=value> <service|route=id?>"
+  echo "$0 <env> rate-remove <consumer_id|consumer_name> <service|route=id?>"
   echo "$0 <env> ip-create <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id?>"
   echo "$0 <env> ip-update <consumer_id|consumer_name> <whitelist|blacklist=ip> <service|route=id?>"
   echo "$0 <env> ip-remove <consumer_id|consumer_name> <service|route=id?>"
@@ -52,8 +52,8 @@ tmp_consumers=$(mktemp -q)
 rate_limiting_plugin_name="rate-limiting"
 ip_restriction_plugin_name="ip-restriction"
 
+optional_filters=('service','route')
 rate_limit_timings=('second','minute','hour','day','month','year')
-ip_restriction_filters=('service','route')
 ip_restriction_lists=('whitelist','blacklist')
 
 function kong_curl {
@@ -61,12 +61,6 @@ function kong_curl {
     shift
     # curl -u $HTTP_AUTH --proxy "$socks" "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
     curl "http://$KONG_ELB/$path" --silent -o "$tmp_consumers" $*
-}
-
-function kong_plugin_curl {
-    path="$1"
-    shift
-    curl "http://$KONG_ELB/$path" --silent "$tmp_consumers" $* | jq "."
 }
 
 function cmd_add_consumer {
@@ -254,11 +248,17 @@ function cmd_add_key {
 #     ) -i
 # }
 
-function get_plugin_id_by_name {
+function get_plugin_id {
     consumer_id=$1
     plugin_name=$2
-    plugin_id=$(kong_plugin_curl "consumers/$consumer_id/plugins" --request GET | jq '.data[] | select(.name == "'$plugin_name'") .id' | tr -d \")
-    echo $plugin_id
+    filter=$3
+    id=$4
+    kong_curl "consumers/$consumer_id/plugins" --request GET
+    if [ $filter ]; then
+      echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.'$filter'.id == "'$id'")) .id' < "$tmp_consumers") | tr -d \"
+    else
+      echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.service.id == null) and select(.route.id == null)) .id' < $tmp_consumers)  | tr -d \"
+    fi
 }
 
 function validate_rate_timing {
@@ -277,7 +277,7 @@ function add_consumer_rate_limiting {
     shift
     shift
     shift
-    parameters=" name=$rate_limiting_plugin_name"
+    parameters="--data name=$rate_limiting_plugin_name"
 
     if [ "$#" -gt 0 ]; then
       for time in $*
@@ -286,45 +286,51 @@ function add_consumer_rate_limiting {
         if [ $is_valid_time == 1 ]; then
           parameters=$parameters" --data config.$time"
         else
-          echo "Please insert a valid time selection - invalid: $is_valid_time"
-          exit 1
+          eval $(split_value $time)
+          is_valid_filter=$(validate_filter $filter)
+          if [ $is_valid_filter == 1 ]; then
+            parameters="$parameters --data $filter.id=$id"
+          else
+            echo "Please validate input. You provided: $is_valid_filter"
+            exit 1
+          fi
         fi
       done
     else
-      echo "Please insert a valid time selection"
+      echo "Please insert a time selection"
       exit 1
     fi
 
-    kong_curl "consumers/$consumer_id/plugins" --request POST --data $parameters 
+    kong_curl "consumers/$consumer_id/plugins" --request POST $parameters 
     jq '.' < "$tmp_consumers"
 }
 
 # Updates a field within the rate limiting plugin. To reset to null, leave the value blank
 # ex: ./kong_consumers <env> rate-update <consumer_id|consumer_name> day=     will set value of day to null
 function update_consumer_rate_limiting {
-    consumer_id="$3"
-    shift
-    shift
-    shift
-    if [ "$#" -gt 0 ]; then
-      rate_limit_id=$(get_plugin_id_by_name $consumer_id $rate_limiting_plugin_name)
-      parameters=""
-    
-      for time in $*
-      do
-        is_valid_time=$(validate_rate_timing $time)
-        if [ $is_valid_time == 1 ]; then
-          parameters=$parameters" config.$time"
-        else
-          echo "Please insert a valid time selection - invalid: $is_valid_time"
-          exit 1
-        fi
-      done
+    consumer_id="$1"
+    rate_value="$2"
+    search_filter="$3"
+    is_valid_time=$(validate_rate_timing $rate_value)
+    if [ $is_valid_time == 1 ]; then
+      parameters=$parameters" config.$rate_value"
     else
-      echo "You must add a value to update"
+      echo "Please insert a valid time selection. You provided: $is_valid_time"
       exit 1
     fi
-
+    if [ $search_filter ]; then
+      eval $(split_value $search_filter)
+      is_valid_filter=$(validate_filter $filter)
+      if [ $is_valid_filter == 1 ]; then
+        rate_limit_id=$(get_plugin_id $consumer_id $rate_limiting_plugin_name $filter $id)
+      else
+        echo "Please validate input. You provided: $is_valid_filter"
+        exit 1
+      fi
+    else
+      rate_limit_id=$(get_plugin_id $consumer_id $rate_limiting_plugin_name)
+    fi
+    
     kong_curl "plugins/$rate_limit_id" --request PATCH --data $parameters 
     jq '.' < "$tmp_consumers"
 }
@@ -332,38 +338,30 @@ function update_consumer_rate_limiting {
 # Removes rate limiting plugin from consumer with consumer id or name
 function delete_consumer_rate_limiting {
     consumer_id=$1
-    rate_limit_id=$(get_plugin_id_by_name $consumer_id $rate_limiting_plugin_name)
+    search_filter=$2
+    if [ $search_filter ]; then
+      eval $(split_value $search_filter)
+      rate_limit_id=$(get_plugin_id $consumer_id $rate_limiting_plugin_name $filter $id)
+    else
+      rate_limit_id=$(get_plugin_id $consumer_id $rate_limiting_plugin_name)
+    fi
+    
     kong_curl "consumers/$consumer_id/plugins/$rate_limit_id" --request DELETE
+    echo "Deleted consumer plugin with id $rate_limit_id"
 }
 
-function split_ip_restriction_filter {
+function split_value {
     a=($(echo "$@" | tr '=' '\n'))
     echo "filter=${a[0]}; id=${a[1]}"
 }
 
-function validate_ip_restriction_filter {
+function validate_filter {
     filter=$1
-    if [[ ${ip_restriction_filters[*]} =~ ${filter} ]]; then
+    if [[ ${optional_filters[*]} =~ ${filter} ]]; then
       echo 1
     else
       echo $filter
     fi
-}
-
-function get_ip_plugin_without_filter {
-    consumer_id=$1
-    plugin_name=$2
-    kong_curl "consumers/$consumer_id/plugins" --request GET
-    echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.service.id == null) and select(.route.id == null)) .id' < $tmp_consumers)  | tr -d \"
-}
-
-function get_ip_plugin_with_filter {
-    consumer_id=$1
-    plugin_name=$2
-    filter=$3
-    id=$4
-    kong_curl "consumers/$consumer_id/plugins" --request GET
-    echo $(jq '.data[] | select((.name == "'$plugin_name'") and select(.'$filter'.id == "'$id'")) .id' < "$tmp_consumers") | tr -d \"
 }
 
 # Adds ip-restriction to a consumer by passing in consumer name/id, whitelist/blacklist ip
@@ -372,15 +370,15 @@ function add_consumer_ip_restriction {
     consumer_id=$1
     ip_config=$2
     search_filter=$3
-    eval $(split_ip_restriction_filter $ip_config)
+    eval $(split_value $ip_config)
     split_ips=$(echo "$id" | tr ',' '\n')
     for ip in $split_ips
     do
       parameters="$parameters --data config.$filter=$ip"
     done
     if [ $search_filter ]; then
-      eval $(split_ip_restriction_filter $search_filter)
-      is_valid_filter=$(validate_ip_restriction_filter $filter)
+      eval $(split_value $search_filter)
+      is_valid_filter=$(validate_filter $filter)
       if [ $is_valid_filter == 1 ]; then
         parameters="$parameters --data $filter.id=$id"
       else
@@ -399,7 +397,7 @@ function update_consumer_ip_restriction {
     consumer_id=$1
     ip_config=$2
     search_filter=$3
-    eval $(split_ip_restriction_filter $ip_config)
+    eval $(split_value $ip_config)
     split_ips=$(echo "$id" | tr ',' '\n')
 
     for ip in $split_ips
@@ -407,16 +405,16 @@ function update_consumer_ip_restriction {
       parameters="$parameters --data config.$filter=$ip"
     done
     if [ $search_filter ]; then
-      eval $(split_ip_restriction_filter $search_filter)
-      is_valid_filter=$(validate_ip_restriction_filter $filter)
+      eval $(split_value $search_filter)
+      is_valid_filter=$(validate_filter $filter)
       if [ $is_valid_filter == 1 ]; then
-        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
+        ip_restriction_id=$(get_plugin_id $consumer_id $ip_restriction_plugin_name $filter $id)
       else
         echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
         exit 1
       fi
     else
-      ip_restriction_id=$(get_ip_plugin_without_filter $consumer_id $ip_restriction_plugin_name)
+      ip_restriction_id=$(get_plugin_id $consumer_id $ip_restriction_plugin_name)
     fi
 
     kong_curl "plugins/$ip_restriction_id" --request PATCH $parameters 
@@ -429,18 +427,20 @@ function delete_consumer_ip_restriction {
     consumer_id=$1
     search_filter=$2
     if [ $search_filter ]; then
-      eval $(split_ip_restriction_filter $search_filter)
-      is_valid_filter=$(validate_ip_restriction_filter $filter)
+      eval $(split_value $search_filter)
+      is_valid_filter=$(validate_filter $filter)
       if [ $is_valid_filter == 1 ]; then
-        ip_restriction_id=$(get_ip_plugin_with_filter $consumer_id $ip_restriction_plugin_name $filter $id)
+        ip_restriction_id=$(get_plugin_id $consumer_id $ip_restriction_plugin_name $filter $id)
       else
         echo "Sorry, additional filters must be either 'route' or 'service', you had: $is_valid_filter"
         exit 1
       fi
     else
-      ip_restriction_id=$(get_ip_plugin_without_filter $consumer_id $ip_restriction_plugin_name)
+      ip_restriction_id=$(get_plugin_id $consumer_id $ip_restriction_plugin_name)
     fi
+    
     kong_curl "consumers/$consumer_id/plugins/$ip_restriction_id" --request DELETE
+    echo "Deleted consumer plugin with id $ip_restriction_id"
 }
 
 case "$2" in
@@ -496,12 +496,13 @@ case "$2" in
         add_consumer_rate_limiting "$@" 
         ;;
     rate-update)
-        [[ -z "$1" ]] && usage
-        update_consumer_rate_limiting "$@" 
+        [[ -z "$3" ]] && usage
+        [[ -z "$4" ]] && usage
+        update_consumer_rate_limiting "$3" "$4" "$5" 
         ;;
     rate-remove)
-        [[ -z "$1" ]] && usage
-        delete_consumer_rate_limiting "$3" 
+        [[ -z "$3" ]] && usage
+        delete_consumer_rate_limiting "$3" "$4"
         ;;
     ip-create)
         [[ -z "$3" ]] && usage
