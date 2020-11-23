@@ -79,6 +79,7 @@ describe('SlackService', () => {
         verification: 0,
         claims: 0,
       },
+      environment: "Development"
     };
 
     const allTime = {
@@ -93,6 +94,7 @@ describe('SlackService', () => {
         verification: 7,
         claims: 8,
       },
+      environment: "Development"
     };
 
     const res = await service.sendSignupsMessage(duration, formattedEnd, thisWeek, allTime);
@@ -105,7 +107,7 @@ describe('SlackService', () => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Weekly Sign-ups and Access Requests* for Week Ending 12/17/2003',
+            text: '*Weekly Sign-ups and Access Requests (Development)* for Week Ending 12/17/2003',
           },
         },
         {
