@@ -6,8 +6,8 @@ const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
 const ENVIRONMENTS = {
   'dvp-dev-developer-portal-users': 'Development',
   'dvp-prod-developer-portal-users': 'Production',
-  'dvp-staging-developer-portal-users': 'Staging'
-}
+  'dvp-staging-developer-portal-users': 'Staging',
+};
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -134,7 +134,7 @@ export default class SignupMetricsService {
         result.apiCounts[apiId]++;
       });
     }
-    
+
     return result;
   }
 

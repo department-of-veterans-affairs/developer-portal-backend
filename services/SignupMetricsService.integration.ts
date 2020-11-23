@@ -384,7 +384,7 @@ describeFunc('signups module', () => {
           health: 3,
           verification: 3,
         },
-        environment: "Development"
+        environment: "Development",
       });
     });
 

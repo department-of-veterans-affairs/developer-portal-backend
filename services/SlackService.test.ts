@@ -79,7 +79,7 @@ describe('SlackService', () => {
         verification: 0,
         claims: 0,
       },
-      environment: "Development"
+      environment: "Development",
     };
 
     const allTime = {
@@ -94,7 +94,7 @@ describe('SlackService', () => {
         verification: 7,
         claims: 8,
       },
-      environment: "Development"
+      environment: "Development",
     };
 
     const res = await service.sendSignupsMessage(duration, formattedEnd, thisWeek, allTime);
