@@ -122,7 +122,7 @@ export default class SlackService implements MonitoredService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`,
+            text: `*${titleDuration}ly Sign-ups and Access Requests (${allTimeSignups.environment})* for ${titleDuration} Ending ${endDate}`,
           },
         },
         {

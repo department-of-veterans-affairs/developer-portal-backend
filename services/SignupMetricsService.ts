@@ -3,6 +3,11 @@ import { Moment } from 'moment';
 import DynamoService, { FilterParams } from './DynamoService';
 
 const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
+const ENVIRONMENTS = {
+  'dvp-dev-developer-portal-users': 'Development',
+  'dvp-prod-developer-portal-users': 'Production',
+  'dvp-staging-developer-portal-users': 'Staging'
+}
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -29,6 +34,7 @@ export interface ApiSignupCounts {
 export interface SignupCountResult {
   total: number;
   apiCounts: ApiSignupCounts;
+  environment: string;
 }
 
 export default class SignupMetricsService {
@@ -103,6 +109,7 @@ export default class SignupMetricsService {
         verification: 0,
         claims: 0,
       },
+      environment: ENVIRONMENTS[this.tableName],
     };
 
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
@@ -127,7 +134,7 @@ export default class SignupMetricsService {
         result.apiCounts[apiId]++;
       });
     }
-
+    
     return result;
   }
 
