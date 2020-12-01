@@ -384,7 +384,6 @@ describeFunc('signups module', () => {
           health: 3,
           verification: 3,
         },
-        environment: "Development",
       });
     });
 
@@ -416,7 +415,6 @@ describeFunc('signups module', () => {
           facilities: 5,
           health: 1,
         },
-        environment: "Development",
       });
     });
 
@@ -438,7 +436,6 @@ describeFunc('signups module', () => {
           health: 1,
           verification: 1,
         },
-        environment: "Development",
       });
     });
 
@@ -459,7 +456,6 @@ describeFunc('signups module', () => {
           vaForms: 5,
           verification: 1,
         },
-        environment: "Development",
       });
     });
 
@@ -483,7 +479,6 @@ describeFunc('signups module', () => {
           vaForms: 3,
           verification: 4,
         },
-        environment: "Development",
       });
     });
 
@@ -501,7 +496,6 @@ describeFunc('signups module', () => {
           benefits: 1,
           claims: 1,
         },
-        environment: "Development",
       });
     });
 
@@ -524,7 +518,6 @@ describeFunc('signups module', () => {
           vaForms: 2,
           verification: 1,
         },
-        environment: "Development",
       });
     });
   });

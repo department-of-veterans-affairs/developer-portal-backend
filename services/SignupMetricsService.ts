@@ -7,6 +7,7 @@ const ENVIRONMENTS = {
   'dvp-dev-developer-portal-users': 'Development',
   'dvp-prod-developer-portal-users': 'Production',
   'dvp-staging-developer-portal-users': 'Staging',
+  'fake-users-table': 'Test',
 };
 
 export interface SignupQueryOptions {
@@ -34,12 +35,12 @@ export interface ApiSignupCounts {
 export interface SignupCountResult {
   total: number;
   apiCounts: ApiSignupCounts;
-  environment: string;
 }
 
 export default class SignupMetricsService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;
+  public static environment: string = ENVIRONMENTS[process.env.DYNAMODB_TABLE || DEFAULT_TABLE];
 
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
@@ -109,7 +110,6 @@ export default class SignupMetricsService {
         verification: 0,
         claims: 0,
       },
-      environment: ENVIRONMENTS[this.tableName],
     };
 
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
@@ -137,7 +137,7 @@ export default class SignupMetricsService {
 
     return result;
   }
-
+ 
   private buildFilterParams(options: SignupQueryOptions): FilterParams {
     let filterParams = {};
     if (options.startDate && options.endDate) {
