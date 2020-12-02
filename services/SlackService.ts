@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { SignupCountResult } from './SignupMetricsService';
+import SignupMetricsService, { SignupCountResult } from './SignupMetricsService';
 
 /* 
 WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
@@ -123,6 +123,13 @@ export default class SlackService implements MonitoredService {
           text: {
             type: 'mrkdwn',
             text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Environment:* ${SignupMetricsService.environment}`,
           },
         },
         {

@@ -109,6 +109,13 @@ describe('SlackService', () => {
           },
         },
         {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '*Environment:* Test',
+          },
+        },
+        {
           type: 'divider',
         },
         {
