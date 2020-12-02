@@ -130,7 +130,7 @@ export default class SlackService implements MonitoredService {
           text: {
             type: 'mrkdwn',
             text: `*Environment:* ${SignupMetricsService.environment}`,
-          }
+          },
         },
         {
           type: 'divider',
