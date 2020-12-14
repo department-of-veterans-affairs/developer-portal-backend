@@ -32,6 +32,7 @@ GOVDELIVERY_HOST=http://mock:3001/services/govdelivery
 GOVDELIVERY_KEY=123
 OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
+DEVELOPER_PORTAL_URL=http://localhost:3001
 ```
 
 With a `.env` in place, use `docker-compose up` to run the application.
@@ -45,6 +46,10 @@ Example CURL request:
 curl --location --request POST 'https://lighthouseva.slack.com/api/auth.test' \
 --header 'Authorization: Bearer <Put SLACK_TOKEN here>'
 ```
+
+### Running Developer Portal Backend and Developer Portal together locally
+1. Set `DEVELOPER_PORTAL_URL` in the developer-portal-backend `.env` to where your Developer Portal is running (default is `http://localhost:3001`)
+2. Set `REACT_APP_DEVELOPER_PORTAL_SELF_SERVICE_URL` in the developer-portal `.env.local` to where your Developer Portal Backend is running (default is `http://localhost:9999`)
 
 ## Development
 The `docker-compose.yml` file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. 

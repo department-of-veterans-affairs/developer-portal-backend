@@ -10,6 +10,7 @@ import developerApplicationHandler, { applySchema } from './DeveloperApplication
 import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
+import cors from 'cors';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -49,6 +50,16 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     signups,
     slack,
   } = services;
+
+  /**
+   * LOCAL DEV
+   */
+  if(process.env.DEVELOPER_PORTAL_URL) {
+    const options: cors.CorsOptions = {
+      origin: process.env.DEVELOPER_PORTAL_URL,
+    };  
+    app.use(cors(options));
+  }
 
   /**
    * PUBLIC
