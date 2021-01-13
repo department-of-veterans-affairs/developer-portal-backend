@@ -36,11 +36,6 @@ function setStartAndEndDates(reqStart: string | undefined, reqEnd: string | unde
 
 export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!slack) {
-      res.status(503).json({ error: 'service not enabled' });
-      return;
-    }
-
     const span = req.query.span || 'week';
     const { start, end } = setStartAndEndDates(req.query.start, req.query.end, span);
 

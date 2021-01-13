@@ -12,13 +12,8 @@ export const contactSchema = Joi.object().keys({
   apis: Joi.array().items(Joi.string()),
 }).options({ abortEarly: false });
 
-export default function contactUsHandler(govDelivery: GovDeliveryService | undefined) {
+export default function contactUsHandler(govDelivery: GovDeliveryService) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!govDelivery) {
-      res.status(503).json({ error: 'service not enabled'});
-      return;
-    }
-
     try {
       const supportRequest: SupportEmail = {
         firstName: req.body.firstName,

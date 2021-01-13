@@ -30,23 +30,6 @@ describe('contactUsHandler', () => {
     mockSendEmail.mockClear();
   });
 
-  it('returns a 503 if the service is not configured', async () => {
-    const handler = contactUsHandler(undefined);
-    const mockReq = {
-      body: {
-        firstName: 'Samwise',
-        lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
-      },
-    } as Request;
-
-    await handler(mockReq, mockRes, mockNext);
-
-    expect(mockStatus).toHaveBeenCalledWith(503);
-    expect(mockJson).toHaveBeenCalledWith({ error: 'service not enabled' });
-  });
-
   it('responds with a 200 when the request is okay', async () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {

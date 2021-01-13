@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { SignupCountResult } from './SignupMetricsService';
+import SignupMetricsService, { SignupCountResult } from './SignupMetricsService';
 
 /* 
 WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
@@ -80,7 +80,7 @@ export default class SlackService implements MonitoredService {
       baseURL: baseURL,
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=UTF-8',
       },
     };
     this.client = axios.create(config);
@@ -123,6 +123,13 @@ export default class SlackService implements MonitoredService {
           text: {
             type: 'mrkdwn',
             text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Environment:* ${SignupMetricsService.environment}`,
           },
         },
         {
@@ -181,6 +188,9 @@ export default class SlackService implements MonitoredService {
   private async post(body: PostBody): Promise<string> {
     try {
       const res = await this.client.post('/api/chat.postMessage', { channel: this.options.channel, ...body });
+      if(res.data.error){
+        throw new Error(res.data.error);
+      }
       return res.data;
     }
     catch (err) {
