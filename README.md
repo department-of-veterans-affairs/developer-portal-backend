@@ -9,6 +9,23 @@ When a user applies for a key, several things happen:
 - An email is sent via GovDelivery to the address the user provided that includes some combination of an api key, client id, and client secret.
 - A message is sent to Lighthouse Slack about the signup. Production signups go to `#feed-dx` and nonprod signups go to `#dev-signup-feed`. 
 
+### Architecture Diagrams
+
+<details>
+  <summary>This is the System Context Diagram:</summary>
+  <img src="docs/developer-portal-backend-l1-system-context-diagram.svg" alt="System Context Diagram for Developer Portal Backend" width="650">
+</details>
+<br/>
+<details>
+  <summary>This is the Container Diagram:</summary>
+  <img src="docs/developer-portal-backend-l2-container-diagram.svg" alt="Container Diagram for Developer Portal Backend" width="650">
+</details>
+<br/>
+<details>
+  <summary>This is the Component Diagram for the API:</summary>
+  <img src="docs/developer-portal-backend-l3-api-component-diagram.svg" alt="Component Diagram for the API" width="650">
+</details>
+
 ## Running Locally
 This Express server is written in TypeScript and uses [Node v12+](https://nodejs.org/en/download/).
 
@@ -162,4 +179,3 @@ With the new revision made, go to the cluster again and click the service `dvp-d
 Now just wait for your new task to get up and running in Fargate. It will take a few minutes to start up, and then both tasks will run together for a brief period of time before the old one shuts down.
 
 This container will remain in place until overwritten by another run through this flow, a PR merge runs the release Codebuild job, or the manual Codebuild job is triggered against the dev cluster.
-
