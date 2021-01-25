@@ -2,7 +2,7 @@ import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { WELCOME_TEMPLATE, SUPPORT_TEMPLATE } from '../templates';
+import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, DEFAULT_SUPPORT_TEMPLATE } from '../templates';
 import User from '../models/User';
 
 interface EmailRecipient {
@@ -28,7 +28,7 @@ interface WelcomeEmail {
   redirectURI?: string;
 }
 
-export interface SupportEmail {
+export interface DefaultSupportEmail {
   firstName: string;
   lastName: string;
   requester: string;
@@ -36,7 +36,16 @@ export interface SupportEmail {
   organization?: string;
   apis?: string[];
 }
-
+export interface PublishingSupportEmail {
+  firstName: string;
+  lastName: string;
+  requester: string;
+  organization?: string;
+  apiDetails: string;
+  apiDescription?: string;
+  apiInternalOnly: boolean;
+  apiOtherInfo?: string;
+}
 export interface EmailResponse {
   from_name: string;
   from_email: string;
@@ -92,14 +101,16 @@ export default class GovDeliveryService implements MonitoredService {
   public host: string;
   public supportEmailRecipient: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
-  public supportTemplate: Handlebars.TemplateDelegate<SupportEmail>;
+  public defaultSupportTemplate: Handlebars.TemplateDelegate<DefaultSupportEmail>;
+  public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
   public client: AxiosInstance;
 
   constructor({ token, host, supportEmailRecipient }) {
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
-    this.supportTemplate = Handlebars.compile(SUPPORT_TEMPLATE);
+    this.defaultSupportTemplate = Handlebars.compile(DEFAULT_SUPPORT_TEMPLATE);
+    this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
     this.client = axios.create({
       baseURL: this.host,
       headers: { 'X-AUTH-TOKEN': token },
@@ -133,11 +144,22 @@ export default class GovDeliveryService implements MonitoredService {
     throw Error('User must have token or client_id initialized');
   }
 
-  public sendSupportEmail(supportRequest: SupportEmail): Promise<EmailResponse> {
+  public sendDefaultSupportEmail(supportRequest: DefaultSupportEmail): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: 'Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
-      body: this.supportTemplate(supportRequest),
+      body: this.defaultSupportTemplate(supportRequest),
+      recipients: [{ email: this.supportEmailRecipient }],
+    };
+
+    return this.sendEmail(email);
+  }
+
+  public sendPublishingSupportEmail(supportRequest: PublishingSupportEmail): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      subject: 'Publishing Support Needed',
+      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
+      body: this.publishingSupportTemplate(supportRequest),
       recipients: [{ email: this.supportEmailRecipient }],
     };
 

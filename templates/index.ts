@@ -34,7 +34,7 @@ export const WELCOME_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 <div><strong>Email us at: </strong><a href="mailto:api@va.gov">api@va.gov</a></div>
 `;
 
-export const SUPPORT_TEMPLATE = `<ul>
+export const DEFAULT_SUPPORT_TEMPLATE = `<ul>
     <li>
         <div>
             <div>First Name:</div>
@@ -71,4 +71,55 @@ export const SUPPORT_TEMPLATE = `<ul>
             <div>{{apis}}</div>
         </div>
     </li>
+</ul>`;
+
+export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
+<li>
+    <div>
+        <div>First Name:</div>
+        <div>{{firstName}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Last Name:</div>
+        <div>{{lastName}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Organization:</div>
+        <div>{{organization}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>From Email:</div>
+        <div>{{requester}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>API Details:</div>
+        <div>{{apiDetails}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>API Description:</div>
+        <div>{{apiDescription}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Internal Only:</div>
+        <div>{{apiInternalOnly}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Other Info:</div>
+        <div>{{apiOtherInfo}}</div>
+    </div>
+</li>
 </ul>`;
