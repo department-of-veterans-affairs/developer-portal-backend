@@ -32,6 +32,7 @@ describe('contactUsHandler', () => {
     mockJson.mockClear();
     mockNext.mockClear();
     mockSendDefaultSupportEmail.mockClear();
+    mockSendPublshingSupportEmail.mockClear();
   });
 
   it('responds with a 200 when the request is okay', async () => {
