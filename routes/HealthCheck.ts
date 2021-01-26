@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { RequestHandler } from 'express';
 import HealthCheck from '../models/HealthCheck';
 import { MonitoredService } from '../types';
 import KongService from '../services/KongService';
@@ -12,7 +12,7 @@ export default function healthCheckHandler(kong: KongService,
   dynamo: DynamoService,
   govdelivery: GovDeliveryService,
   slack: SlackService): RequestHandler {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (_req, res, next): Promise<void> {
     try {
       const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack];
       const healthCheck = new HealthCheck(services);
