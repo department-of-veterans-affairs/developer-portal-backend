@@ -309,7 +309,7 @@ describe('validations', () => {
       });
 
       it('is a boolean', () => {
-        const payload = {...publishingPaylod, apiInternalOnly: { potatoes: 'boil em, mash em, stick em in a stew' }};
+        const payload = { ...publishingPayload, apiInternalOnly: { potatoes: 'boil em, mash em, stick em in a stew' } };
   
         const result = contactSchema.validate(payload);
   
@@ -319,7 +319,7 @@ describe('validations', () => {
 
     describe("description", () => {
       it('is forbidden', () => {
-        const payload = {...publishingPaylod, description: "Woah how did this get here"};
+        const payload = { ...publishingPayload, description: "Woah how did this get here" };
   
         const result = contactSchema.validate(payload);
         
