@@ -273,7 +273,7 @@ describe('validations', () => {
   });
   
   describe('type is publishing', () => {
-    const publishingPaylod = {
+    const publishingPayload = {
       ...basePayload,
       type: 'PUBLISHING',
       apiDetails: 'Need help getting to Mt. Doom',
