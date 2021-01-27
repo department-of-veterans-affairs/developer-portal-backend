@@ -272,7 +272,7 @@ describe('validations', () => {
     });
   });
   
-  describe("type is pubslishing", () => {
+  describe('type is publishing', () => {
     const publishingPaylod = {
       ...basePayload,
       type: 'PUBLISHING',
