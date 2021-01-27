@@ -291,7 +291,7 @@ describe('validations', () => {
       });
 
       it('is a string', () => {
-        const payload = {...publishingPaylod, apiDetails: { potatoes: 'boil em, mash em, stick em in a stew' }};
+        const payload = { ...publishingPayload, apiDetails: { potatoes: 'boil em, mash em, stick em in a stew' } };
   
         const result = contactSchema.validate(payload);
   
