@@ -3,10 +3,10 @@ import Joi from '@hapi/joi';
 
 import GovDeliveryService, { DefaultSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
 
-// setting these 'as const' forces the type of the variable to be the explicit string value, instead of just 'string'
-// setting the type to the explicit string allows it to be used in the support request types below
-const DEFAULT = 'DEFAULT' as const;
-const PUBLISHING = 'PUBLISHING' as const;
+export const enum SubmissionType {
+  DEFAULT = 'DEFAULT',
+  PUBLISHING = 'PUBLISHING',
+}
 
 interface ContactDetails {
   firstName: string;
@@ -16,13 +16,13 @@ interface ContactDetails {
 }
 
 type DefaultSupportRequest = {
-  type: typeof DEFAULT;
+  type: SubmissionType.DEFAULT;
   description: string;
   apis?: string[];
 } & ContactDetails
 
 type PublishingSupportRequest = {
-  type: typeof PUBLISHING;
+  type: SubmissionType.PUBLISHING;
   apiDetails: string;
   apiDescription?: string;
   apiInternalOnly: boolean;
@@ -38,8 +38,8 @@ export const contactSchema = Joi.object().keys({
   description: Joi.string().required(),
   organization: Joi.string().allow(''),
   apis: Joi.array().items(Joi.string()),
-  type: Joi.string().valid(DEFAULT, PUBLISHING).optional(),
-}).when(Joi.object({type: Joi.valid(PUBLISHING).required()}).unknown(), {
+  type: Joi.string().valid(SubmissionType.DEFAULT, SubmissionType.PUBLISHING).optional(),
+}).when(Joi.object({type: Joi.valid(SubmissionType.PUBLISHING).required()}).unknown(), {
   then: Joi.object({
     apiDetails: Joi.string().required(),
     apiDescription: Joi.string().optional(),
@@ -53,7 +53,7 @@ export const contactSchema = Joi.object().keys({
 export default function contactUsHandler(govDelivery: GovDeliveryService) {
   return async function (req: Request<{}, {}, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.body.type === PUBLISHING) {
+      if (req.body.type === SubmissionType.PUBLISHING) {
         const supportRequest: PublishingSupportEmail = {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
