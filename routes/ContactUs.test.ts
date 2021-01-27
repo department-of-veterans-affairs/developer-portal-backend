@@ -301,7 +301,7 @@ describe('validations', () => {
 
     describe('apiInternalOnly', () => {
       it('is required', () => {
-        const payload = {...publishingPaylod, apiInternalOnly: undefined};
+        const payload = { ...publishingPayload, apiInternalOnly: undefined };
   
         const result = contactSchema.validate(payload);
         
