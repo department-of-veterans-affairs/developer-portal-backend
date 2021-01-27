@@ -283,7 +283,7 @@ describe('validations', () => {
 
     describe('apiDetails', () => {
       it('is required', () => {
-        const payload = {...publishingPaylod, apiDetails: undefined};
+        const payload = { ...publishingPayload, apiDetails: undefined };
   
         const result = contactSchema.validate(payload);
         
