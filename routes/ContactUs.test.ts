@@ -3,14 +3,14 @@ import contactUsHandler, { contactSchema } from './ContactUs';
 import GovDeliveryService from '../services/GovDeliveryService';
 
 describe('contactUsHandler', () => {
-  const mockSendDefaultSupportEmail = jest.fn();
+  const mockSendConsumerSupportEmail = jest.fn();
   const mockSendPublshingSupportEmail = jest.fn();
   const mockSendStatus = jest.fn();
   const mockGovDelivery = {
-    sendDefaultSupportEmail: mockSendDefaultSupportEmail,
+    sendConsumerSupportEmail: mockSendConsumerSupportEmail,
     sendPublishingSupportEmail: mockSendPublshingSupportEmail,
   } as unknown as GovDeliveryService;
-  mockSendDefaultSupportEmail.mockResolvedValue({});
+  mockSendConsumerSupportEmail.mockResolvedValue({});
 
 
   const mockStatus = jest.fn();
@@ -31,7 +31,7 @@ describe('contactUsHandler', () => {
     mockSendStatus.mockClear();
     mockJson.mockClear();
     mockNext.mockClear();
-    mockSendDefaultSupportEmail.mockClear();
+    mockSendConsumerSupportEmail.mockClear();
     mockSendPublshingSupportEmail.mockClear();
   });
 
@@ -50,7 +50,7 @@ describe('contactUsHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendDefaultSupportEmail).toHaveBeenCalledWith({
+    expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
       requester: mockReq.body.email,
@@ -77,7 +77,7 @@ describe('contactUsHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendDefaultSupportEmail).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith(expect.objectContaining({
       apis: ['facilities', 'health'],
     }));
   });
@@ -95,7 +95,7 @@ describe('contactUsHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendDefaultSupportEmail).toHaveBeenCalledWith({
+    expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
       requester: mockReq.body.email,

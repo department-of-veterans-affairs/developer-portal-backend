@@ -1,6 +1,6 @@
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import GovDeliveryService, { DefaultSupportEmail, PublishingSupportEmail } from './GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from './GovDeliveryService';
 import User from '../models/User';
 
 describe('GovDeliveryService', () => {
@@ -107,9 +107,9 @@ describe('GovDeliveryService', () => {
     });
   });
 
-  describe('sendDefaultSupportEmail', () => {
+  describe('sendConsumerSupportEmail', () => {
     it('should send a request', async () => {
-      const email: DefaultSupportEmail = {
+      const email: ConsumerSupportEmail = {
         firstName: 'Peregrin',
         lastName: 'Took',
         requester: 'peregrin@thefellowship.org',
@@ -118,7 +118,7 @@ describe('GovDeliveryService', () => {
         apis: ['facilities', 'benefits'],
       };
 
-      await client.sendDefaultSupportEmail(email);
+      await client.sendConsumerSupportEmail(email);
       expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
         recipients: [{ email: 'gandalf@istari.net' }],
         from_name: 'Peregrin Took',

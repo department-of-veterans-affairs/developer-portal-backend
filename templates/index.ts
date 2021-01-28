@@ -34,7 +34,7 @@ export const WELCOME_TEMPLATE = `<div>Welcome {{ firstName }},</div><br />
 <div><strong>Email us at: </strong><a href="mailto:api@va.gov">api@va.gov</a></div>
 `;
 
-export const DEFAULT_SUPPORT_TEMPLATE = `<ul>
+export const CONSUMER_SUPPORT_TEMPLATE = `<ul>
     <li>
         <div>
             <div>First Name:</div>

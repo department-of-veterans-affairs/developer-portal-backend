@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 
-import GovDeliveryService, { DefaultSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
 
 export const enum SubmissionType {
   DEFAULT = 'DEFAULT',
@@ -15,7 +15,7 @@ interface ContactDetails {
   organization?: string;
 }
 
-type DefaultSupportRequest = {
+type ConsumerSupportRequest = {
   type: SubmissionType.DEFAULT;
   description: string;
   apis?: string[];
@@ -29,7 +29,7 @@ type PublishingSupportRequest = {
   apiOtherInfo?: string;
 } & ContactDetails
 
-type SupportRequest = DefaultSupportRequest | PublishingSupportRequest
+type SupportRequest = ConsumerSupportRequest | PublishingSupportRequest
 
 export const contactSchema = Joi.object().keys({
   firstName: Joi.string().required(),
@@ -68,7 +68,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
         await govDelivery.sendPublishingSupportEmail(supportRequest);
         res.sendStatus(200);
       } else {
-        const supportRequest: DefaultSupportEmail = {
+        const supportRequest: ConsumerSupportEmail = {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
           requester: req.body.email,
@@ -77,7 +77,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           apis: req.body.apis,
         };
         
-        await govDelivery.sendDefaultSupportEmail(supportRequest);
+        await govDelivery.sendConsumerSupportEmail(supportRequest);
         res.sendStatus(200);
       }
     } catch(err) {
