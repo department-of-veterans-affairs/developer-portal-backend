@@ -1,6 +1,6 @@
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import GovDeliveryService, { SupportEmail } from './GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from './GovDeliveryService';
 import User from '../models/User';
 
 describe('GovDeliveryService', () => {
@@ -107,9 +107,9 @@ describe('GovDeliveryService', () => {
     });
   });
 
-  describe('sendSupportEmail', () => {
+  describe('sendConsumerSupportEmail', () => {
     it('should send a request', async () => {
-      const email: SupportEmail = {
+      const email: ConsumerSupportEmail = {
         firstName: 'Peregrin',
         lastName: 'Took',
         requester: 'peregrin@thefellowship.org',
@@ -118,13 +118,34 @@ describe('GovDeliveryService', () => {
         apis: ['facilities', 'benefits'],
       };
 
-      await client.sendSupportEmail(email);
+      await client.sendConsumerSupportEmail(email);
       expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
         recipients: [{ email: 'gandalf@istari.net' }],
         from_name: 'Peregrin Took',
         subject: 'Support Needed',
         body: expect.stringContaining('peregrin@thefellowship.org'),
       }));
+    });
+
+    describe('sendPublishingSupportEmail', () => {
+      it('should send a request', async () => {
+        const email: PublishingSupportEmail = {
+          firstName: 'Peregrin',
+          lastName: 'Took',
+          requester: 'peregrin@thefellowship.org',
+          organization: 'The Fellowship of the Ring',
+          apiInternalOnly: false,
+          apiDetails: 'Ring',
+        };
+  
+        await client.sendPublishingSupportEmail(email);
+        expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
+          recipients: [{ email: 'gandalf@istari.net' }],
+          from_name: 'Peregrin Took',
+          subject: 'Publishing Support Needed',
+          body: expect.stringContaining('API Details'),
+        }));
+      });
     });
   });
 

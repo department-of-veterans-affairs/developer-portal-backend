@@ -1,3 +1,7 @@
+// The types for RequestHandler have been updated in new versions to return void
+// this type is not completely accurate, as express accepts async handlers. We need to
+// ignore this rule here so esling doesn't complain that you can't await void
+/* eslint-disable @typescript-eslint/await-thenable */
 import { Request, Response } from 'express';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
@@ -104,6 +108,7 @@ describe('healthCheckHandler', () => {
     mockKongHealthCheck.mockRejectedValue(err);
 
     const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith(err);
@@ -113,6 +118,7 @@ describe('healthCheckHandler', () => {
     mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
 
     const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'vibrant', failedHealthChecks: [] });
