@@ -1,3 +1,7 @@
+// The types for RequestHandler have been updated in new versions to return void
+// this type is not completely accurate, as express accepts async handlers. We need to
+// ignore this rule here so esling doesn't complain that you can't await void
+/* eslint-disable @typescript-eslint/await-thenable */
 import { Request, Response } from 'express';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
@@ -42,10 +46,6 @@ describe('healthCheckHandler', () => {
   describe('checks Kong', () => {
     it('calls Kong healthCheck', async () => {
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // The types for RequestHandler have been updated in new versions to return void
-      // this type is not completely accurate, as express accepts async handlers. We need to
-      // ignore this rule here so esling doesn't complain that you can't await void
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockKongHealthCheck).toHaveBeenCalled();
@@ -57,7 +57,6 @@ describe('healthCheckHandler', () => {
       mockKongHealthCheck.mockResolvedValue(mockKongHealthCheckResponse);
 
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockKongHealthCheckResponse ] });
@@ -67,7 +66,6 @@ describe('healthCheckHandler', () => {
   describe('checks Okta', () => {
     it('calls Okta healthCheck', async () => {
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockOktaHealthCheck).toHaveBeenCalled();
@@ -79,7 +77,6 @@ describe('healthCheckHandler', () => {
       mockOktaHealthCheck.mockResolvedValue(mockOktaHealthCheckResponse);
 
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockOktaHealthCheckResponse ] });
@@ -89,7 +86,6 @@ describe('healthCheckHandler', () => {
   describe('checks DynamoDB', () => {
     it('calls Dynamo healthCheck', async () => {
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockDynamoHealthCheck).toHaveBeenCalled();
@@ -101,7 +97,6 @@ describe('healthCheckHandler', () => {
       mockDynamoHealthCheck.mockResolvedValue(mockDynamoHealthCheckResponse);
 
       const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster',failedHealthChecks: [ mockDynamoHealthCheckResponse ] });
