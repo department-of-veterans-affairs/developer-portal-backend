@@ -118,6 +118,12 @@ export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
 </li>
 <li>
     <div>
+        <div>Internal Only Details:</div>
+        <div>{{apiInternalOnlyDetails}}</div>
+    </div>
+</li>
+<li>
+    <div>
         <div>Other Info:</div>
         <div>{{apiOtherInfo}}</div>
     </div>

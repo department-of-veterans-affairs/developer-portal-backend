@@ -315,6 +315,18 @@ describe('validations', () => {
   
         expect(result.error.message).toEqual('"apiInternalOnly" must be a boolean');
       });
+
+      describe('is true', () => {
+        describe('apiInternalOnlyDetails', () => {
+          it('is required', () => {
+            const payload = { ...publishingPayload, apiInternalOnly: true };
+      
+            const result = contactSchema.validate(payload);
+            
+            expect(result.error.message).toEqual('"apiInternalOnlyDetails" is required');
+          });
+        });
+      });
     });
 
     describe("description", () => {

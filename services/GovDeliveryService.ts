@@ -44,6 +44,7 @@ export interface PublishingSupportEmail {
   apiDetails: string;
   apiDescription?: string;
   apiInternalOnly: boolean;
+  apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
 }
 export interface EmailResponse {

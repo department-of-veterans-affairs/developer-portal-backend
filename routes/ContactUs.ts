@@ -26,6 +26,7 @@ type PublishingSupportRequest = {
   apiDetails: string;
   apiDescription?: string;
   apiInternalOnly: boolean;
+  apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
 } & ContactDetails
 
@@ -44,6 +45,10 @@ export const contactSchema = Joi.object().keys({
     apiDetails: Joi.string().required(),
     apiDescription: Joi.string().optional(),
     apiInternalOnly: Joi.boolean().required(),
+    apiInternalOnlyDetails: Joi.string().forbidden().when('apiInternalOnly', {
+      is: Joi.boolean().required().valid(true),
+      then: Joi.required(),
+    }),
     apiOtherInfo: Joi.string().optional(),
     description: Joi.forbidden(),
     apis: Joi.forbidden(),
@@ -62,6 +67,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           apiDetails: req.body.apiDetails,
           apiDescription: req.body.apiDescription,
           apiInternalOnly: req.body.apiInternalOnly,
+          apiInternalOnlyDetails: req.body.apiInternalOnlyDetails,
           apiOtherInfo: req.body.apiOtherInfo,
         };
         
