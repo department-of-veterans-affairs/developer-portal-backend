@@ -18,6 +18,11 @@ export interface OktaApplicationResponse {
       client_secret?: string;
     };
   };
+  settings: {
+    oauthClient: {
+      redirect_uris?: string[];
+    };
+  };
 }
 export default class OktaService implements MonitoredService {
   public client: Client;

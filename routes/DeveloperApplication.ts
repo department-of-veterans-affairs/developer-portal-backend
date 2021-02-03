@@ -78,12 +78,17 @@ export default function developerApplicationHandler(kong: KongService,
       await user.saveToDynamo(dynamo);
 
       if (!user.oauthApplication) {
-        res.json({ token: user.token });
+        res.json({ 
+          token: user.token,
+          kongConsumerId: user.kongConsumerId,
+        });
       } else {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
+          kongConsumerId: user.kongConsumerId,
           token: user.token,
+          redirectURI: user.oAuthRedirectURI,
         });
       }
     } catch (err) {
