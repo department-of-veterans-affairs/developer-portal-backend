@@ -53,6 +53,11 @@ describe('Application', () => {
           client_secret: 'had3breakfasts',
         },
       },
+      settings: {
+        oauthClient: {
+          redirect_uris: ['http://locahost:3000'],
+        },
+      },
     };
     const mockCreateApplication = jest.fn().mockResolvedValue(appRes);
 
