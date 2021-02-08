@@ -105,7 +105,7 @@ describe(route, () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         token: 'my-precious',
-        kongConsumerId: '123',
+        kongUsername: 'FellowshipBaggins',
       });
     });
 
@@ -144,7 +144,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
-        kongConsumerId: '123',
+        kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });
@@ -168,7 +168,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
-          kongConsumerId: "123",
+          kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
@@ -191,7 +191,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
-          kongConsumerId: "123",
+          kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
@@ -216,7 +216,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
-          kongConsumerId: "123",
+          kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
@@ -236,7 +236,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
-        kongConsumerId: "123",
+        kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });
@@ -255,7 +255,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
-        kongConsumerId: "123",
+        kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });

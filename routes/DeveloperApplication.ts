@@ -80,13 +80,13 @@ export default function developerApplicationHandler(kong: KongService,
       if (!user.oauthApplication) {
         res.json({ 
           token: user.token,
-          kongConsumerId: user.kongConsumerId,
+          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
         });
       } else {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
-          kongConsumerId: user.kongConsumerId,
+          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
           token: user.token,
           redirectURI: user.oAuthRedirectURI,
         });
