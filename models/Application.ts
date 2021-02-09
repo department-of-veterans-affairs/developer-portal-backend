@@ -28,7 +28,6 @@ export default class Application implements OktaApplication {
   public client_id?: string;
   public client_secret?: string;
   public oktaID?: string;
-  public redirectURI?: string;
 
   constructor({
     name,
@@ -72,13 +71,9 @@ export default class Application implements OktaApplication {
     try {
       const resp = await client.createApplication(this, IDME_GROUP_ID);
       const { client_id, client_secret } = resp.credentials.oauthClient;
-      const { redirect_uris } = resp.settings.oauthClient;
       this.client_id = client_id;
       this.client_secret = client_secret;
       this.oktaID = resp.id;
-      if (Array.isArray(redirect_uris) && redirect_uris.length > 0) {
-        this.redirectURI = redirect_uris[0];
-      }
       return resp;
     } catch (err) {
       err.action = 'failed saving to Okta';

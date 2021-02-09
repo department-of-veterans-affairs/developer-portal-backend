@@ -47,20 +47,7 @@ describe(route, () => {
       .post('/internal/admin/consumers', { username: 'FellowshipBaggins' }).reply(201, { id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null })
       .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(201, { key: 'my-precious' });
 
-    okta.post('/api/v1/apps').reply(200, { 
-      id: '123', 
-      credentials: { 
-        oauthClient: { 
-          client_id: 'gollum', 
-          client_secret: 'mordor',
-        },
-      },
-      settings: {
-        oauthClient: { 
-          redirect_uris: ['http://localhost:3000'],
-        },
-      },
-    })
+    okta.post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } } })
       .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`).reply(200, {});
 
     const { oktaPolicyCollection, oktaPolicy } = oktaAuthMocks;

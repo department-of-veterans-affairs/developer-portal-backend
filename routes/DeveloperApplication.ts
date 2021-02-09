@@ -88,7 +88,7 @@ export default function developerApplicationHandler(kong: KongService,
           clientSecret: user.oauthApplication.client_secret,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
           token: user.token,
-          redirectURI: user.oAuthRedirectURI,
+          redirectURI: form.oAuthRedirectURI,
         });
       }
     } catch (err) {
