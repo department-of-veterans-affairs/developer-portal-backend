@@ -92,6 +92,7 @@ describe(route, () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         token: 'my-precious',
+        kongUsername: 'FellowshipBaggins',
       });
     });
 
@@ -107,6 +108,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        redirectURI: 'https://fake-oAuth-redirect-uri',
       });
     });
 
@@ -129,6 +131,8 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        kongUsername: 'FellowshipBaggins',
+        redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });
     });
@@ -151,6 +155,8 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          kongUsername: 'FellowshipBaggins',
+          redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
       });
@@ -172,6 +178,8 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          kongUsername: 'FellowshipBaggins',
+          redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
       });
@@ -195,6 +203,8 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          kongUsername: 'FellowshipBaggins',
+          redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
         });
       });
@@ -213,6 +223,8 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        kongUsername: 'FellowshipBaggins',
+        redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });
     });
@@ -230,6 +242,8 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        kongUsername: 'FellowshipBaggins',
+        redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
       });
     });
