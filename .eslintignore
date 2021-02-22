@@ -2,3 +2,4 @@ node_modules/*
 .npm/
 .config/
 dev/mocks/node_modules/*
+.eslintrc.js
