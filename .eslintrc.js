@@ -42,7 +42,6 @@ module.exports = {
   rules: {
     ...getThingsWorkingRules,
     ...rules,
-    'no-unsafe-assignment': 'off'
   },
   overrides: [
     {
