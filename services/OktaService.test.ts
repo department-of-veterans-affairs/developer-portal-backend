@@ -51,12 +51,13 @@ describe('OktaService', () => {
             name: 'policy3',
             conditions: { clients: { include: [] } },
           };
-          return {
+          const returnObj = {
             policies: [policy1,policy2,policy3],
             each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
               return this.policies.forEach(cb);
             },
           };
+          return returnObj;
         });
     });
 
@@ -121,12 +122,13 @@ describe('OktaService', () => {
             name: 'policy3',
             conditions: { clients: { include: [] } },
           };
-          return {
+          const returnObj = {
             policies: [policy1,policy2,policy3],
             each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
               return this.policies.forEach(cb);
             },
           };
+          return returnObj;
         });
 
       const application: OktaApplication = {

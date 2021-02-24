@@ -1,11 +1,14 @@
-import OktaService, { OktaApplicationResponse } from '../services/OktaService';
 import {
   ApplicationType,
   GrantTypes,
   OAuthApplication,
+  OktaApplicationResponse,
+  ResponseTypes,
+} from '@okta/okta-sdk-nodejs';
+import OktaService from '../services/OktaService';
+import {
   OktaApplication,
   OktaUser,
-  ResponseTypes,
 } from '../types';
 
 const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
@@ -29,14 +32,17 @@ export default class Application implements OktaApplication {
   public client_secret?: string;
   public oktaID?: string;
 
-  constructor({
-    name,
-    redirectURIs,
-    applicationType = 'web',
-    responseTypes = ['code'],
-    grantTypes = ['authorization_code', 'refresh_token'],
-    ...options
-  }: ApplicationSettings, owner: OktaUser) {
+  constructor(
+    {
+      name,
+      redirectURIs,
+      applicationType = 'web',
+      responseTypes = ['code'],
+      grantTypes = ['authorization_code', 'refresh_token'],
+      ...options
+    }: ApplicationSettings,
+    owner: OktaUser,
+  ) {
     this.owner = owner;
     this.settings = {
       name: 'oidc_client',

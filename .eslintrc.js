@@ -1,7 +1,6 @@
 // These rules are set due to various eslint errors we get when upgrading
 const getThingsWorkingRules = {
   '@typescript-eslint/no-unsafe-return': 'off',
-  '@typescript-eslint/no-unsafe-call': 'off',
   '@typescript-eslint/no-unsafe-member-access': 'off',
   '@typescript-eslint/restrict-template-expressions': 'off',
   '@typescript-eslint/no-unsafe-assignment': 'off',

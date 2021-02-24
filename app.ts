@@ -2,6 +2,8 @@ import express from 'express';
 import { config } from 'aws-sdk';
 import morgan from 'morgan';
 
+import { IncomingMessage, ServerResponse } from 'http';
+
 import logger from './config/logger';
 import Sentry from './config/Sentry';
 import OktaService from './services/OktaService';
@@ -13,15 +15,38 @@ import DynamoService from './services/DynamoService';
 import SignupMetricsService from './services/SignupMetricsService';
 import configureRoutes from './routes';
 
-function loggingMiddleware(tokens, req, res): string {
-  return JSON.stringify({
+const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tokens, req, res): string => (
+  JSON.stringify({
     method: tokens.method(req, res),
     url: tokens.url(req, res),
     status: tokens.status(req, res),
     contentLength: tokens.res(req, res, 'content-length'),
     responseTime: `${tokens['response-time'](req, res)} ms`,
-  });
-}
+  })
+);
+
+const errorLoggingMiddleware: express.ErrorRequestHandler = (err, req, res) => {
+  // To prevent sensitive information from ending up in the logs like keys, only certain safe
+  // fields are logged from errors.
+  logger.error({ message: err.message, action: err.action, stack: err.stack });
+
+  // Because we hooking post-response processing into the global error handler, we
+  // get to leverage unified logging and error handling; but, it means the response
+  // may have already been committed, since we don't know if the error was thrown
+  // PRE or POST response. As such, we have to check to see if the response has
+  // been committed before we attempt to send anything to the user.
+  if (!res.headersSent) {
+    if (process.env.NODE_ENV === 'production') {
+      res.status(500).json({ error: 'encountered an error' });
+    } else {
+      res.status(500).json({
+        action: err.action,
+        message: err.message,
+        stack: err.stack,
+      });
+    }
+  }
+};
 
 const configureGovDeliveryService = (): GovDeliveryService => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
@@ -151,36 +176,7 @@ export default function configureApp(): express.Application {
   });
 
   app.use(Sentry.Handlers.errorHandler());
-
-  /* 
-   * 'next' is a required param despite not being used. Typescript will throw
-   * a compilation error on `res.status` if only three params are listed, because Express
-   * types it as a regular middleware function instead of an error-handling
-   * middleware function if three parameters are provided instead of four.
-   */
-  app.use((err, req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-    // To prevent sensitive information from ending up in the logs like keys, only certain safe
-    // fields are logged from errors.
-    logger.error({ message: err.message, action: err.action, stack: err.stack });
-
-
-    // Because we hooking post-response processing into the global error handler, we
-    // get to leverage unified logging and error handling; but, it means the response
-    // may have already been committed, since we don't know if the error was thrown
-    // PRE or POST response. As such, we have to check to see if the response has
-    // been committed before we attempt to send anything to the user.
-    if (!res.headersSent) {
-      if (process.env.NODE_ENV === 'production') {
-        res.status(500).json({ error: 'encountered an error' });
-      } else {
-        res.status(500).json({
-          action: err.action,
-          message: err.message,
-          stack: err.stack,
-        });
-      }
-    }
-  });
+  app.use(errorLoggingMiddleware);
 
   return app;
 }

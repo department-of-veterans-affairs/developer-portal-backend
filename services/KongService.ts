@@ -24,6 +24,10 @@ export interface KongAclsResponse {
   data: KongAcl[];
 }
 
+interface ACLResponse {
+  data: { group: string }[];
+}
+
 export interface KongKeyResponse {
   key: string;
   created_at: number;
@@ -70,7 +74,7 @@ export default class KongService implements MonitoredService {
 
   public async createACLs(user: KongUser): Promise<KongAclsResponse> {
     const res = await this.getClient()
-      .get(`${this.kongPath}/${user.consumerName()}/acls`)
+      .get<ACLResponse>(`${this.kongPath}/${user.consumerName()}/acls`)
       .catch(() => {
         // axios throws for anything outside the 2xx response range
       });
