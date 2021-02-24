@@ -56,7 +56,7 @@ export const contactSchema = Joi.object().keys({
 }).options({ abortEarly: false });
 
 export default function contactUsHandler(govDelivery: GovDeliveryService) {
-  return async function (req: Request<{}, {}, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
+  return async function (req: Request<Record<string, unknown>, Record<string, unknown>, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
     try {
       if (req.body.type === SubmissionType.PUBLISHING) {
         const supportRequest: PublishingSupportEmail = {

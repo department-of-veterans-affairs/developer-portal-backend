@@ -5,7 +5,7 @@ const getThingsWorkingRules = {
   '@typescript-eslint/no-unsafe-member-access': 'off',
   '@typescript-eslint/restrict-template-expressions': 'off',
   '@typescript-eslint/no-unsafe-assignment': 'off',
-  '@typescript-eslint/ban-types': 'off',
+  // '@typescript-eslint/ban-types': 'off',
   // '@typescript-eslint/restrict-plus-operands': 'off',
 };
 

@@ -15,7 +15,7 @@ export default class DynamoService implements MonitoredService {
     this.client = new DynamoDB.DocumentClient(config);
   }
 
-  public putItem(item: object, tableName: string): Promise<void> {
+  public putItem(item: Record<string, unknown>, tableName: string): Promise<void> {
     // The DynamoDB API breaks if empty strings are passed in
     Object.keys(item).forEach(k => {
       if (item[k] === '') {
@@ -59,7 +59,11 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public query(tableName: string, keyCondition: string, attributes: {}): Promise<AttributeMap[]> {
+  public query(
+    tableName: string,
+    keyCondition: string,
+    attributes: Record<string, unknown>,
+  ): Promise<AttributeMap[]> {
     return new Promise<AttributeMap[]>((resolve, reject) => {
       this.client.query(
         {
