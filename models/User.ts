@@ -10,7 +10,7 @@ import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
 
-interface UserDynamoItem {
+type UserDynamoItem = {
   apis: string;
   email: string;
   firstName: string;
