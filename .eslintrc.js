@@ -6,7 +6,7 @@ const getThingsWorkingRules = {
   '@typescript-eslint/restrict-template-expressions': 'off',
   '@typescript-eslint/no-unsafe-assignment': 'off',
   '@typescript-eslint/ban-types': 'off',
-  '@typescript-eslint/restrict-plus-operands': 'off',
+  // '@typescript-eslint/restrict-plus-operands': 'off',
 };
 
 // This is a convenience field for what rules we want to use
