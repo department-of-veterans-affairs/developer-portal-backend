@@ -25,7 +25,13 @@ const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tok
   })
 );
 
-const errorLoggingMiddleware: express.ErrorRequestHandler = (err, req, res) => {
+/*
+ * We need the 'next' argument in this function even though it's non-functional, Express does
+ * runtime type checking on the middleware functions. Without the 'next' argument it gets confused
+ * and causes this middleware Anot to operate properly.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const errorLoggingMiddleware: express.ErrorRequestHandler = (err, _req, res, _next) => {
   // To prevent sensitive information from ending up in the logs like keys, only certain safe
   // fields are logged from errors.
   logger.error({ message: err.message, action: err.action, stack: err.stack });

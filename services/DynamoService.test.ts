@@ -31,7 +31,7 @@ describe("DynamoService", () => {
     mockPut.mockClear();
     mockPut.mockImplementation((
       _params,
-      cb: (err: AWSError, data: PutItemOutput) => void,
+      cb: (err: AWSError | null, data: PutItemOutput) => void,
     ) => {
       // setTimeout to simulate actual async responses
       // because Dynamo client doesn't use Promises
@@ -40,7 +40,7 @@ describe("DynamoService", () => {
     mockScan.mockClear();
     mockScan.mockImplementation((
       _params,
-      cb: (error: AWSError, data: ScanOutput) => void,
+      cb: (error: AWSError | null, data: ScanOutput) => void,
     ) => {
       setTimeout(() => cb(null, { Count: 1 }), 5);
     });
@@ -48,7 +48,7 @@ describe("DynamoService", () => {
     mockQuery.mockClear();
     mockQuery.mockImplementation((
       _params,
-      cb: (error: AWSError, data: QueryOutput) => void,
+      cb: (error: AWSError | null, data: QueryOutput) => void,
     ) => {
       setTimeout(() => cb(null, {}), 5);
     });
@@ -56,7 +56,7 @@ describe("DynamoService", () => {
     mockListTables.mockClear();
     mockListTables.mockImplementation((
       _params,
-      cb: (err: AWSError, data: ListTablesOutput) => void,
+      cb: (err: AWSError | null, data: ListTablesOutput) => void,
     ) => {
       setTimeout(() => cb(null, { TableNames: [ 'Users' ] }), 5);
     });
@@ -124,7 +124,7 @@ describe("DynamoService", () => {
     it('retrieves rows from the table', async () => {
       mockScan.mockImplementation((
         _params,
-        cb: (err: AWSError, data: ScanOutput) => void,
+        cb: (err: AWSError | null, data: ScanOutput) => void,
       ) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
       
       const result = await service.scan(tableName, projectionExp, filterParams);
@@ -163,7 +163,7 @@ describe("DynamoService", () => {
     it('retrieves rows from the table', async () => {
       mockQuery.mockImplementation((
         _params,
-        cb: (err: AWSError, data: QueryOutput) => void,
+        cb: (err: AWSError | null, data: QueryOutput) => void,
       ) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
       
       const result = await service.query(tableName, keyCondition, attributes);
@@ -177,7 +177,7 @@ describe("DynamoService", () => {
       const err = new Error('failed to retrieve from table') as AWSError;
       mockQuery.mockImplementation((
         _params,
-        cb: (err: AWSError) => void,
+        cb: (err: AWSError | null) => void,
       ) => setTimeout(() => cb(err), 5));
 
       try {
@@ -215,7 +215,7 @@ describe("DynamoService", () => {
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
       mockListTables.mockImplementation((
         _params,
-        cb: (err: AWSError, data: ListTablesOutput) => void,
+        cb: (err: AWSError | null, data: ListTablesOutput) => void,
       ) => {
         setTimeout(() => cb(null, mockValue), 5);
       });
@@ -225,14 +225,12 @@ describe("DynamoService", () => {
     });
 
     it('returns unhealthy when it does not contain a table', async () => {
-      const mockValue: ListTablesOutput = { TableNames: [ 
-        'gondor',
-      ]};
+      const mockValue: ListTablesOutput = { TableNames: [] };
       const err = new Error(`DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`);
       const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
       mockListTables.mockImplementation((
         _params,
-        cb: (err: AWSError, data: ListTablesOutput) => void,
+        cb: (err: AWSError | null, data: ListTablesOutput) => void,
       ) => {
         setTimeout(() => cb(null, mockValue), 5);
       });
