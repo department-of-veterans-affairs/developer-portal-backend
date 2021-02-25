@@ -4,6 +4,7 @@ import Joi from '@hapi/joi';
 
 import SlackService from '../../services/SlackService';
 import SignupMetricsService from '../../services/SignupMetricsService';
+import { DevPortalError } from '../../models/DevPortalError';
 
 interface SignupsReportQuery {
   start?: string; 
@@ -59,7 +60,7 @@ export default function signupsReportHandler(signups: SignupMetricsService, slac
       await slack.sendSignupsMessage(span, formattedEndDate, spanResult, allTimeResult);
       res.sendStatus(200);
     } catch(err) {
-      err.action = `apply wrapup message`;
+      (err as DevPortalError).action = `apply wrapup message`;
       next(err);
     }
   };

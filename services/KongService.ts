@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { APIS_TO_ACLS } from '../config/apis';
 import { KongConfig, KongUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
+import { DevPortalError } from '../models/DevPortalError';
 
 export interface KongConsumerResponse {
   id: string;
@@ -59,7 +60,7 @@ export default class KongService implements MonitoredService {
   public async createConsumer(user: KongUser): Promise<KongConsumerResponse> {
     try {
       const response = await this.getClient()
-        .get(`${this.kongPath}/${user.consumerName()}`);
+        .get<KongConsumerResponse>(`${this.kongPath}/${user.consumerName()}`);
       const kongUser: KongConsumerResponse = response.data;
       if (kongUser) {
         return kongUser;
@@ -113,7 +114,7 @@ export default class KongService implements MonitoredService {
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     try {
       const res = await this.getClient()
-        .get(`${this.kongPath}/${this.adminConsumerName}`);
+        .get<KongConsumerResponse>(`${this.kongPath}/${this.adminConsumerName}`);
       if (res.data.username !== this.adminConsumerName) {
         throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res.data)}`);
       }
@@ -121,12 +122,12 @@ export default class KongService implements MonitoredService {
         serviceName: 'Kong',
         healthy: true,
       };
-    } catch (err) {
-      err.action = 'checking health of Kong';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of Kong';
       return {
         serviceName: 'Kong',
         healthy: false,
-        err: err,
+        err: err as DevPortalError,
       };
     }
   }

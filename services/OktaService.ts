@@ -8,6 +8,7 @@ import {
 } from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import { DevPortalError } from '../models/DevPortalError';
 
 function filterApplicableEndpoints(apiList: string[]): string[] {
   const filteredApiList: string[] = apiList
@@ -85,12 +86,12 @@ export default class OktaService implements MonitoredService {
         serviceName: 'Okta',
         healthy: true,
       };
-    } catch (err) {
-      err.action = 'checking health of Okta';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of Okta';
       return {
         serviceName: 'Okta',
         healthy: false,
-        err: err,
+        err: err as DevPortalError,
       };
     }
   }

@@ -10,6 +10,7 @@ import {
   OktaApplication,
   OktaUser,
 } from '../types';
+import { DevPortalError } from './DevPortalError';
 
 const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
 const LOGIN_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
@@ -81,8 +82,8 @@ export default class Application implements OktaApplication {
       this.client_secret = client_secret;
       this.oktaID = resp.id;
       return resp;
-    } catch (err) {
-      err.action = 'failed saving to Okta';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'failed saving to Okta';
       throw err;
     }
   }

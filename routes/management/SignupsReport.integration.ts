@@ -4,6 +4,12 @@ import nock from 'nock';
 
 import configureApp from '../../app';
 
+if (!process.env.SLACK_BASE_URL) {
+  throw new Error(
+    'Environment variable SLACK_BASE_URL must be defined for SignupReports.integration test'
+  );
+}
+
 const request = supertest(configureApp());
 const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
 const slack = nock(process.env.SLACK_BASE_URL);
@@ -45,6 +51,7 @@ describe(route, () => {
 
     const response = await request.get(route).send({});
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
   });
@@ -56,6 +63,7 @@ describe(route, () => {
 
     const response = await request.get(route).send({});
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
   });

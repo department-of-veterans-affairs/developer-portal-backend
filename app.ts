@@ -14,6 +14,7 @@ import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
 import SignupMetricsService from './services/SignupMetricsService';
 import configureRoutes from './routes';
+import { DevPortalError } from './models/DevPortalError';
 
 const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tokens, req, res): string => (
   JSON.stringify({
@@ -31,7 +32,7 @@ const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tok
  * and causes this middleware Anot to operate properly.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const errorLoggingMiddleware: express.ErrorRequestHandler = (err, _req, res, _next) => {
+const errorLoggingMiddleware: express.ErrorRequestHandler = (err: DevPortalError, _req, res, _next) => {
   // To prevent sensitive information from ending up in the logs like keys, only certain safe
   // fields are logged from errors.
   logger.error({ message: err.message, action: err.action, stack: err.stack });

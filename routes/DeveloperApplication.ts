@@ -9,6 +9,7 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config/apis';
+import { DevPortalError } from '../models/DevPortalError';
 
 function validateApiList(val: string): string {
   let result: boolean;
@@ -116,8 +117,8 @@ export default function developerApplicationHandler(kong: KongService,
         logger.info({ message: 'sending email to new user' });
         await user.sendEmail(govdelivery);
       }
-    } catch (err) {
-      err.action = 'sending govdelivery signup notification';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'sending govdelivery signup notification';
       next(err);
     }
 
@@ -126,8 +127,8 @@ export default function developerApplicationHandler(kong: KongService,
         logger.info({ message: 'sending success to slack' });
         await user.sendSlackSuccess(slack);
       }
-    } catch (err) {
-      err.action = 'sending slack signup message';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'sending slack signup message';
       next(err);
     }
   };

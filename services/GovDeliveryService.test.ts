@@ -101,8 +101,8 @@ describe('GovDeliveryService', () => {
       user.token = undefined;
       try {
         await client.sendWelcomeEmail(user);
-      } catch (err) {
-        expect(err.message).toEqual('User must have token or client_id initialized');
+      } catch (err: unknown) {
+        expect((err as Error).message).toEqual('User must have token or client_id initialized');
       }
     });
   });
@@ -182,7 +182,7 @@ describe('GovDeliveryService', () => {
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
-      expect(res.err.action).toEqual('checking health of GovDelivery');
+      expect(res.err?.action).toEqual('checking health of GovDelivery');
     });
   });
 });

@@ -1,12 +1,20 @@
 import 'jest';
-import { AWSError, DynamoDB } from 'aws-sdk';
+import { AWSError, DynamoDB, Request as AWSRequest } from 'aws-sdk';
 import DynamoService from './DynamoService';
 import { DynamoConfig } from '../types';
-import { AttributeMap, ListTablesOutput, PutItemOutput, QueryOutput, ScanOutput } from 'aws-sdk/clients/dynamodb';
+import {
+  AttributeMap,
+  ListTablesOutput,
+  PutItemInput,
+  PutItemOutput,
+  QueryOutput,
+  ScanOutput,
+} from 'aws-sdk/clients/dynamodb';
 
 describe("DynamoService", () => {
   let service: DynamoService;
-  let mockPut: jest.SpyInstance;
+  // This needs typed in order for mockPut.mock.calls[0][0] not to give type warnings
+  let mockPut: jest.SpyInstance<AWSRequest<PutItemOutput, AWSError>, [params: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>;
   let mockScan: jest.SpyInstance;
   let mockQuery: jest.SpyInstance;
   let mockListTables: jest.SpyInstance;
@@ -36,6 +44,7 @@ describe("DynamoService", () => {
       // setTimeout to simulate actual async responses
       // because Dynamo client doesn't use Promises
       setTimeout(() => cb(null, {}), 5);
+      return ({} as AWSRequest<PutItemOutput, AWSError>);
     });
     mockScan.mockClear();
     mockScan.mockImplementation((
@@ -89,8 +98,11 @@ describe("DynamoService", () => {
       const err = new Error('Never is too long a word even for me . . . ') as AWSError;
       mockPut.mockImplementationOnce((
         _params,
-        cb: (err: AWSError) => void,
-      ) => setTimeout(() => cb(err), 5));
+        cb: (err: AWSError, _data) => void,
+      ) => {
+        setTimeout(() => cb(err, undefined), 5);
+        return ({} as AWSRequest<PutItemOutput, AWSError>);
+      });
 
       try {
         await service.putItem(item, tableName);

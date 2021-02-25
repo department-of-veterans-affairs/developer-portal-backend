@@ -8,6 +8,9 @@ import OktaService from '../services/OktaService';
 import Application from './Application';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
+import { DevPortalError } from './DevPortalError';
+import { PutItemInput, PutItemOutput } from 'aws-sdk/clients/dynamodb';
+import { AWSError } from 'aws-sdk';
 
 const mockCreateOktaApplication = jest.fn();
 jest.mock('./Application', () => {
@@ -132,7 +135,9 @@ describe('User', () => {
   });
 
   describe('saveToDynamo', () => {
-    const mockPutItem = jest.fn().mockResolvedValue({});
+    const mockPutItem = jest.fn<void, [paramsa: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    mockPutItem.mockImplementation(() => {});
     const dynamo = { putItem: mockPutItem } as unknown as DynamoService;
     let form: FormSubmission;
 
@@ -162,13 +167,13 @@ describe('User', () => {
       //Fail the test if the expectations in the catch is never reached.
       expect.assertions(2);
       const error = new Error('Where is the Horse and the Rider?');
-      mockPutItem.mockRejectedValueOnce(error);
+      mockPutItem.mockImplementationOnce(() => { throw error; });
 
       try {
         await user.saveToDynamo(dynamo);
-      } catch (err) {
+      } catch (err: unknown) {
         expect(err).toEqual(error);
-        expect(err.action).toEqual('failed saving to dynamo');
+        expect((err as DevPortalError).action).toEqual('failed saving to dynamo');
       }
     });
 
@@ -234,8 +239,8 @@ describe('User', () => {
 
       try {
         await user.saveToKong(kongService);
-      } catch (err) {
-        expect(err.action).toEqual('failed creating kong consumer');
+      } catch (err: unknown) {
+        expect((err as DevPortalError).action).toEqual('failed creating kong consumer');
       }
     });
   });
