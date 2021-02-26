@@ -25,10 +25,20 @@ describe(route, () => {
       'Environment variable GOVDELIVERY_HOST must be defined for DeveloperApplication.integration test'
     );
   }
+  if (!process.env.OKTA_HOST) {
+    throw new Error(
+      'Environment variable OKTA_HOST must be defined for DeveloperApplication.integration test'
+    );
+  }
+  if (!process.env.SLACK_BASE_URL) {
+    throw new Error(
+      'Environment variable SLACK_BASE_URL must be defined for DeveloperApplication.integration test'
+    );
+  }
 
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
-  const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
+  const dynamoDB = nock(process.env.DYNAMODB_ENDPOINT);
   const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
   const slack = nock(process.env.SLACK_BASE_URL);
 

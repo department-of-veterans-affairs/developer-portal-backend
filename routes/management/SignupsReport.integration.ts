@@ -23,7 +23,7 @@ if (!process.env.OKTA_HOST) {
 }
 
 const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-const slack = nock(process.env.SLACK_BASE_URL);
+const slack = nock(`${process.env.SLACK_BASE_URL}`);
 
 const route = '/internal/developer-portal/admin/reports/signups';
 describe(route, () => {

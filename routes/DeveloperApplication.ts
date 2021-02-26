@@ -39,11 +39,13 @@ export const applySchema = Joi.object().keys({
   apis: Joi.custom(validateApiList).required(),
 }).options({ abortEarly: false });
 
-export default function developerApplicationHandler(kong: KongService,
-  okta: OktaService,
+export default function developerApplicationHandler(
+  kong: KongService,
+  okta: OktaService | undefined,
   dynamo: DynamoService,
-  govdelivery: GovDeliveryService,
-  slack: SlackService) {
+  govdelivery: GovDeliveryService | undefined,
+  slack: SlackService | undefined,
+) {
   return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     const {
       firstName,
