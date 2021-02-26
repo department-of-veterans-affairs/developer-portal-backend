@@ -35,7 +35,7 @@ describe('OktaService', () => {
       // The policy with name === 'default' is the only one that we update
       jest
         .spyOn(service.client, 'listAuthorizationServerPolicies')
-        .mockImplementation((authServerId: string) => {
+        .mockImplementation((authServerId: unknown) => {
           const policy1 = {
             id: `${authServerId}-1-policy`,
             name: 'policy1',
@@ -105,7 +105,7 @@ describe('OktaService', () => {
       // we have to reset the list of policies to not include one with the 'default' name
       jest
         .spyOn(service.client, 'listAuthorizationServerPolicies')
-        .mockImplementation((authServerId: string) => {
+        .mockImplementation((authServerId: unknown) => {
           const policy1 = {
             id: `${authServerId}-1-policy`,
             name: 'policy1',
