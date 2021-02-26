@@ -22,7 +22,7 @@ const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tok
     url: tokens.url(req, res),
     status: tokens.status(req, res),
     contentLength: tokens.res(req, res, 'content-length'),
-    responseTime: `${tokens['response-time'](req, res)} ms`,
+    responseTime: `${tokens['response-time'](req, res) ?? 'undefined'} ms`,
   })
 );
 
@@ -78,7 +78,7 @@ const configureKongService = (): KongService => {
 
   // String interpolation here ensures the first arg to parseInt is
   // always a string and never undefined.
-  const port = parseInt(`${KONG_PORT}`, 10) || 8000;
+  const port = parseInt(`${KONG_PORT ?? 'undefined'}`, 10) || 8000;
 
   const kongConfig: KongConfig = {
     apiKey: KONG_KEY,
@@ -94,12 +94,13 @@ const configureKongService = (): KongService => {
 const configureOktaService = (): OktaService => {
   const { OKTA_TOKEN, OKTA_ORG, OKTA_HOST } = process.env;
 
-  if (!OKTA_TOKEN || !(OKTA_ORG || OKTA_HOST)) {
+  if (!OKTA_TOKEN || (!OKTA_ORG && !OKTA_HOST)) {
     throw new Error('Okta Config Missing');
   }
 
+  // OKTA_ORG must be a string to get to this point. To satisfy linting, we cast it as a string
   return new OktaService({
-    host: OKTA_HOST || `https://${OKTA_ORG}.okta.com`,
+    host: OKTA_HOST || `https://${OKTA_ORG as string}.okta.com`,
     token: OKTA_TOKEN,
   });
 };

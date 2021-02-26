@@ -170,6 +170,12 @@ describe('GovDeliveryService', () => {
     });
 
     it('returns false when healthcheck endpoint throws an error', async () => {
+      if (!process.env.GOVDELIVERY_HOST) {
+        throw new Error(
+          'Environment variable GOVDELIVERY_HOST must be defined for GovDeliverService test'
+        );
+      }
+
       const err = new Error(`ECONNREFUSED ${process.env.GOVDELIVERY_HOST}`);
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 

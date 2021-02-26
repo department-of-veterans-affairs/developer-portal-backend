@@ -10,6 +10,22 @@ import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/developer_application';
 describe(route, () => {
+  if (!process.env.KONG_HOST) {
+    throw new Error(
+      'Environment variable KONG_HOST must be defined for DeveloperApplication.integration test'
+    );
+  }
+  if (!process.env.DYNAMODB_ENDPOINT) {
+    throw new Error(
+      'Environment variable DYNAMODB_ENDPOINT must be defined for DeveloperApplication.integration test'
+    );
+  }
+  if (!process.env.GOVDELIVERY_HOST) {
+    throw new Error(
+      'Environment variable GOVDELIVERY_HOST must be defined for DeveloperApplication.integration test'
+    );
+  }
+
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);

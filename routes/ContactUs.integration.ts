@@ -7,7 +7,14 @@ import { DevPortalError } from '../models/DevPortalError';
 
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/contact-us';
+
 describe(route, () => {
+  if (!process.env.GOVDELIVERY_HOST) {
+    throw new Error(
+      'Environment variable GOVDELIVERY_HOST must be defined for SignupReports.integration test'
+    );
+  }
+  
   const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
 
   const supportReq = {

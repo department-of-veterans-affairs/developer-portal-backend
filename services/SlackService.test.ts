@@ -197,7 +197,7 @@ describe('SlackService', () => {
     try {
       await service.sendSuccessMessage(message, 'New User Application');
     } catch (err: unknown) {
-      expect((err as Error).message).toEqual('Status: 400, Data: did it wrong, Original: undefined');
+      expect((err as Error).message).toEqual('Status: 400, Data: "did it wrong", Original: undefined');
     }
   });
 

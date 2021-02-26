@@ -114,9 +114,11 @@ export default class SlackService implements MonitoredService {
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
+      const timeSpanCount = timeSpanSignups.apiCounts[api] as number;
+      const allTimeCount = allTimeSignups.apiCounts[api] as number;
       return {
         type: 'mrkdwn',
-        text: `_${api}_: ${timeSpanSignups.apiCounts[api]} new requests (${allTimeSignups.apiCounts[api]} all-time)`,
+        text: `_${api}_: ${timeSpanCount} new requests (${allTimeCount} all-time)`,
       };
     });
     const titleDuration = capitalizeFirstLetter(duration);
@@ -206,7 +208,7 @@ export default class SlackService implements MonitoredService {
       const { response } = err as AxiosError;
       if (response) {
         (err as Error).message =
-          `Status: ${response.status}, Data: ${response.data}, `
+          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, `
           + `Original: ${(err as AxiosError).message}`;
       }
       throw err;
