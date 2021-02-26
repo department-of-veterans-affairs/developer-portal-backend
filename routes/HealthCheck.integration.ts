@@ -30,8 +30,8 @@ describe(route, () => {
 
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
-  const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-  const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
+  const dynamoDB = nock(process.env.DYNAMODB_ENDPOINT);
+  const govDelivery = nock(process.env.GOVDELIVERY_HOST);
   const slack = nock(process.env.SLACK_BASE_URL);
 
   const kongMockPath = '/internal/admin/consumers/_internal_DeveloperPortal';

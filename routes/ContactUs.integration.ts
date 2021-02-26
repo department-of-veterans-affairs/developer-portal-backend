@@ -15,7 +15,7 @@ describe(route, () => {
     );
   }
   
-  const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
+  const govDelivery = nock(process.env.GOVDELIVERY_HOST);
 
   const supportReq = {
     firstName: 'Samwise',
