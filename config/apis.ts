@@ -51,7 +51,7 @@ export const APIS_TO_ACLS = keyAuthAPIList.reduce((acc,endpoint) => {
   return acc;
 }, {});
 
-export const APIS_TO_PROPER_NAMES = [...oauthAPIList, ...keyAuthAPIList].reduce((acc,endpoint) => {
+export const APIS_TO_PROPER_NAMES: Record<string, string> = [...oauthAPIList, ...keyAuthAPIList].reduce((acc,endpoint) => {
   acc[endpoint.key] = endpoint.name;
   return acc;
 }, {});

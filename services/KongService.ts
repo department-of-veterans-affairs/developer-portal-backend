@@ -68,8 +68,10 @@ export default class KongService implements MonitoredService {
     } catch (err) {
       logger.debug({ message: 'no existing consumer, creating new one' });
     }
-    const response = await this.getClient()
-      .post(this.kongPath, { username: user.consumerName() });
+    const response = await this.getClient().post<KongConsumerResponse>(
+      this.kongPath,
+      { username: user.consumerName() },
+    );
     return response.data;
   }
 
@@ -92,7 +94,7 @@ export default class KongService implements MonitoredService {
 
     const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) => (
       this.getClient()
-        .post(`${this.kongPath}/${user.consumerName()}/acls`, { group })
+        .post<KongAcl>(`${this.kongPath}/${user.consumerName()}/acls`, { group })
         .then(response => response.data)
     ));
 
@@ -106,7 +108,7 @@ export default class KongService implements MonitoredService {
 
   public async createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
     const response = await this.getClient()
-      .post(`${this.kongPath}/${user.consumerName()}/key-auth`);
+      .post<KongKeyResponse>(`${this.kongPath}/${user.consumerName()}/key-auth`);
     return response.data;
   }
 
