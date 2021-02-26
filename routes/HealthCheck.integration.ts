@@ -27,6 +27,16 @@ describe(route, () => {
       'Environment variable SLACK_BOT_ID must be defined for HealthCheck.integration test'
     );
   }
+  if (!process.env.OKTA_HOST) {
+    throw new Error(
+      'Environment variable OKTA_HOST must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.SLACK_BASE_URL) {
+    throw new Error(
+      'Environment variable SLACK_BASE_URL must be defined for HealthCheck.integration test'
+    );
+  }
 
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
