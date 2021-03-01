@@ -31,7 +31,11 @@ export default class OktaService implements MonitoredService {
   private async getDefaultPolicy(policies: OktaPolicyCollection): Promise<OktaPolicy | null> {
     let defaultPolicy: OktaPolicy | null = null;
 
-    // Typescript doesn't seem to understand how this function works
+    /*
+     * Typescript doesn't seem to understand that default Policy will get set within this call to
+     * policies.each. If you hover above the return type in vscode, it shows defaultPolicy as
+     * always being null even though it can be set within this call.
+     */
     await policies.each(policy => {
       if (policy.name === 'default') {
         defaultPolicy = policy;
@@ -56,8 +60,7 @@ export default class OktaService implements MonitoredService {
         const policies: OktaPolicyCollection = await this.client.listAuthorizationServerPolicies(authServerId);
         const clientId = resp.credentials.oauthClient.client_id;
         const defaultPolicy: OktaPolicy | null = await this.getDefaultPolicy(policies);
-
-        // policies.each returns a promise https://developer.okta.com/okta-sdk-nodejs/jsdocs/#toc31__anchor
+        
         if (defaultPolicy) {
           defaultPolicy.conditions.clients.include.push(clientId);
           await this.client.updateAuthorizationServerPolicy(
