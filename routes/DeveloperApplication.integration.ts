@@ -288,8 +288,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -305,8 +305,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -322,8 +322,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed creating kong consumer',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -341,8 +341,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -358,8 +358,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -376,8 +376,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -394,8 +394,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed saving to okta',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });
@@ -415,8 +415,8 @@ describe(route, () => {
 
         expect(response.body).toEqual({
           action: 'failed saving to dynamo',
-          message: expect.stringContaining('500'),
-          stack: expect.any(String),
+          message: expect.stringContaining('500') as string,
+          stack: expect.any(String) as string,
         });
         expect(response.status).toEqual(500);
       });

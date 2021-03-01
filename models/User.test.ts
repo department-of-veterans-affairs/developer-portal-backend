@@ -24,7 +24,7 @@ jest.mock('./Application', () => {
 describe('User', () => {
   let event;
   let user: User;
-  let originalDate;
+  let originalDate: () => number;
 
   beforeAll(() => {
     originalDate = Date.now;

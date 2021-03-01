@@ -1,8 +1,3 @@
-// These rules are set due to various eslint errors we get when upgrading
-const getThingsWorkingRules = {
-  '@typescript-eslint/no-unsafe-assignment': 'off',
-};
-
 // This is a convenience field for what rules we want to use
 const rules = {
   'semi': ['error', 'always'],
@@ -33,7 +28,6 @@ module.exports = {
     'node': true,
   },
   rules: {
-    ...getThingsWorkingRules,
     ...rules,
   },
   overrides: [

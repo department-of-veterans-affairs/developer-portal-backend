@@ -31,8 +31,8 @@ const mockUserList: User[] = [
 const mockedUsersAB: User = mockUserList[0];
 
 const expectedMockedUsers: User[] = Array.from(mockUserList);
-expectedMockedUsers[0].createdAt = expect.any(Date);
-expectedMockedUsers[1].createdAt = expect.any(Date);
+expectedMockedUsers[0].createdAt = expect.any(Date) as Date;
+expectedMockedUsers[1].createdAt = expect.any(Date) as Date;
 
 describe('ConsumerRepository', ()=> {
   const mockScan = jest.fn();

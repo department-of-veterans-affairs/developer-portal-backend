@@ -30,6 +30,7 @@ SLACK_BOT_ID=DenethorBot
 SLACK_TOKEN=keep-it-secret-keep-it-safe
 GOVDELIVERY_HOST=http://mock:3001/services/govdelivery
 GOVDELIVERY_KEY=123
+SUPPORT_EMAIL=gandalf@istari.net
 OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
 DEVELOPER_PORTAL_URL=http://localhost:3001

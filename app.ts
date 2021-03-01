@@ -58,7 +58,7 @@ const errorLoggingMiddleware: express.ErrorRequestHandler = (err: DevPortalError
 const configureGovDeliveryService = (): GovDeliveryService => {
   const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
 
-  if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST) {
+  if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
     throw new Error('GovDelivery Config Missing');
   }
 

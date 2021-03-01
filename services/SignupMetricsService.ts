@@ -1,14 +1,7 @@
 import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
 import DynamoService, { FilterParams } from './DynamoService';
-
-const DEFAULT_TABLE = 'dvp-prod-developer-portal-users';
-const ENVIRONMENTS = {
-  'dvp-dev-developer-portal-users': 'Development',
-  'dvp-prod-developer-portal-users': 'Production',
-  'dvp-staging-developer-portal-users': 'Staging',
-  'fake-users-table': 'Test',
-};
+import { DEFAULT_TABLE } from '../util/environments';
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -40,7 +33,6 @@ export interface SignupCountResult {
 export default class SignupMetricsService {
   private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
   private dynamoService: DynamoService;
-  public static environment: string = ENVIRONMENTS[process.env.DYNAMODB_TABLE || DEFAULT_TABLE];
 
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;

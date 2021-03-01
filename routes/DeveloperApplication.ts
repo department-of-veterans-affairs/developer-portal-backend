@@ -39,6 +39,20 @@ export const applySchema = Joi.object().keys({
   apis: Joi.custom(validateApiList).required(),
 }).options({ abortEarly: false });
 
+interface DeveloperApplicationRequestBody {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  description: string;
+  email: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
+  apis: string;
+}
+
+type DeveloperApplicationRequest = Request<Record<string, unknown>, Record<string, unknown>, DeveloperApplicationRequestBody, Record<string, unknown>>;
+
 export default function developerApplicationHandler(
   kong: KongService,
   okta: OktaService | undefined,
@@ -46,7 +60,11 @@ export default function developerApplicationHandler(
   govdelivery: GovDeliveryService | undefined,
   slack: SlackService | undefined,
 ) {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: DeveloperApplicationRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     const {
       firstName,
       lastName,

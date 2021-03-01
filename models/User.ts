@@ -27,6 +27,18 @@ type UserDynamoItem = {
   okta_client_id?: string;
 }
 
+export interface UserConfig {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  email: string;
+  apis: string;
+  description: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
+}
+
 export default class User implements KongUser, GovDeliveryUser {
   public createdAt: Date;
   public firstName: string;
@@ -53,7 +65,7 @@ export default class User implements KongUser, GovDeliveryUser {
     oAuthRedirectURI,
     oAuthApplicationType,
     termsOfService,
-  }) {
+  }: UserConfig) {
     this.createdAt = new Date(Date.now());
     this.firstName = firstName;
     this.lastName = lastName;

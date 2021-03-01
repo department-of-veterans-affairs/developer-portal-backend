@@ -87,7 +87,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Kong',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -106,7 +106,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Kong',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -127,7 +127,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Okta',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -148,7 +148,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Dynamo',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -167,7 +167,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Dynamo',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -188,7 +188,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'GovDelivery',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -207,7 +207,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'GovDelivery',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -228,7 +228,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Slack',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -247,7 +247,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Slack',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);

@@ -1,7 +1,8 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { DevPortalError } from '../models/DevPortalError';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
-import SignupMetricsService, { SignupCountResult } from './SignupMetricsService';
+import { SignupCountResult } from './SignupMetricsService';
+import { getEnvironment } from '../util/get-environment';
 
 /* 
 WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
@@ -136,7 +137,7 @@ export default class SlackService implements MonitoredService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*Environment:* ${SignupMetricsService.environment}`,
+            text: `*Environment:* ${getEnvironment()}`,
           },
         },
         {

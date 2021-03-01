@@ -98,6 +98,11 @@ export interface EmailStatus {
     opened: string;
   };
 }
+interface GovDeliveryServiceConfig {
+  token: string;
+  host: string;
+  supportEmailRecipient: string;
+}
 
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
@@ -107,7 +112,7 @@ export default class GovDeliveryService implements MonitoredService {
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
   public client: AxiosInstance;
 
-  constructor({ token, host, supportEmailRecipient }) {
+  constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
