@@ -40,7 +40,7 @@ describe(route, () => {
   const okta = nock(process.env.OKTA_HOST);
   const dynamoDB = nock(process.env.DYNAMODB_ENDPOINT);
   const govDelivery = nock(`https://${process.env.GOVDELIVERY_HOST}`);
-  const slack = nock(process.env.SLACK_BASE_URL);
+  const slack = nock(`${process.env.SLACK_BASE_URL}`);
 
   const baseAppRequest = {
     description: 'save the world',

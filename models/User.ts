@@ -26,7 +26,6 @@ type UserDynamoItem = {
   okta_application_id?: string;
   okta_client_id?: string;
 }
-
 export interface UserConfig {
   firstName: string;
   lastName: string;
