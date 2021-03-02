@@ -262,7 +262,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"firstName" is required');
+      expect(result.error?.message).toEqual('"firstName" is required');
     });
 
     it('is a string', () => {
@@ -270,7 +270,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"firstName" must be a string');
+      expect(result.error?.message).toEqual('"firstName" must be a string');
     });
   });
 
@@ -280,7 +280,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"lastName" is required');
+      expect(result.error?.message).toEqual('"lastName" is required');
     });
 
     it('is a string', () => {
@@ -288,7 +288,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"lastName" must be a string');
+      expect(result.error?.message).toEqual('"lastName" must be a string');
     });
   });
 
@@ -298,7 +298,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"organization" is required');
+      expect(result.error?.message).toEqual('"organization" is required');
     });
 
     it('is a string', () => {
@@ -306,7 +306,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"organization" must be a string');
+      expect(result.error?.message).toEqual('"organization" must be a string');
     });
   });
 
@@ -316,7 +316,7 @@ describe('validations', () => {
       
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"description" must be a string');
+      expect(result.error?.message).toEqual('"description" must be a string');
     });
 
     it('is allowed to be an empty string', () => {
@@ -334,7 +334,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"email" is required');
+      expect(result.error?.message).toEqual('"email" is required');
     });
 
     it('is in a valid format', () => {
@@ -342,7 +342,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"email" must be a valid email');
+      expect(result.error?.message).toEqual('"email" must be a valid email');
     });
   });
 
@@ -352,7 +352,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"oAuthRedirectURI" must be a string');
+      expect(result.error?.message).toEqual('"oAuthRedirectURI" must be a string');
     });
 
     it('is a uri', () => {
@@ -360,7 +360,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
+      expect(result.error?.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
     });
 
     it('is allowed to be an empty string', () => {
@@ -378,7 +378,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
+      expect(result.error?.message).toEqual('"oAuthApplicationType" must be one of [web, native]');
     });
 
     it('is allowed to be an empty string', () => {
@@ -396,7 +396,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"termsOfService" is required');
+      expect(result.error?.message).toEqual('"termsOfService" is required');
     });
 
     it('requires terms of service were accepted', () => {
@@ -404,7 +404,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"termsOfService" must be [true]');
+      expect(result.error?.message).toEqual('"termsOfService" must be [true]');
     });
   });
 
@@ -414,7 +414,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"apis" is required');
+      expect(result.error?.message).toEqual('"apis" is required');
     });
 
     it('only allows supported api values', () => {
@@ -422,7 +422,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"apis" failed custom validation because invalid apis in list');
+      expect(result.error?.message).toEqual('"apis" failed custom validation because invalid apis in list');
     });
 
     it('gracefully handles non-string types', () => {
@@ -430,7 +430,7 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
+      expect(result.error?.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
     });
   });
 
@@ -439,6 +439,6 @@ describe('validations', () => {
 
     const result = applySchema.validate(payload);
 
-    expect(result.error.message).toEqual('"firstName" is required. "lastName" is required');
+    expect(result.error?.message).toEqual('"firstName" is required. "lastName" is required');
   });
 });

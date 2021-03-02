@@ -1,4 +1,3 @@
-import pick from 'lodash.pick';
 import process from 'process';
 import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
 import Application from './Application';
@@ -10,6 +9,21 @@ import DynamoService from '../services/DynamoService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 
 type APIFilterFn = (api: string) => boolean;
+
+interface UserDynamoItem {
+  apis: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  organization: string;
+  oAuthRedirectURI: string;
+  kongConsumerId?: string;
+  tosAccepted: boolean;
+  description: string;
+  createdAt: string;
+  okta_application_id?: string;
+  okta_client_id?: string;
+}
 
 export default class User implements KongUser, GovDeliveryUser {
   public createdAt: Date;
@@ -100,18 +114,18 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public async saveToDynamo(service: DynamoService): Promise<User> {
     try {
-      const dynamoItem = pick(this, [
-        'apis',
-        'email',
-        'firstName',
-        'lastName',
-        'organization',
-        'oAuthRedirectURI',
-        'kongConsumerId',
-        'tosAccepted',
-      ]);
-      dynamoItem.description = this.description || 'no description';
-      dynamoItem.createdAt = this.createdAt.toISOString();
+      const dynamoItem: UserDynamoItem = {
+        apis: this.apis,
+        email: this.email,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        organization: this.organization,
+        oAuthRedirectURI: this.oAuthRedirectURI,
+        kongConsumerId: this.kongConsumerId,
+        tosAccepted: this.tosAccepted,
+        description: this.description || 'no description',
+        createdAt: this.createdAt.toISOString(),
+      };
 
       if (this.oauthApplication && this.oauthApplication.oktaID) {
         dynamoItem.okta_application_id = this.oauthApplication.oktaID;
