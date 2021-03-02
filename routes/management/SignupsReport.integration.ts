@@ -6,7 +6,7 @@ import configureApp from '../../app';
 
 const request = supertest(configureApp());
 const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-const slack = nock(process.env.SLACK_BASE_URL);
+const slack = nock(`${process.env.SLACK_BASE_URL}`);
 
 const route = '/internal/developer-portal/admin/reports/signups';
 describe(route, () => {
