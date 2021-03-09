@@ -128,7 +128,7 @@ describe('GovDeliveryService', () => {
 
       await client.sendConsumerSupportEmail(email);
       expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: 'gandalf@istari.net' }],
+        recipients: [{ email: SUPPORT_EMAIL }],
         from_name: 'Peregrin Took',
         subject: 'Support Needed',
         body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
@@ -148,7 +148,7 @@ describe('GovDeliveryService', () => {
   
         await client.sendPublishingSupportEmail(email);
         expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: 'gandalf@istari.net' }],
+          recipients: [{ email: SUPPORT_EMAIL }],
           from_name: 'Peregrin Took',
           subject: 'Publishing Support Needed',
           body: expect.stringContaining('API Details') as unknown,
