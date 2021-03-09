@@ -1,6 +1,13 @@
 import 'jest';
 import Application from './Application';
 import OktaService from '../services/OktaService';
+import { OktaUser } from '../types';
+
+const oktaUser: OktaUser = {
+  apiList: [ 'hobbits' ],
+  organization: 'shire',
+  email: 'frodo@bagginswriters',
+};
 
 describe('Application', () => {
   let applicationSettings;
@@ -14,7 +21,7 @@ describe('Application', () => {
 
   describe('applicationType fields', () => {
     it('assigns web fields when applicationType is undefined', () => {
-      const application = new Application(applicationSettings);
+      const application = new Application(applicationSettings, oktaUser);
 
       const oauthClient = application.toOktaApp().settings.oauthClient;
 
@@ -24,7 +31,10 @@ describe('Application', () => {
     });
 
     it('be web fields when applicationType is web', () => {
-      const application = new Application({ ...applicationSettings, applicationType: 'web' });
+      const application = new Application(
+        { ...applicationSettings, applicationType: 'web' },
+        oktaUser,
+      );
 
       const oauthClient = application.toOktaApp().settings.oauthClient;
 
@@ -34,7 +44,10 @@ describe('Application', () => {
     });
 
     it('be native fields when applicationType is native', () => {
-      const application = new Application({ ...applicationSettings, applicationType: 'native' });
+      const application = new Application(
+        { ...applicationSettings, applicationType: 'native' },
+        oktaUser,
+      );
 
       const oauthClient = application.toOktaApp().settings.oauthClient;
 

@@ -12,8 +12,8 @@ describe("KongService", () => {
   const postMock = jest.fn().mockName('postMock');
   beforeEach(() => {
     service = new KongService({
-      apiKey: process.env.KONG_KEY,
-      host: process.env.KONG_HOST,
+      apiKey: process.env.KONG_KEY as unknown as string,
+      host: process.env.KONG_HOST as unknown as string,
       port: process.env.KONG_PORT as unknown as number,
     });
 
@@ -40,6 +40,7 @@ describe("KongService", () => {
   describe('constructor', () => {
     it('should set defaults', () => {
       expect(client.defaults.baseURL).toMatch(/^https/);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(client.defaults.headers.apiKey).toEqual(process.env.KONG_KEY);
     });
   });

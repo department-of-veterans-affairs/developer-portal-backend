@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import signupsReportHandler, { signupsReportSchema } from './SignupsReport';
 import SlackService from '../../services/SlackService';
-import SignupMetricsService from '../../services/SignupMetricsService';
+import SignupMetricsService, { SignupCountResult, SignupQueryOptions } from '../../services/SignupMetricsService';
  
 describe('signupsReportHandler', () => {
   const mockSendSignupsMessage = jest.fn();
   const mockSlack = { sendSignupsMessage: mockSendSignupsMessage } as unknown as SlackService;
   mockSendSignupsMessage.mockResolvedValue('ok');
 
-  const mockCountSignups = jest.fn();
+  const mockCountSignups = jest.fn<SignupCountResult, SignupQueryOptions[]>();
   const mockSignups = { countSignups: mockCountSignups } as unknown as SignupMetricsService;
 
   const mockStatus = jest.fn();
@@ -70,8 +70,8 @@ describe('signupsReportHandler', () => {
 
     mockCountSignups.mockClear();
     mockCountSignups
-      .mockResolvedValueOnce(smallResult)
-      .mockResolvedValueOnce(largeResult);
+      .mockImplementationOnce(() => smallResult)
+      .mockImplementationOnce(() => largeResult);
   });
 
   it('responds with a 200 when the request is okay', async () => {
@@ -91,7 +91,7 @@ describe('signupsReportHandler', () => {
 
   it('sends a start date a month prior if a monthly query is requested', async () => {
     const handler = signupsReportHandler(mockSignups, mockSlack);
-    const weekMockReq = { query: { span: 'month' } } as Request;
+    const weekMockReq = { query: { span: 'month' } } as unknown as Request;
 
     await handler(weekMockReq, mockRes, mockNext);
 

@@ -4,6 +4,7 @@ import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE } from '../templates';
 import User from '../models/User';
+import { DevPortalError } from '../models/DevPortalError';
 
 interface EmailRecipient {
   email: string;
@@ -97,6 +98,11 @@ export interface EmailStatus {
     opened: string;
   };
 }
+interface GovDeliveryServiceConfig {
+  token: string;
+  host: string;
+  supportEmailRecipient: string;
+}
 
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
@@ -106,7 +112,7 @@ export default class GovDeliveryService implements MonitoredService {
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
   public client: AxiosInstance;
 
-  constructor({ token, host, supportEmailRecipient }) {
+  constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
@@ -197,9 +203,9 @@ export default class GovDeliveryService implements MonitoredService {
       healthResponse.healthy = await this.getEmailStatusList(1)
         .then(response => response.status === 200);
       return Promise.resolve(healthResponse);
-    } catch (err) {
-      err.action = 'checking health of GovDelivery';
-      healthResponse.err = err;
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of GovDelivery';
+      healthResponse.err = err as DevPortalError;
       return Promise.resolve(healthResponse);
     }
   }

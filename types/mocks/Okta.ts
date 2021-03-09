@@ -1,4 +1,4 @@
-import { OktaPolicy } from "../../models/Okta";
+import { OktaPolicy } from '@okta/okta-sdk-nodejs';
 
 // Note that these response objects have been truncated for brevity
 export const oktaAuthMocks: {

@@ -17,8 +17,8 @@ const mockShouldUpdateOkta = jest.fn().mockReturnValue(false);
 const mockSendEmail = jest.fn();
 const mockSendSlackSuccess = jest.fn();
 
-let stubOAuthCreds;
-let stubToken;
+let stubOAuthCreds: unknown;
+let stubToken: unknown;
 
 jest.mock('../models/User', () => {
   return jest.fn().mockImplementation(() => {

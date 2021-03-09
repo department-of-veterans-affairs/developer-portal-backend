@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import DynamoService from '../services/DynamoService';
-import User from '../models/User';
+import User, { UserConfig } from '../models/User';
 
 export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || '';
@@ -12,7 +12,7 @@ export default class ConsumerRepository {
     // This gives us easy entry if we want to merge user fields. For instance,
     // we might want to merge the oauth redirect uris or use the latest tosAccepted
     // value
-    const consumerMap: Map<string, User> = new Map();
+    const consumerMap = new Map<string, User>();
 
     consumer.forEach((user) => {
       consumerMap.set(user.email, user);
@@ -64,20 +64,20 @@ export default class ConsumerRepository {
           ExpressionAttributeValues: params.ExpressionAttributeValues,
         },
       );
+    
+    const userConfigs = items.map((item): UserConfig => ({
+      firstName: item.firstName as string,
+      lastName: item.lastName as string,
+      organization: item.organization as string,
+      email: item.email as string,
+      apis: item.apis as string,
+      description: item.description as string,
+      oAuthRedirectURI: item.oAuthRedirectURI as string,
+      oAuthApplicationType: '',
+      termsOfService: item.tosAccepted as boolean,
+    }));
 
-    const results = items.map((item): User => {
-      return new User({
-        firstName: item.firstName,
-        lastName: item.lastName,
-        organization: item.organization,
-        email: item.email,
-        apis: item.apis,
-        description: item.description,
-        oAuthRedirectURI: item.oAuthRedirectURI,
-        oAuthApplicationType: '',
-        termsOfService: item.tosAccepted,
-      });
-    });
+    const results = userConfigs.map((config: UserConfig): User => new User(config));
 
     const uniqueUsersResults = this.removeDuplicates(results);
     return uniqueUsersResults;

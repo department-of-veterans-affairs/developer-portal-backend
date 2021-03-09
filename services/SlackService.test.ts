@@ -196,8 +196,8 @@ describe('SlackService', () => {
 
     try {
       await service.sendSuccessMessage(message, 'New User Application');
-    } catch (err) {
-      expect(err.message).toEqual('Status: 400, Data: did it wrong, Original: undefined');
+    } catch (err: unknown) {
+      expect((err as Error).message).toEqual('Status: 400, Data: "did it wrong", Original: undefined');
     }
   });
 
@@ -221,8 +221,8 @@ describe('SlackService', () => {
  
     try {
       await service.sendSuccessMessage(message, 'New User Application');
-    } catch (err) {
-      expect(err.message).toEqual('channel_not_found');
+    } catch (err: unknown) {
+      expect((err as Error).message).toEqual('channel_not_found');
     }
   });
 

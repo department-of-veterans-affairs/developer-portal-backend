@@ -3,11 +3,19 @@ import supertest from 'supertest';
 import nock from 'nock';
 
 import configureApp from '../app';
+import { DevPortalError } from '../models/DevPortalError';
 
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/contact-us';
+
 describe(route, () => {
-  const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
+  if (!process.env.GOVDELIVERY_HOST) {
+    throw new Error(
+      'Environment variable GOVDELIVERY_HOST must be defined for SignupReports.integration test'
+    );
+  }
+  
+  const govDelivery = nock(process.env.GOVDELIVERY_HOST);
 
   const supportReq = {
     firstName: 'Samwise',
@@ -46,9 +54,10 @@ describe(route, () => {
       .reply(500);
 
     const response = await request.post(route).send(supportReq);
+    const { action, message } = response.body as DevPortalError;
     
     expect(response.status).toEqual(500);
-    expect(response.body.action).toEqual('sending contact us email');
-    expect(response.body.message).toEqual('Request failed with status code 500');
+    expect(action).toEqual('sending contact us email');
+    expect(message).toEqual('Request failed with status code 500');
   });
 });

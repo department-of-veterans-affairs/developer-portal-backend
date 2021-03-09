@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import contactUsHandler, { contactSchema } from './ContactUs';
+import contactUsHandler, { ConsumerSupportRequest, contactSchema, PublishingSupportRequest } from './ContactUs';
 import GovDeliveryService from '../services/GovDeliveryService';
 
 describe('contactUsHandler', () => {
@@ -46,7 +46,7 @@ describe('contactUsHandler', () => {
         description: 'Need help getting to Mt. Doom',
         apis: ['benefits', 'facilities'],
       },
-    } as Request;
+    } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
@@ -91,7 +91,7 @@ describe('contactUsHandler', () => {
         email: 'samwise@thefellowship.org',
         description: 'Need help getting to Mt. Doom',
       },
-    } as Request;
+    } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
@@ -118,7 +118,7 @@ describe('contactUsHandler', () => {
           apiDescription: "Ring",
           apiOtherInfo: 'bad guys go away',
         },
-      } as Request;
+      } as Request<Record<string, unknown>, Record<string, unknown>, PublishingSupportRequest>;
   
       await handler(mockReq, mockRes, mockNext);
   
@@ -126,7 +126,6 @@ describe('contactUsHandler', () => {
         firstName: mockReq.body.firstName,
         lastName: mockReq.body.lastName,
         requester: mockReq.body.email,
-        description: mockReq.body.description,
         organization: mockReq.body.organization,
         apiInternalOnly: mockReq.body.apiInternalOnly,
         apiDetails: mockReq.body.apiDetails,
@@ -153,7 +152,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"firstName" is required');
+      expect(result.error?.message).toEqual('"firstName" is required');
     });
 
     it('is a string', () => {
@@ -161,7 +160,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"firstName" must be a string');
+      expect(result.error?.message).toEqual('"firstName" must be a string');
     });
   });
 
@@ -171,7 +170,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"lastName" is required');
+      expect(result.error?.message).toEqual('"lastName" is required');
     });
 
     it('is a string', () => {
@@ -179,7 +178,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"lastName" must be a string');
+      expect(result.error?.message).toEqual('"lastName" must be a string');
     });
   });
 
@@ -189,7 +188,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
       
-      expect(result.error.message).toEqual('"email" is required');
+      expect(result.error?.message).toEqual('"email" is required');
     });
 
     it('is in a valid format', () => {
@@ -197,7 +196,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"email" must be a valid email');
+      expect(result.error?.message).toEqual('"email" must be a valid email');
     });
   });
 
@@ -207,7 +206,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"organization" must be a string');
+      expect(result.error?.message).toEqual('"organization" must be a string');
     });
 
     it('is allowed to be empty', () => {
@@ -234,7 +233,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
       
-      expect(result.error.message).toEqual('"description" is required');
+      expect(result.error?.message).toEqual('"description" is required');
     });
 
     it('is a string', () => {
@@ -242,7 +241,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"description" must be a string');
+      expect(result.error?.message).toEqual('"description" must be a string');
     });
   });
 
@@ -252,7 +251,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"apis" must be an array');
+      expect(result.error?.message).toEqual('"apis" must be an array');
     });
 
     it('is an array of strings', () => {
@@ -260,7 +259,7 @@ describe('validations', () => {
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
+      expect(result.error?.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
     });
 
     it('allows an empty array', () => {
@@ -287,7 +286,7 @@ describe('validations', () => {
   
         const result = contactSchema.validate(payload);
         
-        expect(result.error.message).toEqual('"apiDetails" is required');
+        expect(result.error?.message).toEqual('"apiDetails" is required');
       });
 
       it('is a string', () => {
@@ -295,7 +294,7 @@ describe('validations', () => {
   
         const result = contactSchema.validate(payload);
   
-        expect(result.error.message).toEqual('"apiDetails" must be a string');
+        expect(result.error?.message).toEqual('"apiDetails" must be a string');
       });
     });
 
@@ -305,7 +304,7 @@ describe('validations', () => {
   
         const result = contactSchema.validate(payload);
         
-        expect(result.error.message).toEqual('"apiInternalOnly" is required');
+        expect(result.error?.message).toEqual('"apiInternalOnly" is required');
       });
 
       it('is a boolean', () => {
@@ -313,7 +312,7 @@ describe('validations', () => {
   
         const result = contactSchema.validate(payload);
   
-        expect(result.error.message).toEqual('"apiInternalOnly" must be a boolean');
+        expect(result.error?.message).toEqual('"apiInternalOnly" must be a boolean');
       });
 
       describe('is true', () => {
@@ -323,7 +322,7 @@ describe('validations', () => {
       
             const result = contactSchema.validate(payload);
             
-            expect(result.error.message).toEqual('"apiInternalOnlyDetails" is required');
+            expect(result.error?.message).toEqual('"apiInternalOnlyDetails" is required');
           });
         });
       });
@@ -335,7 +334,7 @@ describe('validations', () => {
   
         const result = contactSchema.validate(payload);
         
-        expect(result.error.message).toEqual('"description" is not allowed');
+        expect(result.error?.message).toEqual('"description" is not allowed');
       });
     });
   });
@@ -345,6 +344,6 @@ describe('validations', () => {
 
     const result = contactSchema.validate(payload);
 
-    expect(result.error.message).toEqual('"firstName" is required. "lastName" is required');
+    expect(result.error?.message).toEqual('"firstName" is required. "lastName" is required');
   });
 });

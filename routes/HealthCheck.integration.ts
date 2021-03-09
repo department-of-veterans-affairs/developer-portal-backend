@@ -7,10 +7,41 @@ import configureApp from '../app';
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/health_check';
 describe(route, () => {
+  if (!process.env.DYNAMODB_ENDPOINT) {
+    throw new Error(
+      'Environment variable DYNAMODB_ENDPOINT must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.KONG_HOST) {
+    throw new Error(
+      'Environment variable KONG_HOST must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.GOVDELIVERY_HOST) {
+    throw new Error(
+      'Environment variable GOVDELIVERY_HOST must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.SLACK_BOT_ID) {
+    throw new Error(
+      'Environment variable SLACK_BOT_ID must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.OKTA_HOST) {
+    throw new Error(
+      'Environment variable OKTA_HOST must be defined for HealthCheck.integration test'
+    );
+  }
+  if (!process.env.SLACK_BASE_URL) {
+    throw new Error(
+      'Environment variable SLACK_BASE_URL must be defined for HealthCheck.integration test'
+    );
+  }
+
   const kong = nock(`http://${process.env.KONG_HOST}:8000`);
   const okta = nock(process.env.OKTA_HOST);
-  const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-  const govDelivery = nock(`${process.env.GOVDELIVERY_HOST}`);
+  const dynamoDB = nock(process.env.DYNAMODB_ENDPOINT);
+  const govDelivery = nock(process.env.GOVDELIVERY_HOST);
   const slack = nock(process.env.SLACK_BASE_URL);
 
   const kongMockPath = '/internal/admin/consumers/_internal_DeveloperPortal';
@@ -56,7 +87,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Kong',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -75,7 +106,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Kong',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -96,7 +127,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Okta',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -117,7 +148,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Dynamo',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -136,7 +167,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Dynamo',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -157,7 +188,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'GovDelivery',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -176,7 +207,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'GovDelivery',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -197,7 +228,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Slack',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);
@@ -216,7 +247,7 @@ describe(route, () => {
           failedHealthChecks: [{
             healthy: false,
             serviceName: 'Slack',
-            err: expect.any(Object),
+            err: expect.any(Object) as unknown,
           }],
         });
         expect(response.status).toEqual(200);

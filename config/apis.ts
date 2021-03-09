@@ -46,12 +46,12 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   },
 ];
 
-export const APIS_TO_ACLS = keyAuthAPIList.reduce((acc,endpoint) => {
+export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc,endpoint) => {
   acc[endpoint.key] = endpoint.acl;
   return acc;
 }, {});
 
-export const APIS_TO_PROPER_NAMES = [...oauthAPIList, ...keyAuthAPIList].reduce((acc,endpoint) => {
+export const APIS_TO_PROPER_NAMES: Record<string, string> = [...oauthAPIList, ...keyAuthAPIList].reduce((acc,endpoint) => {
   acc[endpoint.key] = endpoint.name;
   return acc;
 }, {});
@@ -59,7 +59,7 @@ export const APIS_TO_PROPER_NAMES = [...oauthAPIList, ...keyAuthAPIList].reduce(
 export const KONG_CONSUMER_APIS: string[] = keyAuthAPIList
   .map((x) => x.key);
 
-export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce((acc,endpoint) => {
+export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.authzEndpoint;
   return acc;
 }, {});

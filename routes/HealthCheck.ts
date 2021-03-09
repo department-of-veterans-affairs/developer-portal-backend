@@ -6,6 +6,7 @@ import OktaService from '../services/OktaService';
 import DynamoService from '../services/DynamoService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
+import { DevPortalError } from '../models/DevPortalError';
 
 export default function healthCheckHandler(kong: KongService,
   okta: OktaService,
@@ -18,8 +19,8 @@ export default function healthCheckHandler(kong: KongService,
       const healthCheck = new HealthCheck(services);
       await healthCheck.check();
       res.json(healthCheck.getResults());
-    } catch(err) {
-      err.action = 'checking health of services';
+    } catch(err: unknown) {
+      (err as DevPortalError).action = 'checking health of services';
       next(err);
     }
   };

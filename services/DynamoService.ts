@@ -3,6 +3,7 @@ import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import logger from '../config/logger';
 import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
+import { DevPortalError } from '../models/DevPortalError';
 
 export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
 
@@ -15,7 +16,7 @@ export default class DynamoService implements MonitoredService {
     this.client = new DynamoDB.DocumentClient(config);
   }
 
-  public putItem(item: object, tableName: string): Promise<void> {
+  public putItem(item: Record<string, unknown>, tableName: string): Promise<void> {
     // The DynamoDB API breaks if empty strings are passed in
     Object.keys(item).forEach(k => {
       if (item[k] === '') {
@@ -59,7 +60,11 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public query(tableName: string, keyCondition: string, attributes: {}): Promise<AttributeMap[]> {
+  public query(
+    tableName: string,
+    keyCondition: string,
+    attributes: Record<string, unknown>,
+  ): Promise<AttributeMap[]> {
     return new Promise<AttributeMap[]>((resolve, reject) => {
       this.client.query(
         {
@@ -96,8 +101,8 @@ export default class DynamoService implements MonitoredService {
             } else if (!data || data.TableNames?.length !== 1) {
               throw new Error(`Did not have a table: ${JSON.stringify(data)}`);
             }
-          } catch (error) {
-            status.err = new Error(`DynamoDB encountered an error: ${error.message}`);
+          } catch (error: unknown) {
+            status.err = new Error(`DynamoDB encountered an error: ${(error as Error).message}`);
             status.err.action = 'checking health of DynamoDB';
             resolve(status);
             return;
@@ -105,9 +110,9 @@ export default class DynamoService implements MonitoredService {
           status.healthy = true;
           resolve(status);
         });
-      } catch (err) {
-        err.action = 'checking health of DynamoDB';
-        status.err = err;
+      } catch (err: unknown) {
+        (err as DevPortalError).action = 'checking health of DynamoDB';
+        status.err = err as Error;
         resolve(status);
       }
     });
