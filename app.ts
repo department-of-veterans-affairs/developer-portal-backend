@@ -92,7 +92,7 @@ const configureKongService = (): KongService => {
 };
 
 const configureOktaService = (): OktaService => {
-  const { OKTA_TOKEN, OKTA_ORG, OKTA_HOST } = process.env;
+  const { OKTA_TOKEN, OKTA_ORG='', OKTA_HOST } = process.env;
 
   if (!OKTA_TOKEN || (!OKTA_ORG && !OKTA_HOST)) {
     throw new Error('Okta Config Missing');
@@ -100,7 +100,7 @@ const configureOktaService = (): OktaService => {
 
   // OKTA_ORG must be a string to get to this point. To satisfy linting, we cast it as a string
   return new OktaService({
-    host: OKTA_HOST || `https://${OKTA_ORG as string}.okta.com`,
+    host: OKTA_HOST ?? `https://${OKTA_ORG}.okta.com`,
     token: OKTA_TOKEN,
   });
 };
