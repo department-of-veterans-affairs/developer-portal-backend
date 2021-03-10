@@ -17,14 +17,20 @@ const writeFile = ({path, content}) => {
 // ***********
 // WRITE FILES
 // ***********
-const prefix = `export const bakedEnv: Record<string, string | undefined> = {${os.EOL}`;
+const prefix = 'export const bakedEnv: Record<string, string | undefined> = {';
 
-let body = '';
+let body = os.EOL;
 Object.entries(process.env).forEach(([key, value]) => {
   if (key.startsWith('NODE_APP_')) {
     body += `  ${key}: '${value || ''}',${os.EOL}`;
   }
 });
+
+const envVariablesNotFound = body === os.EOL;
+if (envVariablesNotFound) {
+  // Erase the end of line character so that the file will be formatted nicely
+  body = '';
+}
 
 const suffix = `};${os.EOL}`;
 
