@@ -3,4 +3,9 @@ node_modules/*
 .config/
 dev/mocks/node_modules/*
 .eslintrc.js
+
+# Test configuration
 dotenv-config.js
+
+# Build files
+generate-files.js

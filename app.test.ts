@@ -7,11 +7,14 @@ const request = supertest(configureApp());
 describe('App routing', () => {
   describe('/health', () => {
     it('succeeds on healthcheck', async () => {
-      const response = await request.get('/health');
-      const { status } = response.body as { status: string };
+      const { status, body } = await request.get('/health');
 
-      expect(response.status).toBe(200);
-      expect(status).toBe('up');
+      expect(status).toBe(200);
+      expect(body).toEqual({
+        status: 'up',
+	version: 'test version',
+	commitHash: 'test commit hash',
+      });
     });
   });
 });

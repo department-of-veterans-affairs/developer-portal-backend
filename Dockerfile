@@ -3,13 +3,17 @@
 FROM vasdvp/lighthouse-node-application-base:node12 AS base
 WORKDIR /home/node
 ENV NODE_ENV development
+ARG APP_VERSION
+ENV APP_VERSION $APP_VERSION
+ARG COMMIT_HASH
+ENV COMMIT_HASH $COMMIT_HASH
 # Install app dependencies in a separate layer from source code, as these will change less often
 COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
 # Add node module binaries (like jest) to path
 ENV PATH /home/node/node_modules/.bin:$PATH
 COPY --chown=node:node . .
-RUN tsc
+RUN npm run build
 
 # The prod stage removes dev dependencies and creates a
 # container for production usage.
