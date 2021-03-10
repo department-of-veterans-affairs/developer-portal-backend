@@ -13,7 +13,7 @@ server.on('error', (e: Error) => {
 });
 
 const commitHash = bakedEnv.NODE_APP_COMMIT_HASH ?? 'undefined';
-const version = bakedEnv.NODE_APP_VERSION ?? 'undefined;
+const version = bakedEnv.NODE_APP_VERSION ?? 'undefined';
 
 server.on('listening', () => {
   console.log(
