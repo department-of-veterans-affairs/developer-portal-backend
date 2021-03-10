@@ -12,8 +12,8 @@ describe('App routing', () => {
       expect(status).toBe(200);
       expect(body).toEqual({
         status: 'up',
-	version: 'test version',
-	commitHash: 'test commit hash',
+        version: 'test version',
+        commitHash: 'test commit hash',
       });
     });
   });

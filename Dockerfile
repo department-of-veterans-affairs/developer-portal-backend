@@ -3,10 +3,10 @@
 FROM vasdvp/lighthouse-node-application-base:node12 AS base
 WORKDIR /home/node
 ENV NODE_ENV development
-ARG APP_VERSION
-ENV APP_VERSION $APP_VERSION
-ARG COMMIT_HASH
-ENV COMMIT_HASH $COMMIT_HASH
+ARG NODE_APP_VERSION
+ENV NODE_APP_VERSION $NODE_APP_VERSION
+ARG NODE_APP_COMMIT_HASH
+ENV NODE_APP_COMMIT_HASH $NODE_APP_COMMIT_HASH
 # Install app dependencies in a separate layer from source code, as these will change less often
 COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
