@@ -1,8 +1,14 @@
 import logger from '../config/logger';
-import { Client, DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
+import {
+  Client,
+  DefaultRequestExecutor,
+  OktaApplicationResponse,
+  OktaPolicy,
+  OktaPolicyCollection,
+} from '@okta/okta-sdk-nodejs';
 import { MonitoredService, OktaApplication, ServiceHealthCheckResponse } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
-import { OktaPolicyCollection } from "../models/Okta";
+import { DevPortalError } from '../models/DevPortalError';
 
 function filterApplicableEndpoints(apiList: string[]): string[] {
   const filteredApiList: string[] = apiList
@@ -10,24 +16,34 @@ function filterApplicableEndpoints(apiList: string[]): string[] {
     .map(endpoint => OKTA_AUTHZ_ENDPOINTS[endpoint]);
   return [...new Set(filteredApiList)];
 }
-export interface OktaApplicationResponse {
-  id: string;
-  credentials: {
-    oauthClient: {
-      client_id: string;
-      client_secret?: string;
-    };
-  };
-}
+
 export default class OktaService implements MonitoredService {
   public client: Client;
 
-  constructor({ host, token }) {
+  constructor({ host, token }: { host: string, token: string}) {
     this.client = new Client({
       token,
       orgUrl: host,
       requestExecutor: new DefaultRequestExecutor(),
     });
+  }
+
+  private async getDefaultPolicy(policies: OktaPolicyCollection): Promise<OktaPolicy | null> {
+    let defaultPolicy: OktaPolicy | null = null;
+
+    /*
+     * Typescript doesn't seem to understand that default Policy will get set within this call to
+     * policies.each. If you hover above the return type in vscode, it shows defaultPolicy as
+     * always being null even though it can be set within this call.
+     */
+    await policies.each(policy => {
+      if (policy.name === 'default') {
+        defaultPolicy = policy;
+        return false;
+      }
+    });
+
+    return defaultPolicy;
   }
 
   public async createApplication(
@@ -43,15 +59,8 @@ export default class OktaService implements MonitoredService {
       applicableEndpoints.map(async authServerId => {
         const policies: OktaPolicyCollection = await this.client.listAuthorizationServerPolicies(authServerId);
         const clientId = resp.credentials.oauthClient.client_id;
-        let defaultPolicy;
-
-        // policies.each returns a promise https://developer.okta.com/okta-sdk-nodejs/jsdocs/#toc31__anchor
-        await policies.each(policy => {
-          if (policy.name === 'default') {
-            defaultPolicy = policy;
-            return false;
-          }
-        });
+        const defaultPolicy: OktaPolicy | null = await this.getDefaultPolicy(policies);
+        
         if (defaultPolicy) {
           defaultPolicy.conditions.clients.include.push(clientId);
           await this.client.updateAuthorizationServerPolicy(
@@ -80,12 +89,12 @@ export default class OktaService implements MonitoredService {
         serviceName: 'Okta',
         healthy: true,
       };
-    } catch (err) {
-      err.action = 'checking health of Okta';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of Okta';
       return {
         serviceName: 'Okta',
         healthy: false,
-        err: err,
+        err: err as DevPortalError,
       };
     }
   }

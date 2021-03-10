@@ -5,8 +5,25 @@ import nock from 'nock';
 import configureApp from '../../app';
 
 const request = supertest(configureApp());
-const dynamoDB = nock(`${process.env.DYNAMODB_ENDPOINT}`);
-const slack = nock(`${process.env.SLACK_BASE_URL}`);
+
+if (!process.env.DYNAMODB_ENDPOINT) {
+  throw new Error(
+    'Environment variable DYNAMODB_ENDPOINT must be defined for SignupsReport.integration test'
+  );
+}
+if (!process.env.SLACK_BASE_URL) {
+  throw new Error(
+    'Environment variable SLACK_BASE_URL must be defined for SignupsReport.integration test'
+  );
+}
+if (!process.env.OKTA_HOST) {
+  throw new Error(
+    'Environment variable OKTA_HOST must be defined for SignupsReport.integration test'
+  );
+}
+
+const dynamoDB = nock(process.env.DYNAMODB_ENDPOINT);
+const slack = nock(process.env.SLACK_BASE_URL);
 
 const route = '/internal/developer-portal/admin/reports/signups';
 describe(route, () => {
@@ -45,6 +62,7 @@ describe(route, () => {
 
     const response = await request.get(route).send({});
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
   });
@@ -56,6 +74,7 @@ describe(route, () => {
 
     const response = await request.get(route).send({});
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toContain('500');
     expect(response.status).toEqual(500);
   });

@@ -1,16 +1,18 @@
 import process from 'process';
-import { ApplicationType, GovDeliveryUser, KongUser } from '../types';
+import { GovDeliveryUser, KongUser } from '../types';
 import Application from './Application';
 import OktaService from '../services/OktaService';
-import SlackService from '../services/SlackService';
+import SlackService, { SlackResponse } from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import DynamoService from '../services/DynamoService';
 import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
+import { ApplicationType } from '@okta/okta-sdk-nodejs';
+import { DevPortalError } from './DevPortalError';
 
 type APIFilterFn = (api: string) => boolean;
 
-interface UserDynamoItem {
+type UserDynamoItem = {
   apis: string;
   email: string;
   firstName: string;
@@ -23,6 +25,17 @@ interface UserDynamoItem {
   createdAt: string;
   okta_application_id?: string;
   okta_client_id?: string;
+}
+export interface UserConfig {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  email: string;
+  apis: string;
+  description: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
 }
 
 export default class User implements KongUser, GovDeliveryUser {
@@ -51,7 +64,7 @@ export default class User implements KongUser, GovDeliveryUser {
     oAuthRedirectURI,
     oAuthApplicationType,
     termsOfService,
-  }) {
+  }: UserConfig) {
     this.createdAt = new Date(Date.now());
     this.firstName = firstName;
     this.lastName = lastName;
@@ -85,8 +98,8 @@ export default class User implements KongUser, GovDeliveryUser {
       const keyAuth = await client.createKeyAuth(this);
       this.token = keyAuth.key;
       return this;
-    } catch (err) {
-      err.action = 'failed creating kong consumer';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'failed creating kong consumer';
       throw err;
     }
   }
@@ -95,19 +108,19 @@ export default class User implements KongUser, GovDeliveryUser {
     try {
       return client.sendWelcomeEmail(this);
     } catch (err) {
-      err.action = 'failed sending welcome email';
+      (err as DevPortalError).action = 'failed sending welcome email';
       throw err;
     }
   }
 
-  public sendSlackSuccess(client: SlackService): Promise<string> {
+  public sendSlackSuccess(client: SlackService): Promise<SlackResponse> {
     try {
       return client.sendSuccessMessage(
         this.toSlackString(),
         'New User Application',
       );
     } catch (err) {
-      err.action = 'failed sending slack success';
+      (err as DevPortalError).action = 'failed sending slack success';
       throw err;
     }
   }
@@ -135,7 +148,7 @@ export default class User implements KongUser, GovDeliveryUser {
       await service.putItem(dynamoItem, this.tableName);
       return this;
     } catch (err) {
-      err.action = 'failed saving to dynamo';
+      (err as DevPortalError).action = 'failed saving to dynamo';
       throw err;
     }
   }
@@ -161,7 +174,7 @@ export default class User implements KongUser, GovDeliveryUser {
       }
       return this;
     } catch (err) {
-      err.action = 'failed saving to okta';
+      (err as DevPortalError).action = 'failed saving to okta';
       throw err;
     }
   }

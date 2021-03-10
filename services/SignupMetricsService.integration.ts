@@ -180,7 +180,7 @@ describeFunc('signups module', () => {
       expect(signups[0]).toEqual({
         email: 'ryan.travitz@adhocteam.us',
         createdAt: '2020-06-01T22:50:36.448Z',
-        apis: expect.anything(),
+        apis: expect.anything() as unknown,
       });
 
       const apis = signups[0].apis.split(',');

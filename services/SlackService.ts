@@ -1,6 +1,8 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import { DevPortalError } from '../models/DevPortalError';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
-import SignupMetricsService, { SignupCountResult } from './SignupMetricsService';
+import { SignupCountResult } from './SignupMetricsService';
+import { getEnvironment } from '../util/environments';
 
 /* 
 WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
@@ -67,6 +69,10 @@ interface SlackBotInfo {
   };
 }
 
+export interface SlackResponse {
+  error?: string;
+}
+
 function capitalizeFirstLetter(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
@@ -87,7 +93,7 @@ export default class SlackService implements MonitoredService {
     this.options = options;
   }
 
-  public sendSuccessMessage(message: string, title: string): Promise<string> {
+  public sendSuccessMessage(message: string, title: string): Promise<SlackResponse> {
     const body: PostBody = {
       text: '',
       attachments: [{
@@ -106,12 +112,14 @@ export default class SlackService implements MonitoredService {
     endDate: string,
     timeSpanSignups: SignupCountResult,
     allTimeSignups: SignupCountResult
-  ): Promise<string> {
+  ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
+      const timeSpanCount = timeSpanSignups.apiCounts[api] as number;
+      const allTimeCount = allTimeSignups.apiCounts[api] as number;
       return {
         type: 'mrkdwn',
-        text: `_${api}_: ${timeSpanSignups.apiCounts[api]} new requests (${allTimeSignups.apiCounts[api]} all-time)`,
+        text: `_${api}_: ${timeSpanCount} new requests (${allTimeCount} all-time)`,
       };
     });
     const titleDuration = capitalizeFirstLetter(duration);
@@ -129,7 +137,7 @@ export default class SlackService implements MonitoredService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*Environment:* ${SignupMetricsService.environment}`,
+            text: `*Environment:* ${getEnvironment()}`,
           },
         },
         {
@@ -185,21 +193,24 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
 
-  private async post(body: PostBody): Promise<string> {
+  private async post(body: PostBody): Promise<SlackResponse> {
     try {
-      const res = await this.client.post('/api/chat.postMessage', { channel: this.options.channel, ...body });
+      const res = await this.client.post<SlackResponse>('/api/chat.postMessage', { channel: this.options.channel, ...body });
       if(res.data.error){
         throw new Error(res.data.error);
       }
       return res.data;
     }
-    catch (err) {
+    catch (err: unknown) {
       // Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
       // We will want that information, so we're re-writing the message field of the error
       // that axios throws on 400 and 500 responses, since our default error handling
       // will accept and log that field.
-      if (err.response) {
-        err.message = `Status: ${err.response.status}, Data: ${err.response.data}, Original: ${err.message}`;
+      const { response } = err as AxiosError;
+      if (response) {
+        (err as Error).message =
+          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, `
+          + `Original: ${(err as AxiosError).message}`;
       }
       throw err;
     }
@@ -215,9 +226,9 @@ export default class SlackService implements MonitoredService {
       const botInfoResponse = await this.getBot();
       healthResponse.healthy = botInfoResponse.ok;
       return Promise.resolve(healthResponse);
-    } catch (err) {
-      err.action = 'checking health of Slack';
-      healthResponse.err = err;
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of Slack';
+      healthResponse.err = err as Error;
       return Promise.resolve(healthResponse);
     }
   }
@@ -228,7 +239,7 @@ export default class SlackService implements MonitoredService {
         bot: this.options.bot,
       },
     };
-    const botInfoResponse = await this.client.get('/api/bots.info', config);
+    const botInfoResponse = await this.client.get<SlackBotInfo>('/api/bots.info', config);
     if(botInfoResponse.data.error){
       throw new Error(botInfoResponse.data.error);
     }

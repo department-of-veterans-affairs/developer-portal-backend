@@ -9,6 +9,7 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config/apis';
+import { DevPortalError } from '../models/DevPortalError';
 
 function validateApiList(val: string): string {
   let result: boolean;
@@ -38,6 +39,20 @@ export const applySchema = Joi.object().keys({
   apis: Joi.custom(validateApiList).required(),
 }).options({ abortEarly: false });
 
+interface DeveloperApplicationRequestBody {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  description: string;
+  email: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
+  apis: string;
+}
+
+type DeveloperApplicationRequest = Request<Record<string, unknown>, Record<string, unknown>, DeveloperApplicationRequestBody, Record<string, unknown>>;
+
 export default function developerApplicationHandler(
   kong: KongService,
   okta: OktaService | undefined,
@@ -45,7 +60,11 @@ export default function developerApplicationHandler(
   govdelivery: GovDeliveryService | undefined,
   slack: SlackService | undefined,
 ) {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: DeveloperApplicationRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     const {
       firstName,
       lastName,
@@ -118,8 +137,8 @@ export default function developerApplicationHandler(
         logger.info({ message: 'sending email to new user' });
         await user.sendEmail(govdelivery);
       }
-    } catch (err) {
-      err.action = 'sending govdelivery signup notification';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'sending govdelivery signup notification';
       next(err);
     }
 
@@ -128,8 +147,8 @@ export default function developerApplicationHandler(
         logger.info({ message: 'sending success to slack' });
         await user.sendSlackSuccess(slack);
       }
-    } catch (err) {
-      err.action = 'sending slack signup message';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'sending slack signup message';
       next(err);
     }
   };

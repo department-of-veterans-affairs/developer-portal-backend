@@ -1,12 +1,16 @@
-import OktaService, { OktaApplicationResponse } from '../services/OktaService';
 import {
   ApplicationType,
   GrantTypes,
   OAuthApplication,
+  OktaApplicationResponse,
+  ResponseTypes,
+} from '@okta/okta-sdk-nodejs';
+import OktaService from '../services/OktaService';
+import {
   OktaApplication,
   OktaUser,
-  ResponseTypes,
 } from '../types';
+import { DevPortalError } from './DevPortalError';
 
 const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
 const LOGIN_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';
@@ -29,14 +33,17 @@ export default class Application implements OktaApplication {
   public client_secret?: string;
   public oktaID?: string;
 
-  constructor({
-    name,
-    redirectURIs,
-    applicationType = 'web',
-    responseTypes = ['code'],
-    grantTypes = ['authorization_code', 'refresh_token'],
-    ...options
-  }: ApplicationSettings, owner: OktaUser) {
+  constructor(
+    {
+      name,
+      redirectURIs,
+      applicationType = 'web',
+      responseTypes = ['code'],
+      grantTypes = ['authorization_code', 'refresh_token'],
+      ...options
+    }: ApplicationSettings,
+    owner: OktaUser,
+  ) {
     this.owner = owner;
     this.settings = {
       name: 'oidc_client',
@@ -75,8 +82,8 @@ export default class Application implements OktaApplication {
       this.client_secret = client_secret;
       this.oktaID = resp.id;
       return resp;
-    } catch (err) {
-      err.action = 'failed saving to Okta';
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'failed saving to Okta';
       throw err;
     }
   }

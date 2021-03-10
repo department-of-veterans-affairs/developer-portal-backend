@@ -1,7 +1,26 @@
-import OktaService, { OktaApplicationResponse } from './OktaService';
-import { OktaApplication, OAuthApplication } from '../types';
+import OktaService from './OktaService';
+import { OktaApplication } from '../types';
+import {
+  Client,
+  OAuthApplication,
+  OktaApplicationResponse,
+  OktaPolicy,
+  OktaPolicyCollection,
+} from '@okta/okta-sdk-nodejs';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
-import { OktaPolicy } from "../models/Okta";
+
+const createOktaPolicyCollection: (...policies: OktaPolicy[]) => OktaPolicyCollection = (
+  ...policies: OktaPolicy[]
+) => {
+  const each = (iterator: (obj: OktaPolicy) => void | boolean): Promise<void> => {
+    policies.forEach(iterator);
+    return Promise.resolve();
+  };
+  
+  return {
+    each,
+  };
+};
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
@@ -26,16 +45,19 @@ describe('OktaService', () => {
       createMock = jest.spyOn(service.client, 'createApplication').mockResolvedValue(appRes);
       groupMock = jest
         .spyOn(service.client, 'createApplicationGroupAssignment')
-        .mockResolvedValue({});
+        .mockResolvedValue(Promise.resolve());
 
       updateAuthPolicyMock = jest
         .spyOn(service.client, 'updateAuthorizationServerPolicy')
-        .mockResolvedValue({});
+        .mockResolvedValue(Promise.resolve());
 
       // The policy with name === 'default' is the only one that we update
-      jest
-        .spyOn(service.client, 'listAuthorizationServerPolicies')
-        .mockImplementation((authServerId: unknown) => {
+      const spyListAuthServerPolicies = jest.spyOn(
+        service.client,
+        'listAuthorizationServerPolicies'
+      ) as jest.SpyInstance<OktaPolicyCollection, string[]>;
+      spyListAuthServerPolicies.mockImplementation(
+        (authServerId: string) => {
           const policy1 = {
             id: `${authServerId}-1-policy`,
             name: 'policy1',
@@ -51,12 +73,7 @@ describe('OktaService', () => {
             name: 'policy3',
             conditions: { clients: { include: [] } },
           };
-          return {
-            policies: [policy1,policy2,policy3],
-            each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
-              return this.policies.forEach(cb);
-            },
-          };
+          return createOktaPolicyCollection(policy1, policy2, policy3);
         });
     });
 
@@ -103,9 +120,12 @@ describe('OktaService', () => {
 
     it('throws error if there is no default policy', async () => {
       // we have to reset the list of policies to not include one with the 'default' name
-      jest
-        .spyOn(service.client, 'listAuthorizationServerPolicies')
-        .mockImplementation((authServerId: unknown) => {
+      const spyListAuthServerPolicies = jest.spyOn<Client, string>(
+        service.client,
+        'listAuthorizationServerPolicies'
+      ) as jest.SpyInstance<Client, string[]>;
+      spyListAuthServerPolicies.mockImplementation(
+        (authServerId: string) => {
           const policy1 = {
             id: `${authServerId}-1-policy`,
             name: 'policy1',
@@ -121,12 +141,7 @@ describe('OktaService', () => {
             name: 'policy3',
             conditions: { clients: { include: [] } },
           };
-          return {
-            policies: [policy1,policy2,policy3],
-            each: function(cb): (cb: (policy: OktaPolicy) => void | Promise<void> | boolean) => Promise<void> {
-              return this.policies.forEach(cb);
-            },
-          };
+          return createOktaPolicyCollection(policy1, policy2, policy3);
         });
 
       const application: OktaApplication = {

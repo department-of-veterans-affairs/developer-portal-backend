@@ -3,6 +3,14 @@ import axios, { AxiosInstance } from 'axios';
 import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from './GovDeliveryService';
 import User from '../models/User';
 
+const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
+
+if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
+  throw new Error(
+    'Environment variable configuration is required to test GovDeliveryService'
+  );
+}
+
 describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
   let event;
@@ -19,9 +27,9 @@ describe('GovDeliveryService', () => {
 
   beforeEach(() => {
     client = new GovDeliveryService({
-      token: process.env.GOVDELIVERY_KEY,
-      host: process.env.GOVDELIVERY_HOST,
-      supportEmailRecipient: 'gandalf@istari.net',
+      token: GOVDELIVERY_KEY,
+      host: GOVDELIVERY_HOST,
+      supportEmailRecipient: SUPPORT_EMAIL,
     });
     event = {
       apis: 'facilities,benefits',
@@ -89,7 +97,7 @@ describe('GovDeliveryService', () => {
       expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
         recipients: [{ email: 'ed@adhocteam.us' }],
         subject: 'Welcome to the VA API Platform',
-        body: expect.stringContaining('VA Facilities API and Benefits Intake API'),
+        body: expect.stringContaining('VA Facilities API and Benefits Intake API') as unknown,
       }));
     });
 
@@ -101,8 +109,8 @@ describe('GovDeliveryService', () => {
       user.token = undefined;
       try {
         await client.sendWelcomeEmail(user);
-      } catch (err) {
-        expect(err.message).toEqual('User must have token or client_id initialized');
+      } catch (err: unknown) {
+        expect((err as Error).message).toEqual('User must have token or client_id initialized');
       }
     });
   });
@@ -120,10 +128,10 @@ describe('GovDeliveryService', () => {
 
       await client.sendConsumerSupportEmail(email);
       expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: 'gandalf@istari.net' }],
+        recipients: [{ email: SUPPORT_EMAIL }],
         from_name: 'Peregrin Took',
         subject: 'Support Needed',
-        body: expect.stringContaining('peregrin@thefellowship.org'),
+        body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
       }));
     });
 
@@ -140,10 +148,10 @@ describe('GovDeliveryService', () => {
   
         await client.sendPublishingSupportEmail(email);
         expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: 'gandalf@istari.net' }],
+          recipients: [{ email: SUPPORT_EMAIL }],
           from_name: 'Peregrin Took',
           subject: 'Publishing Support Needed',
-          body: expect.stringContaining('API Details'),
+          body: expect.stringContaining('API Details') as unknown,
         }));
       });
     });
@@ -161,28 +169,28 @@ describe('GovDeliveryService', () => {
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
       jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: process.env.GOVDELIVERY_KEY,
-        host: process.env.GOVDELIVERY_HOST,
-        supportEmailRecipient: 'gandalf@istari.net',
+        token: GOVDELIVERY_KEY,
+        host: GOVDELIVERY_HOST,
+        supportEmailRecipient: SUPPORT_EMAIL,
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: true });
     });
 
     it('returns false when healthcheck endpoint throws an error', async () => {
-      const err = new Error(`ECONNREFUSED ${process.env.GOVDELIVERY_HOST}`);
+      const err = new Error(`ECONNREFUSED ${GOVDELIVERY_HOST}`);
       const mockGet = jest.fn().mockImplementation(() => { throw err; });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
       jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: process.env.GOVDELIVERY_KEY,
-        host: process.env.GOVDELIVERY_HOST,
-        supportEmailRecipient: 'gandalf@istari.net',
+        token: GOVDELIVERY_KEY,
+        host: GOVDELIVERY_HOST,
+        supportEmailRecipient: SUPPORT_EMAIL,
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
-      expect(res.err.action).toEqual('checking health of GovDelivery');
+      expect(res.err?.action).toEqual('checking health of GovDelivery');
     });
   });
 });

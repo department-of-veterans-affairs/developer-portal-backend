@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 
 import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
+import { DevPortalError } from '../models/DevPortalError';
 
 export const enum SubmissionType {
   DEFAULT = 'DEFAULT',
@@ -15,13 +16,13 @@ interface ContactDetails {
   organization?: string;
 }
 
-type ConsumerSupportRequest = {
+export type ConsumerSupportRequest = {
   type: SubmissionType.DEFAULT;
   description: string;
   apis?: string[];
 } & ContactDetails
 
-type PublishingSupportRequest = {
+export type PublishingSupportRequest = {
   type: SubmissionType.PUBLISHING;
   apiDetails: string;
   apiDescription?: string;
@@ -56,7 +57,7 @@ export const contactSchema = Joi.object().keys({
 }).options({ abortEarly: false });
 
 export default function contactUsHandler(govDelivery: GovDeliveryService) {
-  return async function (req: Request<{}, {}, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
+  return async function (req: Request<Record<string, unknown>, Record<string, unknown>, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
     try {
       if (req.body.type === SubmissionType.PUBLISHING) {
         const supportRequest: PublishingSupportEmail = {
@@ -86,8 +87,8 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
         await govDelivery.sendConsumerSupportEmail(supportRequest);
         res.sendStatus(200);
       }
-    } catch(err) {
-      err.action = 'sending contact us email';
+    } catch(err: unknown) {
+      (err as DevPortalError).action = 'sending contact us email';
       next(err);
     }
   };

@@ -17,7 +17,8 @@ export default class HealthCheck {
   }
 
   public async check(): Promise<void> {
-    const resultPromises: Promise<ServiceHealthCheckResponse>[] = this.services.map(service => service.healthCheck());
+    const resultPromises: Promise<ServiceHealthCheckResponse>[] =
+      this.services.map(service => service.healthCheck());
     const results = await Promise.all(resultPromises);
     results.forEach(result => this.addResult(result));
   }
