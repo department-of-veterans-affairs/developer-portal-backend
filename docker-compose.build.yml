@@ -1,0 +1,20 @@
+version: '3.7'
+
+# This docker-compose is meant to be used in conjunction with the main docker-compose.yml in this
+# respository. To use this docker-compose and run a built version of the app, run:
+# `docker-compose -f docker-compose.yml -f docker-compose.build.yml up`
+
+services:
+  app:
+    build:
+      context: .
+      target: base
+      args:
+        # When the environment variable NODE_APP_COMMIT_HASH is defined during the build,
+        # docker-compose will pass it as a build-argument to the Dockerfile
+        NODE_APP_COMMIT_HASH: $NODE_APP_COMMIT_HASH
+    image: developer-portal-backend
+    command: npm start
+    volumes:
+      # Ignore node_modules
+      - /home/node/node_modules

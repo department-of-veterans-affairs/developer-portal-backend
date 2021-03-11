@@ -13,10 +13,9 @@ server.on('error', (e: Error) => {
 });
 
 const commitHash = bakedEnv.NODE_APP_COMMIT_HASH ?? 'undefined';
-const version = bakedEnv.NODE_APP_VERSION ?? 'undefined';
 
 server.on('listening', () => {
   console.log(
-    `Server started on port ${PORT} with version ${version} and hash ${commitHash}`,
+    `Server started on port ${PORT} with commit hash '${commitHash}'`,
   );
 });

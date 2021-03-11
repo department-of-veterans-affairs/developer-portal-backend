@@ -2,21 +2,17 @@ version: '3.7'
 
 services:
   app:
-    build:
-      context: .
-      target: base
-    image: developer-portal-backend
+    image: vasdvp/lighthouse-node-application-base:node12
     ports:
       - 9999:9999
       # Debug port
       - 9229:9229
     volumes:
-      # map local to remote folder, exclude node_modules
       - .:/home/node
-      - /home/node/node_modules
+      # Ignore dist folder - we don't need it and if we do a build, it will be overwritten anyway
+      - /home/node/dist
+    working_dir: /home/node
     command: npm run ${RUN_COMMAND:-watch}
-    # Debug command
-    # command: npm run watch:debug
     depends_on:
       - kong
     restart: on-failure
@@ -97,6 +93,8 @@ services:
     image: amazon/dynamodb-local
     ports:
       - 8080:8000
+      # Debug port
+      - 9229:9229
   dynamodb-migration:
     image: developer-portal-backend
     env_file: '.env'

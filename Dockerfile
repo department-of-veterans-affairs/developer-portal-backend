@@ -3,10 +3,11 @@
 FROM vasdvp/lighthouse-node-application-base:node12 AS base
 WORKDIR /home/node
 ENV NODE_ENV development
-ARG NODE_APP_VERSION
-ENV NODE_APP_VERSION $NODE_APP_VERSION
+
+# Set container environment variable from the build arg so it's available in the container
 ARG NODE_APP_COMMIT_HASH
 ENV NODE_APP_COMMIT_HASH $NODE_APP_COMMIT_HASH
+
 # Install app dependencies in a separate layer from source code, as these will change less often
 COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
@@ -36,4 +37,3 @@ RUN npm prune --production
 HEALTHCHECK --interval=30s --timeout=4s --start-period=30s \
   CMD node bin/healthcheck.js
 CMD ["node", "dist/server.js"]
-

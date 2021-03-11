@@ -166,7 +166,6 @@ export default function configureApp(): express.Application {
   app.get('/health', (req, res) => {
     res.json({
       status: 'up',
-      version: bakedEnv.NODE_APP_VERSION ?? 'undefined',
       commitHash: bakedEnv.NODE_APP_COMMIT_HASH ?? 'undefined',
     });
   });

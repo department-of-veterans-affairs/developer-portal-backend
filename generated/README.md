@@ -1,7 +1,4 @@
-This directory contains files generated before builds and before tests. These files enable us to 'bake in' variables from during the build process into the built files. This means our cicd pipelines will be able to inject variables into the build when creating artifacts.
+This directory is for files that are generated rather than written in a standard way. At the moment this serves one purpose. A file called baked-env.ts is created that exports a variable call bakedEnv of type Record<string, string | undefined>. To generate these files run `node generate-files.js` at the root of the project. The generate-files.js script takes all environment variables starting in "NODE_APP_" and places them in to the backedEnv variable making them accessible at runtime.
 
-At the current time this is only needed for our app to be able to display version and commit hash.
+Note: There is are commands `npm run genfiles` and `npm run genfiles:test` that run the generate-files.js script for you.
 
-See the file 'generate-files.js' in the root of the project to see which files are generated and which variables are used.
-
-Note: For the version, we could import it from the package.json, but we are not currently using the package.json to keep track of our versioning.

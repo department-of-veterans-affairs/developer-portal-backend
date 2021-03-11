@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node dist/server",
-    "prewatch": "npm run genfiles",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
-    "prewatch:debug": "npm run genfiles",
     "watch:debug": "nodemon --watch '*.ts' --exec 'node --require ts-node/register --inspect-brk=0.0.0.0:9229 server.ts'",
     "lint": "eslint --ext .js,.ts .",
     "pretest": "npm run genfiles:test",
@@ -20,7 +18,7 @@
     "prebuild": "npm run genfiles",
     "build": "tsc",
     "genfiles": "node generate-files.js",
-    "genfiles:test": "NODE_APP_COMMIT_HASH='test commit hash' NODE_APP_VERSION='test version' npm run genfiles"
+    "genfiles:test": "NODE_APP_COMMIT_HASH='test commit hash' npm run genfiles"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
