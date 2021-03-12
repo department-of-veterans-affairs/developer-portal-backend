@@ -1,4 +1,3 @@
 This directory is for files that are generated rather than written in a standard way. At the moment this serves one purpose. A file called baked-env.ts is created that exports a variable call bakedEnv of type Record<string, string | undefined>. To generate these files run `node generate-files.js` at the root of the project. The generate-files.js script takes all environment variables starting in "NODE_APP_" and places them in to the backedEnv variable making them accessible at runtime.
 
-Note: There is are commands `npm run genfiles` and `npm run genfiles:test` that run the generate-files.js script for you.
-
+Note: The commands `npm run genfiles` and `npm run genfiles:test` will run the generate-files.js script for you.
