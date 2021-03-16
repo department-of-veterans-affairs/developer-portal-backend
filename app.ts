@@ -1,7 +1,6 @@
 import express from 'express';
 import { config } from 'aws-sdk';
 import morgan from 'morgan';
-import { bakedEnv } from './generated/baked-env';
 
 import { IncomingMessage, ServerResponse } from 'http';
 
@@ -164,10 +163,7 @@ export default function configureApp(): express.Application {
   });
 
   app.get('/health', (req, res) => {
-    res.json({
-      status: 'up',
-      commitHash: bakedEnv.NODE_APP_COMMIT_HASH ?? 'undefined',
-    });
+    res.json({ status: 'up' });
   });
 
   const kong = configureKongService();

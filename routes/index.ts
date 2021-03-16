@@ -11,6 +11,7 @@ import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
 import cors from 'cors';
+import versionHandler from './Version';
 
 function validationMiddleware(schema: Schema, toValidate: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -74,6 +75,8 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery));
   
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
+  publicRoutes.get('/version', versionHandler());
+
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
   /**
