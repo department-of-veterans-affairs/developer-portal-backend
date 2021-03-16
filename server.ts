@@ -1,6 +1,6 @@
 import * as http from 'http';
 import configureApp from './app';
-import { bakedEnv } from './generated/baked-env';
+import { getBakedEnv } from './generated/baked-env';
 
 const app = configureApp();
 const server: http.Server = new http.Server(app);
@@ -12,7 +12,7 @@ server.on('error', (e: Error) => {
   console.log('Error starting server' + JSON.stringify(e));
 });
 
-const commitHash = bakedEnv.NODE_APP_COMMIT_HASH ?? 'undefined';
+const commitHash = getBakedEnv('NODE_APP_COMMIT_HASH') ?? 'undefined';
 
 server.on('listening', () => {
   console.log(

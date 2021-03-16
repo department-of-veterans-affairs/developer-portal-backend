@@ -17,7 +17,7 @@ const writeFile = ({path, content}) => {
 // ***********
 // WRITE FILES
 // ***********
-const prefix = 'export const bakedEnv: Record<string, string | undefined> = {';
+const prefix = 'const bakedEnv: Record<string, string | undefined> = {';
 
 let body = os.EOL;
 Object.entries(process.env).forEach(([key, value]) => {
@@ -34,7 +34,11 @@ if (envVariablesNotFound) {
 
 const suffix = `};${os.EOL}`;
 
+// Export a separate function in order to mock more easily in tests
+const getBakedEnv =
+  `export const getBakedEnv = (key: string): string | undefined => bakedEnv[key];${os.EOL}`;
+
 writeFile({
   path: getPath('baked-env.ts'),
-  content: prefix + body + suffix,
+  content: prefix + body + suffix + getBakedEnv,
 });
