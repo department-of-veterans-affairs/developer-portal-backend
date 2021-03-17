@@ -28,7 +28,7 @@ phases:
       - echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
       - echo Starting CI...
       - echo Building the CI Docker image...
-      - docker build --build-arg NODE_APP_COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION --pull --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker build --build-arg COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION --pull --target base -t dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - docker images
       - echo Running Lint tests...
       - docker run --rm --entrypoint '' -w "/home/node" -i dvp/developer-portal-backend-ci:$CODEBUILD_RESOLVED_SOURCE_VERSION npm run lint
@@ -38,7 +38,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - docker build --build-arg NODE_APP_COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION --pull --target prod -t dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker build --build-arg COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION --pull --target prod -t dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - docker tag dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dvp/developer-portal-backend:$CODEBUILD_RESOLVED_SOURCE_VERSION
   post_build:
     commands:

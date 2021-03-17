@@ -6,6 +6,7 @@ import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import SignupMetricsService from '../services/SignupMetricsService';
 import SlackService from '../services/SlackService';
+import VersionService from '../services/VersionService';
 import developerApplicationHandler, { applySchema } from './DeveloperApplication';
 import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
@@ -32,6 +33,7 @@ interface AppServices {
   govDelivery: GovDeliveryService;
   slack: SlackService;
   signups: SignupMetricsService;
+  version: VersionService;
 }
 
 /**
@@ -50,6 +52,7 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     govDelivery,
     signups,
     slack,
+    version,
   } = services;
 
   /**
@@ -75,7 +78,8 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery));
   
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
-  publicRoutes.get('/version', versionHandler());
+  
+  publicRoutes.get('/version', versionHandler(version));
 
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 

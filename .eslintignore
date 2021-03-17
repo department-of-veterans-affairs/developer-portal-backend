@@ -6,6 +6,3 @@ dev/mocks/node_modules/*
 
 # Test configuration
 dotenv-config.js
-
-# Build files
-generate-files.js

@@ -6,7 +6,7 @@ services:
     ports:
       - 9999:9999
       # Debug port
-      - 9229:9229
+      # - 9229:9229
     volumes:
       - .:/home/node
       # Ignore dist folder - we don't need it and if we do a build, it will be overwritten anyway

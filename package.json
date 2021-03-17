@@ -7,18 +7,11 @@
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "watch:debug": "nodemon --watch '*.ts' --exec 'node --require ts-node/register --inspect-brk=0.0.0.0:9229 server.ts'",
     "lint": "NODE_OPTIONS=\"--max_old_space_size=1536\" eslint --ext .js,.ts .",
-    "pretest": "npm run genfiles:test",
     "test": "jest",
-    "pretest:debug": "npm run genfiles:test",
     "test:debug": "node --inspect-brk=0.0.0.0:9229 node_modules/.bin/jest --runInBand",
-    "pretest-ci": "npm run genfiles:test",
     "test-ci": "jest --coverage",
-    "pretest:watch": "npm run genfiles:test",
     "test:watch": "jest --watchAll",
-    "prebuild": "npm run genfiles",
-    "build": "tsc",
-    "genfiles": "node generate-files.js",
-    "genfiles:test": "NODE_APP_COMMIT_HASH='test commit hash' npm run genfiles"
+    "build": "tsc"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",

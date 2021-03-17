@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
-import { getBakedEnv } from '../generated/baked-env';
+import VersionService from '../services/VersionService';
 
-export default (): RequestHandler => (
+export default (versionService: VersionService): RequestHandler => (
   (_req, res): void => {
-    res.json({ commitHash: getBakedEnv('NODE_APP_COMMIT_HASH') ?? 'undefined' });
+    res.json({ commitHash: versionService.commitHash });
   }
 );

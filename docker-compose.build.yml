@@ -10,9 +10,9 @@ services:
       context: .
       target: base
       args:
-        # When the environment variable NODE_APP_COMMIT_HASH is defined during the build,
+        # When the environment variable COMMIT_HASH is defined during the build,
         # docker-compose will pass it as a build-argument to the Dockerfile
-        NODE_APP_COMMIT_HASH: $NODE_APP_COMMIT_HASH
+        COMMIT_HASH: $COMMIT_HASH
     image: developer-portal-backend
     command: npm start
     volumes:
