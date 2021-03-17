@@ -14,7 +14,8 @@ import {
 describe("DynamoService", () => {
   let service: DynamoService;
   // This needs typed in order for mockPut.mock.calls[0][0] not to give type warnings
-  let mockPut: jest.SpyInstance<AWSRequest<PutItemOutput, AWSError>, [params: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>;
+  // let mockPut: jest.SpyInstance<AWSRequest<PutItemOutput, AWSError>, [params: PutItemInput, callback?: (err: AWSError | null, data: PutItemOutput) => void]>;
+  let mockPut: jest.SpyInstance;
   let mockScan: jest.SpyInstance;
   let mockQuery: jest.SpyInstance;
   let mockListTables: jest.SpyInstance;

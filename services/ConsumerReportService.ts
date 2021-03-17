@@ -15,7 +15,7 @@ export default class ConsumerReportService {
     this.consumerRepository = consumerRepository;
   }
 
-  public async generateCSVReport({apiList = [], writeToDisk =  true}: CSVReportOptions): Promise<string> {
+  public async generateCSVReport({apiList, writeToDisk}: CSVReportOptions): Promise<string> {
 
     const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
     

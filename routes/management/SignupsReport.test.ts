@@ -95,7 +95,7 @@ describe('signupsReportHandler', () => {
 
     await handler(weekMockReq, mockRes, mockNext);
 
-    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate?.utc().format('MM/DD/YYYY');
 
     expect(sentStartDate).toEqual('11/17/2003');
   });
@@ -105,7 +105,7 @@ describe('signupsReportHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+    const sentStartDate = mockCountSignups.mock.calls[0][0]?.startDate?.utc().format('MM/DD/YYYY');
 
     expect(sentStartDate).toEqual('12/10/2003');
   });
@@ -116,7 +116,7 @@ describe('signupsReportHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    const sentEndDate = mockCountSignups.mock.calls[0][0].endDate.utc().format('MM/DD/YYYY');
+    const sentEndDate = mockCountSignups.mock.calls[0][0]?.endDate?.utc().format('MM/DD/YYYY');
 
     expect(sentEndDate).toEqual('12/18/2002');
   });
@@ -127,7 +127,7 @@ describe('signupsReportHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+    const sentStartDate = mockCountSignups.mock.calls[0][0]?.startDate?.utc().format('MM/DD/YYYY');
 
     expect(sentStartDate).toEqual('12/19/2001');
   });
@@ -138,7 +138,7 @@ describe('signupsReportHandler', () => {
 
     await handler(mockReq, mockRes, mockNext);
 
-    const sentStartDate = mockCountSignups.mock.calls[0][0].startDate.utc().format('MM/DD/YYYY');
+    const sentStartDate = mockCountSignups.mock.calls[0][0]?.startDate?.utc().format('MM/DD/YYYY');
 
     expect(sentStartDate).toEqual('11/19/2001');
   });
@@ -151,7 +151,7 @@ describe('validations', () => {
 
       const result = signupsReportSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"span" must be one of [week, month]');
+      expect(result.error?.message).toEqual('"span" must be one of [week, month]');
     });
   });
 
@@ -161,7 +161,7 @@ describe('validations', () => {
 
       const result = signupsReportSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"start" must be in ISO 8601 date format');
+      expect(result.error?.message).toEqual('"start" must be in ISO 8601 date format');
     });
   });
 
@@ -171,7 +171,7 @@ describe('validations', () => {
 
       const result = signupsReportSchema.validate(payload);
 
-      expect(result.error.message).toEqual('"end" must be in ISO 8601 date format');
+      expect(result.error?.message).toEqual('"end" must be in ISO 8601 date format');
     });
   });
 });
