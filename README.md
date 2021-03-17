@@ -9,11 +9,6 @@ When a user applies for a key, several things happen:
 - An email is sent via GovDelivery to the address the user provided that includes some combination of an api key, client id, and client secret.
 - A message is sent to Lighthouse Slack about the signup. Production signups go to `#feed-dx` and nonprod signups go to `#dev-signup-feed`. 
 
-## Initial Setup
-Run `npm run genfiles` to create all files for the generated/ folder. These are needed for linting to succeed. (Note: It's also needed for the build and testing, but the package.json is configured so it will automatically occur in those scenarios.)
-
-Follow instructions for 'Running Locally'.
-
 ## Running Locally
 This Express server is written in TypeScript and uses [Node v12+](https://nodejs.org/en/download/).
 
