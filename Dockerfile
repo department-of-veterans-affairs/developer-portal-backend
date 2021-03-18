@@ -4,15 +4,14 @@ FROM vasdvp/lighthouse-node-application-base:node12 AS base
 WORKDIR /home/node
 ENV NODE_ENV development
 
-# Set environment variable from the build arg so it's available in the docker image any time it runs
-# process.env.COMMIT_HASH will evaluate to this value any time the docker image is run (unless
-# someone overrides it, so don't do that)
-ARG COMMIT_HASH
-ENV COMMIT_HASH $COMMIT_HASH
-
 # Install app dependencies in a separate layer from source code, as these will change less often
 COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
+
+# Store the commit hash build argument in an environment variable
+ARG COMMIT_HASH
+ENV COMMIT_HASH $COMMIT_HASH
+
 # Add node module binaries (like jest) to path
 ENV PATH /home/node/node_modules/.bin:$PATH
 COPY --chown=node:node . .
