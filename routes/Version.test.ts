@@ -4,7 +4,7 @@ import versionHandler from './Version';
 const mockVersionService = {
   get commitHash() {
     return 'test commit hash';
-  }
+  },
 };
 
 describe('versionHandler', () => {
