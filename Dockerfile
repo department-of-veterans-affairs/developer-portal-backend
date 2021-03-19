@@ -8,7 +8,7 @@ ENV NODE_ENV development
 COPY --chown=node:node package*.json ./
 RUN npm install && npm cache clean --force
 
-# Store the commit hash build argument in an environment variable
+# Store the commit hash build argument in an environment variable for base
 ARG COMMIT_HASH
 ENV COMMIT_HASH $COMMIT_HASH
 
@@ -29,6 +29,10 @@ RUN openssl x509 \
   -in /etc/pki/ca-trust/source/anchors/VA-Internal-S2-RCA1-v1.cer \
   -out /home/node/va-internal.pem
 ENV NODE_EXTRA_CA_CERTS=/home/node/va-internal.pem
+
+# Store the commit hash build argument in an environment variable for production
+ARG COMMIT_HASH
+ENV COMMIT_HASH $COMMIT_HASH
 
 COPY --chown=node:node --from=base /home/node/bin bin
 COPY --chown=node:node --from=base /home/node/dist dist
