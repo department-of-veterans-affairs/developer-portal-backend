@@ -1,7 +1,6 @@
 import OktaService from './OktaService';
 import { OktaApplication } from '../types';
 import {
-  Client,
   OAuthApplication,
   OktaApplicationResponse,
   OktaPolicy,
@@ -9,9 +8,24 @@ import {
 } from '@okta/okta-sdk-nodejs';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
 
-const createOktaPolicyCollection: (...policies: OktaPolicy[]) => OktaPolicyCollection = (
+const scaffoldOktaPolicy = (id: string, name: string): OktaPolicy => ({
+  type: 'test',
+  id,
+  status: 'test',
+  name,
+  description: 'test',
+  priority: 1,
+  system: true,
+  conditions: {
+    clients: {
+      include: [],
+    },
+  },
+});
+
+const createOktaPolicyCollection = (
   ...policies: OktaPolicy[]
-) => {
+): OktaPolicyCollection => {
   const each = (iterator: (obj: OktaPolicy) => void | boolean): Promise<void> => {
     policies.forEach(iterator);
     return Promise.resolve();
@@ -55,25 +69,13 @@ describe('OktaService', () => {
       const spyListAuthServerPolicies = jest.spyOn(
         service.client,
         'listAuthorizationServerPolicies'
-      ) as jest.SpyInstance<OktaPolicyCollection, string[]>;
+      ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
       spyListAuthServerPolicies.mockImplementation(
         (authServerId: string) => {
-          const policy1 = {
-            id: `${authServerId}-1-policy`,
-            name: 'policy1',
-            conditions: { clients: { include: [] } },
-          };
-          const policy2 = {
-            id: `${authServerId}-policy`,
-            name: 'default',
-            conditions: { clients: { include: [] } },
-          };
-          const policy3 = {
-            id: `${authServerId}-3-policy`,
-            name: 'policy3',
-            conditions: { clients: { include: [] } },
-          };
-          return createOktaPolicyCollection(policy1, policy2, policy3);
+          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'default');
+          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
         });
     });
 
@@ -94,11 +96,15 @@ describe('OktaService', () => {
 
       const healthApiEndpoint = OKTA_AUTHZ_ENDPOINTS.health;
       const healthPolicyId = `${healthApiEndpoint}-policy`;
-      expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
-        id: healthPolicyId,
-        name: 'default',
-        conditions: { clients: { include: ['fakeid'] } },
-      });
+      expect(updateAuthPolicyMock).toHaveBeenCalledWith(
+        healthApiEndpoint,
+        healthPolicyId,
+        expect.objectContaining({
+          id: healthPolicyId,
+          name: 'default',
+          conditions: { clients: { include: ['fakeid'] } },
+        }),
+      );
 
       const communityCareApiEndpoint = OKTA_AUTHZ_ENDPOINTS.communityCare;
       const communityCarePolicyId = `${communityCareApiEndpoint}-policy`;
@@ -108,11 +114,11 @@ describe('OktaService', () => {
       expect(updateAuthPolicyMock).toHaveBeenCalledWith(
         communityCareApiEndpoint,
         communityCarePolicyId,
-        {
+        expect.objectContaining({
           id: communityCarePolicyId,
           name: 'default',
           conditions: { clients: { include: ['fakeid'] } },
-        },
+        }),
       );
 
       expect(resp).toEqual(appRes);
@@ -120,28 +126,16 @@ describe('OktaService', () => {
 
     it('throws error if there is no default policy', async () => {
       // we have to reset the list of policies to not include one with the 'default' name
-      const spyListAuthServerPolicies = jest.spyOn<Client, string>(
+      const spyListAuthServerPolicies = jest.spyOn(
         service.client,
         'listAuthorizationServerPolicies'
-      ) as jest.SpyInstance<Client, string[]>;
+      ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
       spyListAuthServerPolicies.mockImplementation(
         (authServerId: string) => {
-          const policy1 = {
-            id: `${authServerId}-1-policy`,
-            name: 'policy1',
-            conditions: { clients: { include: [] } },
-          };
-          const policy2 = {
-            id: `${authServerId}-policy`,
-            name: 'policy2',
-            conditions: { clients: { include: [] } },
-          };
-          const policy3 = {
-            id: `${authServerId}-3-policy`,
-            name: 'policy3',
-            conditions: { clients: { include: [] } },
-          };
-          return createOktaPolicyCollection(policy1, policy2, policy3);
+          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'policy2');
+          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
         });
 
       const application: OktaApplication = {
@@ -178,11 +172,15 @@ describe('OktaService', () => {
 
         // only called for the health endpoint
         expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
-        expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
-          id: healthPolicyId,
-          name: 'default',
-          conditions: { clients: { include: ['fakeid'] } },
-        });
+        expect(updateAuthPolicyMock).toHaveBeenCalledWith(
+          healthApiEndpoint,
+          healthPolicyId,
+          expect.objectContaining({
+            id: healthPolicyId,
+            name: 'default',
+            conditions: { clients: { include: ['fakeid'] } },
+          }),
+        );
 
         expect(resp).toEqual(appRes);
       });
@@ -207,11 +205,15 @@ describe('OktaService', () => {
 
         // only called for the health endpoint
         expect(updateAuthPolicyMock).toHaveBeenCalledTimes(1);
-        expect(updateAuthPolicyMock).toHaveBeenCalledWith(healthApiEndpoint, healthPolicyId, {
-          id: healthPolicyId,
-          name: 'default',
-          conditions: { clients: { include: ['fakeid'] } },
-        });
+        expect(updateAuthPolicyMock).toHaveBeenCalledWith(
+          healthApiEndpoint,
+          healthPolicyId,
+          expect.objectContaining({
+            id: healthPolicyId,
+            name: 'default',
+            conditions: { clients: { include: ['fakeid'] } },
+          }),
+        );
 
         expect(resp).toEqual(appRes);
       });
