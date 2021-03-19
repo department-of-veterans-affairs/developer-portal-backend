@@ -13,7 +13,6 @@ import { DynamoConfig, KongConfig } from './types';
 import SlackService from './services/SlackService';
 import DynamoService from './services/DynamoService';
 import SignupMetricsService from './services/SignupMetricsService';
-import VersionService from './services/VersionService';
 import configureRoutes from './routes';
 import { DevPortalError } from './models/DevPortalError';
 
@@ -173,7 +172,6 @@ export default function configureApp(): express.Application {
   const govDelivery = configureGovDeliveryService();
   const slack = configureSlackService();
   const signups = new SignupMetricsService(dynamo);
-  const version = new VersionService();
 
   // NEW ROUTES
   configureRoutes(app, {
@@ -183,7 +181,6 @@ export default function configureApp(): express.Application {
     okta,
     signups,
     slack,
-    version,
   });
 
   app.use(Sentry.Handlers.errorHandler());

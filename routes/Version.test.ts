@@ -1,12 +1,6 @@
 import { Request, Response } from 'express';
 import versionHandler from './Version';
 
-const mockVersionService = {
-  get commitHash() {
-    return 'test commit hash';
-  },
-};
-
 describe('versionHandler', () => {
 
   const mockJson = jest.fn();
@@ -22,7 +16,7 @@ describe('versionHandler', () => {
   });
 
   it('returns correct commit hash', () => {
-    const handler = versionHandler(mockVersionService);
+    const handler = versionHandler();
     handler(mockReq, mockRes, mockNext);
 
     expect(mockJson).toHaveBeenCalledWith({ commitHash: 'test commit hash' });
