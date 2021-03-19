@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "start": "node dist/server",
     "watch": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "watch:debug": "nodemon --watch '*.ts' --exec 'node --require ts-node/register --inspect-brk=0.0.0.0:9229 server.ts'",
@@ -13,9 +12,6 @@
     "test-ci": "jest --coverage",
     "test:watch": "jest --watchAll",
     "build": "tsc"
-  },
-  "resolutions": {
-    "react-dev-utils": "11.0.4"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
