@@ -51,7 +51,7 @@ describe('ConsumerReportService', () => {
 
       mockScan.mockResolvedValue(mockedUsers);
 
-      const report = await consumerReportServ.generateCSVReport({writeToDisk: false});
+      const report = await consumerReportServ.generateCSVReport({writeToDisk: false, apiList: []});
       expect(report).toContain('fbag@hobbiton.com');
       expect(report).toContain('wizz@higherbeings.com');
     });
