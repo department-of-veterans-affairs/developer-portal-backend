@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "node json-mocks",
     "lint": "eslint --ext .js,.ts ."
   },
+  "resolutions": {
+    "react-dev-utils": "11.0.4"
+  },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^7.22.0",
     "node-mock-server": "^0.25.4"
   }
 }
