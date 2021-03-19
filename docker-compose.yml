@@ -9,7 +9,7 @@ services:
       # - 9229:9229
     volumes:
       - .:/home/node
-      # Ignore dist folder - we don't need it and if we do a build, it will be overwritten anyway
+      # Ignore dist folder from host. We don't need it. If we do a build it will be overwritten
       - /home/node/dist
     working_dir: /home/node
     command: npm run ${RUN_COMMAND:-watch}
@@ -93,8 +93,6 @@ services:
     image: amazon/dynamodb-local
     ports:
       - 8080:8000
-      # Debug port
-      - 9229:9229
   dynamodb-migration:
     image: developer-portal-backend
     env_file: '.env'

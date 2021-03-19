@@ -16,5 +16,5 @@ services:
     image: developer-portal-backend
     command: npm start
     volumes:
-      # Ignore node_modules
+      # Ignore node_modules on the host machine
       - /home/node/node_modules

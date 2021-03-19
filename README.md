@@ -53,7 +53,7 @@ curl --location --request POST 'https://lighthouseva.slack.com/api/auth.test' \
 2. Set `REACT_APP_DEVELOPER_PORTAL_SELF_SERVICE_URL` in the developer-portal `.env.local` to where your Developer Portal Backend is running (default is `http://localhost:9999`)
 
 ## Development
-There are two docker compose files. `docker-compose.yml` is the base. The file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. A developer can set a RUN_COMMAND in their `.env` file to whatever npm command they would like to run (for example: watch:debug)
+There are two docker compose files. `docker-compose.yml` is the base. The file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default watch commmand has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. A developer can set a RUN_COMMAND in their `.env` file to whatever npm command they would like to run (for example: watch:debug)
 
 If a developer wants to run the built project in their local environment, the `docker-compose.build.yml` has been provided. This builds an image using the Dockerfile and runs it with the stand `npm start` command. Note that with this setup, developers will need to rebuild to see their changes, but this is the most production-like setup. To use this docker compose, run `docker-compose -f docker-compose.yml docker-compose.build.yml up`.
 
