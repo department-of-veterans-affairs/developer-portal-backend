@@ -7,14 +7,16 @@ version: '3.7'
 services:
   app:
     build:
-      context: .
-      target: base
+      target: built
       args:
         # When the environment variable COMMIT_HASH is defined during the build,
         # docker-compose will pass it as a build-argument to the Dockerfile
         COMMIT_HASH: $COMMIT_HASH
-    image: developer-portal-backend
+    image: developer-portal-backend-built
     command: npm start
-    volumes:
-      # Ignore node_modules on the host machine
-      - /home/node/node_modules
+
+  kong-create-admin:
+    image: developer-portal-backend-built
+
+  dynamodb-migration:
+    image: developer-portal-backend-built

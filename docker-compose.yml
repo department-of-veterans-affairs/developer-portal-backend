@@ -2,16 +2,20 @@ version: '3.7'
 
 services:
   app:
-    image: vasdvp/lighthouse-node-application-base:node12
+    build:
+      context: .
+      target: base
+    image: developer-portal-backend-base
     ports:
       - 9999:9999
-      # Debug port
-      # - 9229:9229
+      # debug port
+      - 9229:9229
     volumes:
       - .:/home/node
-      # Ignore dist folder from host. We don't need it. If we do a build it will be overwritten
+      # ignore dist folder - if we need to do a build we won't use it anyway
       - /home/node/dist
-    working_dir: /home/node
+      # ignore node_modules on the host machine
+      - /home/node/node_modules
     command: npm run ${RUN_COMMAND:-watch}
     depends_on:
       - kong
@@ -28,7 +32,7 @@ services:
       - KONG_PG_HOST=kong-database
       - KONG_PG_DATABASE=kong
       - KONG_PG_USER=kong
-      - KONG_PG_PASSWORD=kong  
+      - KONG_PG_PASSWORD=kong
     restart: on-failure
 
   kong-migrations-up:
@@ -82,7 +86,7 @@ services:
     restart: on-failure
 
   kong-create-admin:
-    image: developer-portal-backend
+    image: developer-portal-backend-base
     env_file: '.env'
     depends_on:
       - kong-migrations
@@ -94,7 +98,7 @@ services:
     ports:
       - 8080:8000
   dynamodb-migration:
-    image: developer-portal-backend
+    image: developer-portal-backend-base
     env_file: '.env'
     depends_on:
       - dynamodb

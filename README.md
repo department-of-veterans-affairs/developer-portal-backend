@@ -34,6 +34,7 @@ SUPPORT_EMAIL=gandalf@istari.net
 OKTA_HOST=http://mock:3001/services/okta
 OKTA_TOKEN=123
 DEVELOPER_PORTAL_URL=http://localhost:3001
+COMMIT_HASH=local dev
 ```
 
 With a `.env` in place, use `docker-compose up` to run the application.
