@@ -74,7 +74,13 @@ describe('Application', () => {
     } as unknown as OktaService;
 
     it('assigns a client_id, client_secret, and oktaID', async () => {
-      const application = new Application({ ... applicationSettings, applicationType: 'web' });
+      const application = new Application(
+        {
+          ...applicationSettings,
+          applicationType: 'web',
+        },
+        oktaUser,
+      );
 
       const result = await application.createOktaApplication(mockOkta);
 
