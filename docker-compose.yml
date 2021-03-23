@@ -5,7 +5,7 @@ services:
     build:
       context: .
       target: base
-    image: developer-portal-backend
+    image: developer-portal-backend-base
     ports:
       - 9999:9999
       # Debug port
@@ -13,10 +13,11 @@ services:
     volumes:
       # map local to remote folder, exclude node_modules
       - .:/home/node
+      # ignore node_modules on the host machine
       - /home/node/node_modules
+      # ignore dist folder - if we need to do a build we won't use it anyway
+      - /home/node/dist
     command: npm run ${RUN_COMMAND:-watch}
-    # Debug command
-    # command: npm run watch:debug
     depends_on:
       - kong
     restart: on-failure
@@ -32,7 +33,7 @@ services:
       - KONG_PG_HOST=kong-database
       - KONG_PG_DATABASE=kong
       - KONG_PG_USER=kong
-      - KONG_PG_PASSWORD=kong  
+      - KONG_PG_PASSWORD=kong
     restart: on-failure
 
   kong-migrations-up:
@@ -86,7 +87,7 @@ services:
     restart: on-failure
 
   kong-create-admin:
-    image: developer-portal-backend
+    image: developer-portal-backend-base
     env_file: '.env'
     depends_on:
       - kong-migrations
@@ -98,7 +99,7 @@ services:
     ports:
       - 8080:8000
   dynamodb-migration:
-    image: developer-portal-backend
+    image: developer-portal-backend-base
     env_file: '.env'
     depends_on:
       - dynamodb

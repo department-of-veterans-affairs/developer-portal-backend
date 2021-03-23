@@ -53,7 +53,12 @@ curl --location --request POST 'https://lighthouseva.slack.com/api/auth.test' \
 2. Set `REACT_APP_DEVELOPER_PORTAL_SELF_SERVICE_URL` in the developer-portal `.env.local` to where your Developer Portal Backend is running (default is `http://localhost:9999`)
 
 ## Development
-The `docker-compose.yml` file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default start commmand also has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. 
+There are two docker compose files. `docker-compose.yml` is the base. The file defines volumes in the app container so that changes made to the code on the host are picked up inside the container. The default watch commmand has the server hot-reload on changes, so it's convenient to leave the containers running in the background while developing. A developer can set a RUN_COMMAND in their `.env` file to whatever npm command they would like to run (for example: watch:debug)
+
+If a developer wants to run the built project in their local environment, the `docker-compose.build.yml` has been provided. This builds an image using the Dockerfile and runs it with the stand `npm start` command. Developers will need to rebuild to see their changes with this file, but `docker-compose.build.yml` gives the most production-like setup. Developers likely won't want to do their main development with this file because they'll need to consistently rebuild the container. However, this docker-compose being more production-like means it's a good candidate for final testing before submitting a PR. To use this docker compose, run `docker-compose -f docker-compose.yml -f docker-compose.build.yml up`.
+
+For information on overriding docker-compose files checking this link:
+- https://docs.docker.com/compose/extends/
 
 Tests can be run with `npm test` or `npx jest`. The most _correct_ way to run tests is inside the container. To do that, exec into the running app container with `docker-compose exec app bash`. As an editorial note, this author finds running tests to be faster on the host machine. You can npm install and run `npx jest` on the host, but non-linux users need to be careful about modifications to resulting `package-lock.json`.
 
