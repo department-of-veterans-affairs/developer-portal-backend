@@ -14,9 +14,11 @@ WORKDIR /home/node
 ENV NODE_ENV development
 # copy files from base stage
 COPY --chown=node:node --from=base /home/node .
-# add node module binaries (like jest) to path
+# store the commit hash build argument in an environment variable for base
+ARG COMMIT_HASH
+ENV COMMIT_HASH $COMMIT_HASH
+# Add node module binaries (like jest) to path
 ENV PATH /home/node/node_modules/.bin:$PATH
-COPY --chown=node:node . .
 RUN npm run build
 
 # PROD STAGE - removed dev dependencies and create a container for production usage
@@ -29,6 +31,9 @@ RUN openssl x509 \
   -in /etc/pki/ca-trust/source/anchors/VA-Internal-S2-RCA1-v1.cer \
   -out /home/node/va-internal.pem
 ENV NODE_EXTRA_CA_CERTS=/home/node/va-internal.pem
+# store the commit hash build argument in an environment variable for prod
+ARG COMMIT_HASH
+ENV COMMIT_HASH $COMMIT_HASH
 # copy files from built stage
 COPY --chown=node:node --from=built /home/node/bin bin
 COPY --chown=node:node --from=built /home/node/dist dist
