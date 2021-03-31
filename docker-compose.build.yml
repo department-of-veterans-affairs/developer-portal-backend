@@ -1,0 +1,22 @@
+version: '3.7'
+
+# This docker-compose is meant to be used in conjunction with the main docker-compose.yml in this
+# respository. To use this docker-compose and run a built version of the app, run:
+# `docker-compose -f docker-compose.yml -f docker-compose.build.yml up`
+
+services:
+  app:
+    build:
+      target: built
+      args:
+        # When the environment variable COMMIT_HASH is defined during the build,
+        # docker-compose will pass it as a build-argument to the Dockerfile
+        COMMIT_HASH: $COMMIT_HASH
+    image: developer-portal-backend-built
+    command: npm start
+    
+  kong-create-admin:
+    image: developer-portal-backend-built
+
+  dynamodb-migration:
+    image: developer-portal-backend-built
