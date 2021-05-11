@@ -4,6 +4,7 @@ import ObjectsToCsv from 'objects-to-csv';
 
 interface CSVReportOptions {
   apiList: string[];
+  oktaApplicationIdList: string[];
   writeToDisk: boolean;
 }
 
@@ -15,9 +16,12 @@ export default class ConsumerReportService {
     this.consumerRepository = consumerRepository;
   }
 
-  public async generateCSVReport({apiList, writeToDisk}: CSVReportOptions): Promise<string> {
+  public async generateCSVReport({apiList, oktaApplicationIdList, writeToDisk}: CSVReportOptions): Promise<string> {
 
-    const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
+    const consumers: User[] = await this.consumerRepository.getConsumers(
+      apiList,
+      oktaApplicationIdList,
+    );
     
     const data = consumers.map(consumer => (
       {

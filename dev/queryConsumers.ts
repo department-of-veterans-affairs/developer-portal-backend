@@ -5,10 +5,18 @@ import DynamoService from '../services/DynamoService';
 import ConsumerRepository from '../repositories/ConsumerRepository';
 import ConsumerReportService from '../services/ConsumerReportService';
 
+const parseArray = (array: string): string[] => array ? array.split(',') : [];
+
 // CLI Configuration
 const cliOptions: OptionDefinition[] = [
   {
     name: 'apis',
+    alias: 'a',
+    defaultValue: '',
+  },
+  {
+    name: 'oktaApplicationIds',
+    alias: 'i',
     defaultValue: '',
   }
 ];
@@ -16,6 +24,7 @@ const cliOptions: OptionDefinition[] = [
 const printArgs = (args: CommandLineOptions) => {
   console.log('\nArguments:');
   console.log(`   apis: ${args.apis}`);
+  console.log(`   okta application ids: ${args.oktaApplicationIds}`);
 };
 
 const args: CommandLineOptions = commandLineArgs(cliOptions);
@@ -41,12 +50,18 @@ const dynamoService = new DynamoService({
 const consumerRepo = new ConsumerRepository(dynamoService);
 const consumerReportService = new ConsumerReportService(consumerRepo);
 
-const parsedApis: string[] = args.apis ? args.apis.split(',') : [];
+const csvReportOptions = {
+  apiList: parseArray(args.apis),
+  oktaApplicationIdList: parseArray(args.oktaApplicationIds),
+  writeToDisk: true,
+}
 
-consumerReportService.generateCSVReport({apiList: parsedApis, writeToDisk: true})
+consumerReportService.generateCSVReport(csvReportOptions)
   .then((report: string) => {
+    console.log('====================');
     console.log(report);
   })
   .catch((error) => {
+    console.log('====================');
     console.log(error);
   });

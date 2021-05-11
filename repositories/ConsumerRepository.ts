@@ -3,6 +3,57 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoService from '../services/DynamoService';
 import User, { UserConfig } from '../models/User';
 
+interface OktaExpressions {
+  filterExpression: string;
+  expressionAttributeValues: Record<string, string>;
+}
+
+enum FilterType {
+  CONTAINS,
+  EQUALS,
+}
+
+function addFilterToQueryIfApplicable(
+  filter: string[],
+  fieldName: string,
+  oktaQuery: OktaExpressions,
+  filterType: FilterType = FilterType.CONTAINS,
+): void {
+
+  if (!filter || filter.length === 0) {
+    return;
+  }
+
+  // Add an 'and' keyword if a filter has already been added
+  if (oktaQuery.filterExpression) {
+    oktaQuery.filterExpression += ' and ';
+  }
+
+  oktaQuery.filterExpression += '(';
+
+  filter.forEach((item, index) => {
+    const varName = `:${fieldName}_${item}`;
+    oktaQuery.expressionAttributeValues[varName] = item;
+  
+    // Build filter expression - only prefix with `or` if not the first element in the array
+    if (index > 0) {
+      oktaQuery.filterExpression += ' or ';
+    }
+
+    switch(filterType) {
+      case FilterType.EQUALS:
+        oktaQuery.filterExpression += `${fieldName} = ${varName}`;
+        break;
+      case FilterType.CONTAINS:
+      default:
+        oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
+    }
+    
+  });
+
+  oktaQuery.filterExpression += ')';
+}
+
 export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || '';
   private dynamoService: DynamoService;
@@ -25,36 +76,37 @@ export default class ConsumerRepository {
     this.dynamoService = dynamoService;
   }
 
-  public async getConsumers(apiFilter: string[] = []): Promise<User[]> {
+  public async getConsumers(
+    apiFilter: string[] = [],
+    oktaApplicationIdFilter: string[] = [],
+  ): Promise<User[]> {
 
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
     };
 
-    // Build the filter expression and update params
-    if (apiFilter.length > 0) {
+    const oktaQuery: OktaExpressions = {
+      filterExpression: '',
+      expressionAttributeValues: {},
+    };
 
-      let filterExpression = '';
-      const expressionAttributeValues = {};
+    addFilterToQueryIfApplicable(apiFilter, 'apis', oktaQuery);
+    addFilterToQueryIfApplicable(
+      oktaApplicationIdFilter,
+      'okta_application_id',
+      oktaQuery,
+      FilterType.EQUALS,
+    );
 
-      apiFilter.forEach((api, index) => {
-        const varName = `:api_${api}`;
-        expressionAttributeValues[varName] = api;
-      
-        // Build filter expression - only prefix with `or` if not the first element in the array
-        if (index > 0) {
-          filterExpression += ' or ';
-        }
-        filterExpression += `contains(apis, ${varName})`;
-      });
-
+    // validate there is an expression - if there are no arguments it will be blank
+    if (oktaQuery.filterExpression) {
       params = {
         ...params,
-        FilterExpression: filterExpression,
-        ExpressionAttributeValues: expressionAttributeValues,
+        FilterExpression: oktaQuery.filterExpression,
+        ExpressionAttributeValues: oktaQuery.expressionAttributeValues,
       };
     }
-   
+
     const items: DocumentClient.AttributeMap[] =
       await this.dynamoService.scan(
         params.TableName, 

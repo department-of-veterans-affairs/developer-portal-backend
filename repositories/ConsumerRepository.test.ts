@@ -48,7 +48,7 @@ describe('ConsumerRepository', ()=> {
   });
 
   describe('get users', () => {
-    it('returns all users when no api list is given', async () => {
+    it('returns all users when no args are given', async () => {
       mockScan.mockResolvedValue(mockUserList);
 
       const users: User[] = await consumerRepo.getConsumers();
@@ -56,13 +56,13 @@ describe('ConsumerRepository', ()=> {
       expect(users).toEqual(expectedMockedUsers);
     });
 
-    it('should call dynamo scan method with proper params', async () => { 
+    it('should call dynamo scan with proper params with only api list given', async () => {
       mockScan.mockResolvedValue([mockedUsersAB]);  
       
       const tableName = process.env.DYNAMODB_TABLE;
       const projectionExp = 'email, firstName, lastName, apis';
-      const expressionAttributeValues = {":api_ab": "ab"};
-      const filterExpression = "contains(apis, :api_ab)";
+      const expressionAttributeValues = {":apis_ab": "ab"};
+      const filterExpression = "(contains(apis, :apis_ab))";
 
       const apiList: string[] = ['ab'];
       await consumerRepo.getConsumers(apiList);
@@ -74,8 +74,65 @@ describe('ConsumerRepository', ()=> {
           {
             ExpressionAttributeValues: expressionAttributeValues,
             FilterExpression: filterExpression,
-          });
+          }
+        );
     });
+
+    it(
+      'should call dynamo scan with proper prarams with only okta application id list given',
+      async () => { 
+        mockScan.mockResolvedValue([mockedUsersAB]);  
+        
+        const tableName = process.env.DYNAMODB_TABLE;
+        const projectionExp = 'email, firstName, lastName, apis';
+        const expressionAttributeValues = {":okta_application_id_my-okta-id": "my-okta-id"};
+        const filterExpression = "(okta_application_id = :okta_application_id_my-okta-id)";
+
+        const oktaApplicationIdList: string[] = ['my-okta-id'];
+        await consumerRepo.getConsumers(undefined, oktaApplicationIdList);
+
+        expect(mockScan)
+          .toHaveBeenCalledWith(
+            tableName, 
+            projectionExp, 
+            {
+              ExpressionAttributeValues: expressionAttributeValues,
+              FilterExpression: filterExpression,
+            }
+          );
+      }
+    );
+
+    it(
+      'should call dynamo scan with proper prarams with all arguments given',
+      async () => { 
+        mockScan.mockResolvedValue([mockedUsersAB]);  
+        
+        const tableName = process.env.DYNAMODB_TABLE;
+        const projectionExp = 'email, firstName, lastName, apis';
+        const expressionAttributeValues = {
+          ':apis_ab': 'ab',
+          ':okta_application_id_myid': 'myid',
+        };
+        const filterExpression =
+          '(contains(apis, :apis_ab)) and ' +
+          '(okta_application_id = :okta_application_id_myid)';
+
+        const apiList: string[] = ['ab'];
+        const oktaApplicationIdList: string[] = ['myid'];
+        await consumerRepo.getConsumers(apiList, oktaApplicationIdList);
+
+        expect(mockScan)
+          .toHaveBeenCalledWith(
+            tableName,
+            projectionExp,
+            {
+              ExpressionAttributeValues: expressionAttributeValues,
+              FilterExpression: filterExpression,
+            }
+          );
+      }
+    );
   });
 
 });
