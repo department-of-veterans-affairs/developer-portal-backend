@@ -41,12 +41,12 @@ function addFilterToQueryIfApplicable(
     }
 
     switch(filterType) {
-      case FilterType.EQUALS:
-        oktaQuery.filterExpression += `${fieldName} = ${varName}`;
-        break;
-      case FilterType.CONTAINS:
-      default:
-        oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
+    case FilterType.EQUALS:
+      oktaQuery.filterExpression += `${fieldName} = ${varName}`;
+      break;
+    case FilterType.CONTAINS:
+    default:
+      oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
     }
     
   });
