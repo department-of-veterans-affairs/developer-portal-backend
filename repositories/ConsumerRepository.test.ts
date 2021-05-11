@@ -61,8 +61,8 @@ describe('ConsumerRepository', ()=> {
       
       const tableName = process.env.DYNAMODB_TABLE;
       const projectionExp = 'email, firstName, lastName, apis';
-      const expressionAttributeValues = {":apis_ab": "ab"};
-      const filterExpression = "(contains(apis, :apis_ab))";
+      const expressionAttributeValues = {":apis_0": "ab"};
+      const filterExpression = "(contains(apis, :apis_0))";
 
       const apiList: string[] = ['ab'];
       await consumerRepo.getConsumers(apiList);
@@ -85,8 +85,8 @@ describe('ConsumerRepository', ()=> {
         
         const tableName = process.env.DYNAMODB_TABLE;
         const projectionExp = 'email, firstName, lastName, apis';
-        const expressionAttributeValues = {":okta_application_id_my-okta-id": "my-okta-id"};
-        const filterExpression = "(okta_application_id = :okta_application_id_my-okta-id)";
+        const expressionAttributeValues = {":okta_application_id_0": "my-okta-id"};
+        const filterExpression = "(okta_application_id = :okta_application_id_0)";
 
         const oktaApplicationIdList: string[] = ['my-okta-id'];
         await consumerRepo.getConsumers(undefined, oktaApplicationIdList);
@@ -111,12 +111,12 @@ describe('ConsumerRepository', ()=> {
         const tableName = process.env.DYNAMODB_TABLE;
         const projectionExp = 'email, firstName, lastName, apis';
         const expressionAttributeValues = {
-          ':apis_ab': 'ab',
-          ':okta_application_id_myid': 'myid',
+          ':apis_0': 'ab',
+          ':okta_application_id_0': 'myid',
         };
         const filterExpression =
-          '(contains(apis, :apis_ab)) and ' +
-          '(okta_application_id = :okta_application_id_myid)';
+          '(contains(apis, :apis_0)) and ' +
+          '(okta_application_id = :okta_application_id_0)';
 
         const apiList: string[] = ['ab'];
         const oktaApplicationIdList: string[] = ['myid'];

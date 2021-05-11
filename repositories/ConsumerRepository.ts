@@ -32,7 +32,7 @@ function addFilterToQueryIfApplicable(
   oktaQuery.filterExpression += '(';
 
   filter.forEach((item, index) => {
-    const varName = `:${fieldName}_${item}`;
+    const varName = `:${fieldName}_${index}`;
     oktaQuery.expressionAttributeValues[varName] = item;
   
     // Build filter expression - only prefix with `or` if not the first element in the array
