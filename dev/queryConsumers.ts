@@ -3,9 +3,29 @@ import commandLineArgs, { OptionDefinition, CommandLineOptions } from 'command-l
 
 import DynamoService from '../services/DynamoService';
 import ConsumerRepository from '../repositories/ConsumerRepository';
-import ConsumerReportService from '../services/ConsumerReportService';
+import ConsumerReportService, { OutputType } from '../services/ConsumerReportService';
 
 const parseArray = (array: string): string[] => array ? array.split(',') : [];
+// Brute force check that the string matches an output type - maybe a better way to do this
+const isCsvOutputType = (str: string) => (
+  str === 'email' ||
+  str === 'firstName' ||
+  str === 'lastName' ||
+  str === 'apis'
+);
+const parseOutputTypeArray = (array: string): OutputType[] => {
+  const stringArray = parseArray(array);
+  const outputTypes: OutputType[] = [];
+  stringArray.forEach((item) => {
+    if (isCsvOutputType(item)) {
+      outputTypes.push(item as OutputType);
+    } else {
+      console.error(`${item} is not a valid csv output option! It will be ignored`);
+    }
+  });
+
+  return outputTypes;
+}
 
 // CLI Configuration
 const cliOptions: OptionDefinition[] = [
@@ -18,7 +38,12 @@ const cliOptions: OptionDefinition[] = [
     name: 'oktaApplicationIds',
     alias: 'i',
     defaultValue: '',
-  }
+  },
+  {
+    name: 'fields',
+    alias: 'f',
+    defaultValue: 'email,firstName,lastName,apis',
+  },
 ];
 
 const printArgs = (args: CommandLineOptions) => {
@@ -54,6 +79,7 @@ const csvReportOptions = {
   apiList: parseArray(args.apis),
   oktaApplicationIdList: parseArray(args.oktaApplicationIds),
   writeToDisk: true,
+  fields: parseOutputTypeArray(args.fields),
 }
 
 consumerReportService.generateCSVReport(csvReportOptions)

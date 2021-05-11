@@ -2,7 +2,7 @@ import 'jest';
 import User from '../models/User';
 import DynamoService from './DynamoService';
 import ConsumerRepository from '../repositories/ConsumerRepository';
-import ConsumerReportService from './ConsumerReportService';
+import ConsumerReportService, { OutputType } from './ConsumerReportService';
 
 const mockedUsersAB: User[] = [
   new User({
@@ -47,11 +47,16 @@ describe('ConsumerReportService', () => {
   });
 
   describe('generate csv report', () => {
-    it('returns a csv of all users when no api list is given', async () => {
-
+    it('returns a csv of all users when no arguments are given', async () => {
+      const fields: OutputType[] = ['email', 'firstName', 'lastName', 'apis'];
       mockScan.mockResolvedValue(mockedUsers);
 
-      const report = await consumerReportServ.generateCSVReport({writeToDisk: false, apiList: []});
+      const report = await consumerReportServ.generateCSVReport({
+        writeToDisk: false,
+        apiList: [],
+        oktaApplicationIdList: [],
+        fields,
+      });
       expect(report).toContain('fbag@hobbiton.com');
       expect(report).toContain('wizz@higherbeings.com');
     });

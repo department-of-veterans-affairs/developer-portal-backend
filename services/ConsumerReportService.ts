@@ -2,10 +2,13 @@ import User from '../models/User';
 import ConsumerRepository from '../repositories/ConsumerRepository';
 import ObjectsToCsv from 'objects-to-csv';
 
+export type OutputType = 'email' | 'firstName' | 'lastName' | 'apis';
+
 interface CSVReportOptions {
   apiList: string[];
   oktaApplicationIdList: string[];
   writeToDisk: boolean;
+  fields: OutputType[];
 }
 
 export default class ConsumerReportService {
@@ -16,25 +19,39 @@ export default class ConsumerReportService {
     this.consumerRepository = consumerRepository;
   }
 
-  public async generateCSVReport({apiList, oktaApplicationIdList, writeToDisk}: CSVReportOptions): Promise<string> {
-
+  public async generateCSVReport(options: CSVReportOptions): Promise<string> {
+    const { apiList, oktaApplicationIdList, fields } = options;
+    
     const consumers: User[] = await this.consumerRepository.getConsumers(
       apiList,
       oktaApplicationIdList,
     );
-    
-    const data = consumers.map(consumer => (
-      {
-        email: consumer.email,
-        first_Name: consumer.firstName,
-        last_Name: consumer.lastName,
-        APIs: consumer.apis,
-      }
-    ));
+
+    const data = consumers.map(consumer => {
+      const obj: Record<string, unknown> = {};
+      fields.forEach((field) => {
+        switch(field) {
+        case 'email':
+          obj.email = consumer.email;
+          break;
+        case 'firstName':
+          obj.first_Name = consumer.firstName;
+          break;
+        case 'lastName':
+          obj.last_Name = consumer.lastName;
+          break;
+        case 'apis':
+          obj.APIs = consumer.apis;
+          break;
+        }
+      });
+
+      return obj;
+    });
 
     const csv = new ObjectsToCsv(data);
       
-    if (writeToDisk) {
+    if (options.writeToDisk) {
       // Save to file:
       await csv.toDisk('./consumer-report.csv');
     }
