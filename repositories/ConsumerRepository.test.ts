@@ -1,10 +1,10 @@
 import 'jest';
 import DynamoService from '../services/DynamoService';
 import ConsumerRepository from './ConsumerRepository';
-import User from '../models/User';
+import { UserDynamoItem } from '../models/User';
 
-const mockUserList: User[] = [
-  new User({
+const mockUserList: UserDynamoItem[] = [
+  {
     firstName: 'Frodo',
     lastName: 'Baggins',
     organization: 'The Fellowship',
@@ -12,10 +12,12 @@ const mockUserList: User[] = [
     apis: 'ab',
     description: 'super chill',
     oAuthRedirectURI: 'http://elvish-swords.com',
-    oAuthApplicationType: '',
-    termsOfService: true,
-  }),
-  new User({
+    tosAccepted: true,
+    createdAt: '1234567890',
+    okta_application_id: 'okta-id',
+    okta_client_id: 'okta-client-id',
+  },
+  {
     firstName: 'Gandalf',
     lastName: 'Gray',
     organization: 'The Fellowship',
@@ -23,16 +25,14 @@ const mockUserList: User[] = [
     apis: 'va,xz,dx',
     description: 'super cool',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
-    oAuthApplicationType: '',
-    termsOfService: true,
-  }),
+    tosAccepted: true,
+    createdAt: '1234567890',
+  },
 ];
 
-const mockedUsersAB: User = mockUserList[0];
+const mockedUsersAB: UserDynamoItem = mockUserList[0];
 
-const expectedMockedUsers: User[] = Array.from(mockUserList);
-expectedMockedUsers[0].createdAt = expect.any(Date) as Date;
-expectedMockedUsers[1].createdAt = expect.any(Date) as Date;
+const expectedMockedUsers: UserDynamoItem[] = Array.from(mockUserList);
 
 describe('ConsumerRepository', ()=> {
   const mockScan = jest.fn();
@@ -51,7 +51,7 @@ describe('ConsumerRepository', ()=> {
     it('returns all users when no args are given', async () => {
       mockScan.mockResolvedValue(mockUserList);
 
-      const users: User[] = await consumerRepo.getConsumers();
+      const users: UserDynamoItem[] = await consumerRepo.getDynamoConsumers();
 
       expect(users).toEqual(expectedMockedUsers);
     });
@@ -60,12 +60,12 @@ describe('ConsumerRepository', ()=> {
       mockScan.mockResolvedValue([mockedUsersAB]);  
       
       const tableName = process.env.DYNAMODB_TABLE;
-      const projectionExp = 'email, firstName, lastName, apis';
+      const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
       const expressionAttributeValues = {":apis_0": "ab"};
       const filterExpression = "(contains(apis, :apis_0))";
 
       const apiList: string[] = ['ab'];
-      await consumerRepo.getConsumers(apiList);
+      await consumerRepo.getDynamoConsumers(apiList);
 
       expect(mockScan)
         .toHaveBeenCalledWith(
@@ -84,12 +84,12 @@ describe('ConsumerRepository', ()=> {
         mockScan.mockResolvedValue([mockedUsersAB]);  
         
         const tableName = process.env.DYNAMODB_TABLE;
-        const projectionExp = 'email, firstName, lastName, apis';
+        const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
         const expressionAttributeValues = {":okta_application_id_0": "my-okta-id"};
         const filterExpression = "(okta_application_id = :okta_application_id_0)";
 
         const oktaApplicationIdList: string[] = ['my-okta-id'];
-        await consumerRepo.getConsumers(undefined, oktaApplicationIdList);
+        await consumerRepo.getDynamoConsumers(undefined, oktaApplicationIdList);
 
         expect(mockScan)
           .toHaveBeenCalledWith(
@@ -109,7 +109,7 @@ describe('ConsumerRepository', ()=> {
         mockScan.mockResolvedValue([mockedUsersAB]);  
         
         const tableName = process.env.DYNAMODB_TABLE;
-        const projectionExp = 'email, firstName, lastName, apis';
+        const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
         const expressionAttributeValues = {
           ':apis_0': 'ab',
           ':okta_application_id_0': 'myid',
@@ -120,7 +120,7 @@ describe('ConsumerRepository', ()=> {
 
         const apiList: string[] = ['ab'];
         const oktaApplicationIdList: string[] = ['myid'];
-        await consumerRepo.getConsumers(apiList, oktaApplicationIdList);
+        await consumerRepo.getDynamoConsumers(apiList, oktaApplicationIdList);
 
         expect(mockScan)
           .toHaveBeenCalledWith(
@@ -136,3 +136,4 @@ describe('ConsumerRepository', ()=> {
   });
 
 });
+

@@ -11,7 +11,8 @@ const isCsvOutputType = (str: string) => (
   str === 'email' ||
   str === 'firstName' ||
   str === 'lastName' ||
-  str === 'apis'
+  str === 'apis' ||
+  str === 'oktaid'
 );
 const parseOutputTypeArray = (array: string): OutputType[] => {
   const stringArray = parseArray(array);
@@ -50,6 +51,7 @@ const printArgs = (args: CommandLineOptions) => {
   console.log('\nArguments:');
   console.log(`   apis: ${args.apis}`);
   console.log(`   okta application ids: ${args.oktaApplicationIds}`);
+  console.log(`   fields: ${args.fields}`);
 };
 
 const args: CommandLineOptions = commandLineArgs(cliOptions);
@@ -81,6 +83,11 @@ const csvReportOptions = {
   writeToDisk: true,
   fields: parseOutputTypeArray(args.fields),
 }
+
+console.log('Parsed Arguments:');
+console.log(`  Apis: ${csvReportOptions.apiList}`);
+console.log(`  Okta App Id: ${csvReportOptions.oktaApplicationIdList}`);
+console.log(`  Fields: ${csvReportOptions.fields}`);
 
 consumerReportService.generateCSVReport(csvReportOptions)
   .then((report: string) => {

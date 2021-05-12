@@ -30,6 +30,17 @@ const mockedUsers: User[] = mockedUsersAB.concat([
     oAuthApplicationType: '',
     termsOfService: true,
   }),
+  new User({
+    firstName: 'Frodo',
+    lastName: 'Baggins',
+    organization: 'The Fellowship',
+    email: 'fbag@hobbiton.com',
+    apis: 'xz',
+    description: 'super chill',
+    oAuthRedirectURI: 'http://elvish-swords.com',
+    oAuthApplicationType: '',
+    termsOfService: true,
+  }),
 ]);
 
 describe('ConsumerReportService', () => {
@@ -57,9 +68,14 @@ describe('ConsumerReportService', () => {
         oktaApplicationIdList: [],
         fields,
       });
+      // fbag@hobbiton.com merged dynamo item
       expect(report).toContain('fbag@hobbiton.com');
+      expect(report).toContain('"xz,ab"');
+      // wizz@higherbeings.com merged dynamo item
       expect(report).toContain('wizz@higherbeings.com');
+      expect(report).toContain('"va,xz,dx"');
     });
 
   });
 });
+

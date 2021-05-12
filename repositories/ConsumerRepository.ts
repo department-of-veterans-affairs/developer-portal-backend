@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import DynamoService from '../services/DynamoService';
-import User, { UserConfig } from '../models/User';
+import { UserDynamoItem } from '../models/User';
 
 interface OktaExpressions {
   filterExpression: string;
@@ -58,28 +58,14 @@ export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || '';
   private dynamoService: DynamoService;
 
-  private removeDuplicates(consumer: User[]): User[] {
-    // Instead of using a Set to remove duplicate emails, we use a Map.
-    // This gives us easy entry if we want to merge user fields. For instance,
-    // we might want to merge the oauth redirect uris or use the latest tosAccepted
-    // value
-    const consumerMap = new Map<string, User>();
-
-    consumer.forEach((user) => {
-      consumerMap.set(user.email, user);
-    });
-
-    return Array.from(consumerMap.values());
-  }
-
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
   }
 
-  public async getConsumers(
+  public async getDynamoConsumers(
     apiFilter: string[] = [],
     oktaApplicationIdFilter: string[] = [],
-  ): Promise<User[]> {
+  ): Promise<UserDynamoItem[]> {
 
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
@@ -110,29 +96,30 @@ export default class ConsumerRepository {
     const items: DocumentClient.AttributeMap[] =
       await this.dynamoService.scan(
         params.TableName, 
-        'email, firstName, lastName, apis', 
+        'email, firstName, lastName, apis, okta_application_id', 
         {
           FilterExpression: params.FilterExpression,
           ExpressionAttributeValues: params.ExpressionAttributeValues,
         },
       );
-    
-    const userConfigs = items.map((item): UserConfig => ({
+
+    const results = items.map((item): UserDynamoItem => ({
+      apis: item.apis as string,
+      email: item.email as string,
       firstName: item.firstName as string,
       lastName: item.lastName as string,
       organization: item.organization as string,
-      email: item.email as string,
-      apis: item.apis as string,
-      description: item.description as string,
       oAuthRedirectURI: item.oAuthRedirectURI as string,
-      oAuthApplicationType: '',
-      termsOfService: item.tosAccepted as boolean,
+      kongConsumerId: item.kongConsumerId as string,
+      tosAccepted: item.tosAccepted as boolean,
+      description: item.description as string,
+      createdAt: item.createdAt as string,
+      okta_application_id: item.okta_application_id as string,
+      okta_client_id: item.okta_client_id as string,
     }));
 
-    const results = userConfigs.map((config: UserConfig): User => new User(config));
-
-    const uniqueUsersResults = this.removeDuplicates(results);
-    return uniqueUsersResults;
+    return results;
   }
 
 }
+
