@@ -1,86 +1,123 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import DynamoService from '../services/DynamoService';
-import User, { UserConfig } from '../models/User';
+import { UserDynamoItem } from '../models/User';
+
+interface OktaExpressions {
+  filterExpression: string;
+  expressionAttributeValues: Record<string, string>;
+}
+
+enum FilterType {
+  CONTAINS,
+  EQUALS,
+}
+
+const addFilterToQueryIfApplicable = (
+  filter: string[],
+  fieldName: string,
+  oktaQuery: OktaExpressions,
+  filterType: FilterType = FilterType.CONTAINS,
+): void => {
+  if (!filter || filter.length === 0) {
+    return;
+  }
+
+  // Add an 'and' keyword if a filter has already been added
+  if (oktaQuery.filterExpression) {
+    oktaQuery.filterExpression += ' and ';
+  }
+
+  oktaQuery.filterExpression += '(';
+
+  filter.forEach((item, index) => {
+    const varName = `:${fieldName}_${index}`;
+    oktaQuery.expressionAttributeValues[varName] = item;
+
+    // Build filter expression - only prefix with `or` if not the first element in the array
+    if (index > 0) {
+      oktaQuery.filterExpression += ' or ';
+    }
+
+    switch(filterType) {
+    case FilterType.EQUALS:
+      oktaQuery.filterExpression += `${fieldName} = ${varName}`;
+      break;
+    case FilterType.CONTAINS:
+    default:
+      oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
+    }
+
+  });
+
+  oktaQuery.filterExpression += ')';
+};
 
 export default class ConsumerRepository {
   private tableName: string = process.env.DYNAMODB_TABLE || '';
   private dynamoService: DynamoService;
 
-  private removeDuplicates(consumer: User[]): User[] {
-    // Instead of using a Set to remove duplicate emails, we use a Map.
-    // This gives us easy entry if we want to merge user fields. For instance,
-    // we might want to merge the oauth redirect uris or use the latest tosAccepted
-    // value
-    const consumerMap = new Map<string, User>();
-
-    consumer.forEach((user) => {
-      consumerMap.set(user.email, user);
-    });
-
-    return Array.from(consumerMap.values());
-  }
-
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
   }
 
-  public async getConsumers(apiFilter: string[] = []): Promise<User[]> {
+  public async getConsumers(
+    apiFilter: string[] = [],
+    oktaApplicationIdFilter: string[] = [],
+  ): Promise<UserDynamoItem[]> {
 
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
     };
 
-    // Build the filter expression and update params
-    if (apiFilter.length > 0) {
+    const oktaQuery: OktaExpressions = {
+      filterExpression: '',
+      expressionAttributeValues: {},
+    };
 
-      let filterExpression = '';
-      const expressionAttributeValues = {};
+    addFilterToQueryIfApplicable(apiFilter, 'apis', oktaQuery);
+    addFilterToQueryIfApplicable(
+      oktaApplicationIdFilter,
+      'okta_application_id',
+      oktaQuery,
+      FilterType.EQUALS,
+    );
 
-      apiFilter.forEach((api, index) => {
-        const varName = `:api_${api}`;
-        expressionAttributeValues[varName] = api;
-      
-        // Build filter expression - only prefix with `or` if not the first element in the array
-        if (index > 0) {
-          filterExpression += ' or ';
-        }
-        filterExpression += `contains(apis, ${varName})`;
-      });
-
+     // validate there is an expression - if there are no arguments it will be blank
+     if (oktaQuery.filterExpression) {
       params = {
         ...params,
-        FilterExpression: filterExpression,
-        ExpressionAttributeValues: expressionAttributeValues,
+        FilterExpression: oktaQuery.filterExpression,
+        ExpressionAttributeValues: oktaQuery.expressionAttributeValues,
       };
     }
    
     const items: DocumentClient.AttributeMap[] =
       await this.dynamoService.scan(
         params.TableName, 
-        'email, firstName, lastName, apis', 
+        'email, firstName, lastName, apis, okta_application_id', 
         {
           FilterExpression: params.FilterExpression,
           ExpressionAttributeValues: params.ExpressionAttributeValues,
         },
       );
     
-    const userConfigs = items.map((item): UserConfig => ({
+    const results = items.map((item): UserDynamoItem => ({
+      apis: item.apis as string,
+      email: item.email as string,
       firstName: item.firstName as string,
       lastName: item.lastName as string,
       organization: item.organization as string,
-      email: item.email as string,
-      apis: item.apis as string,
-      description: item.description as string,
       oAuthRedirectURI: item.oAuthRedirectURI as string,
-      oAuthApplicationType: '',
-      termsOfService: item.tosAccepted as boolean,
+      kongConsumerId: item.kongConsumerId as string,
+      tosAccepted: item.tosAccepted as boolean,
+      description: item.description as string,
+      createdAt: item.createdAt as string,
+      okta_application_id: item.okta_application_id as string,
+      okta_client_id: item.okta_client_id as string,
     }));
 
-    const results = userConfigs.map((config: UserConfig): User => new User(config));
-
-    const uniqueUsersResults = this.removeDuplicates(results);
-    return uniqueUsersResults;
+    return results;
   }
 
 }
