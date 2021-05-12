@@ -51,7 +51,7 @@ const consumerRepo = new ConsumerRepository(dynamoService);
 const parsedOktaIds: string[] = args.oktaIds ? args.oktaIds.split(',') : [];
 
 // We need to set a max amount of ids in a request because the Dynamo Filter
-// Expression only allows a certain length
+// Expression only allows a 4KB expression
 const MAX_OKTA_IDS_IN_REQUEST = 60;
 const numRequests = Math.ceil(parsedOktaIds.length / MAX_OKTA_IDS_IN_REQUEST);
 
