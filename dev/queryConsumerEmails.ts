@@ -61,12 +61,12 @@ const doRequests = async() => {
   let allDynamoItems: UserDynamoItem[] = [];
 
   for (let i = 0; i < numRequests; i++) {
-    const oktaIds = parsedOktaIds.slice(
+    const oktaIdChunk = parsedOktaIds.slice(
       i * MAX_OKTA_IDS_IN_REQUEST,
       (i + 1) * MAX_OKTA_IDS_IN_REQUEST,
     );
-    console.log(`Making request ${i} for ids: ${oktaIds}`);
-    const users = await consumerRepo.getConsumers(undefined, oktaIds);
+    console.log(`Making request ${i} for ids: ${oktaIdChunk}`);
+    const users = await consumerRepo.getConsumers(undefined, oktaIdChunk);
     console.log(`Users: ${users}`);
     allDynamoItems = allDynamoItems.concat(users);
   }
