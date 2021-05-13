@@ -15,6 +15,11 @@ const cliOptions: OptionDefinition[] = [
     defaultValue: '',
   },
   {
+    name: 'idDelimiter',
+    alias: 'd',
+    defaultValue: ',',
+  },
+  {
     name: 'outputFile',
     alias: 'o',
     defaultValue: '',
@@ -24,6 +29,8 @@ const cliOptions: OptionDefinition[] = [
 const printArgs = (args: CommandLineOptions) => {
   console.log('\nArguments:');
   console.log(`   okta ids: ${args.oktaIds}`);
+  console.log(`   delimiter: ${args.idDelimiter}`);
+  console.log(`   output file: ${args.outputFile}`);
 };
 
 const args: CommandLineOptions = commandLineArgs(cliOptions);
@@ -48,7 +55,7 @@ const dynamoService = new DynamoService({
 });
 
 const consumerRepo = new ConsumerRepository(dynamoService);
-const parsedOktaIds: string[] = args.oktaIds ? args.oktaIds.split(',') : [];
+const parsedOktaIds: string[] = args.oktaIds ? args.oktaIds.split(args.idDelimiter) : [];
 
 // We need to set a max amount of ids in a request because the Dynamo Filter
 // Expression only allows a 4KB expression
@@ -67,14 +74,13 @@ const doRequests = async() => {
     );
     console.log(`Making request ${i} for ids: ${oktaIdChunk}`);
     const users = await consumerRepo.getConsumers(undefined, oktaIdChunk);
-    console.log(`Users: ${users}`);
     allDynamoItems = allDynamoItems.concat(users);
   }
 
 
-  console.log(`Found dynamo items: ${allDynamoItems}`);
+  console.log(`Found ${allDynamoItems.length} dynamo item(s)`);
   const uniqueDynamoItems = mergeUserDynamoItems(allDynamoItems);
-  console.log(`Unique dynamo items: ${uniqueDynamoItems}`);
+  console.log(`${uniqueDynamoItems.length} unique emails found`);
   const data = uniqueDynamoItems.map(dynamoItem => (
     {
       email: dynamoItem.email,
