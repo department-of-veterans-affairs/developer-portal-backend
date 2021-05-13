@@ -44,12 +44,12 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
 process.env.DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || 'dvp-prod-developer-portal-users';
 
 config.update({
-region: 'us-gov-west-1'
+  region: 'us-gov-west-1',
 });
 
 const dynamoService = new DynamoService({
   httpOptions: {
-    timeout: 5000
+    timeout: 5000,
   },
   maxRetries: 1,
 });
