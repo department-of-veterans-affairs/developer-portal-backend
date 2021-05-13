@@ -1,4 +1,4 @@
-import 'jest'
+import 'jest';
 import { mergeUserDynamoItems } from './merge-user-dynamo-items';
 import { UserDynamoItem } from '../models/User';
 
