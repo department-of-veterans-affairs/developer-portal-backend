@@ -83,8 +83,8 @@ export default class ConsumerRepository {
       FilterType.EQUALS,
     );
 
-     // validate there is an expression - if there are no arguments it will be blank
-     if (oktaQuery.filterExpression) {
+    // validate there is an expression - if there are no arguments it will be blank
+    if (oktaQuery.filterExpression) {
       params = {
         ...params,
         FilterExpression: oktaQuery.filterExpression,
