@@ -19,7 +19,7 @@ describe('API constants', () => {
       vaForms: 'va_forms',
     });
   });
-  
+
   it('APIS_TO_PROPER_NAMES', () => {
     expect(APIS_TO_PROPER_NAMES).toEqual({
       claimsAttributes: 'Claims Attributes API',
