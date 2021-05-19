@@ -12,15 +12,17 @@ import {
 describe('API constants', () => {
   it('APIS_TO_ACLS', () => {
     expect(APIS_TO_ACLS).toEqual({
+      claimsAttributes: 'claims_attributes',
       benefits: 'vba_documents',
       confirmation: 'veteran_confirmation',
       facilities: 'va_facilities',
       vaForms: 'va_forms',
     });
   });
-
+  
   it('APIS_TO_PROPER_NAMES', () => {
     expect(APIS_TO_PROPER_NAMES).toEqual({
+      claimsAttributes: 'Claims Attributes API',
       benefits: 'Benefits Intake API',
       claims: 'Claims API',
       communityCare: 'Community Care Eligibility API',
@@ -34,6 +36,7 @@ describe('API constants', () => {
 
   it('KONG_CONSUMER_APIS', () => {
     expect(KONG_CONSUMER_APIS).toEqual([
+      'claimsAttributes',
       'benefits',
       'facilities',
       'vaForms',
@@ -61,6 +64,7 @@ describe('API constants', () => {
 
   it('API_LIST', () => {
     expect(API_LIST).toEqual([
+      'claimsAttributes',
       'benefits',
       'facilities',
       'vaForms',

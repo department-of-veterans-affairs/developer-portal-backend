@@ -25,6 +25,11 @@ const oauthAPIList: OAuthAPI[] = [
 
 const keyAuthAPIList: KeyAuthAPI[] = [
   {
+    name: 'Claims Attributes API',
+    key: 'claimsAttributes',
+    acl: 'claims_attributes',
+  },
+  {
     name: 'Benefits Intake API',
     key: 'benefits',
     acl: 'vba_documents',
