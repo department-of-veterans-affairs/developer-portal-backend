@@ -30,6 +30,11 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     acl: 'vba_documents',
   },
   {
+    name: 'Claims Attributes API',
+    key: 'claimsAttributes',
+    acl: 'claims_attributes',
+  },
+  {
     name: 'VA Facilities API',
     key: 'facilities',
     acl: 'va_facilities',
