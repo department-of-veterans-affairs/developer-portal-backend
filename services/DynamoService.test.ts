@@ -113,6 +113,7 @@ describe("DynamoService", () => {
 
       try {
         await service.putItem(item, tableName);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
       } catch (putError) {
         expect(putError).toStrictEqual(err);
       }
@@ -162,8 +163,9 @@ describe("DynamoService", () => {
 
       try {
         await service.scan(tableName, projectionExp, filterParams);
-      } catch (err) {
-        expect(err).toStrictEqual(err);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
+      } catch (scanError) {
+        expect(scanError).toStrictEqual(err);
       }
     });
   });
@@ -201,8 +203,9 @@ describe("DynamoService", () => {
 
       try {
         await service.query(tableName, keyCondition, attributes);
-      } catch (err) {
-        expect(err).toStrictEqual(err);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
+      } catch (queryError) {
+        expect(queryError).toStrictEqual(err);
       }
     });
   });
