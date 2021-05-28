@@ -31,7 +31,7 @@
   "devDependencies": {
     "@types/command-line-args": "^5.0.0",
     "@types/cors": "^2.8.10",
-    "@types/express": "^4.17.11",
+    "@types/express": "^4.17.12",
     "@types/handlebars": "^4.1.0",
     "@types/hapi__joi": "^17.1.6",
     "@types/jest": "^26.0.23",
@@ -39,7 +39,7 @@
     "@types/node": "^15.6.1",
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
-    "@typescript-eslint/parser": "^4.24.0",
+    "@typescript-eslint/parser": "^4.25.0",
     "command-line-args": "^5.1.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.26.0",
