@@ -44,13 +44,13 @@ export const contactSchema = Joi.object().keys({
 }).when(Joi.object({type: Joi.valid(SubmissionType.PUBLISHING).required()}).unknown(), {
   then: Joi.object({
     apiDetails: Joi.string().required(),
-    apiDescription: Joi.string().optional(),
+    apiDescription: Joi.string().allow(''),
     apiInternalOnly: Joi.boolean().required(),
     apiInternalOnlyDetails: Joi.string().forbidden().when('apiInternalOnly', {
       is: Joi.boolean().required().valid(true),
       then: Joi.required(),
     }),
-    apiOtherInfo: Joi.string().optional(),
+    apiOtherInfo: Joi.string().allow(''),
     description: Joi.forbidden(),
     apis: Joi.forbidden(),
   }),
