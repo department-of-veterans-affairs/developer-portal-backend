@@ -75,6 +75,8 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery));
   
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
+
+  // This simple ping endpoint is for use with a Pingdom check
   publicRoutes.get('/ping', (_req, res) => {
     res.send('pong');
   });
