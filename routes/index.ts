@@ -75,6 +75,9 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery));
   
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
+  publicRoutes.get('/ping', (_req, res) => {
+    res.send('pong');
+  })
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
   publicRoutes.get('/version', versionHandler());
