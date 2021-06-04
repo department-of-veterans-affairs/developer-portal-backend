@@ -115,8 +115,8 @@ export default class SlackService implements MonitoredService {
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
-      const timeSpanCount = timeSpanSignups.apiCounts[api] as number;
-      const allTimeCount = allTimeSignups.apiCounts[api] as number;
+      const timeSpanCount = timeSpanSignups.apiCounts[api];
+      const allTimeCount = allTimeSignups.apiCounts[api];
       return {
         type: 'mrkdwn',
         text: `_${api}_: ${timeSpanCount} new requests (${allTimeCount} all-time)`,
