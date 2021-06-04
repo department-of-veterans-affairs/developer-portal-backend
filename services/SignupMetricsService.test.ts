@@ -55,7 +55,7 @@ describe('SignupMetricsService', () => {
       ]);
 
       const result = await service.getUniqueSignups({});
-      expect(result).toStrictEqual([{...firstSignup, apis: 'facilities,health'}]);
+      expect(result).toStrictEqual([{ ...firstSignup, apis: 'facilities,health' }]);
     });
 
     it('aggregates signups for each user in the window', async () => {
@@ -92,7 +92,7 @@ describe('SignupMetricsService', () => {
         {
           email: 'frodo.baggins@theshire.com',
           createdAt: '2020-06-29T14:00:00.000Z',
-          apis: 'benefits,facilities,health,verification',
+          apis: 'benefits,facilities,health,verification,claimsAttributes',
         },
         {
           email: 'samwise.gamgee@theshire.com',
@@ -150,6 +150,7 @@ describe('SignupMetricsService', () => {
         expect(result.apiCounts).toStrictEqual({
           benefits: 3,
           claims: 3,
+          claimsAttributes: 1,
           communityCare: 0,
           confirmation: 1,
           facilities: 3,
@@ -173,6 +174,7 @@ describe('SignupMetricsService', () => {
         expect(result.apiCounts).toStrictEqual({
           benefits: 3,
           claims: 3,
+          claimsAttributes: 1,
           communityCare: 0,
           confirmation: 1,
           facilities: 3,
@@ -196,6 +198,7 @@ describe('SignupMetricsService', () => {
         expect(result.apiCounts).toStrictEqual({
           benefits: 2,
           claims: 3,
+          claimsAttributes: 1,
           communityCare: 0,
           confirmation: 1,
           facilities: 2,
