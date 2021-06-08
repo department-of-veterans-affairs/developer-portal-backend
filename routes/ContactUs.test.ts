@@ -298,6 +298,24 @@ describe('validations', () => {
       });
     });
 
+    describe('apiDescription', () => {
+      it('can be blank', () => {
+        const payload = { ...publishingPayload, apiDescription: "" };
+  
+        const result = contactSchema.validate(payload);
+        
+        expect(result.error).toBeFalsy();
+      });
+
+      it('is a string', () => {
+        const payload = { ...publishingPayload, apiDescription: { potatoes: 'boil em, mash em, stick em in a stew' } };
+  
+        const result = contactSchema.validate(payload);
+  
+        expect(result.error?.message).toEqual('"apiDescription" must be a string');
+      });
+    });
+
     describe('apiInternalOnly', () => {
       it('is required', () => {
         const payload = { ...publishingPayload, apiInternalOnly: undefined };

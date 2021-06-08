@@ -2,6 +2,7 @@ import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
 import DynamoService, { FilterParams } from './DynamoService';
 import { DEFAULT_TABLE } from '../util/environments';
+import { API_LIST } from '../config/apis';
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -15,14 +16,7 @@ export interface Signup {
 }
 
 export interface ApiSignupCounts {
-  benefits: number;
-  facilities: number;
-  vaForms: number;
-  confirmation: number;
-  health: number;
-  communityCare: number;
-  verification: number;
-  claims: number;
+  [apiKey: string]: number;
 }
 
 export interface SignupCountResult {
@@ -42,7 +36,7 @@ export default class SignupMetricsService {
     const items = await this.dynamoService.scan(
       this.tableName,
       'email, createdAt, apis',
-      this.buildFilterParams(options)
+      this.buildFilterParams(options),
     );
 
     return this.mapItemsToSignups(items);
@@ -83,25 +77,17 @@ export default class SignupMetricsService {
       {
         ':email': signup.email,
         ':signupDate': signup.createdAt,
-      }
+      },
     );
 
     return this.mapItemsToSignups(items);
   }
 
   public async countSignups(options: SignupQueryOptions): Promise<SignupCountResult> {
+    const apiCounts = API_LIST.reduce((acc, current) => ((acc[current] = 0), acc), {});
     const result = {
       total: 0,
-      apiCounts: {
-        benefits: 0,
-        facilities: 0,
-        vaForms: 0,
-        confirmation: 0,
-        health: 0,
-        communityCare: 0,
-        verification: 0,
-        claims: 0,
-      },
+      apiCounts,
     };
 
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
@@ -129,7 +115,7 @@ export default class SignupMetricsService {
 
     return result;
   }
- 
+
   private buildFilterParams(options: SignupQueryOptions): FilterParams {
     let filterParams = {};
     if (options.startDate && options.endDate) {
