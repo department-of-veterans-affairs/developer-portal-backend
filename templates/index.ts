@@ -73,6 +73,163 @@ export const CONSUMER_SUPPORT_TEMPLATE = `<ul>
     </li>
 </ul>`;
 
+export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<ul>
+<li>
+    <div>
+        <div>Primary Contact:</div>
+        <div>First Name: {{primaryFirstName}}</div>
+        <div>Last Name: {{primaryLastName}}</div>
+        <div>Email: {{primaryEmail}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Secondary Contact:</div>
+        <div>First Name: {{secondaryFirstName}}</div>
+        <div>Last Name: {{secondaryLastName}}</div>
+        <div>Email: {{secondaryEmail}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Organization:</div>
+        <div>{{organization}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Application Name:</div>
+        <div>{{appName}}</div>
+    </div>
+    <div>
+        <div>Application Description:</div>
+        <div>{{appDescription}}</div>
+    </div>
+</li>
+<li>
+    <div>Terms of Service:</div>
+    <div>{{termsOfService}}</div>
+</li>
+<li>
+    <div>
+        <div>From Email:</div>
+        <div>{{requester}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Website:</div>
+        <div>{{website}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Phone Number:</div>
+        <div>{{phoneNumber}}</div>
+    </div>
+</li>
+<li>
+    <div>
+        <div>Status Update Emails:</div>
+        {{#each statusUpdateEmails}}
+        <div>{{this}}</div>
+        {{/each}}
+    </div>
+</li>
+<li>
+    <div>
+        <div>APIs:</div>
+        {{#each apis}}
+        <div>{{this}}</div>
+        {{/each}}
+    </div>
+</li>
+<li>
+    <div>
+        <div>Policy Documents:</div>
+        {{#each policyDocuments}}
+            <div>{{this}}</div>
+        {{/each}}
+    </div>
+</li>
+<li>
+    <div>
+        <div>Value Provided:</div>
+        <div>{{valueProvided}}</div>
+    </div>
+</li>
+{{#if businessModel}}
+  <li>
+      <div>
+          <div>Business Model:</div>
+          <div>{{businessModel}}</div>
+      </div>
+  </li>
+{{/if}}
+<li>
+    <div>Monitization Information:</div>
+    {{#with monitization}}
+    <div>Application Monitizes Veteran Information:</div>
+    <div>{{monitizedVeteranInformation}}</div>
+    {{#if monitizedVeteranInformation}}
+        <div>Explanation:</div>
+        <div>{{monitizationExplanation}}</div>
+        <div>App is Veteran Facing:</div>
+        <div>{{veteranFacing}}</div>
+        {{#if veteranFacing}}
+            <div>Link to Application's Primary Webpage:</div>
+            <div>{{website}}</div>
+            <div>Link to Application's Signup Page:</div>
+            <div>{{signUpLink}}</div>
+            <div>Link to Application's FAQ/Support Page:</div>
+            <div>{{supportLink}}</div>
+            <div>Available on the Following Platforms:</div>
+            <div>{{platforms}}</div>
+            <div>Veteran Facing Description:</div>
+            <div>{{veteranFacingDescription}}</div>
+        {{/if}}
+    {{/if}}
+    {{/with}}
+</li>
+<li>
+    <div>Technical Information</div>
+    {{#with technicalInformation}}
+    <div>VASI System Name</div>
+    <div>{{vasiSystemName}}</div>
+    <div>Credential Storage:</div>
+    <div>{{credentialStorage}}</div>
+    <div>Application Stores PII/PHI:</div>
+    <div>{{storePIIOrPHI}}</div>
+    {{#if storePIIOrPHI}}
+        <div>How is PII/PHI Stored?:</div>
+        <div>{{storageMethod}}</div>
+        <div>Safeguards in Place:</div>
+        <div>{{safeguards}}</div>
+        <div>Breach Management Process:</div>
+        <div>{{breachManagementProcess}}</div>
+        <div>Vulnerability Management and Patch Process:</div>
+        <div>{{vulnerabilityManagement}}</div>
+        <div>Application Exposes Veterans’ Health, Claims, Disabilities, or Service History Data to Third Parties:</div>
+        <div>{{exposeHealthInformationToThirdParties}}</div>
+        {{#if exposeHealthInformationToThirdParties}}
+            <div>Description:</div>
+            <div>{{thirdPartyHealthInfoDescription}}</div>
+            <div>Scopes Access Requested:</div>
+            <div>{{scopesAccessRequested}}</div>
+        {{/if}}
+        <div>Distrubiting Production API Keys to Customers:</div>
+        <div>{{distrubitingAPIKeysToCustomers}}</div>
+        {{#if distrubitingAPIKeysToCustomers}}
+            <div>Naming Convention for Customers:</div>
+            <div>namingConvention</div>
+            <div>Centralized Backend Log of Customer Submissions</div>
+            <div>{{centralizedBackendLog}}</div>
+        {{/if}}
+    {{/if}}
+    {{/with}}
+</li>
+</ul> `;
+
 export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
 <li>
     <div>
