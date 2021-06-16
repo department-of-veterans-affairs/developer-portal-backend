@@ -82,11 +82,8 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 	</strong></p>
 <p style="margin-left: 40px">We’ll review your information and notify you within 1-2 weeks if there are any changes we
 	need. </p>
-<a href="">
-	<p style="margin-left: 20px"><strong>3.</strong><strong> </strong><strong>Make any needed technical or policy
-			changes,
-			then
-			complete a demo.</strong><strong> </strong></p>
+<a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
+	<p style="margin-left: 20px"><strong>3.</strong><strong> </strong><strong>Make any needed technical or policy changes, then complete a demo.</strong><strong> </strong></p>
 </a>
 <p style="margin-left: 40px">The faster you complete any changes, the faster we can schedule a demo. Once your changes
 	are made, we aim to
@@ -99,7 +96,7 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 </center>
 
 <center>
-	<p><a href=""><u>Preparing for a demo</u></a> | <a href="https://developer.va.gov/explore"><u>Working with
+	<p><a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo"><u>Preparing for a demo</u></a> | <a href="https://developer.va.gov/onboarding/working-with-lighthouse-apis"><u>Working with
 				Lighthouse APIs</u></a> | <a
 			href="https://developer.va.gov/support/contact-us"><u>Contact us</u></a></p>
 </center>
