@@ -129,3 +129,6 @@ export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
     </div>
 </li>
 </ul>`;
+
+//TODO: ADD TEMPLATE HERE
+export const GITHUB_SECRET_SCANNING_TEMPLATE = ``;

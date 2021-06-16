@@ -2,7 +2,7 @@ import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE } from '../templates';
+import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE, GITHUB_SECRET_SCANNING_TEMPLATE} from '../templates';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
 
@@ -47,6 +47,13 @@ export interface PublishingSupportEmail {
   apiInternalOnly: boolean;
   apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
+}
+export interface GithubSupportEmail {
+  secret_type: string;
+  repo_name: string;
+  repo_url: string;
+  org_name: string;
+  org_url: string;
 }
 export interface EmailResponse {
   from_name: string;
@@ -109,6 +116,7 @@ export default class GovDeliveryService implements MonitoredService {
   public supportEmailRecipient: string;
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
   public consumerSupportTemplate: Handlebars.TemplateDelegate<ConsumerSupportEmail>;
+  public githubSupportTemplate: Handlebars.TemplateDelegate<GithubSupportEmail>;
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
   public client: AxiosInstance;
 
@@ -117,6 +125,7 @@ export default class GovDeliveryService implements MonitoredService {
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.consumerSupportTemplate = Handlebars.compile(CONSUMER_SUPPORT_TEMPLATE);
+    this.githubSupportTemplate = Handlebars.compile(GITHUB_SECRET_SCANNING_TEMPLATE);
     this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
     this.client = axios.create({
       baseURL: this.host,
@@ -173,6 +182,15 @@ export default class GovDeliveryService implements MonitoredService {
     return this.sendEmail(email);
   }
 
+  public sendGithubSecretScanEmail(supportRequest : GithubSupportEmail): Promise<EmailResponse>{
+    const email: EmailResponse = {
+      subject: 'Github Secret Scan Alert',
+      from_name: 'github',
+      body: this.githubSupportTemplate(supportRequest),
+      recipients: [{email: this.supportEmailRecipient}]
+    }
+    return this.sendEmail(email);
+  }
   private async sendEmail(email: EmailRequest): Promise<EmailResponse> {
     const res: AxiosResponse<EmailResponse> = await this.client.post('/messages/email', email);
     return res.data;
