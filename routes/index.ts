@@ -7,6 +7,7 @@ import OktaService from '../services/OktaService';
 import SignupMetricsService from '../services/SignupMetricsService';
 import SlackService from '../services/SlackService';
 import developerApplicationHandler, { applySchema } from './DeveloperApplication';
+import productionRequestHandler, { productionSchema } from './ProductionRequest';
 import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
@@ -38,7 +39,7 @@ interface AppServices {
  * The rev proxy only sends paths prefixed with either /services or /internal to Kong. All
  * developer portal routes start with /internal/developer-portal, and since we do not strip the
  * matched path at the gateway, all routes in this app must begin with this prefix.
- * 
+ *
  * see https://github.com/department-of-veterans-affairs/devops/blob/master/ansible/deployment/config/revproxy-vagov/templates/nginx_api_server.conf.j2#L171-L229
  */
 const GATEWAY_PATH_PREFIX = '/internal/developer-portal';
@@ -58,7 +59,7 @@ const configureRoutes = (app: Express, services: AppServices): void => {
   if(process.env.DEVELOPER_PORTAL_URL) {
     const options: cors.CorsOptions = {
       origin: process.env.DEVELOPER_PORTAL_URL,
-    };  
+    };
     app.use(cors(options));
   }
 
@@ -69,17 +70,22 @@ const configureRoutes = (app: Express, services: AppServices): void => {
   publicRoutes.post('/developer_application',
     validationMiddleware(applySchema, 'body'),
     developerApplicationHandler(kong, okta, dynamo, govDelivery, slack));
-  
+
   publicRoutes.post('/contact-us',
     validationMiddleware(contactSchema, 'body'),
     contactUsHandler(govDelivery));
-  
+
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
 
   // This simple ping endpoint is for use with a Pingdom check
   publicRoutes.get('/ping', (_req, res) => {
     res.send('pong');
   });
+
+  publicRoutes.post('/production_request',
+    validationMiddleware(productionSchema, 'body'),
+    productionRequestHandler(govDelivery));
+
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
   publicRoutes.get('/version', versionHandler());

@@ -11,7 +11,7 @@ import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config/apis';
 import { DevPortalError } from '../models/DevPortalError';
 
-function validateApiList(val: string): string {
+export function validateApiList(val: string): string {
   let result: boolean;
   try {
     const apis = val.split(',');
@@ -90,7 +90,7 @@ export default function developerApplicationHandler(
     };
 
     const user: User = new User(form);
-    /* 
+    /*
      * Sign up the user in Kong and Okta, record it in DynamoDB,
      * and return the result to UI as quickly as possible. Report
      * an error to the UI with the call to next if any of these critical steps fail.
@@ -110,7 +110,7 @@ export default function developerApplicationHandler(
       await user.saveToDynamo(dynamo);
 
       if (!user.oauthApplication) {
-        res.json({ 
+        res.json({
           token: user.token,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
         });

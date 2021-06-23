@@ -2,7 +2,12 @@ import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE, PRODUCTION_ACCESS_SUPPORT_TEMPLATE} from '../templates';
+import {
+  WELCOME_TEMPLATE,
+  PUBLISHING_SUPPORT_TEMPLATE,
+  CONSUMER_SUPPORT_TEMPLATE,
+} from '../templates';
+import {  PRODUCTION_ACCESS_SUPPORT_TEMPLATE, PRODUCTION_ACCESS_CONSUMER_TEMPLATE } from '../templates/production';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
 
@@ -28,7 +33,6 @@ interface WelcomeEmail {
   clientSecret?: string;
   redirectURI?: string;
 }
-
 export interface ConsumerSupportEmail {
   firstName: string;
   lastName: string;
@@ -48,7 +52,23 @@ export interface PublishingSupportEmail {
   apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
 }
-export interface MonitizationInformation {
+export interface ContactDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+export interface ProductionAccessSupportEmail {
+  primaryContact: ContactDetails;
+  secondaryContact: ContactDetails;
+  organization: string;
+  appName: string;
+  appDescription: string;
+  statusUpdateEmails: string[];
+  valueProvided: string;
+  businessModel?: string;
+  policyDocuments: string[];
+  phoneNumber: string;
+  apis?: string[];
   monitizedVeteranInformation: boolean;
   monitizationExplanation?: string;
   veteranFacing?: boolean;
@@ -57,8 +77,6 @@ export interface MonitizationInformation {
   supportLink?: string;
   platforms?: string[];
   veteranFacingDescription?: string;
-}
-export interface TechnicalInformation {
   vasiSystemName?: string;
   credentialStorage: string;
   storePIIOrPHI: boolean;
@@ -71,29 +89,8 @@ export interface TechnicalInformation {
   scopesAccessRequested?: string[];
   distrubitingAPIKeysToCustomers?: boolean;
   namingConvention?: string;
-  centralizedBackendLog: string;
-}
-export interface ContactDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-export interface ProductionAccessSupportEmail {
-  primaryContact: ContactDetails;
-  secondaryContact: ContactDetails;
-  requester: string;
-  organization: string;
-  appName: string;
-  appDescription: string;
-  statusUpdateEmails: string[];
-  valueProvided: string;
-  businessModel?: string;
-  monitization: MonitizationInformation;
-  //TODO: ask question about screenshots in form. Can they be ignored? Should I handle them as email attachments?
-  technicalInformation: TechnicalInformation;
-  policyDocuments: string[];
-  phoneNumber: string;
-  apis?: string[];
+  centralizedBackendLog?: string;
+  listedOnMyHealthApplication?: boolean;
 }
 export interface EmailResponse {
   from_name: string;
@@ -158,6 +155,7 @@ export default class GovDeliveryService implements MonitoredService {
   public consumerSupportTemplate: Handlebars.TemplateDelegate<ConsumerSupportEmail>;
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
   public productionAccessSupportTemplate: Handlebars.TemplateDelegate<ProductionAccessSupportEmail>;
+  public productionAccessConsumerTemplate: string;
   public client: AxiosInstance;
 
   constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
@@ -167,6 +165,7 @@ export default class GovDeliveryService implements MonitoredService {
     this.consumerSupportTemplate = Handlebars.compile(CONSUMER_SUPPORT_TEMPLATE);
     this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
     this.productionAccessSupportTemplate = Handlebars.compile(PRODUCTION_ACCESS_SUPPORT_TEMPLATE);
+    this.productionAccessConsumerTemplate = PRODUCTION_ACCESS_CONSUMER_TEMPLATE;
     this.client = axios.create({
       baseURL: this.host,
       headers: { 'X-AUTH-TOKEN': token },
@@ -225,11 +224,24 @@ export default class GovDeliveryService implements MonitoredService {
   public sendProductionAccessEmail(supportRequest: ProductionAccessSupportEmail): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: 'Production Access Requested',
-      from_name: `${supportRequest.primaryFirstName} ${supportRequest.primaryLastName}`,
+      from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
       body: this.productionAccessSupportTemplate(supportRequest),
       recipients: [{email: this.supportEmailRecipient}],
     };
 
+    return this.sendEmail(email);
+  }
+
+  public sendProductionAccessConsumerEmail(emails: string[]): Promise<EmailResponse> {
+    const mappedEmails: EmailRecipient[] = emails.map((x)=>{
+      return {email: x};
+    });
+    const email: EmailRequest = {
+      subject: 'Your Request for Production Access is Submitted',
+      from_name: 'VA API Platform team',
+      body: this.productionAccessConsumerTemplate,
+      recipients: mappedEmails,
+    };
     return this.sendEmail(email);
   }
 
