@@ -216,7 +216,8 @@ describe('GovDeliveryService', () => {
 
     describe('sendProductionAccessConsumerEmail', () => {
       it('should send a request', async () => {
-        await client.sendProductionAccessConsumerEmail(user);
+        const emails: string[] = ['ed@adhocteam.us'];
+        await client.sendProductionAccessConsumerEmail(emails);
         expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
           recipients: [{ email: 'ed@adhocteam.us' }],
           subject: 'Your Request for Production Access is Submitted',

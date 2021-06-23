@@ -66,7 +66,7 @@ interface ProductionAccessBody {
   businessModel?: string;
   policyDocuments: string[];
   phoneNumber: string;
-  apis?: string[];
+  apis?: string;
   monitizedVeteranInformation: boolean;
   monitizationExplanation?: string;
   veteranFacing?: boolean;
