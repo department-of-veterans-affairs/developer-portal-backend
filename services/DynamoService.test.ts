@@ -14,7 +14,7 @@ import {
 describe("DynamoService", () => {
   let service: DynamoService;
   // This needs typed in order for mockPut.mock.calls[0][0] not to give type warnings
-  let mockPut: jest.SpyInstance<AWSRequest<PutItemOutput, AWSError>, [params: PutItemInput, callback?: (err: AWSError | null, data: PutItemOutput) => void]>;
+  let mockPut: jest.SpyInstance<AWSRequest<PutItemOutput, AWSError>, [params: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>;
   let mockScan: jest.SpyInstance;
   let mockQuery: jest.SpyInstance;
   let mockListTables: jest.SpyInstance;
@@ -39,11 +39,18 @@ describe("DynamoService", () => {
     mockPut.mockClear();
     mockPut.mockImplementation((
       _params,
-      cb: (err: AWSError | null, data: PutItemOutput) => void,
+      cb?: (err: AWSError, data: PutItemOutput) => void,
     ) => {
-      // setTimeout to simulate actual async responses
-      // because Dynamo client doesn't use Promises
-      setTimeout(() => cb(null, {}), 5);
+      /**
+       * what is going on here?
+       * - use setTimeout to simulate actual async responses because Dynamo client doesn't use Promises
+       * - the callback is always defined in the service but need to check presence for AWS typing
+       * - because the first parameter of the callback is defined as AWSError and not AWSError | undefined
+       * or AWSError | null, we cast null to AWSError so we have a falsy value that fits the typing. do
+       * they actually call the callback with an error object always? presumably no. is this bad? I 
+       * don't know. probably yes.
+       */
+      setTimeout(() => cb && cb(null as AWSError, {}), 5);
       return ({} as AWSRequest<PutItemOutput, AWSError>);
     });
     mockScan.mockClear();
@@ -67,7 +74,7 @@ describe("DynamoService", () => {
       _params,
       cb: (err: AWSError | null, data: ListTablesOutput) => void,
     ) => {
-      setTimeout(() => cb(null, { TableNames: [ 'Users' ] }), 5);
+      setTimeout(() => cb(null, { TableNames: ['Users'] }), 5);
     });
   });
 
@@ -81,9 +88,9 @@ describe("DynamoService", () => {
     const item = { commonName: 'Treebeard', sidarinName: 'Fangorn', entishName: 'Not stored due to buffer overflow', orcishName: '' };
     const tableName = 'Ents';
 
-    it('puts to a DynamoDB table', async () => { 
+    it('puts to a DynamoDB table', async () => {
       await service.putItem(item, tableName);
-      expect(mockPut).toHaveBeenCalledWith({ Item: item, TableName: tableName}, expect.any(Function));
+      expect(mockPut).toHaveBeenCalledWith({ Item: item, TableName: tableName }, expect.any(Function));
     });
 
     // The DynamoDB API breaks if empty strings are passed in
@@ -98,16 +105,17 @@ describe("DynamoService", () => {
       const err = new Error('Never is too long a word even for me . . . ') as AWSError;
       mockPut.mockImplementationOnce((
         _params,
-        cb: (err: AWSError, _data) => void,
+        cb?: (err: AWSError, _data) => void,
       ) => {
-        setTimeout(() => cb(err, undefined), 5);
+        setTimeout(() => cb && cb(err, undefined), 5);
         return ({} as AWSRequest<PutItemOutput, AWSError>);
       });
 
       try {
         await service.putItem(item, tableName);
-      } catch (err) {
-        expect(err).toStrictEqual(err);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
+      } catch (putError) {
+        expect(putError).toStrictEqual(err);
       }
     });
 
@@ -119,7 +127,7 @@ describe("DynamoService", () => {
 
   describe('scan', () => {
     const tableName = 'Ents';
-    const tableRecord: AttributeMap = { 
+    const tableRecord: AttributeMap = {
       commonName: { S: 'Treebeard' },
       sidarinName: { S: 'Fangorn' },
       entishName: { S: 'Not stored due to buffer overflow' },
@@ -127,7 +135,7 @@ describe("DynamoService", () => {
     };
     const projectionExp = 'commonName, sidarinName, entishName, orcishName';
     const filterParams = {
-      ExpressionAttributeValues: { 
+      ExpressionAttributeValues: {
         ':commonName': { S: 'Treebeard' },
       },
       FilterExpression: 'commonName = :commonName',
@@ -137,8 +145,8 @@ describe("DynamoService", () => {
       mockScan.mockImplementation((
         _params,
         cb: (err: AWSError | null, data: ScanOutput) => void,
-      ) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
-      
+      ) => setTimeout(() => cb(null, { Items: [tableRecord] }), 5));
+
       const result = await service.scan(tableName, projectionExp, filterParams);
 
       expect(result[0]).toEqual(tableRecord);
@@ -155,29 +163,30 @@ describe("DynamoService", () => {
 
       try {
         await service.scan(tableName, projectionExp, filterParams);
-      } catch (err) {
-        expect(err).toStrictEqual(err);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
+      } catch (scanError) {
+        expect(scanError).toStrictEqual(err);
       }
     });
   });
 
   describe('query', () => {
     const tableName = 'Ents';
-    const tableRecord: AttributeMap = { 
+    const tableRecord: AttributeMap = {
       commonName: { S: 'Treebeard' },
       sidarinName: { S: 'Fangorn' },
       entishName: { S: 'Not stored due to buffer overflow' },
       orcishName: { S: '' },
     };
-    const attributes =  { ':commonName': 'Treebeard' };
+    const attributes = { ':commonName': 'Treebeard' };
     const keyCondition = 'commonName = :commonName';
 
     it('retrieves rows from the table', async () => {
       mockQuery.mockImplementation((
         _params,
         cb: (err: AWSError | null, data: QueryOutput) => void,
-      ) => setTimeout(() => cb(null, { Items: [tableRecord] } ), 5));
-      
+      ) => setTimeout(() => cb(null, { Items: [tableRecord] }), 5));
+
       const result = await service.query(tableName, keyCondition, attributes);
 
       expect(result[0]).toEqual(tableRecord);
@@ -194,8 +203,9 @@ describe("DynamoService", () => {
 
       try {
         await service.query(tableName, keyCondition, attributes);
-      } catch (err) {
-        expect(err).toStrictEqual(err);
+        throw new Error('you shall not pass! (no, really, this is the wrong error)');
+      } catch (queryError) {
+        expect(queryError).toStrictEqual(err);
       }
     });
   });
@@ -203,7 +213,7 @@ describe("DynamoService", () => {
   describe('healthCheck', () => {
     it('scans a DynamoDB table', async () => {
       await service.healthCheck();
-      expect(mockListTables).toHaveBeenCalledWith({ Limit:1 }, expect.any(Function));
+      expect(mockListTables).toHaveBeenCalledWith({ Limit: 1 }, expect.any(Function));
     });
 
     it('returns unhealthy when it receives an error', async () => {
