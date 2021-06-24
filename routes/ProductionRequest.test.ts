@@ -10,7 +10,12 @@ const mockSendEmail = jest.fn();
 let stubToken: unknown;
 
 describe('productionRequestHandler', () => {
-  const govDelivery = {} as GovDeliveryService;
+  const mockSendProductionAccessConsumerEmail = jest.fn();
+  const mockSendProductionAccessEmail = jest.fn();
+  const govDelivery = {
+    sendProductionAccessEmail: mockSendProductionAccessEmail,
+    sendProductionAccessConsumerEmail: mockSendProductionAccessConsumerEmail,
+  } as unknown as GovDeliveryService;
 
   const mockJson = jest.fn();
   const stubRes: Response = {
@@ -52,7 +57,7 @@ describe('productionRequestHandler', () => {
         platforms: ['iOS'],
         veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
         vasiSystemName: 'asdf',
-        credentialStorage: '',
+        credentialStorage: 'stored in a volcano on mount doom',
         storePIIOrPHI: false,
         storageMethod: 'Locking away in the fires from whence it came.',
         safeguards: 'golem',
@@ -79,7 +84,8 @@ describe('productionRequestHandler', () => {
     const handler = productionRequestHandler(govDelivery);
     await handler(stubReq, stubRes, stubNext);
 
-    expect(mockSendEmail).toHaveBeenCalled();
+    expect(mockSendProductionAccessEmail).toHaveBeenCalled();
+    expect(mockSendProductionAccessConsumerEmail).toHaveBeenCalled();
   });
 
   it('renders a successful response even if the email fails', async () => {
@@ -88,19 +94,8 @@ describe('productionRequestHandler', () => {
     const handler = productionRequestHandler(govDelivery);
     await handler(stubReq, stubRes, stubNext);
 
-    expect(mockSendEmail).toHaveBeenCalled();
-    expect(mockJson).toHaveBeenCalledWith({ token: 'onering' });
-  });
-
-
-  it('sends GovDelivery errors to the default error handler', async () => {
-    const err = new Error('failed sending email');
-    mockSendEmail.mockRejectedValue(err);
-
-    const handler = productionRequestHandler(govDelivery);
-    await handler(stubReq, stubRes, stubNext);
-
-    expect(stubNext).toHaveBeenCalledWith(err);
+    expect(mockSendProductionAccessEmail).toHaveBeenCalled();
+    expect(mockSendProductionAccessConsumerEmail).toHaveBeenCalled();
   });
 });
 
@@ -134,7 +129,7 @@ describe('validations', () => {
     platforms: ['iOS'],
     veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vasiSystemName: 'asdf',
-    credentialStorage: '',
+    credentialStorage: 'stored in a volcano on mount doom',
     storePIIOrPHI: false,
     storageMethod: 'Locking away in the fires from whence it came.',
     safeguards: 'golem',
@@ -163,7 +158,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"firstName" must be an object');
+      expect(result.error?.message).toEqual('"primaryContact" must be of type object');
     });
   });
 
@@ -181,7 +176,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"secondaryContact" must be a object');
+      expect(result.error?.message).toEqual('"secondaryContact" must be of type object');
     });
   });
 
@@ -223,7 +218,7 @@ describe('validations', () => {
 
   describe('appDescription', () => {
     it('is a string', () => {
-      const payload = {...defaultPayload, description: 123456789};
+      const payload = {...defaultPayload, appDescription: 123456789};
 
       const result = productionSchema.validate(payload);
 
@@ -241,7 +236,7 @@ describe('validations', () => {
 
   describe('statusUpdateEmails', () => {
     it('is is an array', () => {
-      const payload = { ...defaultPayload, email: 'lolnotanemail.com' };
+      const payload = { ...defaultPayload, statusUpdateEmails: 'lolnotanemail.com' };
 
       const result = productionSchema.validate(payload);
 
@@ -252,7 +247,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"email" is required');
+      expect(result.error?.message).toEqual('"statusUpdateEmails" is required');
     });
   });
 
@@ -283,12 +278,12 @@ describe('validations', () => {
       expect(result.error?.message).toEqual('"businessModel" must be a string');
     });
 
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, businessModel: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"businessModel" is not allowed to be empty');
     });
   });
 
@@ -329,13 +324,6 @@ describe('validations', () => {
   });
 
   describe('apis', () => {
-    it('is a string', () => {
-      const payload = { ...defaultPayload, apis: 123456 };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toEqual('"apis" must be a string');
-    });
     it('only allows supported api values', () => {
       const payload = { ...defaultPayload, apis: 'benefits,horsies' };
 
@@ -364,12 +352,12 @@ describe('validations', () => {
   });
 
   describe('monitizationExplanation', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, monitizationExplanation: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"monitizationExplanation" is not allowed to be empty');
     });
 
     it('is a string', () => {
@@ -400,12 +388,12 @@ describe('validations', () => {
   });
 
   describe('website', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, website: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"website" is not allowed to be empty');
     });
 
     it('is a string', () => {
@@ -418,16 +406,16 @@ describe('validations', () => {
   });
 
   describe('signUpLink', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, signUpLink: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"signUpLink" is not allowed to be empty');
     });
 
     it('is a string', () => {
-      const payload = { ...defaultPayload, website: 123456 };
+      const payload = { ...defaultPayload, signUpLink: 123456 };
 
       const result = productionSchema.validate(payload);
 
@@ -436,16 +424,16 @@ describe('validations', () => {
   });
 
   describe('supportLink', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, supportLink: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"supportLink" is not allowed to be empty');
     });
 
     it('is a string', () => {
-      const payload = { ...defaultPayload, website: 123456 };
+      const payload = { ...defaultPayload, supportLink: 123456 };
 
       const result = productionSchema.validate(payload);
 
@@ -472,12 +460,12 @@ describe('validations', () => {
   });
 
   describe('veteranFacingDescription', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, veteranFacingDescription: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"veteranFacingDescription" is not allowed to be empty');
     });
 
     it('is a string', () => {
@@ -490,12 +478,12 @@ describe('validations', () => {
   });
 
   describe('vasiSystemName', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, vasiSystemName: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"vasiSystemName" is not allowed to be empty');
     });
 
     it('is a string', () => {
@@ -508,14 +496,6 @@ describe('validations', () => {
   });
 
   describe('credentialStorage', () => {
-    it('is required', () => {
-      const payload = { ...defaultPayload, vasiSystemName: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toEqual('"credentialStorage" is required');
-    });
-
     it('is a string', () => {
       const payload = { ...defaultPayload, credentialStorage: 123456 };
 
@@ -526,14 +506,6 @@ describe('validations', () => {
   });
 
   describe('storePIIOrPHI', () => {
-    it('is allowed to be an undefined', () => {
-      const payload = { ...defaultPayload, storePIIOrPHI: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toEqual(undefined);
-    });
-
     it('is a boolean', () => {
       const payload = { ...defaultPayload, storePIIOrPHI: 123456 };
 
@@ -544,12 +516,12 @@ describe('validations', () => {
   });
 
   describe('storageMethod', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, storageMethod: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"storageMethod" is not allowed to be empty');
     });
     it('is a string', () => {
       const payload = { ...defaultPayload, storageMethod: 123456 };
@@ -568,12 +540,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"safeguards" must be a string');
     });
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, safeguards: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"safeguards" is not allowed to be empty');
     });
   });
 
@@ -590,7 +562,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"breachManagementProcess" is not allowed to be empty');
     });
   });
 
@@ -602,12 +574,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"vulnerabilityManagement" must be a string');
     });
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, vulnerabilityManagement: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"vulnerabilityManagement" is not allowed to be empty');
     });
   });
 
@@ -619,13 +591,6 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"exposeHealthInformationToThirdParties" must be a boolean');
     });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, exposeHealthInformationToThirdParties: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
-    });
   });
 
   describe('thirdPartyHealthInfoDescription', () => {
@@ -636,13 +601,6 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"thirdPartyHealthInfoDescription" must be a string');
     });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, thirdPartyHealthInfoDescription: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
-    });
   });
 
   describe('scopesAccessRequested', () => {
@@ -652,13 +610,6 @@ describe('validations', () => {
       const result = productionSchema.validate(payload);
 
       expect(result.error?.message).toEqual('"scopesAccessRequested" must be an array');
-    });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, thirdPartyHealthInfoDescription: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
     });
   });
 
@@ -687,12 +638,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"namingConvention" must be a string');
     });
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, namingConvention: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"namingConvention" is not allowed to be empty');
     });
   });
 
@@ -704,12 +655,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"centralizedBackendLog" must be a string');
     });
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, centralizedBackendLog: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"centralizedBackendLog" is not allowed to be empty');
     });
   });
 
