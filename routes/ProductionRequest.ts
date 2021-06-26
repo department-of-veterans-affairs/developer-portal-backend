@@ -98,12 +98,14 @@ export default function productionRequestHandler( govdelivery: GovDeliveryServic
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    console.log(req.body);
     try {
       if (govdelivery) {
         logger.info({ message: 'sending production access email to support' });
         await govdelivery.sendProductionAccessEmail(req.body);
         logger.info({message: 'sending production access email to consumer'});
         await govdelivery.sendProductionAccessConsumerEmail(req.body['statusUpdateEmails']);
+        res.sendStatus(200);
       }
     } catch (err: unknown) {
       (err as DevPortalError).action = 'sending govdelivery production access request notification';

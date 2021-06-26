@@ -27,158 +27,252 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 			href="https://developer.va.gov/support/contact-us"><u>Contact us</u></a></p>
 </center>
 `;
-export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<ul>
-<li>
-    <div>
-        <div>Primary Contact:</div>
-        <div>First Name: {{primaryFirstName}}</div>
-        <div>Last Name: {{primaryLastName}}</div>
-        <div>Email: {{primaryEmail}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Secondary Contact:</div>
-        <div>First Name: {{secondaryFirstName}}</div>
-        <div>Last Name: {{secondaryLastName}}</div>
-        <div>Email: {{secondaryEmail}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Organization:</div>
-        <div>{{organization}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Application Name:</div>
-        <div>{{appName}}</div>
-    </div>
-    <div>
-        <div>Application Description:</div>
-        <div>{{appDescription}}</div>
-    </div>
-</li>
-<li>
-    <div>Terms of Service:</div>
-    <div>{{termsOfService}}</div>
-</li>
-<li>
-    <div>
-        <div>From Email:</div>
-        <div>{{requester}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Website:</div>
-        <div>{{website}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Phone Number:</div>
-        <div>{{phoneNumber}}</div>
-    </div>
-</li>
-<li>
-    <div>
-        <div>Status Update Emails:</div>
-        {{#each statusUpdateEmails}}
-        <div>{{this}}</div>
-        {{/each}}
-    </div>
-</li>
-<li>
-    <div>
-        <div>APIs:</div>
-        {{#each apis}}
-        <div>{{this}}</div>
-        {{/each}}
-    </div>
-</li>
-<li>
-    <div>
-        <div>Policy Documents:</div>
-        {{#each policyDocuments}}
-            <div>{{this}}</div>
-        {{/each}}
-    </div>
-</li>
-<li>
-    <div>
-        <div>Value Provided:</div>
-        <div>{{valueProvided}}</div>
-    </div>
-</li>
-{{#if businessModel}}
+export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
+<ul>
   <li>
-      <div>
-          <div>Business Model:</div>
-          <div>{{businessModel}}</div>
-      </div>
+    <div>
+      <strong><div>Primary Contact:</div></strong>
+      <div>First Name: {{primaryContact.firstName}}</div>
+      <div>Last Name: {{primaryContact.lastName}}</div>
+      <div>Email: {{primaryContact.email}}</div>
+    </div>
   </li>
-{{/if}}
-<li>
-    <div>Monitization Information:</div>
-    <div>Application Monitizes Veteran Information:</div>
+  <li>
+    <div>
+      <strong><div>Secondary Contact:</div></strong>
+      <div>First Name: {{secondaryContact.firstName}}</div>
+      <div>Last Name: {{secondaryContact.lastName}}</div>
+      <div>Email: {{secondaryContact.email}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong><div>Organization:</div></strong>
+      <div>{{organization}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong><div>Application Name:</div></strong>
+      <div>{{appName}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Application Description:</div>
+      </strong>
+      <div>{{appDescription}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Website:</div>
+      </strong>
+      <div>{{website}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Phone Number:</div>
+      </strong>
+      <div>{{phoneNumber}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Status Update Emails:</div>
+      </strong>
+      {{#each statusUpdateEmails}}
+        <div>{{this}}</div>
+      {{/each}}
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>APIs:</div>
+      </strong>
+      <div>{{apis}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Policy Documents:</div>
+      </strong>
+      {{#each policyDocuments}}
+          <div>{{this}}</div>
+      {{/each}}
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Value Provided:</div>
+      </strong>
+      <div>{{valueProvided}}</div>
+    </div>
+  </li>
+  {{#if businessModel}}
+    <li>
+      <div>
+        <strong>
+          <div>Business Model:</div>
+        </strong>
+        <div>{{businessModel}}</div>
+      </div>
+    </li>
+  {{/if}}
+</ul>
+<h2>Monetization Information</h2>
+<ul>
+  <li>
+    <strong>
+      <div>Application Monitizes Veteran Information:</div>
+    </strong>
     <div>{{monitizedVeteranInformation}}</div>
-    {{#if monitizedVeteranInformation}}
+  </li>
+  {{#if monitizedVeteranInformation}}
+    <li>
+      <strong>
         <div>Explanation:</div>
-        <div>{{monitizationExplanation}}</div>
+      </strong>
+      <div>{{monitizationExplanation}}</div>
+    </li>
+    <li>
+      <strong>
         <div>App is Veteran Facing:</div>
-        <div>{{veteranFacing}}</div>
-        {{#if veteranFacing}}
-            <div>Link to Application's Primary Webpage:</div>
-            <div>{{website}}</div>
-            <div>Link to Application's Signup Page:</div>
-            <div>{{signUpLink}}</div>
-            <div>Link to Application's FAQ/Support Page:</div>
-            <div>{{supportLink}}</div>
-            <div>Available on the Following Platforms:</div>
-            <div>{{platforms}}</div>
-            <div>Veteran Facing Description:</div>
-            <div>{{veteranFacingDescription}}</div>
-        {{/if}}
+      </strong>
+      <div>{{veteranFacing}}</div>
+    </li>
+    {{#if veteranFacing}}
+      <li>
+        <strong>
+          <div>Link to Application's Primary Webpage:</div>
+        </strong>
+        <div>{{website}}</div>
+      </li>
+      <li>
+        <strong>
+          <div>Link to Application's Signup Page:</div>
+        </strong>
+        <div>{{signUpLink}}</div>
+      </li>
+      <li>
+        <strong>
+          <div>Link to Application's FAQ/Support Page:</div>
+        </strong>
+        <div>{{supportLink}}</div>
+      </li>
+      <li>
+        <strong>
+          <div>Available on the Following Platforms:</div>
+        </strong>
+        <div>{{platforms}}</div>
+      </li>
+      <li>
+        <strong>
+          <div>Veteran Facing Description:</div>
+        </strong>
+        <div>{{veteranFacingDescription}}</div>
+      </li>
     {{/if}}
-</li>
-<li>
-    <div>Technical Information</div>
-    <div>VASI System Name</div>
+  {{/if}}
+</ul>
+<h2>Technical Information</h2>
+<ul>
+  <li>
+    <strong>
+      <div>VASI System Name</div>
+    </strong>
     <div>{{vasiSystemName}}</div>
-    <div>Credential Storage:</div>
+  </li>
+  <li>
+    <strong>
+      <div>Credential Storage:</div>
+    </strong>
     <div>{{credentialStorage}}</div>
-    <div>Application Stores PII/PHI:</div>
+  </li>
+  <li>
+    <strong>
+      <div>Application Stores PII/PHI:</div>
+    </strong>
     <div>{{storePIIOrPHI}}</div>
-    {{#if storePIIOrPHI}}
+  </li>
+  {{#if storePIIOrPHI}}
+    <li>
+      <strong>
         <div>How is PII/PHI Stored?:</div>
-        <div>{{storageMethod}}</div>
+      </strong>
+      <div>{{storageMethod}}</div>
+    </li>
+    <li>
+      <strong>
         <div>Safeguards in Place:</div>
-        <div>{{safeguards}}</div>
+      </strong>
+      <div>{{safeguards}}</div>
+    </li>
+    <li>
+      <strong>
         <div>Breach Management Process:</div>
-        <div>{{breachManagementProcess}}</div>
+      </strong>
+      <div>{{breachManagementProcess}}</div>
+    </li>
+    <li>
+      <strong>
         <div>Vulnerability Management and Patch Process:</div>
-        <div>{{vulnerabilityManagement}}</div>
+      </strong>
+      <div>{{vulnerabilityManagement}}</div>
+    </li>
+    <li>
+      <strong>
         <div>Application Exposes Veterans’ Health, Claims, Disabilities, or Service History Data to Third Parties:</div>
-        <div>{{exposeHealthInformationToThirdParties}}</div>
-        {{#if exposeHealthInformationToThirdParties}}
-            <div>Description:</div>
-            <div>{{thirdPartyHealthInfoDescription}}</div>
-            <div>Scopes Access Requested:</div>
-            <div>{{scopesAccessRequested}}</div>
-        {{/if}}
-        <div>Distrubiting Production API Keys to Customers:</div>
-        <div>{{distrubitingAPIKeysToCustomers}}</div>
-        {{#if distrubitingAPIKeysToCustomers}}
-            <div>Naming Convention for Customers:</div>
-            <div>namingConvention</div>
-            <div>Centralized Backend Log of Customer Submissions</div>
-            <div>{{centralizedBackendLog}}</div>
-        {{/if}}
+      </strong>
+      <div>{{exposeHealthInformationToThirdParties}}</div>
+    </li>
+    {{#if exposeHealthInformationToThirdParties}}
+      <li>
+        <strong>
+          <div>Description:</div>
+        </strong>
+        <div>{{thirdPartyHealthInfoDescription}}</div>
+      </li>
+      <li>
+        <strong>
+          <div>Scopes Access Requested:</div>
+        </strong>
+        <div>{{scopesAccessRequested}}</div>
+      </li>
     {{/if}}
-    <div>Listed on MyHealthApplication.com:</div>
+      <li>
+        <strong>
+          <div>Distrubiting Production API Keys to Customers:</div>
+        </strong>
+        <div>{{distrubitingAPIKeysToCustomers}}</div>
+      </li>
+      {{#if distrubitingAPIKeysToCustomers}}
+        <li>
+          <strong>
+            <div>Naming Convention for Customers:</div>
+          </strong>
+          <div>namingConvention</div>
+        </li>
+        <li>
+          <strong>
+            <div>Centralized Backend Log of Customer Submissions</div>
+          </strong>
+          <div>{{centralizedBackendLog}}</div>
+        </li>
+      {{/if}}
+    {{/if}}
+  <li>
+    <strong>
+      <div>Listed on MyHealthApplication.com:</div>
+    </strong>
     <div>{{listedOnMyHealthApplication}}</div>
-</li>
-</ul> `;
-
+  </li>
+</ul>`;
