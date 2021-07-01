@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 
-import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail} from '../services/GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
 
 export const enum SubmissionType {
   DEFAULT = 'DEFAULT',
   PUBLISHING = 'PUBLISHING',
-  PRODUCTION_ACCESS = 'PRODUCTION_ACCESS',
 }
 
 interface ContactDetails {
