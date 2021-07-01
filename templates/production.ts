@@ -31,7 +31,7 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 
     .steps-container {
       height: 26px;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     .sub {
