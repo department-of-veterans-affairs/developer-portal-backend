@@ -1,6 +1,7 @@
-import User from '../models/User';
+import { UserDynamoItem } from '../models/User';
 import ConsumerRepository from '../repositories/ConsumerRepository';
 import ObjectsToCsv from 'objects-to-csv';
+import { mergeUserDynamoItems } from '../util/merge-user-dynamo-items';
 
 interface CSVReportOptions {
   apiList: string[];
@@ -17,9 +18,10 @@ export default class ConsumerReportService {
 
   public async generateCSVReport({apiList, writeToDisk}: CSVReportOptions): Promise<string> {
 
-    const consumers: User[] = await this.consumerRepository.getConsumers(apiList);
-    
-    const data = consumers.map(consumer => (
+    const consumers: UserDynamoItem[] = await this.consumerRepository.getConsumers(apiList);
+    const uniqueConsumers = mergeUserDynamoItems(consumers);
+
+    const data = uniqueConsumers.map(consumer => (
       {
         email: consumer.email,
         first_Name: consumer.firstName,
