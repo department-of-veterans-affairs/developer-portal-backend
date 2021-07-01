@@ -1,31 +1,121 @@
 export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
-<p>We’ve received your request for production access. It’s good to remember that getting production access requires
-	multiple steps and can take less than a week to over a month, depending on the API. For open data APIs,
-	production access takes a week or less and no demo is required.</p>
-<p><strong>What’s next?</strong></p>
-<p style="margin-left: 20px"><strong style="color: green">✓</strong><strong> Start developing. </strong></p>
-<p style="margin-left: 20px"><strong style="color: green">✓</strong><strong> Submit your production access request.
-	</strong></p>
-<p style="margin-left: 40px">We’ll review your information and notify you within 1-2 weeks if there are any changes we
-	need. </p>
-<a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
-	<p style="margin-left: 20px"><strong>3.</strong><strong> </strong><strong>Make any needed technical or policy changes, then complete a demo.</strong><strong> </strong></p>
-</a>
-<p style="margin-left: 40px">The faster you complete any changes, the faster we can schedule a demo. Once your changes
-	are made, we aim to
-	schedule the demo within a week. Demos generally last from 30 to 60 minutes. </p>
-<p style="margin-left: 20px"><strong>4.</strong><strong> </strong><strong>Receive production access. </strong></p>
-<p style="margin-left: 40px">After the demo is complete and any final items are wrapped up, production access is granted
-	within a week. </p>
-<center>
-	<p>Interested in getting access to another API? Read the API docs or request a new API key. </p>
-</center>
+<head>
+  <style>
+    .card {
+      margin: 0 0 20px 0;
+      background: #FFFFFF;
+      Padding: 24px 24px 0.1px 24px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 25px;
+      max-width: 700px;
+    }
 
-<center>
-	<p><a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo"><u>Preparing for a demo</u></a> | <a href="https://developer.va.gov/onboarding/working-with-lighthouse-apis"><u>Working with
-				Lighthouse APIs</u></a> | <a
-			href="https://developer.va.gov/support/contact-us"><u>Contact us</u></a></p>
-</center>
+    .header {
+      background: #112E51;
+      width: 100%;
+      height: 80px;
+    }
+
+    .header img {
+      margin-top: 30px;
+      margin-left: 20px;
+    }
+
+    .steps {
+      width: 24px;
+      float:left;
+      height: 26px;
+      margin-right: 10px;
+    }
+
+    .steps-container {
+      height: 26px;
+      margin-bottom: 40px;
+    }
+
+    .sub {
+      margin-top: -25px;
+      margin-left: 34px;
+      float:center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      padding: 0;
+      font-size: 24px;
+      line-height: 30px;
+      font-weight: bold;
+      color: #323A45;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      padding: 0;
+      font-size: 16px;
+      line-height: 25px;
+      font-weight: bold;
+      color: #323A45;
+      display: inline;
+    }
+
+    p {
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 25px;
+      color: #323A45;
+    }
+  </style>
+</head>
+<div class="card">
+  <div class="header"><img src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/VA-Lighhouse-APIs-email.png" alt="logo"/></div>
+  <p>We’ve received your request for production access. It’s good to remember that getting production access requires
+    multiple steps and can take less than a week to over a month, depending on the API. For open data APIs,
+    production access takes a week or less and no demo is required.</p>
+  <h1><strong>What’s next?</strong></h1>
+  <div class="steps-container">
+    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step one, done"/><h2>Start developing.</h2>
+  </div>
+  <div class="steps-container">
+    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step two, done"/>
+    <h2>Submit your production access request.</h2>
+  </div>
+  <p class="sub">
+    We’ll review your information and notify you within 1-2 weeks if there are any changes we need.
+  </p>
+  <div class="steps-container">
+    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-3-selected.png" alt="Step three, todo"/>
+    <h2>
+      <a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
+        Make any needed technical or policy changes, then complete a demo.
+      </a>
+    </h2>
+  </div>
+  <p class="sub">The faster you complete any changes, the faster we can schedule a demo. Once your changes
+    are made, we aim to
+    schedule the demo within a week. Demos generally last from 30 to 60 minutes. </p>
+  <div class="steps-container">
+    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-4-disabled.png" alt="Step four"/>
+    <h2>Receive production access.</h2>
+  </div>
+  <p class="sub">
+    After the demo is complete and any final items are wrapped up, production access is granted within a week.
+  </p>
+  <p>
+    Interested in getting access to another API? Read the API docs or request a new API key.
+  </p>
+  <p>
+    <a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
+      <u>Preparing for a demo</u>
+    </a> |
+    <a href="https://developer.va.gov/onboarding/working-with-lighthouse-apis">
+      <u>Working with Lighthouse APIs</u>
+    </a> |
+    <a href="https://developer.va.gov/support/contact-us">
+      <u>Contact us</u>
+    </a>
+  </p>
+</div>
 `;
 export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
 <ul>

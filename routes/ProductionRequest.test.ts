@@ -7,8 +7,6 @@ import productionRequestHandler, { productionSchema } from '../routes/Production
 // each test.
 const mockSendEmail = jest.fn();
 
-let stubToken: unknown;
-
 describe('productionRequestHandler', () => {
   const mockSendProductionAccessConsumerEmail = jest.fn();
   const mockSendProductionAccessEmail = jest.fn();
@@ -72,8 +70,6 @@ describe('productionRequestHandler', () => {
         listedOnMyHealthApplication: false,
       },
     } as Request;
-
-    stubToken = 'onering';
 
     mockSendEmail.mockReset();
     stubNext.mockReset();

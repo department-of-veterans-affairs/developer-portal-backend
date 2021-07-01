@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 
-import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail, ProductionAccessSupportEmail} from '../services/GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail} from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
 
 export const enum SubmissionType {

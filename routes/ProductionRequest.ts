@@ -55,6 +55,13 @@ interface ContactDetails {
   email: string;
 }
 
+export interface ProductionAccessConsumerEmail {
+  logo: string;
+  stepOne: string;
+  stepTwo: string;
+  stepThree: string;
+  stepFour: string;
+}
 interface ProductionAccessBody {
   primaryContact: ContactDetails;
   secondaryContact: ContactDetails;
@@ -98,7 +105,6 @@ export default function productionRequestHandler( govdelivery: GovDeliveryServic
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    console.log(req.body);
     try {
       if (govdelivery) {
         logger.info({ message: 'sending production access email to support' });
@@ -113,4 +119,3 @@ export default function productionRequestHandler( govdelivery: GovDeliveryServic
     }
   };
 }
-
