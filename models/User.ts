@@ -12,7 +12,7 @@ import { DevPortalError } from './DevPortalError';
 
 type APIFilterFn = (api: string) => boolean;
 
-type UserDynamoItem = {
+export type UserDynamoItem = {
   apis: string;
   email: string;
   firstName: string;
