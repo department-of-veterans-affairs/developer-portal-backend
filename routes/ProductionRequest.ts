@@ -32,7 +32,7 @@ export const productionSchema = Joi.object().keys({
   signUpLink: Joi.string(),
   supportLink: Joi.string(),
   platforms: Joi.array().items(Joi.string()),
-  veteranFacingDescription: Joi.string(),
+  veteranFacingDescription: Joi.string().max(415),
   vasiSystemName: Joi.string(),
   credentialStorage: Joi.string().required(),
   storePIIOrPHI: Joi.boolean().required(),
