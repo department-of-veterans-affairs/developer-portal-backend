@@ -4,7 +4,7 @@ import logger from '../config/logger';
 import GovDeliveryService from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
 import { validateApiList } from '../util/validators';
-import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
+import {  ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object().keys({
   primaryContact: Joi.object({
@@ -32,7 +32,7 @@ export const productionSchema = Joi.object().keys({
   website: Joi.string(),
   signUpLink: Joi.string(),
   supportLink: Joi.string(),
-  platforms: Joi.array().items(Joi.string()),
+  platforms: Joi.string(),
   veteranFacingDescription: Joi.string().max(415),
   vasiSystemName: Joi.string(),
   credentialStorage: Joi.string().required(),

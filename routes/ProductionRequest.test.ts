@@ -52,7 +52,7 @@ describe('productionRequestHandler', () => {
         website: 'www.one2bindthem.com',
         signUpLink: 'www.one2bindthem.com/signup',
         supportLink: 'www.one2bindthem.com/support',
-        platforms: ['iOS'],
+        platforms: 'iOS',
         veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
         vasiSystemName: 'asdf',
         credentialStorage: 'stored in a volcano on mount doom',
@@ -122,7 +122,7 @@ describe('validations', () => {
     website: 'www.one2bindthem.com',
     signUpLink: 'www.one2bindthem.com/signup',
     supportLink: 'www.one2bindthem.com/support',
-    platforms: ['iOS'],
+    platforms: 'iOS',
     veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vasiSystemName: 'asdf',
     credentialStorage: 'stored in a volcano on mount doom',
@@ -438,8 +438,8 @@ describe('validations', () => {
   });
 
   describe('platforms', () => {
-    it('is allowed to be an empty array', () => {
-      const payload = { ...defaultPayload, platforms: [] };
+    it('is allowed to be an empty string', () => {
+      const payload = { ...defaultPayload, platforms: '' };
 
       const result = productionSchema.validate(payload);
 
@@ -451,7 +451,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"platforms" must be an array');
+      expect(result.error?.message).toEqual('"platforms" must be a string');
     });
   });
 
