@@ -3,18 +3,18 @@ import Joi from '@hapi/joi';
 import logger from '../config/logger';
 import GovDeliveryService from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
-import {validateApiList} from './DeveloperApplication';
+import { validateApiList } from '../util/validators';
 
 export const productionSchema = Joi.object().keys({
   primaryContact: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    email: Joi.string().required(),
+    email: Joi.string().email().required(),
   }).required(),
   secondaryContact: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    email: Joi.string().required(),
+    email: Joi.string().email().required(),
   }).required(),
   organization: Joi.string().required(),
   appName: Joi.string().required(),
@@ -27,7 +27,7 @@ export const productionSchema = Joi.object().keys({
   apis: Joi.custom(validateApiList).required(),
   monitizedVeteranInformation: Joi.boolean().required(),
   monitizationExplanation: Joi.string(),
-  veteranFacing: Joi.boolean(),
+  veteranFacing: Joi.boolean().required(),
   website: Joi.string(),
   signUpLink: Joi.string(),
   supportLink: Joi.string(),
