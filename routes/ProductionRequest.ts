@@ -19,7 +19,7 @@ export const productionSchema = Joi.object().keys({
   organization: Joi.string().required(),
   appName: Joi.string().required(),
   appDescription: Joi.string().required(),
-  statusUpdateEmails: Joi.array().items(Joi.string()).required(),
+  statusUpdateEmails: Joi.array().items(Joi.string().email()).required(),
   valueProvided: Joi.string().required(),
   businessModel: Joi.string(),
   policyDocuments: Joi.array().items(Joi.string()).required(),
@@ -36,14 +36,14 @@ export const productionSchema = Joi.object().keys({
   vasiSystemName: Joi.string(),
   credentialStorage: Joi.string().required(),
   storePIIOrPHI: Joi.boolean().required(),
-  storageMethod: Joi.string(),
-  safeguards: Joi.string(),
+  piiStorageMethod: Joi.string(),
+  multipleReqSafeguards: Joi.string(),
   breachManagementProcess: Joi.string(),
   vulnerabilityManagement: Joi.string(),
-  exposeHealthInformationToThirdParties: Joi.boolean(),
-  thirdPartyHealthInfoDescription: Joi.string(),
+  exposeVeteranInformationToThirdParties: Joi.boolean(),
+  thirdPartyInfoDescription: Joi.string(),
   scopesAccessRequested: Joi.array().items(Joi.string()),
-  distrubitingAPIKeysToCustomers: Joi.boolean(),
+  distributingAPIKeysToCustomers: Joi.boolean().required(),
   namingConvention: Joi.string(),
   centralizedBackendLog: Joi.string(),
   listedOnMyHealthApplication: Joi.boolean(),
@@ -85,14 +85,14 @@ interface ProductionAccessBody {
   vasiSystemName?: string;
   credentialStorage: string;
   storePIIOrPHI: boolean;
-  storageMethod?: string;
-  safeguards?: string;
+  piiStorageMethod?: string;
+  multipleReqSafeguards?: string;
   breachManagementProcess?: string;
   vulnerabilityManagement?: string;
-  exposeHealthInformationToThirdParties?: boolean;
-  thirdPartyHealthInfoDescription?: string;
+  exposeVeteranInformationToThirdParties?: boolean;
+  thirdPartyInfoDescription?: string;
   scopesAccessRequested?: string[];
-  distrubitingAPIKeysToCustomers?: boolean;
+  distributingAPIKeysToCustomers?: boolean;
   namingConvention?: string;
   centralizedBackendLog?: string;
   listedOnMyHealthApplication?: boolean;

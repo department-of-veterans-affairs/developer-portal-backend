@@ -57,14 +57,14 @@ describe('productionRequestHandler', () => {
         vasiSystemName: 'asdf',
         credentialStorage: 'stored in a volcano on mount doom',
         storePIIOrPHI: false,
-        storageMethod: 'Locking away in the fires from whence it came.',
-        safeguards: 'golem',
+        piiStorageMethod: 'Locking away in the fires from whence it came.',
+        multipleReqSafeguards: 'golem',
         breachManagementProcess: 'golem',
         vulnerabilityManagement: 'golem',
-        exposeHealthInformationToThirdParties: false,
-        thirdPartyHealthInfoDescription: 'n/a',
+        exposeVeteranInformationToThirdParties: false,
+        thirdPartyInfoDescription: 'n/a',
         scopesAccessRequested: ['profile', 'email'],
-        distrubitingAPIKeysToCustomers: false,
+        distributingAPIKeysToCustomers: false,
         namingConvention: 'overly-complicated',
         centralizedBackendLog: 'non-existent',
         listedOnMyHealthApplication: false,
@@ -127,14 +127,14 @@ describe('validations', () => {
     vasiSystemName: 'asdf',
     credentialStorage: 'stored in a volcano on mount doom',
     storePIIOrPHI: false,
-    storageMethod: 'Locking away in the fires from whence it came.',
-    safeguards: 'golem',
+    piiStorageMethod: 'Locking away in the fires from whence it came.',
+    multipleReqSafeguards: 'golem',
     breachManagementProcess: 'golem',
     vulnerabilityManagement: 'golem',
-    exposeHealthInformationToThirdParties: false,
-    thirdPartyHealthInfoDescription: 'n/a',
+    exposeVeteranInformationToThirdParties: false,
+    thirdPartyInfoDescription: 'n/a',
     scopesAccessRequested: ['profile', 'email'],
-    distrubitingAPIKeysToCustomers: false,
+    distributingAPIKeysToCustomers: false,
     namingConvention: 'overly-complicated',
     centralizedBackendLog: 'non-existent',
     listedOnMyHealthApplication: false,
@@ -511,37 +511,37 @@ describe('validations', () => {
     });
   });
 
-  describe('storageMethod', () => {
+  describe('piiStorageMethod', () => {
     it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, storageMethod: '' };
+      const payload = { ...defaultPayload, piiStorageMethod: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toBe('"storageMethod" is not allowed to be empty');
+      expect(result.error?.message).toBe('"piiStorageMethod" is not allowed to be empty');
     });
     it('is a string', () => {
-      const payload = { ...defaultPayload, storageMethod: 123456 };
+      const payload = { ...defaultPayload, piiStorageMethod: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"storageMethod" must be a string');
+      expect(result.error?.message).toEqual('"piiStorageMethod" must be a string');
     });
   });
 
-  describe('safeguards', () => {
+  describe('multipleReqSafeguards', () => {
     it('is a string', () => {
-      const payload = { ...defaultPayload, safeguards: 123456 };
+      const payload = { ...defaultPayload, multipleReqSafeguards: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"safeguards" must be a string');
+      expect(result.error?.message).toEqual('"multipleReqSafeguards" must be a string');
     });
     it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, safeguards: '' };
+      const payload = { ...defaultPayload, multipleReqSafeguards: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toBe('"safeguards" is not allowed to be empty');
+      expect(result.error?.message).toBe('"multipleReqSafeguards" is not allowed to be empty');
     });
   });
 
@@ -579,23 +579,23 @@ describe('validations', () => {
     });
   });
 
-  describe('exposeHealthInformationToThirdParties', () => {
+  describe('exposeVeteranInformationToThirdParties', () => {
     it('is a boolean', () => {
-      const payload = { ...defaultPayload, exposeHealthInformationToThirdParties: 123456 };
+      const payload = { ...defaultPayload, exposeVeteranInformationToThirdParties: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"exposeHealthInformationToThirdParties" must be a boolean');
+      expect(result.error?.message).toEqual('"exposeVeteranInformationToThirdParties" must be a boolean');
     });
   });
 
-  describe('thirdPartyHealthInfoDescription', () => {
+  describe('thirdPartyInfoDescription', () => {
     it('is a boolean', () => {
-      const payload = { ...defaultPayload, thirdPartyHealthInfoDescription: 123456 };
+      const payload = { ...defaultPayload, thirdPartyInfoDescription: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"thirdPartyHealthInfoDescription" must be a string');
+      expect(result.error?.message).toEqual('"thirdPartyInfoDescription" must be a string');
     });
   });
 
@@ -609,16 +609,16 @@ describe('validations', () => {
     });
   });
 
-  describe('distrubitingAPIKeysToCustomers', () => {
+  describe('distributingAPIKeysToCustomers', () => {
     it('is an boolean', () => {
-      const payload = { ...defaultPayload, distrubitingAPIKeysToCustomers: 123456 };
+      const payload = { ...defaultPayload, distributingAPIKeysToCustomers: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"distrubitingAPIKeysToCustomers" must be a boolean');
+      expect(result.error?.message).toEqual('"distributingAPIKeysToCustomers" must be a boolean');
     });
     it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, distrubitingAPIKeysToCustomers: undefined };
+      const payload = { ...defaultPayload, distributingAPIKeysToCustomers: undefined };
 
       const result = productionSchema.validate(payload);
 
