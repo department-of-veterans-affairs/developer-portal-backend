@@ -55,13 +55,6 @@ interface ContactDetails {
   email: string;
 }
 
-export interface ProductionAccessConsumerEmail {
-  logo: string;
-  stepOne: string;
-  stepTwo: string;
-  stepThree: string;
-  stepFour: string;
-}
 interface ProductionAccessBody {
   primaryContact: ContactDetails;
   secondaryContact: ContactDetails;

@@ -92,13 +92,6 @@ export interface ProductionAccessSupportEmail {
   centralizedBackendLog?: string;
   listedOnMyHealthApplication?: boolean;
 }
-export interface ProductionAccessConsumerEmail {
-  logo: string;
-  stepOne: string;
-  stepTwo: string;
-  stepThree: string;
-  stepFour: string;
-}
 export interface EmailResponse {
   from_name: string;
   from_email: string;
