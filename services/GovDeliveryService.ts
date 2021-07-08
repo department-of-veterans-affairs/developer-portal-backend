@@ -10,6 +10,7 @@ import {
 import {  PRODUCTION_ACCESS_SUPPORT_TEMPLATE, PRODUCTION_ACCESS_CONSUMER_TEMPLATE } from '../templates/production';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 interface EmailRecipient {
   email: string;
@@ -51,46 +52,6 @@ export interface PublishingSupportEmail {
   apiInternalOnly: boolean;
   apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
-}
-export interface ContactDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-export interface ProductionAccessSupportEmail {
-  primaryContact: ContactDetails;
-  secondaryContact: ContactDetails;
-  organization: string;
-  appName: string;
-  appDescription: string;
-  statusUpdateEmails: string[];
-  valueProvided: string;
-  businessModel?: string;
-  policyDocuments: string[];
-  phoneNumber: string;
-  apis?: string;
-  monitizedVeteranInformation: boolean;
-  monitizationExplanation?: string;
-  veteranFacing?: boolean;
-  website?: string;
-  signUpLink?: string;
-  supportLink?: string;
-  platforms?: string[];
-  veteranFacingDescription?: string;
-  vasiSystemName?: string;
-  credentialStorage: string;
-  storePIIOrPHI: boolean;
-  piiStorageMethod?: string;
-  multipleReqSafeguards?: string;
-  breachManagementProcess?: string;
-  vulnerabilityManagement?: string;
-  exposeVeteranInformationToThirdParties?: boolean;
-  thirdPartyInfoDescription?: string;
-  scopesAccessRequested?: string[];
-  distributingAPIKeysToCustomers?: boolean;
-  namingConvention?: string;
-  centralizedBackendLog?: string;
-  listedOnMyHealthApplication?: boolean;
 }
 export interface EmailResponse {
   from_name: string;

@@ -4,6 +4,7 @@ import logger from '../config/logger';
 import GovDeliveryService from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
 import { validateApiList } from '../util/validators';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object().keys({
   primaryContact: Joi.object({
@@ -49,48 +50,7 @@ export const productionSchema = Joi.object().keys({
   listedOnMyHealthApplication: Joi.boolean(),
 }).options({ abortEarly: false });
 
-interface ContactDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-interface ProductionAccessBody {
-  primaryContact: ContactDetails;
-  secondaryContact: ContactDetails;
-  organization: string;
-  appName: string;
-  appDescription: string;
-  statusUpdateEmails: string[];
-  valueProvided: string;
-  businessModel?: string;
-  policyDocuments: string[];
-  phoneNumber: string;
-  apis?: string;
-  monitizedVeteranInformation: boolean;
-  monitizationExplanation?: string;
-  veteranFacing?: boolean;
-  website?: string;
-  signUpLink?: string;
-  supportLink?: string;
-  platforms?: string[];
-  veteranFacingDescription?: string;
-  vasiSystemName?: string;
-  credentialStorage: string;
-  storePIIOrPHI: boolean;
-  piiStorageMethod?: string;
-  multipleReqSafeguards?: string;
-  breachManagementProcess?: string;
-  vulnerabilityManagement?: string;
-  exposeVeteranInformationToThirdParties?: boolean;
-  thirdPartyInfoDescription?: string;
-  scopesAccessRequested?: string[];
-  distributingAPIKeysToCustomers?: boolean;
-  namingConvention?: string;
-  centralizedBackendLog?: string;
-  listedOnMyHealthApplication?: boolean;
-}
-type ProductionAccessRequest = Request<Record<string, unknown>, Record<string, unknown>, ProductionAccessBody, Record<string, unknown>>;
+type ProductionAccessRequest = Request<Record<string, unknown>, Record<string, unknown>, ProductionAccessSupportEmail, Record<string, unknown>>;
 
 export default function productionRequestHandler( govdelivery: GovDeliveryService | undefined) {
   return async function (
