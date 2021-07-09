@@ -48,6 +48,9 @@ export const productionSchema = Joi.object().keys({
   namingConvention: Joi.string(),
   centralizedBackendLog: Joi.string(),
   listedOnMyHealthApplication: Joi.boolean(),
+  appImageLink: Joi.string(),
+  patientWaitTimeImageLink: Joi.string(),
+  medicalDisclaimerImageLink: Joi.string,
 }).options({ abortEarly: false });
 
 type ProductionAccessRequest = Request<Record<string, unknown>, Record<string, unknown>, ProductionAccessSupportEmail, Record<string, unknown>>;
