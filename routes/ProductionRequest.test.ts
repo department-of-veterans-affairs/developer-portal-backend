@@ -441,12 +441,12 @@ describe('validations', () => {
   });
 
   describe('platforms', () => {
-    it('is allowed to be an empty string', () => {
+    it('is not allowed to be an empty string', () => {
       const payload = { ...defaultPayload, platforms: '' };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toEqual(undefined);
+      expect(result.error?.message).toEqual('"platforms" is not allowed to be empty');
     });
 
     it('is an array', () => {
@@ -620,12 +620,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"distributingAPIKeysToCustomers" must be a boolean');
     });
-    it('is allowed to be undefined', () => {
+    it('is required', () => {
       const payload = { ...defaultPayload, distributingAPIKeysToCustomers: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error).toBe(undefined);
+      expect(result.error?.message).toBe('"distributingAPIKeysToCustomers" is required');
     });
   });
 
