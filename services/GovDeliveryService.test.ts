@@ -1,10 +1,9 @@
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import GovDeliveryService,
-{ ConsumerSupportEmail,
-  PublishingSupportEmail,
-  ProductionAccessSupportEmail } from './GovDeliveryService';
+import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail }
+  from './GovDeliveryService';
 import User from '../models/User';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
 
@@ -180,35 +179,38 @@ describe('GovDeliveryService', () => {
           businessModel: 'magical rings >> profit',
           policyDocuments: ['www.example.com/tos'],
           phoneNumber: '867-5309',
-          apis: ['benefits'],
+          apis: 'benefits',
           monitizedVeteranInformation: false,
           monitizationExplanation: 'n/a',
           veteranFacing: false,
           website: 'www.one2bindthem.com',
           signUpLink: 'www.one2bindthem.com/signup',
           supportLink: 'www.one2bindthem.com/support',
-          platforms: ['iOS'],
+          platforms: 'iOS',
           veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
           vasiSystemName: 'asdf',
           credentialStorage: '',
           storePIIOrPHI: false,
-          storageMethod: 'Locking away in the fires from whence it came.',
-          safeguards: 'golem',
+          piiStorageMethod: 'Locking away in the fires from whence it came.',
+          multipleReqSafeguards: 'golem',
           breachManagementProcess: 'golem',
           vulnerabilityManagement: 'golem',
-          exposeHealthInformationToThirdParties: false,
-          thirdPartyHealthInfoDescription: 'n/a',
+          exposeVeteranInformationToThirdParties: false,
+          thirdPartyInfoDescription: 'n/a',
           scopesAccessRequested: ['profile', 'email'],
-          distrubitingAPIKeysToCustomers: false,
+          distributingAPIKeysToCustomers: false,
           namingConvention: 'overly-complicated',
           centralizedBackendLog: 'non-existent',
           listedOnMyHealthApplication: false,
+          appImageLink: 'www.one2bindthem.com/assets/image',
+          patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patient',
+          medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
         };
         await client.sendProductionAccessEmail(email);
         expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
           recipients: [{ email: SUPPORT_EMAIL }],
           from_name: 'Samwise Gamgee',
-          subject: 'Production Access Requested',
+          subject: 'Production Access Requested for Sauron.INC',
           body: expect.stringContaining('Primary Contact:') as unknown,
         }));
       });
