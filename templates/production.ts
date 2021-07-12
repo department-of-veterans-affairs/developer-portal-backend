@@ -49,7 +49,7 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
       color: #323A45;
     }
 
-    h2 {
+    step-heading {
       margin-bottom: 15px;
       padding: 0;
       font-size: 16px;
@@ -65,10 +65,14 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
       line-height: 25px;
       color: #323A45;
     }
+
+    p a {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <div class="card">
-  <div class="header"><img src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/VA-Lighhouse-APIs-email.png" alt="logo"/></div>
+  <div class="header"><img src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/VA-Lighhouse-APIs-email.png" alt="VA Lighthouse APIs Logo"/></div>
   <p>We’ve received your request for production access. It’s good to remember that getting production access requires
     multiple steps and can take less than a week to over a month, depending on the API. For open data APIs,
     production access takes a week or less and no demo is required.</p>
@@ -106,17 +110,18 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
   </p>
   <p>
     <a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
-      <u>Preparing for a demo</u>
+      Preparing for a demo
     </a> |
     <a href="https://developer.va.gov/onboarding/working-with-lighthouse-apis">
-      <u>Working with Lighthouse APIs</u>
+      Working with Lighthouse APIs
     </a> |
     <a href="https://developer.va.gov/support/contact-us">
-      <u>Contact us</u>
+      Contact us
     </a>
   </p>
 </div>
 `;
+
 export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
 <ul>
   <li>
@@ -217,6 +222,30 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       </div>
     </li>
   {{/if}}
+  <li>
+    <div>
+      <strong>
+        <div>Application Image Link:</div>
+      </strong>
+      <div>{{appImageLink}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Patient Wait Time Image Link:</div>
+      </strong>
+      <div>{{patientWaitTimeImageLink}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Medical Disclaimer Image Link:</div>
+      </strong>
+      <div>{{medicalDisclaimerImageLink}}</div>
+    </div>
+  </li>
 </ul>
 <h2>Monetization Information</h2>
 <ul>
@@ -365,4 +394,5 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
     </strong>
     <div>{{listedOnMyHealthApplication}}</div>
   </li>
-</ul>`;
+</ul>
+`;
