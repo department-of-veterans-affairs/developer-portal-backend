@@ -184,7 +184,7 @@ export default class GovDeliveryService implements MonitoredService {
 
   public sendProductionAccessEmail(supportRequest: ProductionAccessSupportEmail): Promise<EmailResponse> {
     const email: EmailRequest = {
-      subject: `Production Access Requested for ${supportRequest['organization']}`,
+      subject: `Production Access Requested for ${supportRequest.organization}`,
       from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
       body: this.productionAccessSupportTemplate(supportRequest),
       recipients: [{email: this.supportEmailRecipient}],
