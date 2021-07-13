@@ -29,14 +29,9 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
       margin-right: 10px;
     }
 
-    .steps-container {
-      height: 26px;
-      margin-bottom: 20px;
-    }
-
     .sub {
-      margin-top: -25px;
       margin-left: 34px;
+      margin-bottom: 10px;
       float:center;
     }
 
@@ -48,15 +43,23 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
       font-weight: bold;
       color: #323A45;
     }
+    .steps-container {
+      height: 26px;
+      margin-bottom: 20px;
+    }
 
-    step-heading {
-      margin-bottom: 15px;
+    .step-heading {
       padding: 0;
       font-size: 16px;
       line-height: 25px;
       font-weight: bold;
       color: #323A45;
       display: inline;
+    }
+
+    ol {
+      list-style: none;
+      padding-left: 0;
     }
 
     p {
@@ -71,40 +74,58 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
     }
   </style>
 </head>
+
 <div class="card">
   <div class="header"><img src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/VA-Lighhouse-APIs-email.png" alt="VA Lighthouse APIs Logo"/></div>
   <p>We’ve received your request for production access. It’s good to remember that getting production access requires
     multiple steps and can take less than a week to over a month, depending on the API. For open data APIs,
     production access takes a week or less and no demo is required.</p>
   <h1><strong>What’s next?</strong></h1>
-  <div class="steps-container">
-    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step one, done"/><h2>Start developing.</h2>
-  </div>
-  <div class="steps-container">
-    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step two, done"/>
-    <h2>Submit your production access request.</h2>
-  </div>
-  <p class="sub">
-    We’ll review your information and notify you within 1-2 weeks if there are any changes we need.
-  </p>
-  <div class="steps-container">
-    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-3-selected.png" alt="Step three, todo"/>
-    <h2>
-      <a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
-        Make any needed technical or policy changes, then complete a demo.
-      </a>
-    </h2>
-  </div>
-  <p class="sub">The faster you complete any changes, the faster we can schedule a demo. Once your changes
-    are made, we aim to
-    schedule the demo within a week. Demos generally last from 30 to 60 minutes. </p>
-  <div class="steps-container">
-    <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-4-disabled.png" alt="Step four"/>
-    <h2>Receive production access.</h2>
-  </div>
-  <p class="sub">
-    After the demo is complete and any final items are wrapped up, production access is granted within a week.
-  </p>
+  <ol>
+    <li class="steps-container">
+      <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step one, done"/>
+      <div class="step-heading">
+      <strong>
+        Start developing.
+      </strong>
+      </div>
+    </li>
+    <li>
+      <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/Done.png" alt="Step two, done"/>
+      <div class="step-heading">
+        <strong>
+          Submit your production access request.
+        </strong>
+      </div>
+      <div class="sub">
+        We’ll review your information and notify you within 1-2 weeks if there are any changes we need.
+      </div>
+    </li>
+    <li>
+      <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-3-selected.png" alt="Step three, todo"/>
+      <div class="step-heading">
+          <a href="https://developer.va.gov/onboarding/prepare-for-and-complete-a-demo">
+            <strong>
+              Make any needed technical or policy changes, then complete a demo.
+            </strong>
+          </a>
+      </div>
+      <div class="sub">
+        The faster you complete any changes, the faster we can schedule a demo. Once your changes are made, we aim to schedule the demo within a week. Demos generally last from 30 to 60 minutes.
+      </div>
+    </li>
+    <li>
+      <img class="steps" src="https://dvp-developer-portal-backend-images.s3-us-gov-west-1.amazonaws.com/step-4-disabled.png" alt="Step four"/>
+      <div class="step-heading">
+        <strong>
+          Receive production access.
+        </strong>
+      </div>
+      <div class="sub">
+        After the demo is complete and any final items are wrapped up, production access is granted within a week.
+      </div>
+    </li>
+  </ol>
   <p>
     Interested in getting access to another API? Read the API docs or request a new API key.
   </p>
