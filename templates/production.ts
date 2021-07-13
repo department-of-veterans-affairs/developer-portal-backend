@@ -348,13 +348,13 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       <strong>
         <div>How is PII/PHI Stored?:</div>
       </strong>
-      <div>{{storageMethod}}</div>
+      <div>{{piiStorageMethod}}</div>
     </li>
     <li>
       <strong>
         <div>Safeguards in Place:</div>
       </strong>
-      <div>{{safeguards}}</div>
+      <div>{{multipleReqSafeguards}}</div>
     </li>
     <li>
       <strong>
@@ -372,14 +372,14 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       <strong>
         <div>Application Exposes Veterans’ Health, Claims, Disabilities, or Service History Data to Third Parties:</div>
       </strong>
-      <div>{{exposeHealthInformationToThirdParties}}</div>
+      <div>{{exposeVeteranInformationToThirdParties}}</div>
     </li>
-    {{#if exposeHealthInformationToThirdParties}}
+    {{#if exposeVeteranInformationToThirdParties}}
       <li>
         <strong>
           <div>Description:</div>
         </strong>
-        <div>{{thirdPartyHealthInfoDescription}}</div>
+        <div>{{thirdPartyInfoDescription}}</div>
       </li>
       <li>
         <strong>
@@ -390,11 +390,11 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
     {{/if}}
       <li>
         <strong>
-          <div>Distrubiting Production API Keys to Customers:</div>
+          <div>Distributing Production API Keys to Customers:</div>
         </strong>
-        <div>{{distrubitingAPIKeysToCustomers}}</div>
+        <div>{{distributingAPIKeysToCustomers}}</div>
       </li>
-      {{#if distrubitingAPIKeysToCustomers}}
+      {{#if distributingAPIKeysToCustomers}}
         <li>
           <strong>
             <div>Naming Convention for Customers:</div>
