@@ -69,6 +69,9 @@
     }
   },
   "lint-staged": {
-    "*.{js,ts}": "eslint --cache --fix && prettier --write"
+    "*.{js,ts}": [
+      "npx prettier --write",
+      "eslint --cache --fix"
+    ]
   }
 }
