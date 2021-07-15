@@ -71,7 +71,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           apiInternalOnlyDetails: req.body.apiInternalOnlyDetails,
           apiOtherInfo: req.body.apiOtherInfo,
         };
-        
+
         await govDelivery.sendPublishingSupportEmail(supportRequest);
         res.sendStatus(200);
       } else {
@@ -83,7 +83,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           organization: req.body.organization,
           apis: req.body.apis,
         };
-        
+
         await govDelivery.sendConsumerSupportEmail(supportRequest);
         res.sendStatus(200);
       }

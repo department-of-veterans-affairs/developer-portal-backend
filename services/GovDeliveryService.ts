@@ -2,9 +2,15 @@ import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE } from '../templates';
+import {
+  WELCOME_TEMPLATE,
+  PUBLISHING_SUPPORT_TEMPLATE,
+  CONSUMER_SUPPORT_TEMPLATE,
+} from '../templates';
+import {  PRODUCTION_ACCESS_SUPPORT_TEMPLATE, PRODUCTION_ACCESS_CONSUMER_TEMPLATE } from '../templates/production';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 interface EmailRecipient {
   email: string;
@@ -28,7 +34,6 @@ interface WelcomeEmail {
   clientSecret?: string;
   redirectURI?: string;
 }
-
 export interface ConsumerSupportEmail {
   firstName: string;
   lastName: string;
@@ -110,6 +115,8 @@ export default class GovDeliveryService implements MonitoredService {
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
   public consumerSupportTemplate: Handlebars.TemplateDelegate<ConsumerSupportEmail>;
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
+  public productionAccessSupportTemplate: Handlebars.TemplateDelegate<ProductionAccessSupportEmail>;
+  public productionAccessConsumerTemplate: string;
   public client: AxiosInstance;
 
   constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
@@ -118,6 +125,8 @@ export default class GovDeliveryService implements MonitoredService {
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.consumerSupportTemplate = Handlebars.compile(CONSUMER_SUPPORT_TEMPLATE);
     this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
+    this.productionAccessSupportTemplate = Handlebars.compile(PRODUCTION_ACCESS_SUPPORT_TEMPLATE);
+    this.productionAccessConsumerTemplate = PRODUCTION_ACCESS_CONSUMER_TEMPLATE;
     this.client = axios.create({
       baseURL: this.host,
       headers: { 'X-AUTH-TOKEN': token },
@@ -170,6 +179,29 @@ export default class GovDeliveryService implements MonitoredService {
       recipients: [{ email: this.supportEmailRecipient }],
     };
 
+    return this.sendEmail(email);
+  }
+
+  public sendProductionAccessEmail(supportRequest: ProductionAccessSupportEmail): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      subject: `Production Access Requested for ${supportRequest.organization}`,
+      from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
+      body: this.productionAccessSupportTemplate(supportRequest),
+      recipients: [{email: this.supportEmailRecipient}],
+    };
+    return this.sendEmail(email);
+  }
+
+  public sendProductionAccessConsumerEmail(emails: string[]): Promise<EmailResponse> {
+    const mappedEmails: EmailRecipient[] = emails.map((x)=>{
+      return {email: x};
+    });
+    const email: EmailRequest = {
+      subject: 'Your Request for Production Access is Submitted',
+      from_name: 'VA API Platform team',
+      body: this.productionAccessConsumerTemplate,
+      recipients: mappedEmails,
+    };
     return this.sendEmail(email);
   }
 
