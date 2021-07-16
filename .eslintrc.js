@@ -4,7 +4,6 @@ const rules = {
   '@typescript-eslint/camelcase': 'off',
   'comma-dangle': ['error', 'always-multiline'],
   '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-  'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules'] }],
 };
 
 module.exports = {
@@ -18,7 +17,6 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   extends: [
     'eslint:recommended',
-    'plugin:node/recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
@@ -29,12 +27,6 @@ module.exports = {
   },
   rules: {
     ...rules,
-  },
-  settings: {
-    node: {
-      allowModules: ['jest', 'nock', 'supertest'],
-      tryExtensions: ['.js', '.json', '.node', '.ts', '.d.ts'],
-    },
   },
   overrides: [
     {
