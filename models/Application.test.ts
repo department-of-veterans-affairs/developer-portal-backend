@@ -4,7 +4,7 @@ import OktaService from '../services/OktaService';
 import { OktaUser } from '../types';
 
 const oktaUser: OktaUser = {
-  apiList: [ 'hobbits' ],
+  apiList: ['hobbits'],
   organization: 'shire',
   email: 'frodo@bagginswriters',
 };
@@ -27,7 +27,11 @@ describe('Application', () => {
 
       expect(oauthClient.application_type).toEqual('web');
       expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
-      expect(oauthClient.grant_types.sort()).toEqual(['authorization_code', 'implicit', 'refresh_token']);
+      expect(oauthClient.grant_types.sort()).toEqual([
+        'authorization_code',
+        'implicit',
+        'refresh_token',
+      ]);
     });
 
     it('be web fields when applicationType is web', () => {
@@ -40,7 +44,11 @@ describe('Application', () => {
 
       expect(oauthClient.application_type).toEqual('web');
       expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
-      expect(oauthClient.grant_types.sort()).toEqual(['authorization_code', 'implicit', 'refresh_token']);
+      expect(oauthClient.grant_types.sort()).toEqual([
+        'authorization_code',
+        'implicit',
+        'refresh_token',
+      ]);
     });
 
     it('be native fields when applicationType is native', () => {

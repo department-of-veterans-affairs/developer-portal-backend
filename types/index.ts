@@ -1,4 +1,4 @@
-import { OAuthApplication } from "@okta/okta-sdk-nodejs";
+import { OAuthApplication } from '@okta/okta-sdk-nodejs';
 
 export type Protocol = 'http' | 'https';
 

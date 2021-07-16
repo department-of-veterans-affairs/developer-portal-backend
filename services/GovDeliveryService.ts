@@ -2,7 +2,11 @@ import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
 import { GovDeliveryUser, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { WELCOME_TEMPLATE, PUBLISHING_SUPPORT_TEMPLATE, CONSUMER_SUPPORT_TEMPLATE } from '../templates';
+import {
+  WELCOME_TEMPLATE,
+  PUBLISHING_SUPPORT_TEMPLATE,
+  CONSUMER_SUPPORT_TEMPLATE,
+} from '../templates';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
 
@@ -138,11 +142,13 @@ export default class GovDeliveryService implements MonitoredService {
           key: user.token,
           kongUsername: user.kongConsumerId ? user.consumerName() : '',
           token_issued: !!user.token,
-          redirectURI:  user.oAuthRedirectURI,
+          redirectURI: user.oAuthRedirectURI,
         }),
-        recipients: [{
-          email: user.email,
-        }],
+        recipients: [
+          {
+            email: user.email,
+          },
+        ],
       };
 
       return this.sendEmail(email);
@@ -162,7 +168,9 @@ export default class GovDeliveryService implements MonitoredService {
     return this.sendEmail(email);
   }
 
-  public sendPublishingSupportEmail(supportRequest: PublishingSupportEmail): Promise<EmailResponse> {
+  public sendPublishingSupportEmail(
+    supportRequest: PublishingSupportEmail,
+  ): Promise<EmailResponse> {
     const email: EmailRequest = {
       subject: 'Publishing Support Needed',
       from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
@@ -200,8 +208,9 @@ export default class GovDeliveryService implements MonitoredService {
       healthy: false,
     };
     try {
-      healthResponse.healthy = await this.getEmailStatusList(1)
-        .then(response => response.status === 200);
+      healthResponse.healthy = await this.getEmailStatusList(1).then(
+        response => response.status === 200,
+      );
       return Promise.resolve(healthResponse);
     } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of GovDelivery';

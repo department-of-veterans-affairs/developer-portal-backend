@@ -20,7 +20,7 @@ function filterApplicableEndpoints(apiList: string[]): string[] {
 export default class OktaService implements MonitoredService {
   public client: Client;
 
-  constructor({ host, token }: { host: string, token: string}) {
+  constructor({ host, token }: { host: string; token: string }) {
     this.client = new Client({
       token,
       orgUrl: host,
@@ -57,10 +57,12 @@ export default class OktaService implements MonitoredService {
 
     await Promise.all(
       applicableEndpoints.map(async authServerId => {
-        const policies: OktaPolicyCollection = await this.client.listAuthorizationServerPolicies(authServerId);
+        const policies: OktaPolicyCollection = await this.client.listAuthorizationServerPolicies(
+          authServerId,
+        );
         const clientId = resp.credentials.oauthClient.client_id;
         const defaultPolicy: OktaPolicy | null = await this.getDefaultPolicy(policies);
-        
+
         if (defaultPolicy) {
           defaultPolicy.conditions.clients.include.push(clientId);
           await this.client.updateAuthorizationServerPolicy(
@@ -69,8 +71,14 @@ export default class OktaService implements MonitoredService {
             defaultPolicy,
           );
         } else {
-          logger.error({message: "No default policy", clientId: clientId, authServerId: authServerId});
-          throw new Error(`No default policy for clientId: ${clientId}, authServerId: ${authServerId}`);
+          logger.error({
+            message: 'No default policy',
+            clientId: clientId,
+            authServerId: authServerId,
+          });
+          throw new Error(
+            `No default policy for clientId: ${clientId}, authServerId: ${authServerId}`,
+          );
         }
       }),
     );

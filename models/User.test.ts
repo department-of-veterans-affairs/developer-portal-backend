@@ -135,7 +135,10 @@ describe('User', () => {
   });
 
   describe('saveToDynamo', () => {
-    const mockPutItem = jest.fn<void, [paramsa: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>();
+    const mockPutItem = jest.fn<
+      void,
+      [paramsa: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]
+    >();
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     mockPutItem.mockImplementation(() => {});
     const dynamo = { putItem: mockPutItem } as unknown as DynamoService;
@@ -167,7 +170,9 @@ describe('User', () => {
       //Fail the test if the expectations in the catch is never reached.
       expect.assertions(2);
       const error = new Error('Where is the Horse and the Rider?');
-      mockPutItem.mockImplementationOnce(() => { throw error; });
+      mockPutItem.mockImplementationOnce(() => {
+        throw error;
+      });
 
       try {
         await user.saveToDynamo(dynamo);
@@ -186,10 +191,12 @@ describe('User', () => {
 
       await user.saveToDynamo(dynamo);
 
-      expect(mockPutItem.mock.calls[0][0]).toEqual(expect.objectContaining({
-        okta_application_id: 'abc123',
-        okta_client_id: 'xyz456',
-      }));
+      expect(mockPutItem.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          okta_application_id: 'abc123',
+          okta_client_id: 'xyz456',
+        }),
+      );
     });
 
     it('avoids saving okta ids if they do not exist', async () => {
@@ -275,11 +282,14 @@ describe('User', () => {
     const mockOkta = {} as OktaService;
     it('sends to Okta if a redirect URI is provided', async () => {
       await user.saveToOkta(mockOkta);
-      expect(Application).toHaveBeenCalledWith({
-        applicationType: 'web',
-        name: `AdHocPaget-1892-01-03T08:00:00.000Z`,
-        redirectURIs: ['https://rohirrim.rohan.horse/auth'],
-      }, user);
+      expect(Application).toHaveBeenCalledWith(
+        {
+          applicationType: 'web',
+          name: `AdHocPaget-1892-01-03T08:00:00.000Z`,
+          redirectURIs: ['https://rohirrim.rohan.horse/auth'],
+        },
+        user,
+      );
       expect(mockCreateOktaApplication).toHaveBeenCalled();
     });
   });
@@ -299,7 +309,10 @@ Requested access to:
 * verification
 `;
       await user.sendSlackSuccess(mockSlack);
-      expect(mockSendSuccessMessage).toHaveBeenCalledWith(expectedSlackString, 'New User Application');
+      expect(mockSendSuccessMessage).toHaveBeenCalledWith(
+        expectedSlackString,
+        'New User Application',
+      );
     });
   });
 });

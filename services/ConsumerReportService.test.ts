@@ -48,13 +48,14 @@ describe('ConsumerReportService', () => {
 
   describe('generate csv report', () => {
     it('returns a csv of all users when no api list is given', async () => {
-
       mockScan.mockResolvedValue(mockedUsers);
 
-      const report = await consumerReportServ.generateCSVReport({writeToDisk: false, apiList: []});
+      const report = await consumerReportServ.generateCSVReport({
+        writeToDisk: false,
+        apiList: [],
+      });
       expect(report).toContain('fbag@hobbiton.com');
       expect(report).toContain('wizz@higherbeings.com');
     });
-
   });
 });

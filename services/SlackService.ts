@@ -42,7 +42,7 @@ interface PostBody {
 }
 
 interface WebAPIHeaders {
-  'Authorization': string;
+  Authorization: string;
   'Content-Type': string;
 }
 
@@ -85,7 +85,7 @@ export default class SlackService implements MonitoredService {
     const config: WebAPIRequestConfig = {
       baseURL: baseURL,
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json; charset=UTF-8',
       },
     };
@@ -96,12 +96,14 @@ export default class SlackService implements MonitoredService {
   public sendSuccessMessage(message: string, title: string): Promise<SlackResponse> {
     const body: PostBody = {
       text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color: 'good',
-        title,
-      }],
+      attachments: [
+        {
+          text: message,
+          fallback: message,
+          color: 'good',
+          title,
+        },
+      ],
     };
 
     return this.post(body);
@@ -111,7 +113,7 @@ export default class SlackService implements MonitoredService {
     duration: string,
     endDate: string,
     timeSpanSignups: SignupCountResult,
-    allTimeSignups: SignupCountResult
+    allTimeSignups: SignupCountResult,
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
@@ -195,13 +197,15 @@ export default class SlackService implements MonitoredService {
 
   private async post(body: PostBody): Promise<SlackResponse> {
     try {
-      const res = await this.client.post<SlackResponse>('/api/chat.postMessage', { channel: this.options.channel, ...body });
-      if(res.data.error){
+      const res = await this.client.post<SlackResponse>('/api/chat.postMessage', {
+        channel: this.options.channel,
+        ...body,
+      });
+      if (res.data.error) {
         throw new Error(res.data.error);
       }
       return res.data;
-    }
-    catch (err: unknown) {
+    } catch (err: unknown) {
       // Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
       // We will want that information, so we're re-writing the message field of the error
       // that axios throws on 400 and 500 responses, since our default error handling
@@ -209,8 +213,8 @@ export default class SlackService implements MonitoredService {
       const { response } = err as AxiosError;
       if (response) {
         (err as Error).message =
-          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, `
-          + `Original: ${(err as AxiosError).message}`;
+          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, ` +
+          `Original: ${(err as AxiosError).message}`;
       }
       throw err;
     }
@@ -240,7 +244,7 @@ export default class SlackService implements MonitoredService {
       },
     };
     const botInfoResponse = await this.client.get<SlackBotInfo>('/api/bots.info', config);
-    if(botInfoResponse.data.error){
+    if (botInfoResponse.data.error) {
       throw new Error(botInfoResponse.data.error);
     }
     return botInfoResponse.data;

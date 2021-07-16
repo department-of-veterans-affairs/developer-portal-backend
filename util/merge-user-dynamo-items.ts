@@ -1,4 +1,4 @@
-import { UserDynamoItem } from "../models/User";
+import { UserDynamoItem } from '../models/User';
 
 const mergeCommaSeparatedValues = (value1: string, value2: string): string => {
   const array1 = value1.split(',');
@@ -8,8 +8,8 @@ const mergeCommaSeparatedValues = (value1: string, value2: string): string => {
 };
 
 /**
-   * Merges user dynamo items where their emails match
-   */
+ * Merges user dynamo items where their emails match
+ */
 export const mergeUserDynamoItems = (consumer: UserDynamoItem[]): UserDynamoItem[] => {
   // Instead of using a Set to remove duplicate emails, we use a Map.
   // This gives us easy entry if we want to merge user fields. For instance,
@@ -17,7 +17,7 @@ export const mergeUserDynamoItems = (consumer: UserDynamoItem[]): UserDynamoItem
   // value
   const consumerMap = new Map<string, UserDynamoItem>();
 
-  consumer.forEach((user) => {
+  consumer.forEach(user => {
     const existingUser = consumerMap.get(user.email);
     if (existingUser) {
       // merge users

@@ -27,17 +27,21 @@ function validateApiList(val: string): string {
   return val;
 }
 
-export const applySchema = Joi.object().keys({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  organization: Joi.string().required(),
-  description: Joi.string().allow(''),
-  email: Joi.string().email().required(),
-  oAuthRedirectURI: Joi.string().allow('').uri({ scheme: ['http', 'https']}),
-  oAuthApplicationType: Joi.allow('').valid('web', 'native'),
-  termsOfService: Joi.required().valid(true),
-  apis: Joi.custom(validateApiList).required(),
-}).options({ abortEarly: false });
+export const applySchema = Joi.object()
+  .keys({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    organization: Joi.string().required(),
+    description: Joi.string().allow(''),
+    email: Joi.string().email().required(),
+    oAuthRedirectURI: Joi.string()
+      .allow('')
+      .uri({ scheme: ['http', 'https'] }),
+    oAuthApplicationType: Joi.allow('').valid('web', 'native'),
+    termsOfService: Joi.required().valid(true),
+    apis: Joi.custom(validateApiList).required(),
+  })
+  .options({ abortEarly: false });
 
 interface DeveloperApplicationRequestBody {
   firstName: string;
@@ -51,7 +55,12 @@ interface DeveloperApplicationRequestBody {
   apis: string;
 }
 
-type DeveloperApplicationRequest = Request<Record<string, unknown>, Record<string, unknown>, DeveloperApplicationRequestBody, Record<string, unknown>>;
+type DeveloperApplicationRequest = Request<
+  Record<string, unknown>,
+  Record<string, unknown>,
+  DeveloperApplicationRequestBody,
+  Record<string, unknown>
+>;
 
 export default function developerApplicationHandler(
   kong: KongService,
@@ -63,7 +72,7 @@ export default function developerApplicationHandler(
   return async function (
     req: DeveloperApplicationRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     const {
       firstName,
@@ -90,7 +99,7 @@ export default function developerApplicationHandler(
     };
 
     const user: User = new User(form);
-    /* 
+    /*
      * Sign up the user in Kong and Okta, record it in DynamoDB,
      * and return the result to UI as quickly as possible. Report
      * an error to the UI with the call to next if any of these critical steps fail.
@@ -110,7 +119,7 @@ export default function developerApplicationHandler(
       await user.saveToDynamo(dynamo);
 
       if (!user.oauthApplication) {
-        res.json({ 
+        res.json({
           token: user.token,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
         });

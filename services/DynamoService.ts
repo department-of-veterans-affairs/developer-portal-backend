@@ -41,7 +41,11 @@ export default class DynamoService implements MonitoredService {
     });
   }
 
-  public scan(tableName: string, projectionExp: string, filters: FilterParams): Promise<AttributeMap[]> {
+  public scan(
+    tableName: string,
+    projectionExp: string,
+    filters: FilterParams,
+  ): Promise<AttributeMap[]> {
     return new Promise<AttributeMap[]>((resolve, reject) => {
       this.client.scan(
         {
@@ -55,7 +59,7 @@ export default class DynamoService implements MonitoredService {
           } else {
             resolve(data.Items || []);
           }
-        }
+        },
       );
     });
   }
@@ -78,7 +82,7 @@ export default class DynamoService implements MonitoredService {
           } else {
             resolve(data.Items || []);
           }
-        }
+        },
       );
     });
   }
@@ -89,7 +93,7 @@ export default class DynamoService implements MonitoredService {
       serviceName: 'Dynamo',
       healthy: false,
     };
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       try {
         const params = {
           Limit: 1,

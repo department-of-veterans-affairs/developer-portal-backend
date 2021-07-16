@@ -11,7 +11,7 @@ const parseMoment = (argName: string) => {
     const momentArg = moment(date);
     if (!momentArg.isValid()) {
       throw new Error(
-        `"${argName}" must be a date string parseable by moment() [https://momentjs.com/docs/#/parsing/]`
+        `"${argName}" must be a date string parseable by moment() [https://momentjs.com/docs/#/parsing/]`,
       );
     }
 
@@ -24,14 +24,14 @@ const cliOptions: OptionDefinition[] = [
     name: 'start',
     alias: 's',
     type: parseMoment('start'),
-    defaultValue: moment().subtract(7, 'days')
+    defaultValue: moment().subtract(7, 'days'),
   },
   {
     name: 'end',
     alias: 'e',
     type: parseMoment('end'),
-    defaultValue: moment()
-  }
+    defaultValue: moment(),
+  },
 ];
 
 const printArgs = (args: CommandLineOptions) => {
@@ -50,7 +50,7 @@ const printResult = (counts: SignupCountResult) => {
     const formattedLine = sprintf(
       "  %'.-36s %u",
       `${APIS_TO_PROPER_NAMES[apiId]} `,
-      counts.apiCounts[apiId]
+      counts.apiCounts[apiId],
     );
     console.log(formattedLine);
   });
@@ -65,19 +65,19 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
 }
 
 config.update({
-  region: 'us-gov-west-1'
+  region: 'us-gov-west-1',
 });
 
 const dynamoService = new DynamoService({
   httpOptions: {
-    timeout: 5000
+    timeout: 5000,
   },
-  maxRetries: 1
+  maxRetries: 1,
 });
 const service = new SignupMetricsService(dynamoService);
 service
   .countSignups({
     startDate: args.start,
-    endDate: args.end
+    endDate: args.end,
   })
   .then((counts: SignupCountResult) => printResult(counts));

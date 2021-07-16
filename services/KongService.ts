@@ -59,8 +59,9 @@ export default class KongService implements MonitoredService {
 
   public async createConsumer(user: KongUser): Promise<KongConsumerResponse> {
     try {
-      const response = await this.getClient()
-        .get<KongConsumerResponse>(`${this.kongPath}/${user.consumerName()}`);
+      const response = await this.getClient().get<KongConsumerResponse>(
+        `${this.kongPath}/${user.consumerName()}`,
+      );
       const kongUser: KongConsumerResponse = response.data;
       if (kongUser) {
         return kongUser;
@@ -68,10 +69,9 @@ export default class KongService implements MonitoredService {
     } catch (err) {
       logger.debug({ message: 'no existing consumer, creating new one' });
     }
-    const response = await this.getClient().post<KongConsumerResponse>(
-      this.kongPath,
-      { username: user.consumerName() },
-    );
+    const response = await this.getClient().post<KongConsumerResponse>(this.kongPath, {
+      username: user.consumerName(),
+    });
     return response.data;
   }
 
@@ -86,17 +86,17 @@ export default class KongService implements MonitoredService {
 
     const groupsToAdd = user.apiList.reduce((toAdd: string[], api: string) => {
       const validGroup = APIS_TO_ACLS[api];
-      if (validGroup && (!existingGroups.includes(validGroup))) {
+      if (validGroup && !existingGroups.includes(validGroup)) {
         toAdd.push(validGroup);
       }
       return toAdd;
     }, []);
 
-    const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) => (
+    const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) =>
       this.getClient()
         .post<KongAcl>(`${this.kongPath}/${user.consumerName()}/acls`, { group })
-        .then(response => response.data)
-    ));
+        .then(response => response.data),
+    );
 
     const results: KongAcl[] = await Promise.all(addCalls);
 
@@ -107,16 +107,18 @@ export default class KongService implements MonitoredService {
   }
 
   public async createKeyAuth(user: KongUser): Promise<KongKeyResponse> {
-    const response = await this.getClient()
-      .post<KongKeyResponse>(`${this.kongPath}/${user.consumerName()}/key-auth`);
+    const response = await this.getClient().post<KongKeyResponse>(
+      `${this.kongPath}/${user.consumerName()}/key-auth`,
+    );
     return response.data;
   }
 
   // Kong is considered healthy if the admin consumer is able to query itself on the connected instance
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     try {
-      const res = await this.getClient()
-        .get<KongConsumerResponse>(`${this.kongPath}/${this.adminConsumerName}`);
+      const res = await this.getClient().get<KongConsumerResponse>(
+        `${this.kongPath}/${this.adminConsumerName}`,
+      );
       if (res.data.username !== this.adminConsumerName) {
         throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res.data)}`);
       }

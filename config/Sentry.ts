@@ -6,4 +6,3 @@ Sentry.init({
 });
 
 export default Sentry;
-

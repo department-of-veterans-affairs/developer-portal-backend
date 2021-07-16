@@ -17,7 +17,7 @@ describe('SlackService', () => {
     expect(mockCreate).toHaveBeenCalledWith({
       baseURL: slackURL,
       headers: {
-        'Authorization': `Bearer ${slackToken}`,
+        Authorization: `Bearer ${slackToken}`,
         'Content-Type': 'application/json; charset=UTF-8',
       },
     });
@@ -32,9 +32,12 @@ describe('SlackService', () => {
     });
 
     // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+    jest
+      .spyOn(axios, 'create')
+      .mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
-    const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
+    const message =
+      'Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n';
     const service = new SlackService(slackURL, slackToken, slackOptions);
 
     const res = await service.sendSuccessMessage(message, 'New User Application');
@@ -43,12 +46,14 @@ describe('SlackService', () => {
     expect(mockPost).toHaveBeenCalledWith('/api/chat.postMessage', {
       channel: slackOptions.channel,
       text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color: 'good',
-        title: 'New User Application',
-      }],
+      attachments: [
+        {
+          text: message,
+          fallback: message,
+          color: 'good',
+          title: 'New User Application',
+        },
+      ],
     });
   });
 
@@ -60,7 +65,9 @@ describe('SlackService', () => {
       data: 'ok',
     });
 
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+    jest
+      .spyOn(axios, 'create')
+      .mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
     const service = new SlackService(slackURL, slackToken, slackOptions);
     const end = moment('2003-12-17T00:00:00.000Z');
@@ -173,7 +180,6 @@ describe('SlackService', () => {
         },
       ],
     });
-
   });
 
   it('re-tags the error message if the error contains a response', async () => {
@@ -189,15 +195,20 @@ describe('SlackService', () => {
     });
 
     // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+    jest
+      .spyOn(axios, 'create')
+      .mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
-    const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
+    const message =
+      'Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n';
     const service = new SlackService(slackURL, slackToken, slackOptions);
 
     try {
       await service.sendSuccessMessage(message, 'New User Application');
     } catch (err: unknown) {
-      expect((err as Error).message).toEqual('Status: 400, Data: "did it wrong", Original: undefined');
+      expect((err as Error).message).toEqual(
+        'Status: 400, Data: "did it wrong", Original: undefined',
+      );
     }
   });
 
@@ -206,19 +217,22 @@ describe('SlackService', () => {
 
     const mockPost = jest.fn().mockResolvedValue({
       status: 200,
-      data: { 
+      data: {
         ok: false,
-        error: 'channel_not_found', 
+        error: 'channel_not_found',
       },
       headers: {},
     });
 
     // cast to unknown first to avoid having to reimplement all of AxiosInstance
-    jest.spyOn(axios, 'create').mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
+    jest
+      .spyOn(axios, 'create')
+      .mockImplementation(() => ({ post: mockPost } as unknown as AxiosInstance));
 
-    const message = "Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n";
+    const message =
+      'Son of Denethor, Faramir: faramir@rangers.gondor.mil\nRequested access to:\n* va_facilities\n* health\n';
     const service = new SlackService(slackURL, slackToken, slackOptions);
- 
+
     try {
       await service.sendSuccessMessage(message, 'New User Application');
     } catch (err: unknown) {
@@ -236,7 +250,9 @@ describe('SlackService', () => {
       });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
 
       const service = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.healthCheck();
@@ -256,7 +272,9 @@ describe('SlackService', () => {
       });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
 
       const service = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.healthCheck();
@@ -266,15 +284,18 @@ describe('SlackService', () => {
 
     it('returns false when bot.info has an error', async () => {
       const err = new Error('ECONNREFUSED http://numenor-fake-slack');
-      const mockGet = jest.fn().mockImplementation(() => { throw err; });
+      const mockGet = jest.fn().mockImplementation(() => {
+        throw err;
+      });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
 
       const service = new SlackService(slackURL, slackToken, slackOptions);
       const res = await service.healthCheck();
       expect(res).toEqual({ serviceName: 'Slack', healthy: false, err: err });
     });
   });
-
 });

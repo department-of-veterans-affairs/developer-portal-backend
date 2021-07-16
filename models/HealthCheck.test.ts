@@ -5,21 +5,18 @@ import { MonitoredService } from '../types';
 
 describe('HealthCheck model', () => {
   describe('check()', () => {
-    const healthyService = ({
-      healthCheck: () =>
-        Promise.resolve({ serviceName: "healthyService", healthy: true }),
-    } as unknown) as MonitoredService;
+    const healthyService = {
+      healthCheck: () => Promise.resolve({ serviceName: 'healthyService', healthy: true }),
+    } as unknown as MonitoredService;
 
-    const unHealthyService = ({
+    const unHealthyService = {
       healthCheck: () =>
         Promise.resolve({
-          serviceName: "unHealthyService",
+          serviceName: 'unHealthyService',
           healthy: false,
-          err: new Error(
-            `Kong did not return the expected consumer: { message: 'Not found' }`
-          ),
+          err: new Error(`Kong did not return the expected consumer: { message: 'Not found' }`),
         }),
-    } as unknown) as MonitoredService;
+    } as unknown as MonitoredService;
 
     it('healthStatus remains "vibrant" if a result is healthy', async () => {
       const healthCheck = new HealthCheck([healthyService]);
@@ -36,7 +33,9 @@ describe('HealthCheck model', () => {
       expect(healthCheck.getResults().healthStatus).toEqual('lackluster');
       expect(healthCheck.getResults().failedHealthChecks.length).toEqual(1);
       expect(healthCheck.getResults().failedHealthChecks[0].healthy).toEqual(false);
-      expect(healthCheck.getResults().failedHealthChecks[0].serviceName).toEqual('unHealthyService');
+      expect(healthCheck.getResults().failedHealthChecks[0].serviceName).toEqual(
+        'unHealthyService',
+      );
     });
 
     it('sends result to logger if a result is unhealthy', async () => {

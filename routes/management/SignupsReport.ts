@@ -7,8 +7,8 @@ import SignupMetricsService from '../../services/SignupMetricsService';
 import { DevPortalError } from '../../models/DevPortalError';
 
 interface SignupsReportQuery {
-  start?: string; 
-  end?: string; 
+  start?: string;
+  end?: string;
   span?: string;
 }
 
@@ -18,7 +18,11 @@ export const signupsReportSchema = Joi.object().keys({
   end: Joi.date().iso(),
 });
 
-function setStartAndEndDates(reqStart: string | undefined, reqEnd: string | undefined, span: string): { start: Moment; end: Moment } {
+function setStartAndEndDates(
+  reqStart: string | undefined,
+  reqEnd: string | undefined,
+  span: string,
+): { start: Moment; end: Moment } {
   let start: Moment;
   let end: Moment;
 
@@ -42,7 +46,16 @@ function setStartAndEndDates(reqStart: string | undefined, reqEnd: string | unde
 }
 
 export default function signupsReportHandler(signups: SignupMetricsService, slack: SlackService) {
-  return async function (req: Request<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, SignupsReportQuery>, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request<
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Record<string, unknown>,
+      SignupsReportQuery
+    >,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const span = req.query.span || 'week';
     const { start, end } = setStartAndEndDates(req.query.start, req.query.end, span);
 
@@ -59,10 +72,9 @@ export default function signupsReportHandler(signups: SignupMetricsService, slac
 
       await slack.sendSignupsMessage(span, formattedEndDate, spanResult, allTimeResult);
       res.sendStatus(200);
-    } catch(err) {
+    } catch (err) {
       (err as DevPortalError).action = `apply wrapup message`;
       next(err);
     }
   };
 }
-

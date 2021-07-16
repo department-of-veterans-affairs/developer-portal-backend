@@ -39,15 +39,14 @@ const addFilterToQueryIfApplicable = (
       oktaQuery.filterExpression += ' or ';
     }
 
-    switch(filterType) {
-    case FilterType.EQUALS:
-      oktaQuery.filterExpression += `${fieldName} = ${varName}`;
-      break;
-    case FilterType.CONTAINS:
-    default:
-      oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
+    switch (filterType) {
+      case FilterType.EQUALS:
+        oktaQuery.filterExpression += `${fieldName} = ${varName}`;
+        break;
+      case FilterType.CONTAINS:
+      default:
+        oktaQuery.filterExpression += `contains(${fieldName}, ${varName})`;
     }
-
   });
 
   oktaQuery.filterExpression += ')';
@@ -65,7 +64,6 @@ export default class ConsumerRepository {
     apiFilter: string[] = [],
     oktaApplicationIdFilter: string[] = [],
   ): Promise<UserDynamoItem[]> {
-
     let params: DocumentClient.ScanInput = {
       TableName: this.tableName,
     };
@@ -91,33 +89,33 @@ export default class ConsumerRepository {
         ExpressionAttributeValues: oktaQuery.expressionAttributeValues,
       };
     }
-   
-    const items: DocumentClient.AttributeMap[] =
-      await this.dynamoService.scan(
-        params.TableName, 
-        'email, firstName, lastName, apis, okta_application_id', 
-        {
-          FilterExpression: params.FilterExpression,
-          ExpressionAttributeValues: params.ExpressionAttributeValues,
-        },
-      );
-    
-    const results = items.map((item): UserDynamoItem => ({
-      apis: item.apis as string,
-      email: item.email as string,
-      firstName: item.firstName as string,
-      lastName: item.lastName as string,
-      organization: item.organization as string,
-      oAuthRedirectURI: item.oAuthRedirectURI as string,
-      kongConsumerId: item.kongConsumerId as string,
-      tosAccepted: item.tosAccepted as boolean,
-      description: item.description as string,
-      createdAt: item.createdAt as string,
-      okta_application_id: item.okta_application_id as string,
-      okta_client_id: item.okta_client_id as string,
-    }));
+
+    const items: DocumentClient.AttributeMap[] = await this.dynamoService.scan(
+      params.TableName,
+      'email, firstName, lastName, apis, okta_application_id',
+      {
+        FilterExpression: params.FilterExpression,
+        ExpressionAttributeValues: params.ExpressionAttributeValues,
+      },
+    );
+
+    const results = items.map(
+      (item): UserDynamoItem => ({
+        apis: item.apis as string,
+        email: item.email as string,
+        firstName: item.firstName as string,
+        lastName: item.lastName as string,
+        organization: item.organization as string,
+        oAuthRedirectURI: item.oAuthRedirectURI as string,
+        kongConsumerId: item.kongConsumerId as string,
+        tosAccepted: item.tosAccepted as boolean,
+        description: item.description as string,
+        createdAt: item.createdAt as string,
+        okta_application_id: item.okta_application_id as string,
+        okta_client_id: item.okta_client_id as string,
+      }),
+    );
 
     return results;
   }
-
 }

@@ -113,7 +113,7 @@ describe('developerApplicationHandler', () => {
     const handler = developerApplicationHandler(kong, undefined, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
-    expect(mockSaveToDynamo).toHaveBeenCalled();    
+    expect(mockSaveToDynamo).toHaveBeenCalled();
   });
 
   it('renders a token as a response if no OAuth applications were requested', async () => {
@@ -224,7 +224,7 @@ describe('developerApplicationHandler', () => {
   });
 
   it('sends GovDelivery errors to the default error handler', async () => {
-    const err = new Error('failed sending email');    
+    const err = new Error('failed sending email');
     mockShouldUpdateKong.mockReturnValue(true);
     mockSendEmail.mockRejectedValue(err);
 
@@ -235,7 +235,7 @@ describe('developerApplicationHandler', () => {
   });
 
   it('sends Slack errors to the default error handler', async () => {
-    const err = new Error('failed sending slack message');    
+    const err = new Error('failed sending slack message');
     mockShouldUpdateKong.mockReturnValue(true);
     mockSendSlackSuccess.mockRejectedValue(err);
 
@@ -258,7 +258,7 @@ describe('validations', () => {
 
   describe('firstName', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, firstName: undefined};
+      const payload = { ...defaultPayload, firstName: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -276,7 +276,7 @@ describe('validations', () => {
 
   describe('lastName', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, lastName: undefined};
+      const payload = { ...defaultPayload, lastName: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -294,7 +294,7 @@ describe('validations', () => {
 
   describe('organization', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, organization: undefined};
+      const payload = { ...defaultPayload, organization: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -302,7 +302,7 @@ describe('validations', () => {
     });
 
     it('is a string', () => {
-      const payload = {...defaultPayload, organization: { name: 'Rohan' }};
+      const payload = { ...defaultPayload, organization: { name: 'Rohan' } };
 
       const result = applySchema.validate(payload);
 
@@ -312,15 +312,15 @@ describe('validations', () => {
 
   describe('description', () => {
     it('is a string', () => {
-      const payload = {...defaultPayload, description: 123456789};
-      
+      const payload = { ...defaultPayload, description: 123456789 };
+
       const result = applySchema.validate(payload);
 
       expect(result.error?.message).toEqual('"description" must be a string');
     });
 
     it('is allowed to be an empty string', () => {
-      const payload = {...defaultPayload, description: ''};
+      const payload = { ...defaultPayload, description: '' };
 
       const result = applySchema.validate(payload);
 
@@ -330,7 +330,7 @@ describe('validations', () => {
 
   describe('email', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, email: undefined};
+      const payload = { ...defaultPayload, email: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -360,7 +360,9 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
+      expect(result.error?.message).toEqual(
+        '"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern',
+      );
     });
 
     it('is allowed to be an empty string', () => {
@@ -422,7 +424,9 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis" failed custom validation because invalid apis in list');
+      expect(result.error?.message).toEqual(
+        '"apis" failed custom validation because invalid apis in list',
+      );
     });
 
     it('gracefully handles non-string types', () => {
@@ -430,12 +434,14 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
+      expect(result.error?.message).toEqual(
+        '"apis" failed custom validation because it was unable to process the provided data',
+      );
     });
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {...defaultPayload, firstName: undefined, lastName: undefined};
+    const payload = { ...defaultPayload, firstName: undefined, lastName: undefined };
 
     const result = applySchema.validate(payload);
 

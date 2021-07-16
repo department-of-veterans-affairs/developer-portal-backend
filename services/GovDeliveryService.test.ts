@@ -1,14 +1,15 @@
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from './GovDeliveryService';
+import GovDeliveryService, {
+  ConsumerSupportEmail,
+  PublishingSupportEmail,
+} from './GovDeliveryService';
 import User from '../models/User';
 
 const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
 
 if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
-  throw new Error(
-    'Environment variable configuration is required to test GovDeliveryService'
-  );
+  throw new Error('Environment variable configuration is required to test GovDeliveryService');
 }
 
 describe('GovDeliveryService', () => {
@@ -94,11 +95,14 @@ describe('GovDeliveryService', () => {
   describe('sendWelcomeEmail', () => {
     it('should send a request', async () => {
       await client.sendWelcomeEmail(user);
-      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: 'ed@adhocteam.us' }],
-        subject: 'Welcome to the VA API Platform',
-        body: expect.stringContaining('VA Facilities API and Benefits Intake API') as unknown,
-      }));
+      expect(mockPost).toHaveBeenCalledWith(
+        '/messages/email',
+        expect.objectContaining({
+          recipients: [{ email: 'ed@adhocteam.us' }],
+          subject: 'Welcome to the VA API Platform',
+          body: expect.stringContaining('VA Facilities API and Benefits Intake API') as unknown,
+        }),
+      );
     });
 
     it('should raise error if user lacks token and client_id', async () => {
@@ -127,12 +131,15 @@ describe('GovDeliveryService', () => {
       };
 
       await client.sendConsumerSupportEmail(email);
-      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: SUPPORT_EMAIL }],
-        from_name: 'Peregrin Took',
-        subject: 'Support Needed',
-        body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
-      }));
+      expect(mockPost).toHaveBeenCalledWith(
+        '/messages/email',
+        expect.objectContaining({
+          recipients: [{ email: SUPPORT_EMAIL }],
+          from_name: 'Peregrin Took',
+          subject: 'Support Needed',
+          body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
+        }),
+      );
     });
 
     describe('sendPublishingSupportEmail', () => {
@@ -145,14 +152,17 @@ describe('GovDeliveryService', () => {
           apiInternalOnly: false,
           apiDetails: 'Ring',
         };
-  
+
         await client.sendPublishingSupportEmail(email);
-        expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: SUPPORT_EMAIL }],
-          from_name: 'Peregrin Took',
-          subject: 'Publishing Support Needed',
-          body: expect.stringContaining('API Details') as unknown,
-        }));
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            recipients: [{ email: SUPPORT_EMAIL }],
+            from_name: 'Peregrin Took',
+            subject: 'Publishing Support Needed',
+            body: expect.stringContaining('API Details') as unknown,
+          }),
+        );
       });
     });
   });
@@ -167,7 +177,9 @@ describe('GovDeliveryService', () => {
       });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
         token: GOVDELIVERY_KEY,
         host: GOVDELIVERY_HOST,
@@ -179,10 +191,14 @@ describe('GovDeliveryService', () => {
 
     it('returns false when healthcheck endpoint throws an error', async () => {
       const err = new Error(`ECONNREFUSED ${GOVDELIVERY_HOST}`);
-      const mockGet = jest.fn().mockImplementation(() => { throw err; });
+      const mockGet = jest.fn().mockImplementation(() => {
+        throw err;
+      });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
         token: GOVDELIVERY_KEY,
         host: GOVDELIVERY_HOST,

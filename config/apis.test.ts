@@ -54,12 +54,7 @@ describe('API constants', () => {
   });
 
   it('OKTA_CONSUMER_APIS', () => {
-    expect(OKTA_CONSUMER_APIS).toEqual([
-      'health',
-      'verification',
-      'communityCare',
-      'claims',
-    ]);
+    expect(OKTA_CONSUMER_APIS).toEqual(['health', 'verification', 'communityCare', 'claims']);
   });
 
   it('API_LIST', () => {

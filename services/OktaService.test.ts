@@ -23,14 +23,12 @@ const scaffoldOktaPolicy = (id: string, name: string): OktaPolicy => ({
   },
 });
 
-const createOktaPolicyCollection = (
-  ...policies: OktaPolicy[]
-): OktaPolicyCollection => {
+const createOktaPolicyCollection = (...policies: OktaPolicy[]): OktaPolicyCollection => {
   const each = (iterator: (obj: OktaPolicy) => void | boolean): Promise<void> => {
     policies.forEach(iterator);
     return Promise.resolve();
   };
-  
+
   return {
     each,
   };
@@ -68,15 +66,14 @@ describe('OktaService', () => {
       // The policy with name === 'default' is the only one that we update
       const spyListAuthServerPolicies = jest.spyOn(
         service.client,
-        'listAuthorizationServerPolicies'
+        'listAuthorizationServerPolicies',
       ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
-      spyListAuthServerPolicies.mockImplementation(
-        (authServerId: string) => {
-          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
-          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'default');
-          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
-          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
-        });
+      spyListAuthServerPolicies.mockImplementation((authServerId: string) => {
+        const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+        const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'default');
+        const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+        return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
+      });
     });
 
     it('creates an application in Okta and assigns a group to its id', async () => {
@@ -128,15 +125,14 @@ describe('OktaService', () => {
       // we have to reset the list of policies to not include one with the 'default' name
       const spyListAuthServerPolicies = jest.spyOn(
         service.client,
-        'listAuthorizationServerPolicies'
+        'listAuthorizationServerPolicies',
       ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
-      spyListAuthServerPolicies.mockImplementation(
-        (authServerId: string) => {
-          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
-          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'policy2');
-          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
-          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
-        });
+      spyListAuthServerPolicies.mockImplementation((authServerId: string) => {
+        const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+        const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'policy2');
+        const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+        return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
+      });
 
       const application: OktaApplication = {
         owner: {
@@ -149,7 +145,6 @@ describe('OktaService', () => {
 
       await expect(service.createApplication(application, 'testgroup')).rejects.toThrow();
     });
-
 
     describe('ignores non okta endpoints', () => {
       it('ignores kong (key based) endpoint and only calls okta endpoint', async () => {

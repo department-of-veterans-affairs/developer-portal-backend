@@ -20,7 +20,9 @@ describe('healthCheckHandler', () => {
   const mockDynamoHealthCheck = jest.fn();
   const mockDynamo = { healthCheck: mockDynamoHealthCheck } as unknown as DynamoService;
 
-  const mockGovDelivery = { healthCheck: () => ({ healthy: true }) } as unknown as GovDeliveryService;
+  const mockGovDelivery = {
+    healthCheck: () => ({ healthy: true }),
+  } as unknown as GovDeliveryService;
   const mockSlack = { healthCheck: () => ({ healthy: true }) } as unknown as SlackService;
 
   const mockJson = jest.fn();
@@ -45,7 +47,13 @@ describe('healthCheckHandler', () => {
 
   describe('checks Kong', () => {
     it('calls Kong healthCheck', async () => {
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockKongHealthCheck).toHaveBeenCalled();
@@ -56,16 +64,31 @@ describe('healthCheckHandler', () => {
       const mockKongHealthCheckResponse = { serviceName: 'Kong', healthy: false, err: err };
       mockKongHealthCheck.mockResolvedValue(mockKongHealthCheckResponse);
 
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
-      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockKongHealthCheckResponse ] });
+      expect(mockJson).toHaveBeenCalledWith({
+        healthStatus: 'lackluster',
+        failedHealthChecks: [mockKongHealthCheckResponse],
+      });
     });
   });
 
   describe('checks Okta', () => {
     it('calls Okta healthCheck', async () => {
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockOktaHealthCheck).toHaveBeenCalled();
@@ -76,16 +99,31 @@ describe('healthCheckHandler', () => {
       const mockOktaHealthCheckResponse = { serviceName: 'Okta', healthy: false, err: err };
       mockOktaHealthCheck.mockResolvedValue(mockOktaHealthCheckResponse);
 
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
-      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster', failedHealthChecks: [ mockOktaHealthCheckResponse ] });
+      expect(mockJson).toHaveBeenCalledWith({
+        healthStatus: 'lackluster',
+        failedHealthChecks: [mockOktaHealthCheckResponse],
+      });
     });
   });
 
   describe('checks DynamoDB', () => {
     it('calls Dynamo healthCheck', async () => {
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockDynamoHealthCheck).toHaveBeenCalled();
@@ -96,10 +134,19 @@ describe('healthCheckHandler', () => {
       const mockDynamoHealthCheckResponse = { serviceName: 'Dynamo', healthy: false, err: err };
       mockDynamoHealthCheck.mockResolvedValue(mockDynamoHealthCheckResponse);
 
-      const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
+      const handler = healthCheckHandler(
+        mockKong,
+        mockOkta,
+        mockDynamo,
+        mockGovDelivery,
+        mockSlack,
+      );
       await handler(mockReq, mockRes, mockNext);
 
-      expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'lackluster',failedHealthChecks: [ mockDynamoHealthCheckResponse ] });
+      expect(mockJson).toHaveBeenCalledWith({
+        healthStatus: 'lackluster',
+        failedHealthChecks: [mockDynamoHealthCheckResponse],
+      });
     });
   });
 

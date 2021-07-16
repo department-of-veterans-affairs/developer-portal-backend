@@ -11,10 +11,10 @@ const route = '/internal/developer-portal/public/contact-us';
 describe(route, () => {
   if (!process.env.GOVDELIVERY_HOST) {
     throw new Error(
-      'Environment variable GOVDELIVERY_HOST must be defined for SignupReports.integration test'
+      'Environment variable GOVDELIVERY_HOST must be defined for SignupReports.integration test',
     );
   }
-  
+
   const govDelivery = nock(process.env.GOVDELIVERY_HOST);
 
   const supportReq = {
@@ -49,13 +49,11 @@ describe(route, () => {
   });
 
   it('sends error message on 500 status', async () => {
-    govDelivery
-      .post('/messages/email')
-      .reply(500);
+    govDelivery.post('/messages/email').reply(500);
 
     const response = await request.post(route).send(supportReq);
     const { action, message } = response.body as DevPortalError;
-    
+
     expect(response.status).toEqual(500);
     expect(action).toEqual('sending contact us email');
     expect(message).toEqual('Request failed with status code 500');

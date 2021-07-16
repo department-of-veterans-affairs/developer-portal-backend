@@ -16,15 +16,18 @@ import SignupMetricsService from './services/SignupMetricsService';
 import configureRoutes from './routes';
 import { DevPortalError } from './models/DevPortalError';
 
-const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tokens, req, res): string => (
+const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (
+  tokens,
+  req,
+  res,
+): string =>
   JSON.stringify({
     method: tokens.method(req, res),
     url: tokens.url(req, res),
     status: tokens.status(req, res),
     contentLength: tokens.res(req, res, 'content-length'),
     responseTime: `${tokens['response-time'](req, res) ?? 'undefined'} ms`,
-  })
-);
+  });
 
 /*
  * We need the 'next' argument in this function even though it's non-functional, Express does
@@ -32,7 +35,12 @@ const loggingMiddleware: morgan.FormatFn<IncomingMessage, ServerResponse> = (tok
  * and causes this middleware Anot to operate properly.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const errorLoggingMiddleware: express.ErrorRequestHandler = (err: DevPortalError, _req, res, _next) => {
+const errorLoggingMiddleware: express.ErrorRequestHandler = (
+  err: DevPortalError,
+  _req,
+  res,
+  _next,
+) => {
   // To prevent sensitive information from ending up in the logs like keys, only certain safe
   // fields are logged from errors.
   logger.error({ message: err.message, action: err.action, stack: err.stack });
@@ -92,7 +100,7 @@ const configureKongService = (): KongService => {
 };
 
 const configureOktaService = (): OktaService => {
-  const { OKTA_TOKEN, OKTA_ORG='', OKTA_HOST } = process.env;
+  const { OKTA_TOKEN, OKTA_ORG = '', OKTA_HOST } = process.env;
 
   if (!OKTA_TOKEN || (!OKTA_ORG && !OKTA_HOST)) {
     throw new Error('Okta Config Missing');
@@ -108,7 +116,7 @@ const configureOktaService = (): OktaService => {
 const configureSlackService = (): SlackService => {
   const { SLACK_BASE_URL, SLACK_TOKEN, SLACK_CHANNEL, SLACK_BOT_ID } = process.env;
 
-  if(!SLACK_BASE_URL || !SLACK_TOKEN || !SLACK_CHANNEL || !SLACK_BOT_ID){
+  if (!SLACK_BASE_URL || !SLACK_TOKEN || !SLACK_CHANNEL || !SLACK_BOT_ID) {
     throw new Error('Slack Config Missing');
   }
 

@@ -6,10 +6,7 @@ import {
   ResponseTypes,
 } from '@okta/okta-sdk-nodejs';
 import OktaService from '../services/OktaService';
-import {
-  OktaApplication,
-  OktaUser,
-} from '../types';
+import { OktaApplication, OktaUser } from '../types';
 import { DevPortalError } from './DevPortalError';
 
 const REDIRECT_URL = 'https://sandbox-api.va.gov/oauth2/redirect/';

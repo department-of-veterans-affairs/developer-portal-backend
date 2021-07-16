@@ -12,7 +12,5 @@ server.on('error', (e: Error) => {
 });
 
 server.on('listening', () => {
-  console.log(
-    `Server started on port ${PORT}`,
-  );
+  console.log(`Server started on port ${PORT}`);
 });

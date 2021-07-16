@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 
-import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail } from '../services/GovDeliveryService';
+import GovDeliveryService, {
+  ConsumerSupportEmail,
+  PublishingSupportEmail,
+} from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
 
 export const enum SubmissionType {
@@ -20,7 +23,7 @@ export type ConsumerSupportRequest = {
   type: SubmissionType.DEFAULT;
   description: string;
   apis?: string[];
-} & ContactDetails
+} & ContactDetails;
 
 export type PublishingSupportRequest = {
   type: SubmissionType.PUBLISHING;
@@ -29,35 +32,44 @@ export type PublishingSupportRequest = {
   apiInternalOnly: boolean;
   apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
-} & ContactDetails
+} & ContactDetails;
 
-type SupportRequest = ConsumerSupportRequest | PublishingSupportRequest
+type SupportRequest = ConsumerSupportRequest | PublishingSupportRequest;
 
-export const contactSchema = Joi.object().keys({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  email: Joi.string().email().required(),
-  description: Joi.string().required(),
-  organization: Joi.string().allow(''),
-  apis: Joi.array().items(Joi.string()),
-  type: Joi.string().valid(SubmissionType.DEFAULT, SubmissionType.PUBLISHING).optional(),
-}).when(Joi.object({type: Joi.valid(SubmissionType.PUBLISHING).required()}).unknown(), {
-  then: Joi.object({
-    apiDetails: Joi.string().required(),
-    apiDescription: Joi.string().allow(''),
-    apiInternalOnly: Joi.boolean().required(),
-    apiInternalOnlyDetails: Joi.string().forbidden().when('apiInternalOnly', {
-      is: Joi.boolean().required().valid(true),
-      then: Joi.required(),
+export const contactSchema = Joi.object()
+  .keys({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    email: Joi.string().email().required(),
+    description: Joi.string().required(),
+    organization: Joi.string().allow(''),
+    apis: Joi.array().items(Joi.string()),
+    type: Joi.string().valid(SubmissionType.DEFAULT, SubmissionType.PUBLISHING).optional(),
+  })
+  .when(Joi.object({ type: Joi.valid(SubmissionType.PUBLISHING).required() }).unknown(), {
+    then: Joi.object({
+      apiDetails: Joi.string().required(),
+      apiDescription: Joi.string().allow(''),
+      apiInternalOnly: Joi.boolean().required(),
+      apiInternalOnlyDetails: Joi.string()
+        .forbidden()
+        .when('apiInternalOnly', {
+          is: Joi.boolean().required().valid(true),
+          then: Joi.required(),
+        }),
+      apiOtherInfo: Joi.string().allow(''),
+      description: Joi.forbidden(),
+      apis: Joi.forbidden(),
     }),
-    apiOtherInfo: Joi.string().allow(''),
-    description: Joi.forbidden(),
-    apis: Joi.forbidden(),
-  }),
-}).options({ abortEarly: false });
+  })
+  .options({ abortEarly: false });
 
 export default function contactUsHandler(govDelivery: GovDeliveryService) {
-  return async function (req: Request<Record<string, unknown>, Record<string, unknown>, SupportRequest>, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request<Record<string, unknown>, Record<string, unknown>, SupportRequest>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       if (req.body.type === SubmissionType.PUBLISHING) {
         const supportRequest: PublishingSupportEmail = {
@@ -71,7 +83,7 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           apiInternalOnlyDetails: req.body.apiInternalOnlyDetails,
           apiOtherInfo: req.body.apiOtherInfo,
         };
-        
+
         await govDelivery.sendPublishingSupportEmail(supportRequest);
         res.sendStatus(200);
       } else {
@@ -83,11 +95,11 @@ export default function contactUsHandler(govDelivery: GovDeliveryService) {
           organization: req.body.organization,
           apis: req.body.apis,
         };
-        
+
         await govDelivery.sendConsumerSupportEmail(supportRequest);
         res.sendStatus(200);
       }
-    } catch(err: unknown) {
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'sending contact us email';
       next(err);
     }

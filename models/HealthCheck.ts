@@ -8,8 +8,8 @@ export interface HealthCheckResults {
 }
 
 export default class HealthCheck {
-  private healthCheckResults: HealthCheckResults
-  private services: MonitoredService[]
+  private healthCheckResults: HealthCheckResults;
+  private services: MonitoredService[];
 
   constructor(services: MonitoredService[]) {
     this.healthCheckResults = { healthStatus: 'vibrant', failedHealthChecks: [] };
@@ -17,8 +17,9 @@ export default class HealthCheck {
   }
 
   public async check(): Promise<void> {
-    const resultPromises: Promise<ServiceHealthCheckResponse>[] =
-      this.services.map(service => service.healthCheck());
+    const resultPromises: Promise<ServiceHealthCheckResponse>[] = this.services.map(service =>
+      service.healthCheck(),
+    );
     const results = await Promise.all(resultPromises);
     results.forEach(result => this.addResult(result));
   }
@@ -26,7 +27,11 @@ export default class HealthCheck {
   private addResult(result: ServiceHealthCheckResponse): void {
     if (!result.healthy) {
       if (result.err) {
-        result.err = { message: result.err.message, action: result.err.action, stack: result.err.stack };
+        result.err = {
+          message: result.err.message,
+          action: result.err.action,
+          stack: result.err.stack,
+        };
         logger.error(result.err);
         Sentry.captureException(result.err);
       }

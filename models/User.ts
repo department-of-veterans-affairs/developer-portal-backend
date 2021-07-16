@@ -25,7 +25,7 @@ export type UserDynamoItem = {
   createdAt: string;
   okta_application_id?: string;
   okta_client_id?: string;
-}
+};
 export interface UserConfig {
   firstName: string;
   lastName: string;
@@ -115,10 +115,7 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public sendSlackSuccess(client: SlackService): Promise<SlackResponse> {
     try {
-      return client.sendSuccessMessage(
-        this.toSlackString(),
-        'New User Application',
-      );
+      return client.sendSuccessMessage(this.toSlackString(), 'New User Application');
     } catch (err) {
       (err as DevPortalError).action = 'failed sending slack success';
       throw err;

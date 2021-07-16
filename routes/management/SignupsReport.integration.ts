@@ -8,17 +8,17 @@ const request = supertest(configureApp());
 
 if (!process.env.DYNAMODB_ENDPOINT) {
   throw new Error(
-    'Environment variable DYNAMODB_ENDPOINT must be defined for SignupsReport.integration test'
+    'Environment variable DYNAMODB_ENDPOINT must be defined for SignupsReport.integration test',
   );
 }
 if (!process.env.SLACK_BASE_URL) {
   throw new Error(
-    'Environment variable SLACK_BASE_URL must be defined for SignupsReport.integration test'
+    'Environment variable SLACK_BASE_URL must be defined for SignupsReport.integration test',
   );
 }
 if (!process.env.OKTA_HOST) {
   throw new Error(
-    'Environment variable OKTA_HOST must be defined for SignupsReport.integration test'
+    'Environment variable OKTA_HOST must be defined for SignupsReport.integration test',
   );
 }
 

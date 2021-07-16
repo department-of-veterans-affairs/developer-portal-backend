@@ -8,18 +8,20 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import { DevPortalError } from '../models/DevPortalError';
 
-export default function healthCheckHandler(kong: KongService,
+export default function healthCheckHandler(
+  kong: KongService,
   okta: OktaService,
   dynamo: DynamoService,
   govdelivery: GovDeliveryService,
-  slack: SlackService): RequestHandler {
+  slack: SlackService,
+): RequestHandler {
   return async function (_req, res, next): Promise<void> {
     try {
       const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack];
       const healthCheck = new HealthCheck(services);
       await healthCheck.check();
       res.json(healthCheck.getResults());
-    } catch(err: unknown) {
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of services';
       next(err);
     }

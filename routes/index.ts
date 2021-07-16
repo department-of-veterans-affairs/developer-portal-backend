@@ -38,27 +38,20 @@ interface AppServices {
  * The rev proxy only sends paths prefixed with either /services or /internal to Kong. All
  * developer portal routes start with /internal/developer-portal, and since we do not strip the
  * matched path at the gateway, all routes in this app must begin with this prefix.
- * 
+ *
  * see https://github.com/department-of-veterans-affairs/devops/blob/master/ansible/deployment/config/revproxy-vagov/templates/nginx_api_server.conf.j2#L171-L229
  */
 const GATEWAY_PATH_PREFIX = '/internal/developer-portal';
 const configureRoutes = (app: Express, services: AppServices): void => {
-  const {
-    kong,
-    okta,
-    dynamo,
-    govDelivery,
-    signups,
-    slack,
-  } = services;
+  const { kong, okta, dynamo, govDelivery, signups, slack } = services;
 
   /**
    * LOCAL DEV
    */
-  if(process.env.DEVELOPER_PORTAL_URL) {
+  if (process.env.DEVELOPER_PORTAL_URL) {
     const options: cors.CorsOptions = {
       origin: process.env.DEVELOPER_PORTAL_URL,
-    };  
+    };
     app.use(cors(options));
   }
 
@@ -66,14 +59,18 @@ const configureRoutes = (app: Express, services: AppServices): void => {
    * PUBLIC
    */
   const publicRoutes = express.Router();
-  publicRoutes.post('/developer_application',
+  publicRoutes.post(
+    '/developer_application',
     validationMiddleware(applySchema, 'body'),
-    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack));
-  
-  publicRoutes.post('/contact-us',
+    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack),
+  );
+
+  publicRoutes.post(
+    '/contact-us',
     validationMiddleware(contactSchema, 'body'),
-    contactUsHandler(govDelivery));
-  
+    contactUsHandler(govDelivery),
+  );
+
   publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
 
   // This simple ping endpoint is for use with a Pingdom check
@@ -88,9 +85,11 @@ const configureRoutes = (app: Express, services: AppServices): void => {
    * PROTECTED
    */
   const adminRoutes = express.Router();
-  adminRoutes.get('/reports/signups',
+  adminRoutes.get(
+    '/reports/signups',
     validationMiddleware(signupsReportSchema, 'query'),
-    signupsReportHandler(signups, slack));
+    signupsReportHandler(signups, slack),
+  );
   app.use(`${GATEWAY_PATH_PREFIX}/admin`, adminRoutes);
 };
 

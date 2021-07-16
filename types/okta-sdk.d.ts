@@ -13,9 +13,9 @@ declare module '@okta/okta-sdk-nodejs' {
       };
     };
   }
-  
+
   class Collection<T> {
-    each: (iterator: (obj: T) => void | boolean) => Promise<void>
+    each: (iterator: (obj: T) => void | boolean) => Promise<void>;
   }
   type OktaPolicyCollection = Collection<OktaPolicy>;
   interface OktaApplicationResponse {
@@ -31,17 +31,17 @@ declare module '@okta/okta-sdk-nodejs' {
   type ApplicationName = 'oidc_client';
   type SignOnMode = 'OPENID_CONNECT';
   type GrantTypes =
-  | 'implicit'
-  | 'authorization_code'
-  | 'refresh_token'
-  | 'password'
-  | 'client_credentials';
+    | 'implicit'
+    | 'authorization_code'
+    | 'refresh_token'
+    | 'password'
+    | 'client_credentials';
   type TokenEndpointAuthMethod =
-  | 'client_secret_basic'
-  | 'client_secret_post'
-  | 'client_secret_jwt'
-  | 'private_key_jwt'
-  | 'none';
+    | 'client_secret_basic'
+    | 'client_secret_post'
+    | 'client_secret_jwt'
+    | 'private_key_jwt'
+    | 'none';
   type ResponseTypes = 'token' | 'id_token' | 'code';
   type ApplicationType = 'web' | 'native' | 'browser' | 'service';
   type ConsentMethod = 'REQUIRED' | 'TRUSTED';
@@ -71,9 +71,9 @@ declare module '@okta/okta-sdk-nodejs' {
       };
     };
   }
-  
+
   class DefaultRequestExecutor {
-    constructor()
+    constructor();
   }
 
   class User {
@@ -94,7 +94,8 @@ declare module '@okta/okta-sdk-nodejs' {
     updateAuthorizationServerPolicy(
       authServiceId: string,
       policyId: string,
-      policy: OktaPolicy): Promise<void>;
+      policy: OktaPolicy,
+    ): Promise<void>;
     getUser(user: string): Promise<User>;
   }
 }

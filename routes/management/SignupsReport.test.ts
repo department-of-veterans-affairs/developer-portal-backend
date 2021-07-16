@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
 import signupsReportHandler, { signupsReportSchema } from './SignupsReport';
 import SlackService from '../../services/SlackService';
-import SignupMetricsService, { SignupCountResult, SignupQueryOptions } from '../../services/SignupMetricsService';
- 
+import SignupMetricsService, {
+  SignupCountResult,
+  SignupQueryOptions,
+} from '../../services/SignupMetricsService';
+
 describe('signupsReportHandler', () => {
   const mockSendSignupsMessage = jest.fn();
   const mockSlack = { sendSignupsMessage: mockSendSignupsMessage } as unknown as SlackService;
@@ -58,7 +61,7 @@ describe('signupsReportHandler', () => {
       claims: 8,
     },
   };
-  
+
   beforeEach(() => {
     mockReq = { query: {} } as Request;
 
@@ -66,7 +69,7 @@ describe('signupsReportHandler', () => {
     mockJson.mockClear();
     mockSendStatus.mockClear();
     mockNext.mockClear();
-    mockStatus.mockReturnValue(mockRes);  
+    mockStatus.mockReturnValue(mockRes);
 
     mockCountSignups.mockClear();
     mockCountSignups
@@ -83,7 +86,7 @@ describe('signupsReportHandler', () => {
       'week',
       '12/17/2003',
       smallResult,
-      largeResult
+      largeResult,
     );
 
     expect(mockSendStatus).toHaveBeenCalledWith(200);
