@@ -1,9 +1,8 @@
 // This is a convenience field for what rules we want to use
 const rules = {
-  'semi': ['error', 'always'],
+  semi: ['error', 'always'],
   '@typescript-eslint/camelcase': 'off',
-  'comma-dangle': ["error", "always-multiline"],
-  indent: ['error', 2],
+  'comma-dangle': ['error', 'always-multiline'],
   '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules'] }],
 };
@@ -14,15 +13,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     tsconfigRootDir: __dirname,
-    project: [
-      './tsconfig.json',
-      './tsconfig.test.json',
-    ],
+    project: ['./tsconfig.json', './tsconfig.test.json'],
   },
-  plugins: [
-    '@typescript-eslint',
-    'prettier'
-  ],
+  plugins: ['@typescript-eslint', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:node/recommended',
@@ -32,7 +25,7 @@ module.exports = {
     'prettier',
   ],
   env: {
-    'node': true,
+    node: true,
   },
   rules: {
     ...rules,
@@ -51,9 +44,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: [
-    'dist/',
-    'bin/',
-    'dev/'
-  ],
+  ignorePatterns: ['dist/', 'bin/', 'dev/'],
 };
