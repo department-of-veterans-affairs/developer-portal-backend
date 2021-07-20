@@ -3,19 +3,19 @@ import Joi from '@hapi/joi';
 import logger from '../config/logger';
 import GovDeliveryService from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
-import { validateApiList } from '../util/validators';
+import { validateApiList, emailValidator, validatePhoneFormat } from '../util/validators';
 import {  ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object().keys({
   primaryContact: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().email().custom(emailValidator).required(),
   }).required(),
   secondaryContact: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().email().custom(emailValidator).required(),
   }).required(),
   organization: Joi.string().required(),
   appName: Joi.string().required(),
@@ -24,7 +24,7 @@ export const productionSchema = Joi.object().keys({
   valueProvided: Joi.string().required(),
   businessModel: Joi.string(),
   policyDocuments: Joi.array().items(Joi.string()).required(),
-  phoneNumber: Joi.string().required(),
+  phoneNumber: Joi.custom(validatePhoneFormat).required(),
   apis: Joi.custom(validateApiList).required(),
   monitizedVeteranInformation: Joi.boolean().required(),
   monitizationExplanation: Joi.string(),
