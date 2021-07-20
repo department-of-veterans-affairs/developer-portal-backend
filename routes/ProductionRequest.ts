@@ -20,7 +20,7 @@ export const productionSchema = Joi.object().keys({
   organization: Joi.string().required(),
   appName: Joi.string().required(),
   appDescription: Joi.string().required(),
-  statusUpdateEmails: Joi.array().items(Joi.string().email()).required(),
+  statusUpdateEmails: Joi.array().items(Joi.string().email().custom(emailValidator)).required(),
   valueProvided: Joi.string().required(),
   businessModel: Joi.string(),
   policyDocuments: Joi.array().items(Joi.string()).required(),
