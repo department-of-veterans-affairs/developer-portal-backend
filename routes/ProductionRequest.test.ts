@@ -44,7 +44,7 @@ describe('productionRequestHandler', () => {
         valueProvided: 'n/a',
         businessModel: 'magical rings >> profit',
         policyDocuments: ['www.example.com/tos'],
-        phoneNumber: '867-5309',
+        phoneNumber: '555-867-5309',
         apis: 'benefits',
         monitizedVeteranInformation: false,
         monitizationExplanation: 'n/a',
@@ -117,7 +117,7 @@ describe('validations', () => {
     valueProvided: 'n/a',
     businessModel: 'magical rings >> profit',
     policyDocuments: ['www.example.com/tos'],
-    phoneNumber: '867-5309',
+    phoneNumber: '555-867-5309',
     apis: 'benefits',
     monitizedVeteranInformation: false,
     monitizationExplanation: 'n/a',
@@ -318,7 +318,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"phoneNumber" must be a string');
+      expect(result.error?.message).toEqual('"phoneNumber" failed custom validation because phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444');
     });
   });
 
