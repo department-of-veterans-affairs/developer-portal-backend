@@ -298,15 +298,19 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       </li>
       <li>
         <strong>
-          <div>Link to Application's Signup Page:</div>
+          <div>Links to Application's Signup Page:</div>
         </strong>
-        <div>{{signUpLink}}</div>
+        {{#each signUpLink}}
+          <div>{{this}}</div>
+        {{/each}}
       </li>
       <li>
         <strong>
-          <div>Link to Application's FAQ/Support Page:</div>
+          <div>Links to Application's FAQ/Support Page:</div>
         </strong>
-        <div>{{supportLink}}</div>
+        {{#each supportLink}}
+          <div>{{this}}</div>
+        {{/each}}
       </li>
       <li>
         <strong>
