@@ -31,7 +31,7 @@ export function validateApiList(val: string): string {
 }
 
 export function validatePhoneFormat(number: string): string {
-  let result: boolean = false;
+  let result: boolean;
   try {
     result = VALID_PHONE_REGEX.test(number);
   } catch {
