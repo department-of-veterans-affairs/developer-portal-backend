@@ -31,7 +31,7 @@ export function validateApiList(val: string): string {
 }
 
 export function validatePhoneFormat(number: string): string {
-  let result: boolean;
+  let result: boolean = false;
   try {
     result = VALID_PHONE_REGEX.test(number);
   } catch {
@@ -39,7 +39,7 @@ export function validatePhoneFormat(number: string): string {
   }
 
   if (!result) {
-    throw new Error('Phone number format invalid.');
+    throw new Error('phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444');
   }
 
   return number;

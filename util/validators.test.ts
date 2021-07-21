@@ -2,7 +2,7 @@ import "jest";
 import { emailValidator, validatePhoneFormat } from "./validators";
 
 describe("validatePhoneFormat", ()=>{
-  const errorString = 'Phone number format invalid.';
+  const errorString = 'phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444';
   it('allows valid phone formats', ()=>{
     expect(validatePhoneFormat('222-333-4444')).toBe('222-333-4444');
     expect(validatePhoneFormat('(222) 333 4444')).toBe('(222) 333 4444');

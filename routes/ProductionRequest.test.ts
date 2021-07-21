@@ -318,7 +318,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"phoneNumber" failed custom validation because Phone number format invalid.');
+      expect(result.error?.message).toEqual('"phoneNumber" failed custom validation because phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444');
     });
   });
 
