@@ -59,9 +59,6 @@ describe(route, () => {
     namingConvention: 'overly-complicated',
     centralizedBackendLog: 'non-existent',
     listedOnMyHealthApplication: false,
-    appImageLink: 'www.one2bindthem.com/assets/app.jpeg',
-    patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patientWaitTime.jpeg',
-    medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/medicalDisclaimer.jpeg',
   };
 
   it('sends a 400 response and descriptive errors if validations fail', async () => {

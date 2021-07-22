@@ -202,9 +202,6 @@ describe('GovDeliveryService', () => {
           namingConvention: 'overly-complicated',
           centralizedBackendLog: 'non-existent',
           listedOnMyHealthApplication: false,
-          appImageLink: 'www.one2bindthem.com/assets/image',
-          patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patient',
-          medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
         };
         await client.sendProductionAccessEmail(email);
         expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({

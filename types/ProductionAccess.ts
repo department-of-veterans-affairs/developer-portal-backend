@@ -37,7 +37,4 @@ export interface ProductionAccessSupportEmail {
   namingConvention?: string;
   centralizedBackendLog?: string;
   listedOnMyHealthApplication?: boolean;
-  appImageLink: string;
-  patientWaitTimeImageLink: string;
-  medicalDisclaimerImageLink: string;
 }
