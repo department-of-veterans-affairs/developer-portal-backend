@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
 import User from '../models/User';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 import GovDeliveryService, {
   ConsumerSupportEmail,
   PublishingSupportEmail,
@@ -163,6 +166,86 @@ describe('GovDeliveryService', () => {
             from_name: 'Peregrin Took',
             recipients: [{ email: SUPPORT_EMAIL }],
             subject: 'Publishing Support Needed',
+          }),
+        );
+      });
+    });
+
+    describe('sendProductionAccessEmail', () => {
+      it('should send a request', async () => {
+        const email: ProductionAccessSupportEmail = {
+          apis: 'benefits',
+          appDescription: 'A social media platform with one room.',
+          appImageLink: 'www.one2bindthem.com/assets/image',
+          appName: 'One to Bind Them',
+          breachManagementProcess: 'golem',
+          businessModel: 'magical rings >> profit',
+          centralizedBackendLog: 'non-existent',
+          credentialStorage: '',
+          distributingAPIKeysToCustomers: false,
+          // eslint-disable-next-line id-length
+          exposeVeteranInformationToThirdParties: false,
+          listedOnMyHealthApplication: false,
+          medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
+          monitizationExplanation: 'n/a',
+          monitizedVeteranInformation: false,
+          multipleReqSafeguards: 'golem',
+          namingConvention: 'overly-complicated',
+          organization: 'Sauron.INC',
+          patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patient',
+          phoneNumber: '867-5309',
+          piiStorageMethod: 'Locking away in the fires from whence it came.',
+          platforms: 'iOS',
+          policyDocuments: ['www.example.com/tos'],
+          primaryContact: {
+            email: 'sam@fellowship.com',
+            firstName: 'Samwise',
+            lastName: 'Gamgee',
+          },
+          scopesAccessRequested: ['profile', 'email'],
+          secondaryContact: {
+            email: 'frodo@fellowship.com',
+            firstName: 'Frodo',
+            lastName: 'Baggins',
+          },
+          signUpLink: 'www.one2bindthem.com/signup',
+          statusUpdateEmails: ['sam@fellowship.com'],
+          storePIIOrPHI: false,
+          supportLink: 'www.one2bindthem.com/support',
+          thirdPartyInfoDescription: 'n/a',
+          valueProvided: 'n/a',
+          vasiSystemName: 'asdf',
+          veteranFacing: false,
+          veteranFacingDescription:
+            'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+          vulnerabilityManagement: 'golem',
+          website: 'www.one2bindthem.com',
+        };
+        await client.sendProductionAccessEmail(email);
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            body: expect.stringContaining('Primary Contact:') as unknown,
+            from_name: 'Samwise Gamgee',
+            recipients: [{ email: SUPPORT_EMAIL }],
+            subject: 'Production Access Requested for Sauron.INC',
+          }),
+        );
+      });
+    });
+
+    describe('sendProductionAccessConsumerEmail', () => {
+      it('should send a request', async () => {
+        const emails: string[] = ['ed@adhocteam.us'];
+        await client.sendProductionAccessConsumerEmail(emails);
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            body: expect.stringContaining(
+              'We’ve received your request for production access.',
+            ) as unknown,
+            recipients: [{ email: 'ed@adhocteam.us' }],
+            subject: 'Your Request for Production Access is Submitted',
           }),
         );
       });

@@ -7,8 +7,13 @@ import {
   PUBLISHING_SUPPORT_TEMPLATE,
   CONSUMER_SUPPORT_TEMPLATE,
 } from '../templates';
+import {
+  PRODUCTION_ACCESS_SUPPORT_TEMPLATE,
+  PRODUCTION_ACCESS_CONSUMER_TEMPLATE,
+} from '../templates/production';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
+import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 interface EmailRecipient {
   email: string;
@@ -32,7 +37,6 @@ interface WelcomeEmail {
   clientSecret?: string;
   redirectURI?: string;
 }
-
 export interface ConsumerSupportEmail {
   firstName: string;
   lastName: string;
@@ -119,6 +123,10 @@ export default class GovDeliveryService implements MonitoredService {
 
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
 
+  public productionAccessSupportTemplate: Handlebars.TemplateDelegate<ProductionAccessSupportEmail>;
+
+  public productionAccessConsumerTemplate: string;
+
   public client: AxiosInstance;
 
   public constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
@@ -127,6 +135,8 @@ export default class GovDeliveryService implements MonitoredService {
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.consumerSupportTemplate = Handlebars.compile(CONSUMER_SUPPORT_TEMPLATE);
     this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
+    this.productionAccessSupportTemplate = Handlebars.compile(PRODUCTION_ACCESS_SUPPORT_TEMPLATE);
+    this.productionAccessConsumerTemplate = PRODUCTION_ACCESS_CONSUMER_TEMPLATE;
     this.client = axios.create({
       baseURL: this.host,
       headers: { 'X-AUTH-TOKEN': token },
@@ -216,6 +226,30 @@ export default class GovDeliveryService implements MonitoredService {
       subject: 'Publishing Support Needed',
     };
 
+    return this.sendEmail(email);
+  }
+
+  public sendProductionAccessEmail(
+    supportRequest: ProductionAccessSupportEmail,
+  ): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      body: this.productionAccessSupportTemplate(supportRequest),
+      from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
+      recipients: [{ email: this.supportEmailRecipient }],
+      subject: `Production Access Requested for ${supportRequest.organization}`,
+    };
+    return this.sendEmail(email);
+  }
+
+  // eslint-disable-next-line id-length
+  public sendProductionAccessConsumerEmail(emails: string[]): Promise<EmailResponse> {
+    const mappedEmails: EmailRecipient[] = emails.map(x => ({ email: x }));
+    const email: EmailRequest = {
+      body: this.productionAccessConsumerTemplate,
+      from_name: 'VA API Platform team',
+      recipients: mappedEmails,
+      subject: 'Your Request for Production Access is Submitted',
+    };
     return this.sendEmail(email);
   }
 

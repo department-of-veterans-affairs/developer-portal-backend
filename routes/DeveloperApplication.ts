@@ -10,24 +10,8 @@ import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
-import { API_LIST } from '../config/apis';
+import { validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
-
-const validateApiList = (val: string): string => {
-  let result: boolean;
-  try {
-    const apis = val.split(',');
-    result = apis.every(api => API_LIST.includes(api));
-  } catch {
-    throw new Error('it was unable to process the provided data');
-  }
-
-  if (!result) {
-    throw new Error('invalid apis in list');
-  }
-
-  return val;
-};
 
 export const applySchema = Joi.object()
   .keys({
@@ -39,9 +23,7 @@ export const applySchema = Joi.object()
     oAuthApplicationType: Joi.allow('').valid('web', 'native'),
     oAuthRedirectURI: Joi.string()
       .allow('')
-      .uri({
-        scheme: ['http', 'https'],
-      }),
+      .uri({ scheme: ['http', 'https'] }),
     organization: Joi.string().required(),
     termsOfService: Joi.required().valid(true),
   })
@@ -119,7 +101,8 @@ const developerApplicationHandler =
       logger.info({ message: 'recording signup in DynamoDB' });
       await user.saveToDynamo(dynamo);
 
-      if (user.oauthApplication === undefined) {
+      // eslint-disable-next-line no-negated-condition
+      if (!user.oauthApplication) {
         res.json({
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
           token: user.token,

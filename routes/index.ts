@@ -8,6 +8,7 @@ import OktaService from '../services/OktaService';
 import SignupMetricsService from '../services/SignupMetricsService';
 import SlackService from '../services/SlackService';
 import developerApplicationHandler, { applySchema } from './DeveloperApplication';
+import productionRequestHandler, { productionSchema } from './ProductionRequest';
 import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
@@ -77,6 +78,13 @@ const configureRoutes = (app: Express, services: AppServices): void => {
   publicRoutes.get('/ping', (_req, res) => {
     res.send('pong');
   });
+
+  publicRoutes.post(
+    '/production_request',
+    validationMiddleware(productionSchema, 'body'),
+    productionRequestHandler(govDelivery),
+  );
+
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
   publicRoutes.get('/version', versionHandler());
