@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
+import GovDeliveryService from '../services/GovDeliveryService';
 import contactUsHandler, {
   ConsumerSupportRequest,
   contactSchema,
   PublishingSupportRequest,
 } from './ContactUs';
-import GovDeliveryService from '../services/GovDeliveryService';
 
 describe('contactUsHandler', () => {
   const mockSendConsumerSupportEmail = jest.fn();
@@ -20,13 +20,15 @@ describe('contactUsHandler', () => {
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   const mockRes: Response = {
-    status: mockStatus,
     json: mockJson,
     sendStatus: mockSendStatus,
+    status: mockStatus,
   } as unknown as Response;
 
-  // The call to status needs to return the response object again for json
-  // to be called properly.
+  /*
+   * The call to status needs to return the response object again for json
+   * to be called properly.
+   */
   mockStatus.mockReturnValue(mockRes);
 
   beforeEach(() => {
@@ -42,24 +44,24 @@ describe('contactUsHandler', () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        apis: ['benefits', 'facilities'],
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
-        description: 'Need help getting to Mt. Doom',
-        apis: ['benefits', 'facilities'],
       },
     } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
+      apis: ['benefits', 'facilities'],
+      description: mockReq.body.description,
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
-      requester: mockReq.body.email,
-      description: mockReq.body.description,
       organization: mockReq.body.organization,
-      apis: ['benefits', 'facilities'],
+      requester: mockReq.body.email,
     });
 
     expect(mockSendStatus).toHaveBeenCalledWith(200);
@@ -69,12 +71,12 @@ describe('contactUsHandler', () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        apis: ['facilities', 'health'],
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
-        description: 'Need help getting to Mt. Doom',
-        apis: ['facilities', 'health'],
       },
     } as Request;
 
@@ -91,20 +93,20 @@ describe('contactUsHandler', () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
       },
     } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
+      description: mockReq.body.description,
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
       requester: mockReq.body.email,
-      description: mockReq.body.description,
     });
   });
 
@@ -113,29 +115,29 @@ describe('contactUsHandler', () => {
       const handler = contactUsHandler(mockGovDelivery);
       const mockReq = {
         body: {
-          type: 'PUBLISHING',
+          apiDescription: 'Ring',
+          apiDetails: "I can't carry it for you, but I can carry you.",
+          apiInternalOnly: false,
+          apiOtherInfo: 'bad guys go away',
+          email: 'samwise@thefellowship.org',
           firstName: 'Samwise',
           lastName: 'Gamgee',
-          email: 'samwise@thefellowship.org',
           organization: 'The Fellowship of the Ring',
-          apiInternalOnly: false,
-          apiDetails: "I can't carry it for you, but I can carry you.",
-          apiDescription: 'Ring',
-          apiOtherInfo: 'bad guys go away',
+          type: 'PUBLISHING',
         },
       } as Request<Record<string, unknown>, Record<string, unknown>, PublishingSupportRequest>;
 
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockSendPublshingSupportEmail).toHaveBeenCalledWith({
+        apiDescription: mockReq.body.apiDescription,
+        apiDetails: mockReq.body.apiDetails,
+        apiInternalOnly: mockReq.body.apiInternalOnly,
+        apiOtherInfo: mockReq.body.apiOtherInfo,
         firstName: mockReq.body.firstName,
         lastName: mockReq.body.lastName,
-        requester: mockReq.body.email,
         organization: mockReq.body.organization,
-        apiInternalOnly: mockReq.body.apiInternalOnly,
-        apiDetails: mockReq.body.apiDetails,
-        apiDescription: mockReq.body.apiDescription,
-        apiOtherInfo: mockReq.body.apiOtherInfo,
+        requester: mockReq.body.email,
       });
 
       expect(mockSendStatus).toHaveBeenCalledWith(200);
@@ -145,10 +147,10 @@ describe('contactUsHandler', () => {
 
 describe('validations', () => {
   const basePayload = {
+    description: 'Need help getting to Mt. Doom',
+    email: 'samwise@thefellowship.org',
     firstName: 'Samwise',
     lastName: 'Gamgee',
-    email: 'samwise@thefellowship.org',
-    description: 'Need help getting to Mt. Doom',
   };
 
   describe('firstName', () => {
@@ -283,10 +285,10 @@ describe('validations', () => {
   describe('type is publishing', () => {
     const publishingPayload = {
       ...basePayload,
-      type: 'PUBLISHING',
       apiDetails: 'Need help getting to Mt. Doom',
       apiInternalOnly: false,
       description: undefined,
+      type: 'PUBLISHING',
     };
 
     describe('apiDetails', () => {

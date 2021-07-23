@@ -6,9 +6,11 @@ import OktaService from '../services/OktaService';
 import DynamoService from '../services/DynamoService';
 import developerApplicationHandler, { applySchema } from '../routes/DeveloperApplication';
 
-// The mocking that follows that is outside of the describe block is
-// to create a user model that can have its return values overriden for
-// each test.
+/*
+ * The mocking that follows that is outside of the describe block is
+ * to create a user model that can have its return values overriden for
+ * each test.
+ */
 const mockSaveToKong = jest.fn();
 const mockSaveToDynamo = jest.fn();
 const mockSaveToOkta = jest.fn();
@@ -20,21 +22,19 @@ const mockSendSlackSuccess = jest.fn();
 let stubOAuthCreds: unknown;
 let stubToken: unknown;
 
-jest.mock('../models/User', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      saveToKong: mockSaveToKong,
-      saveToDynamo: mockSaveToDynamo,
-      saveToOkta: mockSaveToOkta,
-      sendEmail: mockSendEmail,
-      sendSlackSuccess: mockSendSlackSuccess,
-      shouldUpdateKong: mockShouldUpdateKong,
-      shouldUpdateOkta: mockShouldUpdateOkta,
-      token: stubToken,
-      oauthApplication: stubOAuthCreds,
-    };
-  });
-});
+jest.mock('../models/User', () =>
+  jest.fn().mockImplementation(() => ({
+    oauthApplication: stubOAuthCreds,
+    saveToDynamo: mockSaveToDynamo,
+    saveToKong: mockSaveToKong,
+    saveToOkta: mockSaveToOkta,
+    sendEmail: mockSendEmail,
+    sendSlackSuccess: mockSendSlackSuccess,
+    shouldUpdateKong: mockShouldUpdateKong,
+    shouldUpdateOkta: mockShouldUpdateOkta,
+    token: stubToken,
+  })),
+);
 
 describe('developerApplicationHandler', () => {
   const kong = {} as KongService;
@@ -248,9 +248,9 @@ describe('developerApplicationHandler', () => {
 
 describe('validations', () => {
   const defaultPayload = {
-    firstName: 'Eowyn',
     apis: 'benefits',
     email: 'eowyn@rohan.horse',
+    firstName: 'Eowyn',
     lastName: 'Eorl',
     organization: 'Rohan',
     termsOfService: true,

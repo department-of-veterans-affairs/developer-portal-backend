@@ -65,8 +65,8 @@ describe(route, () => {
       const response = await request.get(route);
 
       expect(response.body).toEqual({
-        healthStatus: 'vibrant',
         failedHealthChecks: [],
+        healthStatus: 'vibrant',
       });
       expect(response.status).toEqual(200);
     });
@@ -83,14 +83,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Kong',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -104,14 +104,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Kong',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -127,14 +127,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Okta',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -150,14 +150,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Dynamo',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -171,14 +171,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Dynamo',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -194,14 +194,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'GovDelivery',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -215,14 +215,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'GovDelivery',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -238,14 +238,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Slack',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });
@@ -259,14 +259,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
-          healthStatus: 'lackluster',
           failedHealthChecks: [
             {
+              err: expect.any(Object) as unknown,
               healthy: false,
               serviceName: 'Slack',
-              err: expect.any(Object) as unknown,
             },
           ],
+          healthStatus: 'lackluster',
         });
         expect(response.status).toEqual(200);
       });

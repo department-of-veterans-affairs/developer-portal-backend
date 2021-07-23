@@ -2,52 +2,52 @@ import { KeyAuthAPI, OAuthAPI } from '../types';
 
 const oauthAPIList: OAuthAPI[] = [
   {
-    name: 'Health API',
-    key: 'health',
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
+    key: 'health',
+    name: 'Health API',
   },
   {
-    name: 'Veteran Verification API',
-    key: 'verification',
     authzEndpoint: process.env.AUTHZ_SERVER_VERIFICATION,
+    key: 'verification',
+    name: 'Veteran Verification API',
   },
   {
-    name: 'Community Care Eligibility API',
-    key: 'communityCare',
     authzEndpoint: process.env.AUTHZ_SERVER_COMMUNITYCARE,
+    key: 'communityCare',
+    name: 'Community Care Eligibility API',
   },
   {
-    name: 'Claims API',
-    key: 'claims',
     authzEndpoint: process.env.AUTHZ_SERVER_CLAIMS,
+    key: 'claims',
+    name: 'Claims API',
   },
 ];
 
 const keyAuthAPIList: KeyAuthAPI[] = [
   {
-    name: 'Benefits Intake API',
-    key: 'benefits',
     acl: 'vba_documents',
+    key: 'benefits',
+    name: 'Benefits Intake API',
   },
   {
-    name: 'Claims Attributes API',
-    key: 'claimsAttributes',
     acl: 'claims_attributes',
+    key: 'claimsAttributes',
+    name: 'Claims Attributes API',
   },
   {
-    name: 'VA Facilities API',
-    key: 'facilities',
     acl: 'va_facilities',
+    key: 'facilities',
+    name: 'VA Facilities API',
   },
   {
-    name: 'VA Form API',
-    key: 'vaForms',
     acl: 'va_forms',
+    key: 'vaForms',
+    name: 'VA Form API',
   },
   {
-    name: 'Veteran Confirmation API',
-    key: 'confirmation',
     acl: 'veteran_confirmation',
+    key: 'confirmation',
+    name: 'Veteran Confirmation API',
   },
 ];
 

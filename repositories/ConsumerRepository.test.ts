@@ -1,32 +1,32 @@
 import 'jest';
 import DynamoService from '../services/DynamoService';
-import ConsumerRepository from './ConsumerRepository';
 import { UserDynamoItem } from '../models/User';
+import ConsumerRepository from './ConsumerRepository';
 
 const mockUserList: UserDynamoItem[] = [
   {
+    apis: 'ab',
+    createdAt: '1234567890',
+    description: 'super chill',
+    email: 'fbag@hobbiton.com',
     firstName: 'Frodo',
     lastName: 'Baggins',
-    organization: 'The Fellowship',
-    email: 'fbag@hobbiton.com',
-    apis: 'ab',
-    description: 'super chill',
     oAuthRedirectURI: 'http://elvish-swords.com',
-    tosAccepted: true,
-    createdAt: '1234567890',
     okta_application_id: 'okta-id',
     okta_client_id: 'okta-client-id',
+    organization: 'The Fellowship',
+    tosAccepted: true,
   },
   {
+    apis: 'va,xz,dx',
+    createdAt: '1234567890',
+    description: 'super cool',
+    email: 'wizz@higherbeings.com',
     firstName: 'Gandalf',
     lastName: 'Gray',
-    organization: 'The Fellowship',
-    email: 'wizz@higherbeings.com',
-    apis: 'va,xz,dx',
-    description: 'super cool',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
+    organization: 'The Fellowship',
     tosAccepted: true,
-    createdAt: '1234567890',
   },
 ];
 
@@ -100,7 +100,7 @@ describe('ConsumerRepository', () => {
         ':okta_application_id_0': 'myid',
       };
       const filterExpression =
-        '(contains(apis, :apis_0)) and ' + '(okta_application_id = :okta_application_id_0)';
+        '(contains(apis, :apis_0)) and (okta_application_id = :okta_application_id_0)';
 
       const apiList: string[] = ['ab'];
       const oktaApplicationIdList: string[] = ['myid'];

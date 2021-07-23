@@ -18,18 +18,18 @@ describe(route, () => {
   const govDelivery = nock(process.env.GOVDELIVERY_HOST);
 
   const supportReq = {
+    apis: ['benefits', 'facilities'],
+    description: 'Need help getting to Mt. Doom',
+    email: 'samwise@thefellowship.org',
     firstName: 'Samwise',
     lastName: 'Gamgee',
-    email: 'samwise@thefellowship.org',
     organization: 'The Fellowship of the Ring',
-    description: 'Need help getting to Mt. Doom',
-    apis: ['benefits', 'facilities'],
   };
 
   it('sends a 400 response and descriptive errors if validations fail', async () => {
     const response = await request.post(route).send({
-      email: 'samwise@thefellowship.org',
       description: 'Need help getting to Mt. Doom',
+      email: 'samwise@thefellowship.org',
     });
 
     expect(response.status).toEqual(400);
@@ -41,7 +41,7 @@ describe(route, () => {
   it('sends 200 on submit of Contact Us form and sends email from GovDelivery', async () => {
     govDelivery
       .post('/messages/email')
-      .reply(200, { from_name: 'Samwise', from_email: 'samwise@thefellowship.org' });
+      .reply(200, { from_email: 'samwise@thefellowship.org', from_name: 'Samwise' });
 
     const response = await request.post(route).send(supportReq);
 

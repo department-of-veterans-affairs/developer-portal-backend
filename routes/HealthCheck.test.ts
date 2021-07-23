@@ -1,6 +1,8 @@
-// The types for RequestHandler have been updated in new versions to return void
-// this type is not completely accurate, as express accepts async handlers. We need to
-// ignore this rule here so esling doesn't complain that you can't await void
+/*
+ * The types for RequestHandler have been updated in new versions to return void
+ * this type is not completely accurate, as express accepts async handlers. We need to
+ * ignore this rule here so esling doesn't complain that you can't await void
+ */
 /* eslint-disable @typescript-eslint/await-thenable */
 import { Request, Response } from 'express';
 import KongService from '../services/KongService';
@@ -40,9 +42,9 @@ describe('healthCheckHandler', () => {
     mockNext.mockClear();
     mockJson.mockClear();
 
-    mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
-    mockOktaHealthCheck.mockResolvedValue({ serviceName: 'Okta', healthy: true });
-    mockDynamoHealthCheck.mockResolvedValue({ serviceName: 'Dynamo', healthy: true });
+    mockKongHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Kong' });
+    mockOktaHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Okta' });
+    mockDynamoHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Dynamo' });
   });
 
   describe('checks Kong', () => {
@@ -60,8 +62,8 @@ describe('healthCheckHandler', () => {
     });
 
     it('returns unhealthy response if Kong fails to report back healthy', async () => {
-      const err = new Error(`Kong did not return the expected consumer: { message: 'Not found' }`);
-      const mockKongHealthCheckResponse = { serviceName: 'Kong', healthy: false, err: err };
+      const err = new Error("Kong did not return the expected consumer: { message: 'Not found' }");
+      const mockKongHealthCheckResponse = { err, healthy: false, serviceName: 'Kong' };
       mockKongHealthCheck.mockResolvedValue(mockKongHealthCheckResponse);
 
       const handler = healthCheckHandler(
@@ -74,8 +76,8 @@ describe('healthCheckHandler', () => {
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({
-        healthStatus: 'lackluster',
         failedHealthChecks: [mockKongHealthCheckResponse],
+        healthStatus: 'lackluster',
       });
     });
   });
@@ -95,8 +97,8 @@ describe('healthCheckHandler', () => {
     });
 
     it('returns unhealthy response if Okta fails to report back healthy', async () => {
-      const err = new Error(`Okta did not return a user: { constructor: { name: 'Orc' } }`);
-      const mockOktaHealthCheckResponse = { serviceName: 'Okta', healthy: false, err: err };
+      const err = new Error("Okta did not return a user: { constructor: { name: 'Orc' } }");
+      const mockOktaHealthCheckResponse = { err, healthy: false, serviceName: 'Okta' };
       mockOktaHealthCheck.mockResolvedValue(mockOktaHealthCheckResponse);
 
       const handler = healthCheckHandler(
@@ -109,8 +111,8 @@ describe('healthCheckHandler', () => {
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({
-        healthStatus: 'lackluster',
         failedHealthChecks: [mockOktaHealthCheckResponse],
+        healthStatus: 'lackluster',
       });
     });
   });
@@ -130,8 +132,8 @@ describe('healthCheckHandler', () => {
     });
 
     it('returns 503 if DynamoDB fails to report back healthy', async () => {
-      const err = new Error(`DynamoDB did not return a record: Missing region in config`);
-      const mockDynamoHealthCheckResponse = { serviceName: 'Dynamo', healthy: false, err: err };
+      const err = new Error('DynamoDB did not return a record: Missing region in config');
+      const mockDynamoHealthCheckResponse = { err, healthy: false, serviceName: 'Dynamo' };
       mockDynamoHealthCheck.mockResolvedValue(mockDynamoHealthCheckResponse);
 
       const handler = healthCheckHandler(
@@ -144,8 +146,8 @@ describe('healthCheckHandler', () => {
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockJson).toHaveBeenCalledWith({
-        healthStatus: 'lackluster',
         failedHealthChecks: [mockDynamoHealthCheckResponse],
+        healthStatus: 'lackluster',
       });
     });
   });
@@ -162,12 +164,12 @@ describe('healthCheckHandler', () => {
   });
 
   it('returns 200 if all services report back healthy', async () => {
-    mockKongHealthCheck.mockResolvedValue({ serviceName: 'Kong', healthy: true });
+    mockKongHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Kong' });
 
     const handler = healthCheckHandler(mockKong, mockOkta, mockDynamo, mockGovDelivery, mockSlack);
     // eslint-disable-next-line @typescript-eslint/await-thenable
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockJson).toHaveBeenCalledWith({ healthStatus: 'vibrant', failedHealthChecks: [] });
+    expect(mockJson).toHaveBeenCalledWith({ failedHealthChecks: [], healthStatus: 'vibrant' });
   });
 });

@@ -1,3 +1,5 @@
+/* eslint-disable max-params */
+
 import { RequestHandler } from 'express';
 import HealthCheck from '../models/HealthCheck';
 import { MonitoredService } from '../types';
@@ -8,14 +10,15 @@ import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import { DevPortalError } from '../models/DevPortalError';
 
-export default function healthCheckHandler(
-  kong: KongService,
-  okta: OktaService,
-  dynamo: DynamoService,
-  govdelivery: GovDeliveryService,
-  slack: SlackService,
-): RequestHandler {
-  return async function (_req, res, next): Promise<void> {
+const healthCheckHandler =
+  (
+    kong: KongService,
+    okta: OktaService,
+    dynamo: DynamoService,
+    govdelivery: GovDeliveryService,
+    slack: SlackService,
+  ): RequestHandler =>
+  async (_req, res, next): Promise<void> => {
     try {
       const services: MonitoredService[] = [kong, okta, dynamo, govdelivery, slack];
       const healthCheck = new HealthCheck(services);
@@ -26,4 +29,5 @@ export default function healthCheckHandler(
       next(err);
     }
   };
-}
+
+export default healthCheckHandler;

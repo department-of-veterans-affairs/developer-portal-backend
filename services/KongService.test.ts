@@ -1,7 +1,7 @@
 import 'jest';
-import KongService from './KongService';
-import User from '../models/User';
 import { AxiosInstance } from 'axios';
+import User from '../models/User';
+import KongService from './KongService';
 
 describe('KongService', () => {
   let service: KongService;
@@ -117,7 +117,7 @@ describe('KongService', () => {
 
     it('returns unhealthy when it catches an error', async () => {
       const err = new Error('failed to connect to Kong');
-      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Kong' };
       getMock.mockRejectedValue(err);
 
       const healthCheck = await service.healthCheck();
@@ -129,7 +129,7 @@ describe('KongService', () => {
       const err = new Error(
         `Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`,
       );
-      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Kong' };
       getMock.mockResolvedValue({ data: getMockValue });
 
       const healthCheck = await service.healthCheck();
@@ -141,7 +141,7 @@ describe('KongService', () => {
       const err = new Error(
         `Kong did not return the expected consumer: ${JSON.stringify(getMockValue)}`,
       );
-      const expectedReturn = { serviceName: 'Kong', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Kong' };
       getMock.mockResolvedValue({ data: { username: 'wrong_user' } });
 
       const healthCheck = await service.healthCheck();
@@ -149,7 +149,7 @@ describe('KongService', () => {
     });
 
     it('returns healthy when it receives the right consumer', async () => {
-      const expectedReturn = { serviceName: 'Kong', healthy: true };
+      const expectedReturn = { healthy: true, serviceName: 'Kong' };
       getMock.mockResolvedValue({ data: { username: '_internal_DeveloperPortal' } });
 
       const healthCheck = await service.healthCheck();

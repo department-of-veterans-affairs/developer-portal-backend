@@ -1,12 +1,12 @@
 import 'jest';
-import Application from './Application';
 import OktaService from '../services/OktaService';
 import { OktaUser } from '../types';
+import Application from './Application';
 
 const oktaUser: OktaUser = {
   apiList: ['hobbits'],
-  organization: 'shire',
   email: 'frodo@bagginswriters',
+  organization: 'shire',
 };
 
 describe('Application', () => {
@@ -23,7 +23,7 @@ describe('Application', () => {
     it('assigns web fields when applicationType is undefined', () => {
       const application = new Application(applicationSettings, oktaUser);
 
-      const oauthClient = application.toOktaApp().settings.oauthClient;
+      const { oauthClient } = application.toOktaApp().settings;
 
       expect(oauthClient.application_type).toEqual('web');
       expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
@@ -40,7 +40,7 @@ describe('Application', () => {
         oktaUser,
       );
 
-      const oauthClient = application.toOktaApp().settings.oauthClient;
+      const { oauthClient } = application.toOktaApp().settings;
 
       expect(oauthClient.application_type).toEqual('web');
       expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
@@ -57,7 +57,7 @@ describe('Application', () => {
         oktaUser,
       );
 
-      const oauthClient = application.toOktaApp().settings.oauthClient;
+      const { oauthClient } = application.toOktaApp().settings;
 
       expect(oauthClient.application_type).toEqual('native');
       expect(oauthClient.response_types.sort()).toEqual(['code']);
@@ -67,13 +67,13 @@ describe('Application', () => {
 
   describe('createOktaApplication', () => {
     const appRes = {
-      id: '99hobbitses',
       credentials: {
         oauthClient: {
           client_id: 'hobbit98',
           client_secret: 'had3breakfasts',
         },
       },
+      id: '99hobbitses',
     };
     const mockCreateApplication = jest.fn().mockResolvedValue(appRes);
 

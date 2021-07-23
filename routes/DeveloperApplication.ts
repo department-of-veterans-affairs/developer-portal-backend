@@ -1,3 +1,5 @@
+/* eslint-disable max-params */
+
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 import { FormSubmission } from '../types/FormSubmission';
@@ -11,7 +13,7 @@ import DynamoService from '../services/DynamoService';
 import { API_LIST } from '../config/apis';
 import { DevPortalError } from '../models/DevPortalError';
 
-function validateApiList(val: string): string {
+const validateApiList = (val: string): string => {
   let result: boolean;
   try {
     const apis = val.split(',');
@@ -25,21 +27,23 @@ function validateApiList(val: string): string {
   }
 
   return val;
-}
+};
 
 export const applySchema = Joi.object()
   .keys({
-    firstName: Joi.string().required(),
-    lastName: Joi.string().required(),
-    organization: Joi.string().required(),
+    apis: Joi.custom(validateApiList).required(),
     description: Joi.string().allow(''),
     email: Joi.string().email().required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    oAuthApplicationType: Joi.allow('').valid('web', 'native'),
     oAuthRedirectURI: Joi.string()
       .allow('')
-      .uri({ scheme: ['http', 'https'] }),
-    oAuthApplicationType: Joi.allow('').valid('web', 'native'),
+      .uri({
+        scheme: ['http', 'https'],
+      }),
+    organization: Joi.string().required(),
     termsOfService: Joi.required().valid(true),
-    apis: Joi.custom(validateApiList).required(),
   })
   .options({ abortEarly: false });
 
@@ -62,18 +66,15 @@ type DeveloperApplicationRequest = Request<
   Record<string, unknown>
 >;
 
-export default function developerApplicationHandler(
-  kong: KongService,
-  okta: OktaService | undefined,
-  dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
-  slack: SlackService | undefined,
-) {
-  return async function (
-    req: DeveloperApplicationRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+const developerApplicationHandler =
+  (
+    kong: KongService,
+    okta: OktaService | undefined,
+    dynamo: DynamoService,
+    govdelivery: GovDeliveryService | undefined,
+    slack: SlackService | undefined,
+  ) =>
+  async (req: DeveloperApplicationRequest, res: Response, next: NextFunction): Promise<void> => {
     const {
       firstName,
       lastName,
@@ -87,15 +88,15 @@ export default function developerApplicationHandler(
     } = req.body;
 
     const form: FormSubmission = {
-      firstName,
-      lastName,
-      organization,
+      apis,
       description,
       email,
-      oAuthRedirectURI,
+      firstName,
+      lastName,
       oAuthApplicationType,
+      oAuthRedirectURI,
+      organization,
       termsOfService,
-      apis,
     };
 
     const user: User = new User(form);
@@ -118,21 +119,21 @@ export default function developerApplicationHandler(
       logger.info({ message: 'recording signup in DynamoDB' });
       await user.saveToDynamo(dynamo);
 
-      if (!user.oauthApplication) {
+      if (user.oauthApplication === undefined) {
         res.json({
-          token: user.token,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
+          token: user.token,
         });
       } else {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-          token: user.token,
           redirectURI: user.oAuthRedirectURI,
+          token: user.token,
         });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       next(err);
       return;
     }
@@ -161,4 +162,5 @@ export default function developerApplicationHandler(
       next(err);
     }
   };
-}
+
+export default developerApplicationHandler;

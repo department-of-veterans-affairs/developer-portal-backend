@@ -26,7 +26,7 @@ export interface KongAclsResponse {
 }
 
 interface ACLResponse {
-  data: { group: string }[];
+  data: Array<{ group: string }>;
 }
 
 export interface KongKeyResponse {
@@ -40,10 +40,12 @@ export interface KongKeyResponse {
 
 export default class KongService implements MonitoredService {
   public kongPath = '/internal/admin/consumers';
-  private adminConsumerName = '_internal_DeveloperPortal';
-  private client: AxiosInstance;
 
-  constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
+  private readonly adminConsumerName = '_internal_DeveloperPortal';
+
+  private readonly client: AxiosInstance;
+
+  public constructor({ apiKey, host, port, protocol = 'https' }: KongConfig) {
     const config = {
       baseURL: `${protocol}://${host}:${port}`,
       headers: {
@@ -59,16 +61,18 @@ export default class KongService implements MonitoredService {
 
   public async createConsumer(user: KongUser): Promise<KongConsumerResponse> {
     try {
-      const response = await this.getClient().get<KongConsumerResponse>(
+      const consumerResponse = await this.getClient().get<KongConsumerResponse>(
         `${this.kongPath}/${user.consumerName()}`,
       );
-      const kongUser: KongConsumerResponse = response.data;
+      const kongUser: KongConsumerResponse = consumerResponse.data;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (kongUser) {
         return kongUser;
       }
-    } catch (err) {
+    } catch (err: unknown) {
       logger.debug({ message: 'no existing consumer, creating new one' });
     }
+
     const response = await this.getClient().post<KongConsumerResponse>(this.kongPath, {
       username: user.consumerName(),
     });
@@ -92,7 +96,7 @@ export default class KongService implements MonitoredService {
       return toAdd;
     }, []);
 
-    const addCalls: Promise<KongAcl>[] = groupsToAdd.map((group: string) =>
+    const addCalls: Array<Promise<KongAcl>> = groupsToAdd.map((group: string) =>
       this.getClient()
         .post<KongAcl>(`${this.kongPath}/${user.consumerName()}/acls`, { group })
         .then(response => response.data),
@@ -101,8 +105,8 @@ export default class KongService implements MonitoredService {
     const results: KongAcl[] = await Promise.all(addCalls);
 
     return {
-      total: results.length,
       data: results,
+      total: results.length,
     };
   }
 
@@ -123,15 +127,15 @@ export default class KongService implements MonitoredService {
         throw new Error(`Kong did not return the expected consumer: ${JSON.stringify(res.data)}`);
       }
       return {
-        serviceName: 'Kong',
         healthy: true,
+        serviceName: 'Kong',
       };
     } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of Kong';
       return {
-        serviceName: 'Kong',
-        healthy: false,
         err: err as DevPortalError,
+        healthy: false,
+        serviceName: 'Kong',
       };
     }
   }

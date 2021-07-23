@@ -32,8 +32,10 @@ describe(route, () => {
   });
 
   it('sends a message to slack', async () => {
-    // This test is just basically just a sanity check in it's current implementation...
-    // - it does not verify that the payload is correct, it just verifies that slack recieved a 'post' to the correct path
+    /*
+     * This test is just basically just a sanity check in it's current implementation...
+     * - it does not verify that the payload is correct, it just verifies that slack recieved a 'post' to the correct path
+     */
     dynamoDB.post('/').reply(200).post('/').reply(200);
 
     slack.post('/api/chat.postMessage').reply(200);

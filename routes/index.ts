@@ -1,5 +1,6 @@
 import { Schema, ValidationErrorItem } from '@hapi/joi';
 import express, { Express, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import DynamoService from '../services/DynamoService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import KongService from '../services/KongService';
@@ -11,10 +12,10 @@ import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
 import versionHandler from './Version';
-import cors from 'cors';
 
-function validationMiddleware(schema: Schema, toValidate: string) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+const validationMiddleware =
+  (schema: Schema, toValidate: string) =>
+  (req: Request, res: Response, next: NextFunction): void => {
     const { error } = schema.validate(req[toValidate]);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
@@ -23,7 +24,6 @@ function validationMiddleware(schema: Schema, toValidate: string) {
       next();
     }
   };
-}
 
 interface AppServices {
   kong: KongService;

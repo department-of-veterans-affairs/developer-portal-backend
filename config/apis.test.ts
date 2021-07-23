@@ -46,10 +46,10 @@ describe('API constants', () => {
 
   it('OKTA_AUTHZ_ENDPOINTS', () => {
     expect(OKTA_AUTHZ_ENDPOINTS).toEqual({
+      claims: 'claims_endpoint',
+      communityCare: 'community_care_endpoint',
       health: 'health_endpoint',
       verification: 'verification_endpoint',
-      communityCare: 'community_care_endpoint',
-      claims: 'claims_endpoint',
     });
   });
 

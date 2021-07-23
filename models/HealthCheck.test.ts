@@ -1,20 +1,20 @@
-import HealthCheck from './HealthCheck';
 import logger from '../config/logger';
 import Sentry from '../config/Sentry';
 import { MonitoredService } from '../types';
+import HealthCheck from './HealthCheck';
 
 describe('HealthCheck model', () => {
   describe('check()', () => {
     const healthyService = {
-      healthCheck: () => Promise.resolve({ serviceName: 'healthyService', healthy: true }),
+      healthCheck: () => Promise.resolve({ healthy: true, serviceName: 'healthyService' }),
     } as unknown as MonitoredService;
 
     const unHealthyService = {
       healthCheck: () =>
         Promise.resolve({
-          serviceName: 'unHealthyService',
+          err: new Error("Kong did not return the expected consumer: { message: 'Not found' }"),
           healthy: false,
-          err: new Error(`Kong did not return the expected consumer: { message: 'Not found' }`),
+          serviceName: 'unHealthyService',
         }),
     } as unknown as MonitoredService;
 

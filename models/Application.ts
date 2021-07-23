@@ -25,12 +25,16 @@ export interface ApplicationSettings {
 
 export default class Application implements OktaApplication {
   public owner: OktaUser;
+
   public settings: OAuthApplication;
+
   public client_id?: string;
+
   public client_secret?: string;
+
   public oktaID?: string;
 
-  constructor(
+  public constructor(
     {
       name,
       redirectURIs,
@@ -43,9 +47,8 @@ export default class Application implements OktaApplication {
   ) {
     this.owner = owner;
     this.settings = {
-      name: 'oidc_client',
       label: name,
-      signOnMode: 'OPENID_CONNECT',
+      name: 'oidc_client',
       settings: {
         oauthClient: {
           application_type: applicationType,
@@ -58,6 +61,7 @@ export default class Application implements OktaApplication {
           response_types: responseTypes,
         },
       },
+      signOnMode: 'OPENID_CONNECT',
     };
     if (applicationType === 'native') {
       this.settings.credentials = { oauthClient: { token_endpoint_auth_method: 'none' } };

@@ -54,8 +54,8 @@ describe(route, () => {
   const devAppRequest = {
     ...baseAppRequest,
     apis: 'facilities,verification',
-    oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
     oAuthApplicationType: 'web',
+    oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
   };
 
   beforeEach(() => {
@@ -69,25 +69,25 @@ describe(route, () => {
       .reply(404)
       .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'va_facilities' })
       .reply(201, {
-        group: 'facilities',
-        created_at: 1040169600,
-        id: '123',
         consumer: { id: '222' },
+        created_at: 1040169600,
+        group: 'facilities',
+        id: '123',
       })
       .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'veteran_verification' })
       .reply(201, {
-        group: 'veteran_verification',
-        created_at: 1040169600,
-        id: '123',
         consumer: { id: '222' },
+        created_at: 1040169600,
+        group: 'veteran_verification',
+        id: '123',
       })
       .post('/internal/admin/consumers', { username: 'FellowshipBaggins' })
       .reply(201, {
-        id: '123',
         created_at: 1008720000,
-        username: 'frodo',
         custom_id: '222',
+        id: '123',
         tags: null,
+        username: 'frodo',
       })
       .post('/internal/admin/consumers/FellowshipBaggins/key-auth')
       .reply(201, { key: 'my-precious' });
@@ -95,8 +95,8 @@ describe(route, () => {
     okta
       .post('/api/v1/apps')
       .reply(200, {
-        id: '123',
         credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } },
+        id: '123',
       })
       .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
       .reply(200, {});
@@ -144,8 +144,8 @@ describe(route, () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
-        token: 'my-precious',
         kongUsername: 'FellowshipBaggins',
+        token: 'my-precious',
       });
     });
 
@@ -153,8 +153,8 @@ describe(route, () => {
       const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
-        oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
         oAuthApplicationType: 'web',
+        oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
       });
 
       expect(response.status).toEqual(200);
@@ -169,8 +169,8 @@ describe(route, () => {
       const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
-        oAuthRedirectURI: '',
         oAuthApplicationType: 'web',
+        oAuthRedirectURI: '',
       });
 
       expect(response.status).toEqual(200);
@@ -197,11 +197,11 @@ describe(route, () => {
       beforeEach(() => {
         nock.removeInterceptor(consumerInterceptor);
         kong.get(consumerPath).reply(200, {
-          id: '123',
           created_at: 1008720000,
-          username: 'frodo',
           custom_id: '222',
+          id: '123',
           tags: null,
+          username: 'frodo',
         });
       });
 
@@ -224,10 +224,10 @@ describe(route, () => {
         nock.removeInterceptor(aclInterceptor);
 
         kong.get(aclPath).reply(200, {
-          total: 1,
           data: [
-            { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+            { consumer: { id: '222' }, created_at: 1040169600, group: 'va_facilities', id: '123' },
           ],
+          total: 1,
         });
 
         const response = await request.post(route).send(devAppRequest);
@@ -248,16 +248,23 @@ describe(route, () => {
         nock.removeInterceptor(aclInterceptor);
 
         kong.get(aclPath).reply(200, {
-          total: 2,
           data: [
-            { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
             {
-              group: 'veteran_verification',
+              consumer: {
+                id: '222',
+              },
               created_at: 1040169600,
+              group: 'va_facilities',
               id: '123',
+            },
+            {
               consumer: { id: '222' },
+              created_at: 1040169600,
+              group: 'veteran_verification',
+              id: '123',
             },
           ],
+          total: 2,
         });
 
         const response = await request.post(route).send(devAppRequest);

@@ -1,33 +1,33 @@
 import 'jest';
 import User from '../models/User';
-import DynamoService from './DynamoService';
 import ConsumerRepository from '../repositories/ConsumerRepository';
+import DynamoService from './DynamoService';
 import ConsumerReportService from './ConsumerReportService';
 
 const mockedUsersAB: User[] = [
   new User({
-    firstName: 'Frodo',
-    lastName: 'Baggins',
-    organization: 'The Fellowship',
-    email: 'fbag@hobbiton.com',
     apis: 'ab',
     description: 'super chill',
-    oAuthRedirectURI: 'http://elvish-swords.com',
+    email: 'fbag@hobbiton.com',
+    firstName: 'Frodo',
+    lastName: 'Baggins',
     oAuthApplicationType: '',
+    oAuthRedirectURI: 'http://elvish-swords.com',
+    organization: 'The Fellowship',
     termsOfService: true,
   }),
 ];
 
 const mockedUsers: User[] = mockedUsersAB.concat([
   new User({
-    firstName: 'Gandalf',
-    lastName: 'Gray',
-    organization: 'The Fellowship',
-    email: 'wizz@higherbeings.com',
     apis: 'va,xz,dx',
     description: 'super cool',
-    oAuthRedirectURI: 'http://wanna-use-magic.com',
+    email: 'wizz@higherbeings.com',
+    firstName: 'Gandalf',
+    lastName: 'Gray',
     oAuthApplicationType: '',
+    oAuthRedirectURI: 'http://wanna-use-magic.com',
+    organization: 'The Fellowship',
     termsOfService: true,
   }),
 ]);
@@ -51,8 +51,8 @@ describe('ConsumerReportService', () => {
       mockScan.mockResolvedValue(mockedUsers);
 
       const report = await consumerReportServ.generateCSVReport({
-        writeToDisk: false,
         apiList: [],
+        writeToDisk: false,
       });
       expect(report).toContain('fbag@hobbiton.com');
       expect(report).toContain('wizz@higherbeings.com');

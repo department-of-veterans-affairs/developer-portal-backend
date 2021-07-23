@@ -1,3 +1,10 @@
+/* eslint-disable
+  @typescript-eslint/explicit-member-accessibility,
+  @typescript-eslint/no-extraneous-class,
+  @typescript-eslint/no-invalid-void-type,
+  max-classes-per-file
+*/
+
 declare module '@okta/okta-sdk-nodejs' {
   interface OktaPolicy {
     type: string;

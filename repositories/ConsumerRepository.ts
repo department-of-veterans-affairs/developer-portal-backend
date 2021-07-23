@@ -9,8 +9,8 @@ interface OktaExpressions {
 }
 
 enum FilterType {
-  CONTAINS,
-  EQUALS,
+  CONTAINS = 0,
+  EQUALS = 1,
 }
 
 const addFilterToQueryIfApplicable = (
@@ -19,7 +19,7 @@ const addFilterToQueryIfApplicable = (
   oktaQuery: OktaExpressions,
   filterType: FilterType = FilterType.CONTAINS,
 ): void => {
-  if (!filter || filter.length === 0) {
+  if (filter.length === 0) {
     return;
   }
 
@@ -53,8 +53,9 @@ const addFilterToQueryIfApplicable = (
 };
 
 export default class ConsumerRepository {
-  private tableName: string = process.env.DYNAMODB_TABLE || '';
-  private dynamoService: DynamoService;
+  private readonly tableName: string = process.env.DYNAMODB_TABLE ?? '';
+
+  private readonly dynamoService: DynamoService;
 
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
@@ -69,8 +70,8 @@ export default class ConsumerRepository {
     };
 
     const oktaQuery: OktaExpressions = {
-      filterExpression: '',
       expressionAttributeValues: {},
+      filterExpression: '',
     };
 
     addFilterToQueryIfApplicable(apiFilter, 'apis', oktaQuery);
@@ -85,8 +86,8 @@ export default class ConsumerRepository {
     if (oktaQuery.filterExpression) {
       params = {
         ...params,
-        FilterExpression: oktaQuery.filterExpression,
         ExpressionAttributeValues: oktaQuery.expressionAttributeValues,
+        FilterExpression: oktaQuery.filterExpression,
       };
     }
 
@@ -94,25 +95,25 @@ export default class ConsumerRepository {
       params.TableName,
       'email, firstName, lastName, apis, okta_application_id',
       {
-        FilterExpression: params.FilterExpression,
         ExpressionAttributeValues: params.ExpressionAttributeValues,
+        FilterExpression: params.FilterExpression,
       },
     );
 
     const results = items.map(
       (item): UserDynamoItem => ({
         apis: item.apis as string,
+        createdAt: item.createdAt as string,
+        description: item.description as string,
         email: item.email as string,
         firstName: item.firstName as string,
-        lastName: item.lastName as string,
-        organization: item.organization as string,
-        oAuthRedirectURI: item.oAuthRedirectURI as string,
         kongConsumerId: item.kongConsumerId as string,
-        tosAccepted: item.tosAccepted as boolean,
-        description: item.description as string,
-        createdAt: item.createdAt as string,
+        lastName: item.lastName as string,
+        oAuthRedirectURI: item.oAuthRedirectURI as string,
         okta_application_id: item.okta_application_id as string,
         okta_client_id: item.okta_client_id as string,
+        organization: item.organization as string,
+        tosAccepted: item.tosAccepted as boolean,
       }),
     );
 

@@ -1,7 +1,5 @@
 import 'jest';
 import { AWSError, DynamoDB, Request as AWSRequest } from 'aws-sdk';
-import DynamoService from './DynamoService';
-import { DynamoConfig } from '../types';
 import {
   AttributeMap,
   ListTablesOutput,
@@ -10,6 +8,8 @@ import {
   QueryOutput,
   ScanOutput,
 } from 'aws-sdk/clients/dynamodb';
+import { DynamoConfig } from '../types';
+import DynamoService from './DynamoService';
 
 describe('DynamoService', () => {
   let service: DynamoService;
@@ -24,11 +24,11 @@ describe('DynamoService', () => {
 
   beforeEach(() => {
     const config = {
+      accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
       httpOptions: {
         timeout: 5000,
       },
       maxRetries: 1,
-      accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
       region: process.env.DYNAMODB_REGION,
       secretAccessKey: process.env.DYNAMODB_ACCESS_KEY_SECRET,
       sessionToken: process.env.DYNAMODB_SESSION_TOKEN,
@@ -50,7 +50,7 @@ describe('DynamoService', () => {
        * they actually call the callback with an error object always? presumably no. is this bad? I
        * don't know. probably yes.
        */
-      setTimeout(() => cb && cb(null as AWSError, {}), 5);
+      setTimeout(() => cb?.(null as AWSError, {}), 5);
       return {} as AWSRequest<PutItemOutput, AWSError>;
     });
     mockScan.mockClear();
@@ -84,9 +84,9 @@ describe('DynamoService', () => {
   describe('putItem', () => {
     const item = {
       commonName: 'Treebeard',
-      sidarinName: 'Fangorn',
       entishName: 'Not stored due to buffer overflow',
       orcishName: '',
+      sidarinName: 'Fangorn',
     };
     const tableName = 'Ents';
 
@@ -101,22 +101,22 @@ describe('DynamoService', () => {
     // The DynamoDB API breaks if empty strings are passed in
     it('converts empty strings in user model to nulls', async () => {
       await service.putItem(item, tableName);
-      expect(mockPut.mock.calls[0][0]['Item']['orcishName']).toEqual(null);
+      expect(mockPut.mock.calls[0][0].Item.orcishName).toEqual(null);
     });
 
     it('responds to an error with a rejection', async () => {
-      //Fail the test if the expectation in the catch is never reached.
+      // Fail the test if the expectation in the catch is never reached.
       expect.assertions(1);
       const err = new Error('Never is too long a word even for me . . . ') as AWSError;
       mockPut.mockImplementationOnce((_params, cb?: (err: AWSError, _data) => void) => {
-        setTimeout(() => cb && cb(err, undefined), 5);
+        setTimeout(() => cb?.(err, undefined), 5);
         return {} as AWSRequest<PutItemOutput, AWSError>;
       });
 
       try {
         await service.putItem(item, tableName);
         throw new Error('you shall not pass! (no, really, this is the wrong error)');
-      } catch (putError) {
+      } catch (putError: unknown) {
         expect(putError).toStrictEqual(err);
       }
     });
@@ -131,9 +131,9 @@ describe('DynamoService', () => {
     const tableName = 'Ents';
     const tableRecord: AttributeMap = {
       commonName: { S: 'Treebeard' },
-      sidarinName: { S: 'Fangorn' },
       entishName: { S: 'Not stored due to buffer overflow' },
       orcishName: { S: '' },
+      sidarinName: { S: 'Fangorn' },
     };
     const projectionExp = 'commonName, sidarinName, entishName, orcishName';
     const filterParams = {
@@ -164,7 +164,7 @@ describe('DynamoService', () => {
       try {
         await service.scan(tableName, projectionExp, filterParams);
         throw new Error('you shall not pass! (no, really, this is the wrong error)');
-      } catch (scanError) {
+      } catch (scanError: unknown) {
         expect(scanError).toStrictEqual(err);
       }
     });
@@ -174,9 +174,9 @@ describe('DynamoService', () => {
     const tableName = 'Ents';
     const tableRecord: AttributeMap = {
       commonName: { S: 'Treebeard' },
-      sidarinName: { S: 'Fangorn' },
       entishName: { S: 'Not stored due to buffer overflow' },
       orcishName: { S: '' },
+      sidarinName: { S: 'Fangorn' },
     };
     const attributes = { ':commonName': 'Treebeard' };
     const keyCondition = 'commonName = :commonName';
@@ -203,7 +203,7 @@ describe('DynamoService', () => {
       try {
         await service.query(tableName, keyCondition, attributes);
         throw new Error('you shall not pass! (no, really, this is the wrong error)');
-      } catch (queryError) {
+      } catch (queryError: unknown) {
         expect(queryError).toStrictEqual(err);
       }
     });
@@ -218,7 +218,7 @@ describe('DynamoService', () => {
     it('returns unhealthy when it receives an error', async () => {
       const mockValue = 'Missing region in config';
       const err = new Error(`DynamoDB encountered an error: ${mockValue}`);
-      const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Dynamo' };
       mockListTables.mockImplementationOnce((_params, cb: (err: AWSError) => void) => {
         setTimeout(() => cb(new Error(mockValue) as AWSError), 5);
       });
@@ -232,7 +232,7 @@ describe('DynamoService', () => {
       const err = new Error(
         `DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`,
       );
-      const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Dynamo' };
       mockListTables.mockImplementation(
         (_params, cb: (err: AWSError | null, data: ListTablesOutput) => void) => {
           setTimeout(() => cb(null, mockValue), 5);
@@ -248,7 +248,7 @@ describe('DynamoService', () => {
       const err = new Error(
         `DynamoDB encountered an error: Did not have a table: ${JSON.stringify(mockValue)}`,
       );
-      const expectedReturn = { serviceName: 'Dynamo', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Dynamo' };
       mockListTables.mockImplementation(
         (_params, cb: (err: AWSError | null, data: ListTablesOutput) => void) => {
           setTimeout(() => cb(null, mockValue), 5);
@@ -260,7 +260,7 @@ describe('DynamoService', () => {
     });
 
     it('returns healthy when it receives a single record', async () => {
-      const expectedReturn = { serviceName: 'Dynamo', healthy: true };
+      const expectedReturn = { healthy: true, serviceName: 'Dynamo' };
 
       const healthCheck = await service.healthCheck();
       expect(healthCheck).toStrictEqual(expectedReturn);
