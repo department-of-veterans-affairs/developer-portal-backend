@@ -82,12 +82,16 @@ describe('DynamoService', () => {
   });
 
   describe('putItem', () => {
-    const item = {
-      commonName: 'Treebeard',
-      entishName: 'Not stored due to buffer overflow',
-      orcishName: '',
-      sidarinName: 'Fangorn',
-    };
+    // We are marshalling the item as that is what we expect to receive from the User model
+    const item = DynamoDB.Converter.marshall(
+      {
+        commonName: 'Treebeard',
+        entishName: 'Not stored due to buffer overflow',
+        orcishName: '',
+        sidarinName: 'Fangorn',
+      },
+      { convertEmptyValues: true },
+    );
     const tableName = 'Ents';
 
     it('puts to a DynamoDB table', async () => {
@@ -101,7 +105,7 @@ describe('DynamoService', () => {
     // The DynamoDB API breaks if empty strings are passed in
     it('converts empty strings in user model to nulls', async () => {
       await service.putItem(item, tableName);
-      expect(mockPut.mock.calls[0][0].Item.orcishName).toEqual(null);
+      expect(mockPut.mock.calls[0][0].Item.orcishName).toEqual({ NULL: true });
     });
 
     it('responds to an error with a rejection', async () => {

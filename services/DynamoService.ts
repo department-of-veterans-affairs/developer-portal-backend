@@ -2,7 +2,6 @@ import { AWSError, DynamoDB } from 'aws-sdk';
 import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
-import logger from '../config/logger';
 import { DevPortalError } from '../models/DevPortalError';
 
 export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
@@ -18,14 +17,6 @@ export default class DynamoService implements MonitoredService {
   }
 
   public putItem(item: Record<string, unknown>, tableName: string): Promise<void> {
-    // The DynamoDB API breaks if empty strings are passed in
-    Object.keys(item).forEach(k => {
-      if (item[k] === '') {
-        logger.debug({ message: `converting ${k} from empty string to null` });
-        item[k] = null;
-      }
-    });
-
     return new Promise((resolve, reject) => {
       const params = {
         Item: item,
