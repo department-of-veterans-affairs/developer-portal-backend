@@ -2,7 +2,10 @@
  * This file represents the best approximation of our development conventions in this project as of
  * the conversion from TSLint to ESLint in API-1323. The rules in this file should be considered
  * flexible and can be extended or relaxed as necessary. Feel free to add rules that would be helpful
- * and remove rules that are overly strict.
+ * and remove rules that are overly strict. As of API-3321, these rules were added to the backend to
+ * keep the linting in line with the frontend. When adding or changing a rule here, you should ask
+ * if it makes sense to update or add the rule in the frontend as well. Please try to keep the two
+ * repos in sync when possible.
  *
  * Notes
  *  1. The Typescript ESLint plugin has several rules that extend rules in the core ESLint module. In
@@ -16,9 +19,6 @@
  *  - Typescript ESLint: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/src/configs/recommended.ts
  *    - ESLint via Typescript ESLint: https://github.com/eslint/eslint/blob/master/conf/eslint-recommended.js
  *  - Typescript ESLint with type checking: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/src/configs/recommended-requiring-type-checking.ts
- *  - React: https://github.com/yannickcr/eslint-plugin-react/blob/master/index.js
- *  - React rules of hooks: https://github.com/facebook/react/blob/master/packages/eslint-plugin-react-hooks/src/index.js
- *  - Accessibility: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/src/index.js
  */
 
 // https://eslint.org/docs/rules/
