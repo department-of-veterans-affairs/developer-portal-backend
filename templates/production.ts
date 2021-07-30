@@ -305,6 +305,22 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
         </div>
       </li>
       <li>
+<<<<<<< HEAD
+        <strong>
+          <div>Links to Application's Signup Page:</div>
+        </strong>
+        {{#each signUpLink}}
+          <div>{{this}}</div>
+        {{/each}}
+      </li>
+      <li>
+        <strong>
+          <div>Links to Application's FAQ/Support Page:</div>
+        </strong>
+        {{#each supportLink}}
+          <div>{{this}}</div>
+        {{/each}}
+=======
         <div>
           <strong>
             <div>Link to Application's Signup Page:</div>
@@ -319,6 +335,7 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
           </strong>
           <div>{{supportLink}}</div>
         </div>
+>>>>>>> added parent div to line items in template
       </li>
       <li>
         <div>
