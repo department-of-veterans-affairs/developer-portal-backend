@@ -19,8 +19,8 @@ export interface ProductionAccessSupportEmail {
   monitizationExplanation?: string;
   veteranFacing?: boolean;
   website?: string;
-  signUpLink?: string;
-  supportLink?: string;
+  signUpLink?: string[];
+  supportLink?: string[];
   platforms?: string;
   veteranFacingDescription?: string;
   vasiSystemName?: string;

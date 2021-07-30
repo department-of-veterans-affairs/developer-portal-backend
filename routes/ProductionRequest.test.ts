@@ -50,8 +50,8 @@ describe('productionRequestHandler', () => {
         monitizationExplanation: 'n/a',
         veteranFacing: false,
         website: 'www.one2bindthem.com',
-        signUpLink: 'www.one2bindthem.com/signup',
-        supportLink: 'www.one2bindthem.com/support',
+        signUpLink: ['www.one2bindthem.com/signup'],
+        supportLink: ['www.one2bindthem.com/support'],
         platforms: 'iOS',
         veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
         vasiSystemName: 'asdf',
@@ -120,8 +120,8 @@ describe('validations', () => {
     monitizationExplanation: 'n/a',
     veteranFacing: false,
     website: 'www.one2bindthem.com',
-    signUpLink: 'www.one2bindthem.com/signup',
-    supportLink: 'www.one2bindthem.com/support',
+    signUpLink: ['www.one2bindthem.com/signup'],
+    supportLink: ['www.one2bindthem.com/support'],
     platforms: 'iOS',
     veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vasiSystemName: 'asdf',
@@ -402,12 +402,12 @@ describe('validations', () => {
   });
 
   describe('signUpLink', () => {
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, signUpLink: '' };
+    it('is allowed to be empty', () => {
+      const payload = { ...defaultPayload, signUpLink: [] };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"signUpLink" is not allowed to be empty');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {
@@ -415,17 +415,17 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"signUpLink" must be a string');
+      expect(result.error?.message).toEqual('"signUpLink" must be an array');
     });
   });
 
   describe('supportLink', () => {
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, supportLink: '' };
+    it('is allowed to be empty', () => {
+      const payload = { ...defaultPayload, supportLink: [] };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"supportLink" is not allowed to be empty');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {
@@ -433,7 +433,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"supportLink" must be a string');
+      expect(result.error?.message).toEqual('"supportLink" must be an array');
     });
   });
 
