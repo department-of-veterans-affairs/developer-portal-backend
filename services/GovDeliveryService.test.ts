@@ -183,8 +183,7 @@ describe('GovDeliveryService', () => {
           centralizedBackendLog: 'non-existent',
           credentialStorage: '',
           distributingAPIKeysToCustomers: false,
-          // eslint-disable-next-line id-length
-          exposeVeteranInformationToThirdParties: false,
+          exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
           listedOnMyHealthApplication: false,
           medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
           monitizationExplanation: 'n/a',
@@ -208,10 +207,10 @@ describe('GovDeliveryService', () => {
             firstName: 'Frodo',
             lastName: 'Baggins',
           },
-          signUpLink: 'www.one2bindthem.com/signup',
+          signUpLink: ['www.one2bindthem.com/signup'],
           statusUpdateEmails: ['sam@fellowship.com'],
           storePIIOrPHI: false,
-          supportLink: 'www.one2bindthem.com/support',
+          supportLink: ['www.one2bindthem.com/support'],
           thirdPartyInfoDescription: 'n/a',
           valueProvided: 'n/a',
           vasiSystemName: 'asdf',
@@ -219,7 +218,6 @@ describe('GovDeliveryService', () => {
           veteranFacingDescription:
             'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
           vulnerabilityManagement: 'golem',
-          website: 'www.one2bindthem.com',
         };
         await client.sendProductionAccessEmail(email);
         expect(mockPost).toHaveBeenCalledWith(

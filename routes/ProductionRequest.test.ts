@@ -64,10 +64,9 @@ describe('productionRequestHandler', () => {
           firstName: 'Frodo',
           lastName: 'Baggins',
         },
-        signUpLink: 'www.one2bindthem.com/signup',
+        signUpLink: ['www.one2bindthem.com/signup'],
         statusUpdateEmails: ['sam@fellowship.com'],
-        storePIIOrPHI: false,
-        supportLink: 'www.one2bindthem.com/support',
+        supportLink: ['www.one2bindthem.com/support'],
         thirdPartyInfoDescription: 'n/a',
         valueProvided: 'n/a',
         vasiSystemName: 'asdf',
@@ -134,11 +133,9 @@ describe('validations', () => {
       firstName: 'Frodo',
       lastName: 'Baggins',
     },
-    signUpLink: 'www.one2bindthem.com/signup',
+    signUpLink: ['www.one2bindthem.com/signup'],
     statusUpdateEmails: ['sam@fellowship.com'],
-    storePIIOrPHI: false,
-    supportLink: 'www.one2bindthem.com/support',
-    thirdPartyInfoDescription: 'n/a',
+    supportLink: ['www.one2bindthem.com/support'],
     valueProvided: 'n/a',
     vasiSystemName: 'asdf',
     veteranFacing: false,
@@ -412,12 +409,12 @@ describe('validations', () => {
   });
 
   describe('signUpLink', () => {
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, signUpLink: '' };
+    it('is allowed to be empty', () => {
+      const payload = { ...defaultPayload, signUpLink: [] };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"signUpLink" is not allowed to be empty');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {
@@ -425,17 +422,17 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"signUpLink" must be a string');
+      expect(result.error?.message).toEqual('"signUpLink" must be an array');
     });
   });
 
   describe('supportLink', () => {
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, supportLink: '' };
+    it('is allowed to be empty', () => {
+      const payload = { ...defaultPayload, supportLink: [] };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"supportLink" is not allowed to be empty');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {
@@ -443,7 +440,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"supportLink" must be a string');
+      expect(result.error?.message).toEqual('"supportLink" must be an array');
     });
   });
 
@@ -671,78 +668,6 @@ describe('validations', () => {
       const result = productionSchema.validate(payload);
 
       expect(result.error?.message).toBe('"centralizedBackendLog" is not allowed to be empty');
-    });
-  });
-
-  describe('appImageLink', () => {
-    it('is a string', () => {
-      const payload = { ...defaultPayload, appImageLink: 123456 };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toEqual('"appImageLink" must be a string');
-    });
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, appImageLink: '' };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toBe('"appImageLink" is not allowed to be empty');
-    });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, appImageLink: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
-    });
-  });
-
-  describe('medicalDisclaimerImageLink', () => {
-    it('is a string', () => {
-      const payload = { ...defaultPayload, medicalDisclaimerImageLink: 123456 };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toEqual('"medicalDisclaimerImageLink" must be a string');
-    });
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, medicalDisclaimerImageLink: '' };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toBe('"medicalDisclaimerImageLink" is not allowed to be empty');
-    });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, medicalDisclaimerImageLink: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
-    });
-  });
-
-  describe('patientWaitTimeImageLink', () => {
-    it('is a string', () => {
-      const payload = { ...defaultPayload, patientWaitTimeImageLink: 123456 };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toEqual('"patientWaitTimeImageLink" must be a string');
-    });
-    it('is not allowed to be an empty string', () => {
-      const payload = { ...defaultPayload, patientWaitTimeImageLink: '' };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error?.message).toBe('"patientWaitTimeImageLink" is not allowed to be empty');
-    });
-    it('is allowed to be undefined', () => {
-      const payload = { ...defaultPayload, patientWaitTimeImageLink: undefined };
-
-      const result = productionSchema.validate(payload);
-
-      expect(result.error).toBe(undefined);
     });
   });
 
