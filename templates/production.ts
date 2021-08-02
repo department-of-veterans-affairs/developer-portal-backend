@@ -243,30 +243,6 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       </div>
     </li>
   {{/if}}
-  <li>
-    <div>
-      <strong>
-        <div>Application Image Link:</div>
-      </strong>
-      <div>{{appImageLink}}</div>
-    </div>
-  </li>
-  <li>
-    <div>
-      <strong>
-        <div>Patient Wait Time Image Link:</div>
-      </strong>
-      <div>{{patientWaitTimeImageLink}}</div>
-    </div>
-  </li>
-  <li>
-    <div>
-      <strong>
-        <div>Medical Disclaimer Image Link:</div>
-      </strong>
-      <div>{{medicalDisclaimerImageLink}}</div>
-    </div>
-  </li>
 </ul>
 <h2>Monetization Information</h2>
 <ul>
