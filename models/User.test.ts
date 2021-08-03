@@ -60,7 +60,7 @@ describe('User', () => {
   });
 
   describe('shouldUpdateOkta', () => {
-    const updateOktaTest = (api: string): void => {
+    it.each(OKTA_CONSUMER_APIS)('returns true when %s is requested', api => {
       event = {
         apis: api,
         description: 'Mayhem',
@@ -73,11 +73,7 @@ describe('User', () => {
       };
       user = new User(event);
       expect(user.shouldUpdateOkta()).toBe(true);
-    };
-
-    for (const api of OKTA_CONSUMER_APIS) {
-      it(`returns true when ${api} is requested`, () => updateOktaTest(api));
-    }
+    });
 
     it('returns false when benefits / facilities are requested', () => {
       event = {

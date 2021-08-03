@@ -1,9 +1,9 @@
 /**
- * This file represents the best approximation of our development conventions in this project as of
- * the conversion from TSLint to ESLint in API-1323. The rules in this file should be considered
- * flexible and can be extended or relaxed as necessary. Feel free to add rules that would be helpful
- * and remove rules that are overly strict. As of API-3321, these rules were added to the backend to
- * keep the linting in line with the frontend. When adding or changing a rule here, you should ask
+ * The rules in this file should be considered flexible and can be extended or relaxed as necessary.
+ * Feel free to add rules that would be helpful and remove rules that are overly strict.
+ *
+ * As of API-3321, these rules were coppied from the developer-portal repo to the developer-portal-backend
+ * to keep the linting in line with the frontend. When adding or changing a rule here, you should ask
  * if it makes sense to update or add the rule in the frontend as well. Please try to keep the two
  * repos in sync when possible.
  *
@@ -64,7 +64,6 @@ const coreESLintRules = {
       max: 32,
     },
   ],
-  'jsx-quotes': 'error',
   'key-spacing': 'error',
   'linebreak-style': 'error',
   'max-classes-per-file': ['error', 1],

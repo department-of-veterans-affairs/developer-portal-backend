@@ -135,6 +135,7 @@ describe('validations', () => {
     },
     signUpLink: ['www.one2bindthem.com/signup'],
     statusUpdateEmails: ['sam@fellowship.com'],
+    storePIIOrPHI: false,
     supportLink: ['www.one2bindthem.com/support'],
     valueProvided: 'n/a',
     vasiSystemName: 'asdf',

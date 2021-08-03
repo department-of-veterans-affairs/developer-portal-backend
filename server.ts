@@ -8,7 +8,7 @@ const PORT = process.env.PORT ?? 9999;
 server.listen(PORT);
 
 server.on('error', (e: Error) => {
-  console.log(`Error starting server${JSON.stringify(e)}`);
+  console.log(`Error starting server ${JSON.stringify(e)}`);
 });
 
 server.on('listening', () => {

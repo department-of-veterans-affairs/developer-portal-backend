@@ -1,5 +1,3 @@
-/* eslint-disable no-new */
-
 import axios, { AxiosInstance } from 'axios';
 import moment from 'moment';
 import SlackService from './SlackService';
@@ -14,6 +12,8 @@ describe('SlackService', () => {
 
   it('sends a provided bearer token', () => {
     const mockCreate = jest.spyOn(axios, 'create');
+
+    // eslint-disable-next-line no-new
     new SlackService(slackURL, slackToken, slackOptions);
 
     expect(mockCreate).toHaveBeenCalledWith({

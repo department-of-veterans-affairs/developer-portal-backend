@@ -101,18 +101,17 @@ const developerApplicationHandler =
       logger.info({ message: 'recording signup in DynamoDB' });
       await user.saveToDynamo(dynamo);
 
-      // eslint-disable-next-line no-negated-condition
-      if (!user.oauthApplication) {
-        res.json({
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-          token: user.token,
-        });
-      } else {
+      if (user.oauthApplication) {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
           redirectURI: user.oAuthRedirectURI,
+          token: user.token,
+        });
+      } else {
+        res.json({
+          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
           token: user.token,
         });
       }

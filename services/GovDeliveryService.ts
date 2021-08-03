@@ -158,7 +158,6 @@ export default class GovDeliveryService implements MonitoredService {
     }, '');
   }
 
-  // GovDelivery is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     const healthResponse: ServiceHealthCheckResponse = {
       healthy: false,

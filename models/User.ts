@@ -68,6 +68,8 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public tosAccepted: boolean;
 
+  public readonly apiList: string[];
+
   public constructor({
     firstName,
     lastName,
@@ -89,15 +91,12 @@ export default class User implements KongUser, GovDeliveryUser {
     this.oAuthRedirectURI = oAuthRedirectURI;
     this.oAuthApplicationType = oAuthApplicationType;
     this.tosAccepted = termsOfService;
+
+    this.apiList = this.apis ? this.apis.split(',') : [];
   }
 
   public consumerName(): string {
     return `${this.organization}${this.lastName}`.replace(/\W/g, '');
-  }
-
-  public get apiList(): string[] {
-    // eslint-disable-next-line no-underscore-dangle
-    return this._apiList;
   }
 
   public async saveToKong(client: KongService): Promise<User> {
@@ -198,13 +197,6 @@ export default class User implements KongUser, GovDeliveryUser {
   public shouldUpdateOkta(): boolean {
     const isOktaApi: APIFilterFn = api => this.apiList.includes(api);
     return OKTA_CONSUMER_APIS.some(isOktaApi);
-  }
-
-  private get _apiList(): string[] {
-    if (this.apis) {
-      return this.apis.split(',');
-    }
-    return [];
   }
 
   private toSlackString(): string {
