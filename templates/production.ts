@@ -249,58 +249,70 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
 <h2>Monetization Information</h2>
 <ul>
   <li>
-    <strong>
-      <div>Application Monitizes Veteran Information:</div>
-    </strong>
-    <div>{{monitizedVeteranInformation}}</div>
+    <div>
+      <strong>
+        <div>Application Monitizes Veteran Information:</div>
+      </strong>
+      <div>{{monitizedVeteranInformation}}</div>
+    </div>
   </li>
   {{#if monitizedVeteranInformation}}
     <li>
-      <strong>
-        <div>Explanation:</div>
-      </strong>
-      <div>{{monitizationExplanation}}</div>
+      <div>
+        <strong>
+          <div>Explanation:</div>
+        </strong>
+        <div>{{monitizationExplanation}}</div>
+      </div>
     </li>
     <li>
-      <strong>
-        <div>App is Veteran Facing:</div>
-      </strong>
-      <div>{{veteranFacing}}</div>
+      <div>
+        <strong>
+          <div>App is Veteran Facing:</div>
+        </strong>
+        <div>{{veteranFacing}}</div>
+      </div>
     </li>
     {{#if veteranFacing}}
       <li>
-        <strong>
-          <div>Link to Application's Primary Webpage:</div>
-        </strong>
-        <div>{{website}}</div>
+        <div>
+          <strong>
+            <div>Link to Application's Primary Webpage:</div>
+          </strong>
+          <div>{{website}}</div>
+        </div>
       </li>
       <li>
-        <strong>
-          <div>Links to Application's Signup Page:</div>
-        </strong>
-        {{#each signUpLink}}
-          <div>{{this}}</div>
-        {{/each}}
+        <div>
+          <strong>
+            <div>Link to Application's Signup Page:</div>
+          </strong>
+          <div>{{signUpLink}}</div>
+        </div>
       </li>
       <li>
-        <strong>
-          <div>Links to Application's FAQ/Support Page:</div>
-        </strong>
-        {{#each supportLink}}
-          <div>{{this}}</div>
-        {{/each}}
+        <div>
+          <strong>
+            <div>Link to Application's FAQ/Support Page:</div>
+          </strong>
+          <div>{{supportLink}}</div>
+        </div>
       </li>
       <li>
-        <strong>
-          <div>Available on the Following Platforms:</div>
-        </strong>
-        <div>{{platforms}}</div>
+        <div>
+          <strong>
+            <div>Available on the Following Platforms:</div>
+          </strong>
+          <div>{{platforms}}</div>
+        </div>
       </li>
       <li>
-        <strong>
-          <div>Veteran Facing Description:</div>
-        </strong>
-        <div>{{veteranFacingDescription}}</div>
+        <div>
+          <strong>
+            <div>Veteran Facing Description:</div>
+          </strong>
+          <div>{{veteranFacingDescription}}</div>
+        </div>
       </li>
     {{/if}}
   {{/if}}
@@ -308,94 +320,122 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
 <h2>Technical Information</h2>
 <ul>
   <li>
-    <strong>
-      <div>VASI System Name</div>
-    </strong>
-    <div>{{vasiSystemName}}</div>
+    <div>
+      <strong>
+        <div>VASI System Name</div>
+      </strong>
+      <div>{{vasiSystemName}}</div>
+    </div>
   </li>
   <li>
-    <strong>
-      <div>Credential Storage:</div>
-    </strong>
-    <div>{{credentialStorage}}</div>
+    <div>
+      <strong>
+        <div>Credential Storage:</div>
+      </strong>
+      <div>{{credentialStorage}}</div>
+    </div>
   </li>
   <li>
-    <strong>
-      <div>Application Stores PII/PHI:</div>
-    </strong>
-    <div>{{storePIIOrPHI}}</div>
+    <div>
+      <strong>
+        <div>Application Stores PII/PHI:</div>
+      </strong>
+      <div>{{storePIIOrPHI}}</div>
+    </div>
   </li>
   {{#if storePIIOrPHI}}
     <li>
-      <strong>
-        <div>How is PII/PHI Stored?:</div>
-      </strong>
-      <div>{{piiStorageMethod}}</div>
+      <div>
+        <strong>
+          <div>How is PII/PHI Stored?:</div>
+        </strong>
+        <div>{{piiStorageMethod}}</div>
+      </div>
     </li>
     <li>
-      <strong>
-        <div>Safeguards in Place:</div>
-      </strong>
-      <div>{{multipleReqSafeguards}}</div>
+      <div>
+        <strong>
+          <div>Safeguards in Place:</div>
+        </strong>
+        <div>{{multipleReqSafeguards}}</div>
+      </div>
     </li>
     <li>
-      <strong>
-        <div>Breach Management Process:</div>
-      </strong>
-      <div>{{breachManagementProcess}}</div>
+      <div>
+        <strong>
+          <div>Breach Management Process:</div>
+        </strong>
+        <div>{{breachManagementProcess}}</div>
+      </div>
     </li>
     <li>
-      <strong>
-        <div>Vulnerability Management and Patch Process:</div>
-      </strong>
-      <div>{{vulnerabilityManagement}}</div>
+      <div>
+        <strong>
+          <div>Vulnerability Management and Patch Process:</div>
+        </strong>
+        <div>{{vulnerabilityManagement}}</div>
+      </div>
     </li>
     <li>
-      <strong>
-        <div>Application Exposes Veterans’ Health, Claims, Disabilities, or Service History Data to Third Parties:</div>
-      </strong>
-      <div>{{exposeVeteranInformationToThirdParties}}</div>
+      <div>
+        <strong>
+          <div>Application Exposes Veterans’ Health, Claims, Disabilities, or Service History Data to Third Parties:</div>
+        </strong>
+        <div>{{exposeVeteranInformationToThirdParties}}</div>
+      </div>
     </li>
     {{#if exposeVeteranInformationToThirdParties}}
       <li>
-        <strong>
-          <div>Description:</div>
-        </strong>
-        <div>{{thirdPartyInfoDescription}}</div>
+        <div>
+          <strong>
+            <div>Description:</div>
+          </strong>
+          <div>{{thirdPartyInfoDescription}}</div>
+        </div>
       </li>
       <li>
-        <strong>
-          <div>Scopes Access Requested:</div>
-        </strong>
-        <div>{{scopesAccessRequested}}</div>
+        <div>
+          <strong>
+            <div>Scopes Access Requested:</div>
+          </strong>
+          <div>{{scopesAccessRequested}}</div>
+        </div>
       </li>
     {{/if}}
       <li>
-        <strong>
-          <div>Distributing Production API Keys to Customers:</div>
-        </strong>
-        <div>{{distributingAPIKeysToCustomers}}</div>
+        <div>
+          <strong>
+            <div>Distributing Production API Keys to Customers:</div>
+          </strong>
+          <div>{{distributingAPIKeysToCustomers}}</div>
+        </div>
       </li>
       {{#if distributingAPIKeysToCustomers}}
         <li>
-          <strong>
-            <div>Naming Convention for Customers:</div>
-          </strong>
-          <div>namingConvention</div>
+          <div>
+            <strong>
+              <div>Naming Convention for Customers:</div>
+            </strong>
+            <div>namingConvention</div>
+          </div>
         </li>
         <li>
-          <strong>
-            <div>Centralized Backend Log of Customer Submissions</div>
-          </strong>
-          <div>{{centralizedBackendLog}}</div>
+          <div>
+            <strong>
+              <div>Centralized Backend Log of Customer Submissions</div>
+            </strong>
+            <div>{{centralizedBackendLog}}</div>
+          </div>
         </li>
       {{/if}}
     {{/if}}
   <li>
-    <strong>
-      <div>Listed on MyHealthApplication.com:</div>
-    </strong>
-    <div>{{listedOnMyHealthApplication}}</div>
+    <div>
+      <strong>
+        <div>Listed on MyHealthApplication.com:</div>
+      </strong>
+      <div>{{listedOnMyHealthApplication}}</div>
+    </div>
   </li>
 </ul>
 `;
