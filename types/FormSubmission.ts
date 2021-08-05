@@ -14,7 +14,13 @@ export class FormSubmission {
 
   public oAuthApplicationType = '';
 
+  public programName = '';
+
+  public sponsorEmail = '';
+
   public termsOfService = false;
+  
+  public vaEmail = '';
 
   public apis = ''; // Comma-separated list
 }

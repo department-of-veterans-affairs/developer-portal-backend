@@ -23,10 +23,14 @@ export interface UserDynamoItem {
   kongConsumerId?: string;
   tosAccepted: boolean;
   description: string;
+  programName: string;
+  sponsorEmail: string;
+  vaEmail: string;
   createdAt: string;
   okta_application_id?: string;
   okta_client_id?: string;
 }
+
 export interface UserConfig {
   firstName: string;
   lastName: string;
@@ -37,6 +41,9 @@ export interface UserConfig {
   oAuthRedirectURI: string;
   oAuthApplicationType?: string;
   termsOfService: boolean;
+  programName: string;
+  sponsorEmail: string;
+  vaEmail: string;
 }
 
 export default class User implements KongUser, GovDeliveryUser {
@@ -58,7 +65,11 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public oAuthApplicationType?: string;
 
+  public programName: string;
+
   public kongConsumerId?: string;
+
+  public sponsorEmail: string;
 
   public token?: string;
 
@@ -67,6 +78,8 @@ export default class User implements KongUser, GovDeliveryUser {
   public tableName: string = process.env.DYNAMODB_TABLE ?? 'Users';
 
   public tosAccepted: boolean;
+
+  public vaEmail: string;
 
   public readonly apiList: string[];
 
@@ -79,7 +92,10 @@ export default class User implements KongUser, GovDeliveryUser {
     description,
     oAuthRedirectURI,
     oAuthApplicationType,
+    programName,
+    sponsorEmail,
     termsOfService,
+    vaEmail,
   }: UserConfig) {
     this.createdAt = new Date(Date.now());
     this.firstName = firstName;
@@ -90,7 +106,10 @@ export default class User implements KongUser, GovDeliveryUser {
     this.description = description;
     this.oAuthRedirectURI = oAuthRedirectURI;
     this.oAuthApplicationType = oAuthApplicationType;
+    this.programName = programName;
+    this.sponsorEmail = sponsorEmail;
     this.tosAccepted = termsOfService;
+    this.vaEmail = vaEmail;
 
     this.apiList = this.apis ? this.apis.split(',') : [];
   }
@@ -143,7 +162,10 @@ export default class User implements KongUser, GovDeliveryUser {
         lastName: this.lastName,
         oAuthRedirectURI: this.oAuthRedirectURI,
         organization: this.organization,
+        programName: this.programName,
+        sponsorEmail: this.sponsorEmail,
         tosAccepted: this.tosAccepted,
+        vaEmail: this.vaEmail,
       };
 
       if (this.oauthApplication?.oktaID) {
@@ -200,7 +222,8 @@ export default class User implements KongUser, GovDeliveryUser {
   }
 
   private toSlackString(): string {
-    const intro = `${this.lastName}, ${this.firstName}: ${this.email}\nDescription: ${this.description}\nRequested access to:\n`;
+    const email = this.vaEmail ? `Contact Email: ${this.email} | VA Email: ${this.vaEmail}` : `${this.email}`;
+    const intro = `${this.lastName}, ${this.firstName}: ${email}\nDescription: ${this.description}\nRequested access to:\n`;
     return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro);
   }
 }

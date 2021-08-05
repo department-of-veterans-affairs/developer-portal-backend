@@ -127,11 +127,18 @@ describe(route, () => {
       email: 'eowyn@rohan.horse',
       lastName: 'Eorl',
       termsOfService: true,
+      internalApiInfo: {
+        programName: 'Battle of the Hornburg',
+      },
     });
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({
-      errors: ['"firstName" is required', '"organization" is required'],
+      errors: [
+        '"firstName" is required', 
+        '"internalApiInfo.sponsorEmail" is required',
+        '"organization" is required', 
+      ],
     });
   });
 

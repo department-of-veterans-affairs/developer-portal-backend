@@ -43,7 +43,10 @@ describe('User', () => {
       oAuthApplicationType: 'web',
       oAuthRedirectURI: 'https://rohirrim.rohan.horse/auth',
       organization: 'Ad Hoc',
+      programName: '',
+      sponsorEmail: '',
       termsOfService: true,
+      vaEmail: '',
     };
     user = new User(event);
   });
@@ -69,7 +72,10 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateOkta()).toBe(true);
@@ -85,6 +91,9 @@ describe('User', () => {
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
+        programName: '',
+        sponsorEmail: '',
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateOkta()).toBe(false);
@@ -106,6 +115,9 @@ describe('User', () => {
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
+        programName: '',
+        sponsorEmail: '',
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateKong()).toBe(true);
@@ -121,6 +133,9 @@ describe('User', () => {
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
+        programName: '',
+        sponsorEmail: '',
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateKong()).toBe(false);
@@ -157,6 +172,9 @@ describe('User', () => {
         oAuthRedirectURI: '',
         organization: 'The Rohirrim',
         termsOfService: true,
+        programName: '',
+        sponsorEmail: '',
+        vaEmail: '',
       };
     });
 

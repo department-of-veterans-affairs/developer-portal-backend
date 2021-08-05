@@ -19,6 +19,11 @@ export const applySchema = Joi.object()
     description: Joi.string().allow(''),
     email: Joi.string().email().required(),
     firstName: Joi.string().required(),
+    internalApiInfo: Joi.object().keys({
+      programName: Joi.string().required(),
+      sponsorEmail: Joi.string().email().required(),
+      vaEmail: Joi.string().email(),
+    }),
     lastName: Joi.string().required(),
     oAuthApplicationType: Joi.allow('').valid('web', 'native'),
     oAuthRedirectURI: Joi.string()
@@ -39,6 +44,11 @@ interface DeveloperApplicationRequestBody {
   oAuthApplicationType: string;
   termsOfService: boolean;
   apis: string;
+  internalApiInfo: {
+    programName: string;
+    sponsorEmail: string;
+    vaEmail: string;
+  };
 }
 
 type DeveloperApplicationRequest = Request<
@@ -67,8 +77,10 @@ const developerApplicationHandler =
       oAuthApplicationType,
       termsOfService,
       apis,
+      internalApiInfo,
     } = req.body;
 
+    const { programName, sponsorEmail, vaEmail } = internalApiInfo || {};
     const form: FormSubmission = {
       apis,
       description,
@@ -78,7 +90,10 @@ const developerApplicationHandler =
       oAuthApplicationType,
       oAuthRedirectURI,
       organization,
+      programName,
+      sponsorEmail,
       termsOfService,
+      vaEmail,
     };
 
     const user: User = new User(form);
