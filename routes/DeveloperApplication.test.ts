@@ -449,7 +449,7 @@ describe('validations', () => {
     describe('programName', () => {
       it('is required', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, programName: undefined };
-        const payload = { ...defaultPayload, internalApiInfo };        
+        const payload = { ...defaultPayload, internalApiInfo };
 
         const result = applySchema.validate(payload);
 
@@ -458,7 +458,7 @@ describe('validations', () => {
 
       it('is a string', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, programName: 12345 };
-        const payload = { ...defaultPayload, internalApiInfo };        
+        const payload = { ...defaultPayload, internalApiInfo };
 
         const result = applySchema.validate(payload);
 
@@ -469,7 +469,7 @@ describe('validations', () => {
     describe('sponsorEmail', () => {
       it('is required', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: undefined };
-        const payload = { ...defaultPayload, internalApiInfo };        
+        const payload = { ...defaultPayload, internalApiInfo };
 
         const result = applySchema.validate(payload);
 
@@ -478,7 +478,7 @@ describe('validations', () => {
 
       it('is a string', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 12345 };
-        const payload = { ...defaultPayload, internalApiInfo };        
+        const payload = { ...defaultPayload, internalApiInfo };
 
         const result = applySchema.validate(payload);
 
@@ -487,18 +487,20 @@ describe('validations', () => {
 
       it('is in a valid format', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 'lolnotanemail.com' };
-        const payload = { ...defaultPayload, internalApiInfo };   
-  
+        const payload = { ...defaultPayload, internalApiInfo };
+
         const result = applySchema.validate(payload);
-  
-        expect(result.error?.message).toEqual('"internalApiInfo.sponsorEmail" must be a valid email');
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.sponsorEmail" must be a valid email',
+        );
       });
     });
 
     describe('vaEmail', () => {
       it('is a string', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 12345 };
-        const payload = { ...defaultPayload, internalApiInfo };        
+        const payload = { ...defaultPayload, internalApiInfo };
 
         const result = applySchema.validate(payload);
 
@@ -507,10 +509,10 @@ describe('validations', () => {
 
       it('is in a valid format', () => {
         const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'lolnotanemail.com' };
-        const payload = { ...defaultPayload, internalApiInfo };   
-  
+        const payload = { ...defaultPayload, internalApiInfo };
+
         const result = applySchema.validate(payload);
-  
+
         expect(result.error?.message).toEqual('"internalApiInfo.vaEmail" must be a valid email');
       });
     });

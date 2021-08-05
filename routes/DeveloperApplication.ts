@@ -12,6 +12,7 @@ import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
 import { validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
+import { DeveloperApplicationRequestBody } from '../types';
 
 export const applySchema = Joi.object()
   .keys({
@@ -34,23 +35,6 @@ export const applySchema = Joi.object()
   })
   .options({ abortEarly: false });
 
-interface DeveloperApplicationRequestBody {
-  firstName: string;
-  lastName: string;
-  organization: string;
-  description: string;
-  email: string;
-  oAuthRedirectURI: string;
-  oAuthApplicationType: string;
-  termsOfService: boolean;
-  apis: string;
-  internalApiInfo: {
-    programName: string;
-    sponsorEmail: string;
-    vaEmail: string;
-  };
-}
-
 type DeveloperApplicationRequest = Request<
   Record<string, unknown>,
   Record<string, unknown>,
@@ -67,34 +51,7 @@ const developerApplicationHandler =
     slack: SlackService | undefined,
   ) =>
   async (req: DeveloperApplicationRequest, res: Response, next: NextFunction): Promise<void> => {
-    const {
-      firstName,
-      lastName,
-      organization,
-      description,
-      email,
-      oAuthRedirectURI,
-      oAuthApplicationType,
-      termsOfService,
-      apis,
-      internalApiInfo,
-    } = req.body;
-
-    const { programName, sponsorEmail, vaEmail } = internalApiInfo || {};
-    const form: FormSubmission = {
-      apis,
-      description,
-      email,
-      firstName,
-      lastName,
-      oAuthApplicationType,
-      oAuthRedirectURI,
-      organization,
-      programName,
-      sponsorEmail,
-      termsOfService,
-      vaEmail,
-    };
+    const form: FormSubmission = new FormSubmission(req.body);
 
     const user: User = new User(form);
     /*

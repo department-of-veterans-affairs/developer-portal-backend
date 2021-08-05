@@ -69,3 +69,20 @@ export interface KeyAuthAPI {
   key: string;
   acl: string;
 }
+
+export interface DeveloperApplicationRequestBody {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  description: string;
+  email: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
+  apis: string;
+  internalApiInfo?: {
+    programName: string;
+    sponsorEmail: string;
+    vaEmail: string;
+  };
+}

@@ -90,9 +90,9 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
-        termsOfService: true,
         programName: '',
         sponsorEmail: '',
+        termsOfService: true,
         vaEmail: '',
       };
       user = new User(event);
@@ -114,9 +114,9 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
-        termsOfService: true,
         programName: '',
         sponsorEmail: '',
+        termsOfService: true,
         vaEmail: '',
       };
       user = new User(event);
@@ -132,9 +132,9 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
-        termsOfService: true,
         programName: '',
         sponsorEmail: '',
+        termsOfService: true,
         vaEmail: '',
       };
       user = new User(event);
@@ -171,9 +171,9 @@ describe('User', () => {
         oAuthApplicationType: '',
         oAuthRedirectURI: '',
         organization: 'The Rohirrim',
-        termsOfService: true,
         programName: '',
         sponsorEmail: '',
+        termsOfService: true,
         vaEmail: '',
       };
     });

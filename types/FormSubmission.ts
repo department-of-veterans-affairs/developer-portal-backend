@@ -1,26 +1,43 @@
+import { DeveloperApplicationRequestBody } from '.';
+
 // A struct to define default values for submissions with omitted fields.
 export class FormSubmission {
-  public firstName = '';
+  public apis; // Comma-separated list
 
-  public lastName = '';
+  public description;
 
-  public organization = '';
+  public email;
 
-  public description = '';
+  public firstName;
 
-  public email = '';
+  public lastName;
 
-  public oAuthRedirectURI = '';
+  public organization;
 
-  public oAuthApplicationType = '';
+  public oAuthRedirectURI;
 
-  public programName = '';
+  public oAuthApplicationType;
 
-  public sponsorEmail = '';
+  public programName;
 
-  public termsOfService = false;
-  
-  public vaEmail = '';
+  public sponsorEmail;
 
-  public apis = ''; // Comma-separated list
+  public termsOfService;
+
+  public vaEmail;
+
+  public constructor(body: DeveloperApplicationRequestBody) {
+    this.apis = body.apis;
+    this.description = body.description;
+    this.email = body.email;
+    this.firstName = body.firstName;
+    this.lastName = body.lastName;
+    this.organization = body.organization;
+    this.oAuthRedirectURI = body.oAuthRedirectURI;
+    this.oAuthApplicationType = body.oAuthApplicationType;
+    this.programName = body.internalApiInfo?.programName ?? '';
+    this.sponsorEmail = body.internalApiInfo?.sponsorEmail ?? '';
+    this.termsOfService = body.termsOfService;
+    this.vaEmail = body.internalApiInfo?.vaEmail ?? '';
+  }
 }

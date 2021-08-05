@@ -125,19 +125,19 @@ describe(route, () => {
     const response = await request.post(route).send({
       apis: 'benefits',
       email: 'eowyn@rohan.horse',
-      lastName: 'Eorl',
-      termsOfService: true,
       internalApiInfo: {
         programName: 'Battle of the Hornburg',
       },
+      lastName: 'Eorl',
+      termsOfService: true,
     });
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({
       errors: [
-        '"firstName" is required', 
+        '"firstName" is required',
         '"internalApiInfo.sponsorEmail" is required',
-        '"organization" is required', 
+        '"organization" is required',
       ],
     });
   });
