@@ -5,10 +5,10 @@ import { getEnvironment } from '../util/environments';
 import { SignupCountResult } from './SignupMetricsService';
 
 /*
- *WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
- *As in when chat.postMessage is called you have to specify a channel. Bot is related to the
- *healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
- *and usable. There may be more options in the future.
+ * WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
+ * As in when chat.postMessage is called you have to specify a channel. Bot is related to the
+ * healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
+ * and usable. There may be more options in the future.
  */
 interface WebAPISlackOptions {
   channel: string;

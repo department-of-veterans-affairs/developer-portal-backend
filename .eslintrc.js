@@ -2,7 +2,7 @@
  * The rules in this file should be considered flexible and can be extended or relaxed as necessary.
  * Feel free to add rules that would be helpful and remove rules that are overly strict.
  *
- * As of API-3321, these rules were coppied from the developer-portal repo to the developer-portal-backend
+ * As of API-3321, these rules were copied from the developer-portal repo to the developer-portal-backend
  * to keep the linting in line with the frontend. When adding or changing a rule here, you should ask
  * if it makes sense to update or add the rule in the frontend as well. Please try to keep the two
  * repos in sync when possible.
