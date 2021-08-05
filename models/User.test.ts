@@ -1,28 +1,26 @@
 import 'jest';
+import { PutItemInput, PutItemOutput } from 'aws-sdk/clients/dynamodb';
+import { AWSError } from 'aws-sdk';
 import { FormSubmission } from '../types/FormSubmission';
 import { OKTA_CONSUMER_APIS } from '../config/apis';
-import User from './User';
 import KongService from '../services/KongService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import OktaService from '../services/OktaService';
-import Application from './Application';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
+import Application from './Application';
+import User, { UserConfig } from './User';
 import { DevPortalError } from './DevPortalError';
-import { PutItemInput, PutItemOutput } from 'aws-sdk/clients/dynamodb';
-import { AWSError } from 'aws-sdk';
 
 const mockCreateOktaApplication = jest.fn();
-jest.mock('./Application', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      createOktaApplication: mockCreateOktaApplication,
-    };
-  });
-});
+jest.mock('./Application', () =>
+  jest.fn().mockImplementation(() => ({
+    createOktaApplication: mockCreateOktaApplication,
+  })),
+);
 
 describe('User', () => {
-  let event;
+  let event: UserConfig;
   let user: User;
   let originalDate: () => number;
 
@@ -42,10 +40,10 @@ describe('User', () => {
       email: 'ed@adhocteam.us',
       firstName: 'Edward',
       lastName: 'Paget',
+      oAuthApplicationType: 'web',
+      oAuthRedirectURI: 'https://rohirrim.rohan.horse/auth',
       organization: 'Ad Hoc',
       termsOfService: true,
-      oAuthRedirectURI: 'https://rohirrim.rohan.horse/auth',
-      oAuthApplicationType: 'web',
     };
     user = new User(event);
   });
@@ -62,21 +60,20 @@ describe('User', () => {
   });
 
   describe('shouldUpdateOkta', () => {
-    for (const api of OKTA_CONSUMER_APIS) {
-      it(`returns true when ${api} is requested`, () => {
-        event = {
-          apis: api,
-          description: 'Mayhem',
-          email: 'ed@adhocteam.us',
-          firstName: 'Edward',
-          lastName: 'Paget',
-          organization: 'Ad Hoc',
-          termsOfService: true,
-        };
-        user = new User(event);
-        expect(user.shouldUpdateOkta()).toBe(true);
-      });
-    }
+    it.each(OKTA_CONSUMER_APIS)('returns true when %s is requested', api => {
+      event = {
+        apis: api,
+        description: 'Mayhem',
+        email: 'ed@adhocteam.us',
+        firstName: 'Edward',
+        lastName: 'Paget',
+        oAuthRedirectURI: '',
+        organization: 'Ad Hoc',
+        termsOfService: true,
+      };
+      user = new User(event);
+      expect(user.shouldUpdateOkta()).toBe(true);
+    });
 
     it('returns false when benefits / facilities are requested', () => {
       event = {
@@ -85,6 +82,7 @@ describe('User', () => {
         email: 'ed@adhocteam.us',
         firstName: 'Edward',
         lastName: 'Paget',
+        oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
       };
@@ -105,6 +103,7 @@ describe('User', () => {
         email: 'ed@adhocteam.us',
         firstName: 'Edward',
         lastName: 'Paget',
+        oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
       };
@@ -119,6 +118,7 @@ describe('User', () => {
         email: 'ed@adhocteam.us',
         firstName: 'Edward',
         lastName: 'Paget',
+        oAuthRedirectURI: '',
         organization: 'Ad Hoc',
         termsOfService: true,
       };
@@ -135,7 +135,10 @@ describe('User', () => {
   });
 
   describe('saveToDynamo', () => {
-    const mockPutItem = jest.fn<void, [paramsa: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]>();
+    const mockPutItem = jest.fn<
+      void,
+      [params: PutItemInput, callback?: (err: AWSError, data: PutItemOutput) => void]
+    >();
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     mockPutItem.mockImplementation(() => {});
     const dynamo = { putItem: mockPutItem } as unknown as DynamoService;
@@ -150,9 +153,9 @@ describe('User', () => {
         email: 'eomer@rohirrim.rohan.horse',
         firstName: 'Eomer',
         lastName: 'King',
-        organization: 'The Rohirrim',
-        oAuthRedirectURI: '',
         oAuthApplicationType: '',
+        oAuthRedirectURI: '',
+        organization: 'The Rohirrim',
         termsOfService: true,
       };
     });
@@ -164,10 +167,12 @@ describe('User', () => {
     });
 
     it('returns an error if save fails', async () => {
-      //Fail the test if the expectations in the catch is never reached.
+      // Fail the test if the expectations in the catch is never reached.
       expect.assertions(2);
       const error = new Error('Where is the Horse and the Rider?');
-      mockPutItem.mockImplementationOnce(() => { throw error; });
+      mockPutItem.mockImplementationOnce(() => {
+        throw error;
+      });
 
       try {
         await user.saveToDynamo(dynamo);
@@ -178,24 +183,30 @@ describe('User', () => {
     });
 
     it('saves client ids and secrets if they exist', async () => {
-      const user = new User(form);
-      user.oauthApplication = {
-        oktaID: 'abc123',
+      const newUser = new User(form);
+      newUser.oauthApplication = {
         client_id: 'xyz456',
+        oktaID: 'abc123',
       } as unknown as Application;
 
-      await user.saveToDynamo(dynamo);
+      await newUser.saveToDynamo(dynamo);
 
-      expect(mockPutItem.mock.calls[0][0]).toEqual(expect.objectContaining({
-        okta_application_id: 'abc123',
-        okta_client_id: 'xyz456',
-      }));
+      expect(mockPutItem.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          okta_application_id: {
+            S: 'abc123',
+          },
+          okta_client_id: {
+            S: 'xyz456',
+          },
+        }),
+      );
     });
 
     it('avoids saving okta ids if they do not exist', async () => {
-      const user = new User(form);
+      const newUser = new User(form);
 
-      await user.saveToDynamo(dynamo);
+      await newUser.saveToDynamo(dynamo);
 
       const calledParams = Object.keys(mockPutItem.mock.calls[0][0]);
       expect(calledParams).not.toContain('okta_application_id');
@@ -208,8 +219,8 @@ describe('User', () => {
     const mockKeyAuth = jest.fn();
     const mockCreateAcls = jest.fn().mockResolvedValue({});
     const kongService = {
-      createConsumer: mockCreateConsumer,
       createACLs: mockCreateAcls,
+      createConsumer: mockCreateConsumer,
       createKeyAuth: mockKeyAuth,
     } as unknown as KongService;
 
@@ -231,8 +242,10 @@ describe('User', () => {
     });
 
     it('tags any errors that occur', async () => {
-      //Fail the test if the expectation in the catch is never
-      //reached.
+      /*
+       * Fail the test if the expectation in the catch is never
+       * reached.
+       */
       expect.assertions(1);
 
       mockCreateConsumer.mockRejectedValue(new Error('failed calling Kong'));
@@ -265,7 +278,7 @@ describe('User', () => {
 
       try {
         await user.sendEmail(govDelivery);
-      } catch (err) {
+      } catch (err: unknown) {
         expect(err).toEqual(testErr);
       }
     });
@@ -275,11 +288,14 @@ describe('User', () => {
     const mockOkta = {} as OktaService;
     it('sends to Okta if a redirect URI is provided', async () => {
       await user.saveToOkta(mockOkta);
-      expect(Application).toHaveBeenCalledWith({
-        applicationType: 'web',
-        name: `AdHocPaget-1892-01-03T08:00:00.000Z`,
-        redirectURIs: ['https://rohirrim.rohan.horse/auth'],
-      }, user);
+      expect(Application).toHaveBeenCalledWith(
+        {
+          applicationType: 'web',
+          name: 'AdHocPaget-1892-01-03T08:00:00.000Z',
+          redirectURIs: ['https://rohirrim.rohan.horse/auth'],
+        },
+        user,
+      );
       expect(mockCreateOktaApplication).toHaveBeenCalled();
     });
   });
@@ -299,7 +315,10 @@ Requested access to:
 * verification
 `;
       await user.sendSlackSuccess(mockSlack);
-      expect(mockSendSuccessMessage).toHaveBeenCalledWith(expectedSlackString, 'New User Application');
+      expect(mockSendSuccessMessage).toHaveBeenCalledWith(
+        expectedSlackString,
+        'New User Application',
+      );
     });
   });
 });

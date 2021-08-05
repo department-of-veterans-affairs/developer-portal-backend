@@ -1,3 +1,5 @@
+/* eslint-disable id-length, max-lines */
+
 export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 <head>
   <style>

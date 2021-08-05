@@ -1,7 +1,9 @@
-export class DevPortalError extends Error {
-  action = '';
+/* eslint-disable no-useless-constructor */
 
-  constructor(message: string) {
+export class DevPortalError extends Error {
+  public action: string = '';
+
+  public constructor(message: string) {
     super(message);
   }
 }

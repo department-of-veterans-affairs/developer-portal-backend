@@ -1,18 +1,22 @@
+/* eslint-disable id-length */
+
 import { Request, Response } from 'express';
 import GovDeliveryService from '../services/GovDeliveryService';
 import productionRequestHandler, { productionSchema } from '../routes/ProductionRequest';
 
-// The mocking that follows that is outside of the describe block is
-// to create a user model that can have its return values overriden for
-// each test.
+/*
+ * The mocking that follows that is outside of the describe block is
+ * to create a user model that can have its return values overriden for
+ * each test.
+ */
 const mockSendEmail = jest.fn();
 
 describe('productionRequestHandler', () => {
   const mockSendProductionAccessConsumerEmail = jest.fn();
   const mockSendProductionAccessEmail = jest.fn();
   const govDelivery = {
-    sendProductionAccessEmail: mockSendProductionAccessEmail,
     sendProductionAccessConsumerEmail: mockSendProductionAccessConsumerEmail,
+    sendProductionAccessEmail: mockSendProductionAccessEmail,
   } as unknown as GovDeliveryService;
 
   const mockJson = jest.fn();
@@ -27,54 +31,56 @@ describe('productionRequestHandler', () => {
   beforeEach(() => {
     stubReq = {
       body: {
+        apis: 'benefits',
+        appDescription: 'A social media platform with one room.',
+        appImageLink: 'www.one2bindthem.com/assets/app.jpeg',
+        appName: 'One to Bind Them',
+        breachManagementProcess: 'golem',
+        businessModel: 'magical rings >> profit',
+        centralizedBackendLog: 'non-existent',
+        credentialStorage: 'stored in a volcano on mount doom',
+        distributingAPIKeysToCustomers: false,
+        exposeVeteranInformationToThirdParties: false,
+        listedOnMyHealthApplication: false,
+        medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/medicalDisclaimer.jpeg',
+        monitizationExplanation: 'n/a',
+        monitizedVeteranInformation: false,
+        multipleReqSafeguards: 'golem',
+        namingConvention: 'overly-complicated',
+        organization: 'Sauron.INC',
+        patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patientWaitTime.jpeg',
+        phoneNumber: '555-867-5309',
+        piiStorageMethod: 'Locking away in the fires from whence it came.',
+        platforms: 'iOS',
+        policyDocuments: ['www.example.com/tos'],
         primaryContact: {
+          email: 'sam@fellowship.com',
           firstName: 'Samwise',
           lastName: 'Gamgee',
-          email: 'sam@fellowship.com',
         },
+        scopesAccessRequested: ['profile', 'email'],
         secondaryContact: {
+          email: 'frodo@fellowship.com',
           firstName: 'Frodo',
           lastName: 'Baggins',
-          email: 'frodo@fellowship.com',
         },
-        organization: 'Sauron.INC',
-        appName: 'One to Bind Them',
-        appDescription: 'A social media platform with one room.',
-        statusUpdateEmails: ['sam@fellowship.com'],
-        valueProvided: 'n/a',
-        businessModel: 'magical rings >> profit',
-        policyDocuments: ['www.example.com/tos'],
-        phoneNumber: '555-867-5309',
-        apis: 'benefits',
-        monitizedVeteranInformation: false,
-        monitizationExplanation: 'n/a',
-        veteranFacing: false,
-        website: 'www.one2bindthem.com',
         signUpLink: ['www.one2bindthem.com/signup'],
+        statusUpdateEmails: ['sam@fellowship.com'],
         supportLink: ['www.one2bindthem.com/support'],
-        platforms: 'iOS',
-        veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
-        vasiSystemName: 'asdf',
-        credentialStorage: 'stored in a volcano on mount doom',
-        storePIIOrPHI: false,
-        piiStorageMethod: 'Locking away in the fires from whence it came.',
-        multipleReqSafeguards: 'golem',
-        breachManagementProcess: 'golem',
-        vulnerabilityManagement: 'golem',
-        exposeVeteranInformationToThirdParties: false,
         thirdPartyInfoDescription: 'n/a',
-        scopesAccessRequested: ['profile', 'email'],
-        distributingAPIKeysToCustomers: false,
-        namingConvention: 'overly-complicated',
-        centralizedBackendLog: 'non-existent',
-        listedOnMyHealthApplication: false,
+        valueProvided: 'n/a',
+        vasiSystemName: 'asdf',
+        veteranFacing: false,
+        veteranFacingDescription:
+          'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+        vulnerabilityManagement: 'golem',
+        website: 'www.one2bindthem.com',
       },
     } as Request;
 
     mockSendEmail.mockReset();
     stubNext.mockReset();
   });
-
 
   it('sends an email', async () => {
     const handler = productionRequestHandler(govDelivery);
@@ -97,52 +103,52 @@ describe('productionRequestHandler', () => {
 
 describe('validations', () => {
   const defaultPayload = {
+    apis: 'benefits',
+    appDescription: 'A social media platform with one room.',
+    appName: 'One to Bind Them',
+    breachManagementProcess: 'golem',
+    businessModel: 'magical rings >> profit',
+    centralizedBackendLog: 'non-existent',
+    credentialStorage: 'stored in a volcano on mount doom',
+    distributingAPIKeysToCustomers: false,
+    exposeVeteranInformationToThirdParties: false,
+    listedOnMyHealthApplication: false,
+    monitizationExplanation: 'n/a',
+    monitizedVeteranInformation: false,
+    multipleReqSafeguards: 'golem',
+    namingConvention: 'overly-complicated',
+    organization: 'Sauron.INC',
+    phoneNumber: '555-867-5309',
+    piiStorageMethod: 'Locking away in the fires from whence it came.',
+    platforms: 'iOS',
+    policyDocuments: ['www.example.com/tos'],
     primaryContact: {
+      email: 'sam@fellowship.com',
       firstName: 'Samwise',
       lastName: 'Gamgee',
-      email: 'sam@fellowship.com',
     },
+    scopesAccessRequested: ['profile', 'email'],
     secondaryContact: {
+      email: 'frodo@fellowship.com',
       firstName: 'Frodo',
       lastName: 'Baggins',
-      email: 'frodo@fellowship.com',
     },
-    organization: 'Sauron.INC',
-    appName: 'One to Bind Them',
-    appDescription: 'A social media platform with one room.',
-    statusUpdateEmails: ['sam@fellowship.com'],
-    valueProvided: 'n/a',
-    businessModel: 'magical rings >> profit',
-    policyDocuments: ['www.example.com/tos'],
-    phoneNumber: '555-867-5309',
-    apis: 'benefits',
-    monitizedVeteranInformation: false,
-    monitizationExplanation: 'n/a',
-    veteranFacing: false,
-    website: 'www.one2bindthem.com',
     signUpLink: ['www.one2bindthem.com/signup'],
-    supportLink: ['www.one2bindthem.com/support'],
-    platforms: 'iOS',
-    veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
-    vasiSystemName: 'asdf',
-    credentialStorage: 'stored in a volcano on mount doom',
+    statusUpdateEmails: ['sam@fellowship.com'],
     storePIIOrPHI: false,
-    piiStorageMethod: 'Locking away in the fires from whence it came.',
-    multipleReqSafeguards: 'golem',
-    breachManagementProcess: 'golem',
+    supportLink: ['www.one2bindthem.com/support'],
+    valueProvided: 'n/a',
+    vasiSystemName: 'asdf',
+    veteranFacing: false,
+    veteranFacingDescription:
+      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vulnerabilityManagement: 'golem',
-    exposeVeteranInformationToThirdParties: false,
-    thirdPartyInfoDescription: 'n/a',
-    scopesAccessRequested: ['profile', 'email'],
-    distributingAPIKeysToCustomers: false,
-    namingConvention: 'overly-complicated',
-    centralizedBackendLog: 'non-existent',
-    listedOnMyHealthApplication: false,
+    website: 'www.one2bindthem.com',
   };
 
   describe('primaryContact', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, primaryContact: undefined};
+      const payload = { ...defaultPayload, primaryContact: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -160,7 +166,7 @@ describe('validations', () => {
 
   describe('secondaryContact', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, secondaryContact: undefined};
+      const payload = { ...defaultPayload, secondaryContact: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -178,7 +184,7 @@ describe('validations', () => {
 
   describe('organization', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, organization: undefined};
+      const payload = { ...defaultPayload, organization: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -186,7 +192,7 @@ describe('validations', () => {
     });
 
     it('is a string', () => {
-      const payload = {...defaultPayload, organization: { name: 'Rohan' }};
+      const payload = { ...defaultPayload, organization: { name: 'Rohan' } };
 
       const result = productionSchema.validate(payload);
 
@@ -196,25 +202,24 @@ describe('validations', () => {
 
   describe('appName', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, appName: undefined};
+      const payload = { ...defaultPayload, appName: undefined };
 
       const result = productionSchema.validate(payload);
 
       expect(result.error?.message).toEqual('"appName" is required');
     });
     it('is a string', () => {
-      const payload = {...defaultPayload, appName: 123456789};
+      const payload = { ...defaultPayload, appName: 123456789 };
 
       const result = productionSchema.validate(payload);
 
       expect(result.error?.message).toEqual('"appName" must be a string');
-
     });
   });
 
   describe('appDescription', () => {
     it('is a string', () => {
-      const payload = {...defaultPayload, appDescription: 123456789};
+      const payload = { ...defaultPayload, appDescription: 123456789 };
 
       const result = productionSchema.validate(payload);
 
@@ -222,7 +227,7 @@ describe('validations', () => {
     });
 
     it('is required', () => {
-      const payload = {...defaultPayload, appDescription: undefined};
+      const payload = { ...defaultPayload, appDescription: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -239,7 +244,7 @@ describe('validations', () => {
       expect(result.error?.message).toEqual('"statusUpdateEmails" must be an array');
     });
     it('is required', () => {
-      const payload = {...defaultPayload, statusUpdateEmails: undefined};
+      const payload = { ...defaultPayload, statusUpdateEmails: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -249,7 +254,7 @@ describe('validations', () => {
 
   describe('valueProvided', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, valueProvided: undefined};
+      const payload = { ...defaultPayload, valueProvided: undefined };
 
       const result = productionSchema.validate(payload);
 
@@ -262,7 +267,6 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"valueProvided" must be a string');
     });
-
   });
 
   describe('businessModel', () => {
@@ -315,7 +319,9 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"phoneNumber" failed custom validation because phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444');
+      expect(result.error?.message).toEqual(
+        '"phoneNumber" failed custom validation because phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444',
+      );
     });
   });
 
@@ -325,7 +331,9 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis" failed custom validation because invalid apis in list');
+      expect(result.error?.message).toEqual(
+        '"apis" failed custom validation because invalid apis in list',
+      );
     });
   });
 
@@ -461,7 +469,9 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"veteranFacingDescription" is not allowed to be empty');
+      expect(result.error?.message).toEqual(
+        '"veteranFacingDescription" is not allowed to be empty',
+      );
     });
 
     it('is a string', () => {
@@ -585,7 +595,9 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"exposeVeteranInformationToThirdParties" must be a boolean');
+      expect(result.error?.message).toEqual(
+        '"exposeVeteranInformationToThirdParties" must be a boolean',
+      );
     });
   });
 
@@ -678,10 +690,12 @@ describe('validations', () => {
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {...defaultPayload, primaryContact: undefined, secondaryContact: undefined};
+    const payload = { ...defaultPayload, primaryContact: undefined, secondaryContact: undefined };
 
     const result = productionSchema.validate(payload);
 
-    expect(result.error?.message).toEqual('"primaryContact" is required. "secondaryContact" is required');
+    expect(result.error?.message).toEqual(
+      '"primaryContact" is required. "secondaryContact" is required',
+    );
   });
 });

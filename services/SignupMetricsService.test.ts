@@ -8,8 +8,8 @@ describe('SignupMetricsService', () => {
   const mockQuery = jest.fn();
 
   const mockDynamoService = {
-    scan: mockScan,
     query: mockQuery,
+    scan: mockScan,
   } as unknown as DynamoService;
 
   describe('getUniqueSignups', () => {
@@ -28,9 +28,9 @@ describe('SignupMetricsService', () => {
 
     it('returns values from querySignups()', async () => {
       const signup = {
-        email: 'frodo@theshire.com',
-        createdAt: '2020-06-29T14:00:00.000Z',
         apis: 'facilities',
+        createdAt: '2020-06-29T14:00:00.000Z',
+        email: 'frodo@theshire.com',
       };
 
       mockScan.mockResolvedValue([signup]);
@@ -40,17 +40,17 @@ describe('SignupMetricsService', () => {
 
     it('only includes the first signup for each user', async () => {
       const firstSignup = {
-        email: 'frodo@theshire.com',
-        createdAt: '2020-06-29T14:00:00.000Z',
         apis: 'facilities',
+        createdAt: '2020-06-29T14:00:00.000Z',
+        email: 'frodo@theshire.com',
       };
 
       mockScan.mockResolvedValue([
         firstSignup,
         {
-          email: 'frodo@theshire.com',
-          createdAt: '2020-06-29T20:00:00.000Z',
           apis: 'health',
+          createdAt: '2020-06-29T20:00:00.000Z',
+          email: 'frodo@theshire.com',
         },
       ]);
 
@@ -61,23 +61,23 @@ describe('SignupMetricsService', () => {
     it('aggregates signups for each user in the window', async () => {
       mockScan.mockResolvedValue([
         {
-          email: 'frodo@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'facilities',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'frodo@theshire.com',
         },
         {
-          email: 'frodo@theshire.com',
-          createdAt: '2020-06-29T20:00:00.000Z',
           apis: 'health',
+          createdAt: '2020-06-29T20:00:00.000Z',
+          email: 'frodo@theshire.com',
         },
       ]);
 
       const result = await service.getUniqueSignups({});
       expect(result).toStrictEqual([
         {
-          email: 'frodo@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'facilities,health',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'frodo@theshire.com',
         },
       ]);
     });
@@ -90,24 +90,24 @@ describe('SignupMetricsService', () => {
       service = new SignupMetricsService(mockDynamoService);
       mockUniqueSignups = jest.spyOn(service, 'getUniqueSignups').mockResolvedValue([
         {
-          email: 'frodo.baggins@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'benefits,facilities,health,verification,claimsAttributes',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'frodo.baggins@theshire.com',
         },
         {
-          email: 'samwise.gamgee@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'benefits,claims,facilities,vaForms',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'samwise.gamgee@theshire.com',
         },
         {
-          email: 'pippin.took@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'claims,health,vaForms,verification',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'pippin.took@theshire.com',
         },
         {
-          email: 'merry.brandybuck@theshire.com',
-          createdAt: '2020-06-29T14:00:00.000Z',
           apis: 'benefits,claims,facilities,health,confirmation',
+          createdAt: '2020-06-29T14:00:00.000Z',
+          email: 'merry.brandybuck@theshire.com',
         },
       ]);
 
@@ -133,9 +133,9 @@ describe('SignupMetricsService', () => {
       it('excludes consumers who have previously signed up from the total', async () => {
         mockPreviousSignups.mockResolvedValueOnce([
           {
-            email: 'frodo.baggins@theshire.com',
-            createdAt: '2020-06-29T14:00:00.000Z',
             apis: 'benefits,facilities,health,verification',
+            createdAt: '2020-06-29T14:00:00.000Z',
+            email: 'frodo.baggins@theshire.com',
           },
         ]);
 
@@ -163,9 +163,9 @@ describe('SignupMetricsService', () => {
       it('counts new API signups', async () => {
         mockPreviousSignups.mockResolvedValueOnce([
           {
-            email: 'frodo.baggins@theshire.com',
-            createdAt: '2020-01-29T14:00:00.000Z',
             apis: 'claims',
+            createdAt: '2020-01-29T14:00:00.000Z',
+            email: 'frodo.baggins@theshire.com',
           },
         ]);
 
@@ -187,9 +187,9 @@ describe('SignupMetricsService', () => {
       it('does not count repeated/old API signups', async () => {
         mockPreviousSignups.mockResolvedValueOnce([
           {
-            email: 'frodo.baggins@theshire.com',
-            createdAt: '2020-01-29T14:00:00.000Z',
             apis: 'benefits,facilities,health',
+            createdAt: '2020-01-29T14:00:00.000Z',
+            email: 'frodo.baggins@theshire.com',
           },
         ]);
 

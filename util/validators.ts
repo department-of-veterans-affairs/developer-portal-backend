@@ -2,19 +2,21 @@ import { API_LIST } from '../config/apis';
 // disabling because eslint acts weird with literals in regex patterns
 
 /* eslint-disable no-useless-escape */
-/* Matches for all valid NANP phone formats.
- The following formats are valid:
- 222-333-4444
- 222.333.4444
- (222) 333 4444
- (222) 333-4444
- 222.333.4444x555555
- 222 222 2222 (ext.1234)
- 222 222 2222 (extension 1234)
-*/
-const VALID_PHONE_REGEX = /^(?:\([2-9]\d{2}\)\ ?|[2-9]\d{2}(?:\-?|\ ?|\.?))[2-9]\d{2}[- .]?\d{4}((\ )?(\()?(ext|x|extension)([- .:])?\d{1,6}(\))?)?$/;
+/*
+ * Matches for all valid NANP phone formats.
+ * The following formats are valid:
+ * 222-333-4444
+ * 222.333.4444
+ * (222) 333 4444
+ * (222) 333-4444
+ * 222.333.4444x555555
+ * 222 222 2222 (ext.1234)
+ * 222 222 2222 (extension 1234)
+ */
+const VALID_PHONE_REGEX =
+  /^(?:\([2-9]\d{2}\)\ ?|[2-9]\d{2}(?:\-?|\ ?|\.?))[2-9]\d{2}[- .]?\d{4}((\ )?(\()?(ext|x|extension)([- .:])?\d{1,6}(\))?)?$/;
 
-export function validateApiList(val: string): string {
+export const validateApiList = (val: string): string => {
   let result: boolean;
   try {
     const apis = val.split(',');
@@ -28,28 +30,31 @@ export function validateApiList(val: string): string {
   }
 
   return val;
-}
+};
 
-export function validatePhoneFormat(number: string): string {
+export const validatePhoneFormat = (num: string): string => {
   let result: boolean;
   try {
-    result = VALID_PHONE_REGEX.test(number);
+    result = VALID_PHONE_REGEX.test(num);
   } catch {
     throw new Error('it was unable to process the provided data');
   }
 
   if (!result) {
-    throw new Error('phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444');
+    throw new Error(
+      'phone number format invalid. Valid format examples: 222-333-4444, (222) 333-4444, 2223334444',
+    );
   }
 
-  return number;
+  return num;
+};
 
-}
-
-export function emailValidator(email: string): string {
+export const emailValidator = (email: string): string => {
   let result: boolean;
-  // any email that matches this pattern is most likely fake.
-  // IE: 'test@email.com', 'email@fake.com', etc
+  /*
+   * any email that matches this pattern is most likely fake.
+   * IE: 'test@email.com', 'email@fake.com', etc
+   */
   const pattern = /test|sample|fake|email/i;
   try {
     result = pattern.test(email);
@@ -62,4 +67,4 @@ export function emailValidator(email: string): string {
   }
 
   return email;
-}
+};

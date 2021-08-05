@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import versionHandler from './Version';
 
 describe('versionHandler', () => {
-
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   const mockReq = { body: {} } as Request;

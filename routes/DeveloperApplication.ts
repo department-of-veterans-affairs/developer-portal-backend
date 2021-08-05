@@ -1,3 +1,5 @@
+/* eslint-disable max-params */
+
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 import { FormSubmission } from '../types/FormSubmission';
@@ -11,17 +13,21 @@ import DynamoService from '../services/DynamoService';
 import { validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
 
-export const applySchema = Joi.object().keys({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  organization: Joi.string().required(),
-  description: Joi.string().allow(''),
-  email: Joi.string().email().required(),
-  oAuthRedirectURI: Joi.string().allow('').uri({ scheme: ['http', 'https']}),
-  oAuthApplicationType: Joi.allow('').valid('web', 'native'),
-  termsOfService: Joi.required().valid(true),
-  apis: Joi.custom(validateApiList).required(),
-}).options({ abortEarly: false });
+export const applySchema = Joi.object()
+  .keys({
+    apis: Joi.custom(validateApiList).required(),
+    description: Joi.string().allow(''),
+    email: Joi.string().email().required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    oAuthApplicationType: Joi.allow('').valid('web', 'native'),
+    oAuthRedirectURI: Joi.string()
+      .allow('')
+      .uri({ scheme: ['http', 'https'] }),
+    organization: Joi.string().required(),
+    termsOfService: Joi.required().valid(true),
+  })
+  .options({ abortEarly: false });
 
 interface DeveloperApplicationRequestBody {
   firstName: string;
@@ -35,20 +41,22 @@ interface DeveloperApplicationRequestBody {
   apis: string;
 }
 
-type DeveloperApplicationRequest = Request<Record<string, unknown>, Record<string, unknown>, DeveloperApplicationRequestBody, Record<string, unknown>>;
+type DeveloperApplicationRequest = Request<
+  Record<string, unknown>,
+  Record<string, unknown>,
+  DeveloperApplicationRequestBody,
+  Record<string, unknown>
+>;
 
-export default function developerApplicationHandler(
-  kong: KongService,
-  okta: OktaService | undefined,
-  dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
-  slack: SlackService | undefined,
-) {
-  return async function (
-    req: DeveloperApplicationRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+const developerApplicationHandler =
+  (
+    kong: KongService,
+    okta: OktaService | undefined,
+    dynamo: DynamoService,
+    govdelivery: GovDeliveryService | undefined,
+    slack: SlackService | undefined,
+  ) =>
+  async (req: DeveloperApplicationRequest, res: Response, next: NextFunction): Promise<void> => {
     const {
       firstName,
       lastName,
@@ -62,15 +70,15 @@ export default function developerApplicationHandler(
     } = req.body;
 
     const form: FormSubmission = {
-      firstName,
-      lastName,
-      organization,
+      apis,
       description,
       email,
-      oAuthRedirectURI,
+      firstName,
+      lastName,
       oAuthApplicationType,
+      oAuthRedirectURI,
+      organization,
       termsOfService,
-      apis,
     };
 
     const user: User = new User(form);
@@ -93,21 +101,21 @@ export default function developerApplicationHandler(
       logger.info({ message: 'recording signup in DynamoDB' });
       await user.saveToDynamo(dynamo);
 
-      if (!user.oauthApplication) {
-        res.json({
-          token: user.token,
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-        });
-      } else {
+      if (user.oauthApplication) {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
           kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-          token: user.token,
           redirectURI: user.oAuthRedirectURI,
+          token: user.token,
+        });
+      } else {
+        res.json({
+          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
+          token: user.token,
         });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       next(err);
       return;
     }
@@ -136,4 +144,5 @@ export default function developerApplicationHandler(
       next(err);
     }
   };
-}
+
+export default developerApplicationHandler;

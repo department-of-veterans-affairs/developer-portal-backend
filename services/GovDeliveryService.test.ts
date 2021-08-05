@@ -1,16 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import GovDeliveryService, { ConsumerSupportEmail, PublishingSupportEmail }
-  from './GovDeliveryService';
 import User from '../models/User';
 import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
+import GovDeliveryService, {
+  ConsumerSupportEmail,
+  PublishingSupportEmail,
+} from './GovDeliveryService';
 
 const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
 
 if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
-  throw new Error(
-    'Environment variable configuration is required to test GovDeliveryService'
-  );
+  throw new Error('Environment variable configuration is required to test GovDeliveryService');
 }
 
 describe('GovDeliveryService', () => {
@@ -20,18 +22,18 @@ describe('GovDeliveryService', () => {
 
   const mockPost = jest.fn();
   mockPost.mockResolvedValue({
+    data: {},
+    headers: {},
     status: 200,
     statusText: 'ok',
-    headers: {},
-    data: {},
   });
   jest.spyOn(axios, 'create').mockReturnValue({ post: mockPost } as unknown as AxiosInstance);
 
   beforeEach(() => {
     client = new GovDeliveryService({
-      token: GOVDELIVERY_KEY,
       host: GOVDELIVERY_HOST,
       supportEmailRecipient: SUPPORT_EMAIL,
+      token: GOVDELIVERY_KEY,
     });
     event = {
       apis: 'facilities,benefits',
@@ -55,8 +57,8 @@ describe('GovDeliveryService', () => {
         apis: 'VA Facilities API',
         firstName: 'Edward',
         key: 'fakeKey',
-        token_issued: true,
         oauth: false,
+        token_issued: true,
       });
       expect(html).toEqual(expect.stringContaining('Welcome Edward'));
       expect(html).toEqual(expect.stringContaining('VA Facilities API'));
@@ -67,12 +69,12 @@ describe('GovDeliveryService', () => {
       const template = client.welcomeTemplate;
       const html = template({
         apis: 'Health API, Veteran Verification API, and VA Facilities API',
-        firstName: 'Edward',
-        key: 'fakeKey',
-        token_issued: true,
-        oauth: true,
         clientID: 'superid',
         clientSecret: 'supersecret',
+        firstName: 'Edward',
+        key: 'fakeKey',
+        oauth: true,
+        token_issued: true,
       });
       expect(html).toEqual(expect.stringContaining('Health API'));
       expect(html).toEqual(expect.stringContaining('Verification'));
@@ -96,16 +98,21 @@ describe('GovDeliveryService', () => {
   describe('sendWelcomeEmail', () => {
     it('should send a request', async () => {
       await client.sendWelcomeEmail(user);
-      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: 'ed@adhocteam.us' }],
-        subject: 'Welcome to the VA API Platform',
-        body: expect.stringContaining('VA Facilities API and Benefits Intake API') as unknown,
-      }));
+      expect(mockPost).toHaveBeenCalledWith(
+        '/messages/email',
+        expect.objectContaining({
+          body: expect.stringContaining('VA Facilities API and Benefits Intake API') as unknown,
+          recipients: [{ email: 'ed@adhocteam.us' }],
+          subject: 'Welcome to the VA API Platform',
+        }),
+      );
     });
 
     it('should raise error if user lacks token and client_id', async () => {
-      //Fail the test if the expectation in the catch is never
-      //reached.
+      /*
+       * Fail the test if the expectation in the catch is never
+       * reached.
+       */
       expect.assertions(1);
 
       user.token = undefined;
@@ -120,96 +127,108 @@ describe('GovDeliveryService', () => {
   describe('sendConsumerSupportEmail', () => {
     it('should send a request', async () => {
       const email: ConsumerSupportEmail = {
+        apis: ['facilities', 'benefits'],
+        description: 'Need more supplies for second breakfast',
         firstName: 'Peregrin',
         lastName: 'Took',
-        requester: 'peregrin@thefellowship.org',
-        description: 'Need more supplies for second breakfast',
         organization: 'The Fellowship of the Ring',
-        apis: ['facilities', 'benefits'],
+        requester: 'peregrin@thefellowship.org',
       };
 
       await client.sendConsumerSupportEmail(email);
-      expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-        recipients: [{ email: SUPPORT_EMAIL }],
-        from_name: 'Peregrin Took',
-        subject: 'Support Needed',
-        body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
-      }));
+      expect(mockPost).toHaveBeenCalledWith(
+        '/messages/email',
+        expect.objectContaining({
+          body: expect.stringContaining('peregrin@thefellowship.org') as unknown,
+          from_name: 'Peregrin Took',
+          recipients: [{ email: SUPPORT_EMAIL }],
+          subject: 'Support Needed',
+        }),
+      );
     });
 
     describe('sendPublishingSupportEmail', () => {
       it('should send a request', async () => {
         const email: PublishingSupportEmail = {
+          apiDetails: 'Ring',
+          apiInternalOnly: false,
           firstName: 'Peregrin',
           lastName: 'Took',
-          requester: 'peregrin@thefellowship.org',
           organization: 'The Fellowship of the Ring',
-          apiInternalOnly: false,
-          apiDetails: 'Ring',
+          requester: 'peregrin@thefellowship.org',
         };
 
         await client.sendPublishingSupportEmail(email);
-        expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: SUPPORT_EMAIL }],
-          from_name: 'Peregrin Took',
-          subject: 'Publishing Support Needed',
-          body: expect.stringContaining('API Details') as unknown,
-        }));
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            body: expect.stringContaining('API Details') as unknown,
+            from_name: 'Peregrin Took',
+            recipients: [{ email: SUPPORT_EMAIL }],
+            subject: 'Publishing Support Needed',
+          }),
+        );
       });
     });
 
     describe('sendProductionAccessEmail', () => {
       it('should send a request', async () => {
         const email: ProductionAccessSupportEmail = {
+          apis: 'benefits',
+          appDescription: 'A social media platform with one room.',
+          appImageLink: 'www.one2bindthem.com/assets/image',
+          appName: 'One to Bind Them',
+          breachManagementProcess: 'golem',
+          businessModel: 'magical rings >> profit',
+          centralizedBackendLog: 'non-existent',
+          credentialStorage: '',
+          distributingAPIKeysToCustomers: false,
+          exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
+          listedOnMyHealthApplication: false,
+          medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
+          monitizationExplanation: 'n/a',
+          monitizedVeteranInformation: false,
+          multipleReqSafeguards: 'golem',
+          namingConvention: 'overly-complicated',
+          organization: 'Sauron.INC',
+          patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patient',
+          phoneNumber: '867-5309',
+          piiStorageMethod: 'Locking away in the fires from whence it came.',
+          platforms: 'iOS',
+          policyDocuments: ['www.example.com/tos'],
           primaryContact: {
+            email: 'sam@fellowship.com',
             firstName: 'Samwise',
             lastName: 'Gamgee',
-            email: 'sam@fellowship.com',
           },
+          scopesAccessRequested: ['profile', 'email'],
           secondaryContact: {
+            email: 'frodo@fellowship.com',
             firstName: 'Frodo',
             lastName: 'Baggins',
-            email: 'frodo@fellowship.com',
           },
-          organization: 'Sauron.INC',
-          appName: 'One to Bind Them',
-          appDescription: 'A social media platform with one room.',
-          statusUpdateEmails: ['sam@fellowship.com'],
-          valueProvided: 'n/a',
-          businessModel: 'magical rings >> profit',
-          policyDocuments: ['www.example.com/tos'],
-          phoneNumber: '867-5309',
-          apis: 'benefits',
-          monitizedVeteranInformation: false,
-          monitizationExplanation: 'n/a',
-          veteranFacing: false,
-          website: 'www.one2bindthem.com',
           signUpLink: 'www.one2bindthem.com/signup',
-          supportLink: 'www.one2bindthem.com/support',
-          platforms: 'iOS',
-          veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
-          vasiSystemName: 'asdf',
-          credentialStorage: '',
+          statusUpdateEmails: ['sam@fellowship.com'],
           storePIIOrPHI: false,
-          piiStorageMethod: 'Locking away in the fires from whence it came.',
-          multipleReqSafeguards: 'golem',
-          breachManagementProcess: 'golem',
-          vulnerabilityManagement: 'golem',
-          exposeVeteranInformationToThirdParties: false,
+          supportLink: 'www.one2bindthem.com/support',
           thirdPartyInfoDescription: 'n/a',
-          scopesAccessRequested: ['profile', 'email'],
-          distributingAPIKeysToCustomers: false,
-          namingConvention: 'overly-complicated',
-          centralizedBackendLog: 'non-existent',
-          listedOnMyHealthApplication: false,
+          valueProvided: 'n/a',
+          vasiSystemName: 'asdf',
+          veteranFacing: false,
+          veteranFacingDescription:
+            'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+          vulnerabilityManagement: 'golem',
         };
         await client.sendProductionAccessEmail(email);
-        expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: SUPPORT_EMAIL }],
-          from_name: 'Samwise Gamgee',
-          subject: 'Production Access Requested for Sauron.INC',
-          body: expect.stringContaining('Primary Contact:') as unknown,
-        }));
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            body: expect.stringContaining('Primary Contact:') as unknown,
+            from_name: 'Samwise Gamgee',
+            recipients: [{ email: SUPPORT_EMAIL }],
+            subject: 'Production Access Requested for Sauron.INC',
+          }),
+        );
       });
     });
 
@@ -217,11 +236,16 @@ describe('GovDeliveryService', () => {
       it('should send a request', async () => {
         const emails: string[] = ['ed@adhocteam.us'];
         await client.sendProductionAccessConsumerEmail(emails);
-        expect(mockPost).toHaveBeenCalledWith('/messages/email', expect.objectContaining({
-          recipients: [{ email: 'ed@adhocteam.us' }],
-          subject: 'Your Request for Production Access is Submitted',
-          body: expect.stringContaining('We’ve received your request for production access.') as unknown,
-        }));
+        expect(mockPost).toHaveBeenCalledWith(
+          '/messages/email',
+          expect.objectContaining({
+            body: expect.stringContaining(
+              'We’ve received your request for production access.',
+            ) as unknown,
+            recipients: [{ email: 'ed@adhocteam.us' }],
+            subject: 'Your Request for Production Access is Submitted',
+          }),
+        );
       });
     });
   });
@@ -229,36 +253,42 @@ describe('GovDeliveryService', () => {
   describe('Healthcheck Validation', () => {
     it('returns true when healthcheck endpoint returns 200', async () => {
       const mockGet = jest.fn().mockResolvedValue({
+        data: [{}],
+        headers: {},
         status: 200,
         statusText: 'ok',
-        headers: {},
-        data: [{}],
       });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: GOVDELIVERY_KEY,
         host: GOVDELIVERY_HOST,
         supportEmailRecipient: SUPPORT_EMAIL,
+        token: GOVDELIVERY_KEY,
       });
       const res = await client.healthCheck();
-      expect(res).toEqual({ serviceName: 'GovDelivery', healthy: true });
+      expect(res).toEqual({ healthy: true, serviceName: 'GovDelivery' });
     });
 
     it('returns false when healthcheck endpoint throws an error', async () => {
       const err = new Error(`ECONNREFUSED ${GOVDELIVERY_HOST}`);
-      const mockGet = jest.fn().mockImplementation(() => { throw err; });
+      const mockGet = jest.fn().mockImplementation(() => {
+        throw err;
+      });
 
       // cast to unknown first to avoid having to reimplement all of AxiosInstance
-      jest.spyOn(axios, 'create').mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
+      jest
+        .spyOn(axios, 'create')
+        .mockImplementation(() => ({ get: mockGet } as unknown as AxiosInstance));
       client = new GovDeliveryService({
-        token: GOVDELIVERY_KEY,
         host: GOVDELIVERY_HOST,
         supportEmailRecipient: SUPPORT_EMAIL,
+        token: GOVDELIVERY_KEY,
       });
       const res = await client.healthCheck();
-      expect(res).toEqual({ serviceName: 'GovDelivery', healthy: false, err: err });
+      expect(res).toEqual({ err, healthy: false, serviceName: 'GovDelivery' });
       expect(res.err?.action).toEqual('checking health of GovDelivery');
     });
   });

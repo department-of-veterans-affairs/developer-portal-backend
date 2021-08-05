@@ -64,7 +64,7 @@ const numRequests = Math.ceil(parsedOktaIds.length / MAX_OKTA_IDS_IN_REQUEST);
 
 console.log(`There will be ${numRequests} requests made to DynamoDB`);
 
-const doRequests = async() => {
+const doRequests = async () => {
   let allDynamoItems: UserDynamoItem[] = [];
 
   for (let i = 0; i < numRequests; i++) {
@@ -77,16 +77,13 @@ const doRequests = async() => {
     allDynamoItems = allDynamoItems.concat(users);
   }
 
-
   console.log(`Found ${allDynamoItems.length} dynamo item(s)`);
   const uniqueDynamoItems = mergeUserDynamoItems(allDynamoItems);
   console.log(`${uniqueDynamoItems.length} unique emails found`);
-  const data = uniqueDynamoItems.map(dynamoItem => (
-    {
-      email: dynamoItem.email,
-      oktaId: dynamoItem.okta_application_id,
-    }
-  ));
+  const data = uniqueDynamoItems.map(dynamoItem => ({
+    email: dynamoItem.email,
+    oktaId: dynamoItem.okta_application_id,
+  }));
 
   const csv = new ObjectsToCsv(data);
   const csvString = await csv.toString();
@@ -103,6 +100,6 @@ const doRequests = async() => {
   } else {
     console.log(csvString);
   }
-}
+};
 
 void doRequests();
