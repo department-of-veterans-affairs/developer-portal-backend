@@ -444,7 +444,7 @@ describe('validations', () => {
     const defaultInternalApiInfo = {
       programName: 'Battle of the Hornburg',
       sponsorEmail: 'aragorn@gondor.horse',
-      vaEmail: 'eowyn@gondor.horse',
+      vaEmail: 'eowyn@va.gov',
     };
     describe('programName', () => {
       it('is required', () => {
@@ -513,7 +513,9 @@ describe('validations', () => {
 
         const result = applySchema.validate(payload);
 
-        expect(result.error?.message).toEqual('"internalApiInfo.vaEmail" must be a valid email');
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" must be a valid email. "internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
       });
     });
   });

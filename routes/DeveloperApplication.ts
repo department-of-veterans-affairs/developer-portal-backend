@@ -10,7 +10,7 @@ import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
-import { validateApiList } from '../util/validators';
+import { vaEmailValidator, validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
 import { DeveloperApplicationRequestBody } from '../types';
 
@@ -23,7 +23,7 @@ export const applySchema = Joi.object()
     internalApiInfo: Joi.object().keys({
       programName: Joi.string().required(),
       sponsorEmail: Joi.string().email().required(),
-      vaEmail: Joi.string().email(),
+      vaEmail: Joi.string().email().custom(vaEmailValidator),
     }),
     lastName: Joi.string().required(),
     oAuthApplicationType: Joi.allow('').valid('web', 'native'),

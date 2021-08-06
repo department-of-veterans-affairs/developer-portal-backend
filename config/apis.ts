@@ -1,5 +1,11 @@
 import { KeyAuthAPI, OAuthAPI } from '../types';
 
+const addressValidation: KeyAuthAPI = {
+  acl: 'internal-va:address_validation',
+  key: 'addressValidation',
+  name: 'Address Validation API',
+};
+
 const oauthAPIList: OAuthAPI[] = [
   {
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
@@ -49,7 +55,10 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     key: 'confirmation',
     name: 'Veteran Confirmation API',
   },
+  addressValidation,
 ];
+
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [addressValidation];
 
 export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;
@@ -63,6 +72,8 @@ export const APIS_TO_PROPER_NAMES: Record<string, string> = [
   acc[endpoint.key] = endpoint.name;
   return acc;
 }, {});
+
+export const INTERNAL_ONLY_APIS: string[] = internalOnlyApis.map(x => x.key);
 
 export const KONG_CONSUMER_APIS: string[] = keyAuthAPIList.map(x => x.key);
 

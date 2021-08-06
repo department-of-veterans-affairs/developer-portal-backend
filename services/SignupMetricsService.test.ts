@@ -148,6 +148,7 @@ describe('SignupMetricsService', () => {
       it('counts the signups by API with no previous signups', async () => {
         const result = await service.countSignups({});
         expect(result.apiCounts).toStrictEqual({
+          addressValidation: 0,
           benefits: 3,
           claims: 3,
           claimsAttributes: 1,
@@ -172,6 +173,7 @@ describe('SignupMetricsService', () => {
         const result = await service.countSignups({});
         expect(result.total).toBe(3);
         expect(result.apiCounts).toStrictEqual({
+          addressValidation: 0,
           benefits: 3,
           claims: 3,
           claimsAttributes: 1,
@@ -196,6 +198,7 @@ describe('SignupMetricsService', () => {
         const result = await service.countSignups({});
         expect(result.total).toBe(3);
         expect(result.apiCounts).toStrictEqual({
+          addressValidation: 0,
           benefits: 2,
           claims: 3,
           claimsAttributes: 1,

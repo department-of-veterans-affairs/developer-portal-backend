@@ -7,7 +7,7 @@ import SlackService, { SlackResponse } from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import DynamoService from '../services/DynamoService';
-import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
+import { INTERNAL_ONLY_APIS, KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
 import Application from './Application';
 import { DevPortalError } from './DevPortalError';
 
@@ -41,9 +41,9 @@ export interface UserConfig {
   oAuthRedirectURI: string;
   oAuthApplicationType?: string;
   termsOfService: boolean;
-  programName: string;
-  sponsorEmail: string;
-  vaEmail: string;
+  programName: string | undefined;
+  sponsorEmail: string | undefined;
+  vaEmail: string | undefined;
 }
 
 export default class User implements KongUser, GovDeliveryUser {
@@ -65,11 +65,11 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public oAuthApplicationType?: string;
 
-  public programName: string;
-
   public kongConsumerId?: string;
 
-  public sponsorEmail: string;
+  public programName?: string;
+
+  public sponsorEmail?: string;
 
   public token?: string;
 
@@ -79,7 +79,7 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public tosAccepted: boolean;
 
-  public vaEmail: string;
+  public vaEmail?: string;
 
   public readonly apiList: string[];
 
@@ -112,6 +112,13 @@ export default class User implements KongUser, GovDeliveryUser {
     this.vaEmail = vaEmail;
 
     this.apiList = this.apis ? this.apis.split(',') : [];
+
+    const isApplyingForInternal = INTERNAL_ONLY_APIS.some(api => this.apiList.includes(api));
+    const hasVAEmail = this.email.endsWith('va.gov') || this.vaEmail?.endsWith('va.gov');
+
+    if (isApplyingForInternal && !hasVAEmail) {
+      throw new Error('Applying for internal api without VA email');
+    }
   }
 
   public consumerName(): string {
@@ -162,10 +169,10 @@ export default class User implements KongUser, GovDeliveryUser {
         lastName: this.lastName,
         oAuthRedirectURI: this.oAuthRedirectURI,
         organization: this.organization,
-        programName: this.programName,
-        sponsorEmail: this.sponsorEmail,
+        programName: this.programName ?? '',
+        sponsorEmail: this.sponsorEmail ?? '',
         tosAccepted: this.tosAccepted,
-        vaEmail: this.vaEmail,
+        vaEmail: this.vaEmail ?? '',
       };
 
       if (this.oauthApplication?.oktaID) {
@@ -222,7 +229,9 @@ export default class User implements KongUser, GovDeliveryUser {
   }
 
   private toSlackString(): string {
-    const email = this.vaEmail ? `Contact Email: ${this.email} | VA Email: ${this.vaEmail}` : `${this.email}`;
+    const email = this.vaEmail
+      ? `Contact Email: ${this.email} | VA Email: ${this.vaEmail}`
+      : `${this.email}`;
     const intro = `${this.lastName}, ${this.firstName}: ${email}\nDescription: ${this.description}\nRequested access to:\n`;
     return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro);
   }

@@ -12,6 +12,7 @@ import {
 describe('API constants', () => {
   it('APIS_TO_ACLS', () => {
     expect(APIS_TO_ACLS).toEqual({
+      addressValidation: 'internal-va:address_validation',
       benefits: 'vba_documents',
       claimsAttributes: 'claims_attributes',
       confirmation: 'veteran_confirmation',
@@ -22,6 +23,7 @@ describe('API constants', () => {
 
   it('APIS_TO_PROPER_NAMES', () => {
     expect(APIS_TO_PROPER_NAMES).toEqual({
+      addressValidation: 'Address Validation API',
       benefits: 'Benefits Intake API',
       claims: 'Claims API',
       claimsAttributes: 'Claims Attributes API',
@@ -41,6 +43,7 @@ describe('API constants', () => {
       'facilities',
       'vaForms',
       'confirmation',
+      'addressValidation',
     ]);
   });
 
@@ -64,6 +67,7 @@ describe('API constants', () => {
       'facilities',
       'vaForms',
       'confirmation',
+      'addressValidation',
       'health',
       'verification',
       'communityCare',

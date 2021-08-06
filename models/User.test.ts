@@ -60,6 +60,16 @@ describe('User', () => {
       expect(user.email).toEqual('ed@adhocteam.us');
       expect(user.organization).toEqual('Ad Hoc');
     });
+
+    it('errors when signing up for internal api without va email', () => {
+      expect.assertions(1);
+      event.apis = 'addressValidation';
+      try {
+        user = new User(event);
+      } catch (err: unknown) {
+        expect((err as Error).message).toEqual('Applying for internal api without VA email');
+      }
+    });
   });
 
   describe('shouldUpdateOkta', () => {
