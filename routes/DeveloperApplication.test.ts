@@ -517,6 +517,17 @@ describe('validations', () => {
           '"internalApiInfo.vaEmail" must be a valid email. "internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
         );
       });
+
+      it('is in a valid email from the VA', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'gloin@son-of-groin.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
     });
   });
 

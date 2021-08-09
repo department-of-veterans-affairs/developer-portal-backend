@@ -60,15 +60,43 @@ describe('User', () => {
       expect(user.email).toEqual('ed@adhocteam.us');
       expect(user.organization).toEqual('Ad Hoc');
     });
+    describe('signing up for an internal api', () => {
+      it('errors without vaEmail', () => {
+        expect.assertions(1);
+        event.apis = 'addressValidation';
+        try {
+          user = new User(event);
+        } catch (err: unknown) {
+          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+        }
+      });
 
-    it('errors when signing up for internal api without va email', () => {
-      expect.assertions(1);
-      event.apis = 'addressValidation';
-      try {
+      it('errors with invalid va.gov vaEmail', () => {
+        expect.assertions(1);
+        event.apis = 'addressValidation';
+        event.vaEmail = 'gimli@son-of-gloin.com';
+        try {
+          user = new User(event);
+        } catch (err: unknown) {
+          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+        }
+      });
+
+      it('returns a user with a valid vaEmail', () => {
+        event.apis = 'addressValidation';
+        event.vaEmail = 'gimli@va.gov';
         user = new User(event);
-      } catch (err: unknown) {
-        expect((err as Error).message).toEqual('Applying for internal api without VA email');
-      }
+        expect(user.apiList).toStrictEqual(['addressValidation']);
+        expect(user.vaEmail).toEqual('gimli@va.gov');
+      });
+
+      it('returns a user with a va.gov email', () => {
+        event.apis = 'addressValidation';
+        event.email = 'gimli@va.gov';
+        user = new User(event);
+        expect(user.apiList).toStrictEqual(['addressValidation']);
+        expect(user.email).toEqual('gimli@va.gov');
+      });
     });
   });
 
