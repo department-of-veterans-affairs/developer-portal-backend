@@ -68,3 +68,19 @@ export const emailValidator = (email: string): string => {
 
   return email;
 };
+
+export const vaEmailValidator = (email: string): string => {
+  let result: boolean;
+
+  try {
+    result = email.endsWith('va.gov');
+  } catch {
+    throw new Error('it was unable to process the provided data');
+  }
+
+  if (!result) {
+    throw new Error('VA email is not valid. Please check that a real VA email has been submitted');
+  }
+
+  return email;
+};

@@ -113,7 +113,10 @@ export default class ConsumerRepository {
         okta_application_id: item.okta_application_id as string,
         okta_client_id: item.okta_client_id as string,
         organization: item.organization as string,
+        programName: item.programName as string,
+        sponsorEmail: item.sponsorEmail as string,
         tosAccepted: item.tosAccepted as boolean,
+        vaEmail: item.vaEmail as string,
       }),
     );
 

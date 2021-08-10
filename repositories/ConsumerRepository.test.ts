@@ -15,7 +15,10 @@ const mockUserList: UserDynamoItem[] = [
     okta_application_id: 'okta-id',
     okta_client_id: 'okta-client-id',
     organization: 'The Fellowship',
+    programName: 'shire-hero',
+    sponsorEmail: 'bbag@hobbiton.com',
     tosAccepted: true,
+    vaEmail: 'frodo.baggins@shire.com',
   },
   {
     apis: 'va,xz,dx',
@@ -26,7 +29,10 @@ const mockUserList: UserDynamoItem[] = [
     lastName: 'Gray',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
     organization: 'The Fellowship',
+    programName: 'Istari',
+    sponsorEmail: 'manwe@ainur.com',
     tosAccepted: true,
+    vaEmail: 'olorin@middle-earth.com',
   },
 ];
 

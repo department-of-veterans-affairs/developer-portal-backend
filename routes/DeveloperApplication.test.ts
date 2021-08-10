@@ -440,6 +440,111 @@ describe('validations', () => {
     });
   });
 
+  describe('internalApiInfo', () => {
+    const defaultInternalApiInfo = {
+      programName: 'Battle of the Hornburg',
+      sponsorEmail: 'aragorn@va.gov',
+      vaEmail: 'eowyn@va.gov',
+    };
+    describe('programName', () => {
+      it('is required', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, programName: undefined };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.programName" is required');
+      });
+
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, programName: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.programName" must be a string');
+      });
+    });
+
+    describe('sponsorEmail', () => {
+      it('is required', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: undefined };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.sponsorEmail" is required');
+      });
+
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.sponsorEmail" must be a string');
+      });
+
+      it('is in a valid format', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 'lolnotanemail.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.sponsorEmail" must be a valid email. "internalApiInfo.sponsorEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+
+      it('is in a valid email from the VA', () => {
+        const internalApiInfo = {
+          ...defaultInternalApiInfo,
+          sponsorEmail: 'gloin@son-of-groin.com',
+        };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.sponsorEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+    });
+
+    describe('vaEmail', () => {
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.vaEmail" must be a string');
+      });
+
+      it('is in a valid format', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'lolnotanemail.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" must be a valid email. "internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+
+      it('is in a valid email from the VA', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'gloin@son-of-groin.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+    });
+  });
+
   it('reports multiple failures at a time', () => {
     const payload = { ...defaultPayload, firstName: undefined, lastName: undefined };
 

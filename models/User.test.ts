@@ -43,7 +43,10 @@ describe('User', () => {
       oAuthApplicationType: 'web',
       oAuthRedirectURI: 'https://rohirrim.rohan.horse/auth',
       organization: 'Ad Hoc',
+      programName: '',
+      sponsorEmail: '',
       termsOfService: true,
+      vaEmail: '',
     };
     user = new User(event);
   });
@@ -57,6 +60,44 @@ describe('User', () => {
       expect(user.email).toEqual('ed@adhocteam.us');
       expect(user.organization).toEqual('Ad Hoc');
     });
+    describe('signing up for an internal api', () => {
+      it('errors without vaEmail', () => {
+        expect.assertions(1);
+        event.apis = 'addressValidation';
+        try {
+          user = new User(event);
+        } catch (err: unknown) {
+          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+        }
+      });
+
+      it('errors with invalid va.gov vaEmail', () => {
+        expect.assertions(1);
+        event.apis = 'addressValidation';
+        event.vaEmail = 'gimli@son-of-gloin.com';
+        try {
+          user = new User(event);
+        } catch (err: unknown) {
+          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+        }
+      });
+
+      it('returns a user with a valid vaEmail', () => {
+        event.apis = 'addressValidation';
+        event.vaEmail = 'gimli@va.gov';
+        user = new User(event);
+        expect(user.apiList).toStrictEqual(['addressValidation']);
+        expect(user.vaEmail).toEqual('gimli@va.gov');
+      });
+
+      it('returns a user with a va.gov email', () => {
+        event.apis = 'addressValidation';
+        event.email = 'gimli@va.gov';
+        user = new User(event);
+        expect(user.apiList).toStrictEqual(['addressValidation']);
+        expect(user.email).toEqual('gimli@va.gov');
+      });
+    });
   });
 
   describe('shouldUpdateOkta', () => {
@@ -69,7 +110,10 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateOkta()).toBe(true);
@@ -84,7 +128,10 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateOkta()).toBe(false);
@@ -105,7 +152,10 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateKong()).toBe(true);
@@ -120,7 +170,10 @@ describe('User', () => {
         lastName: 'Paget',
         oAuthRedirectURI: '',
         organization: 'Ad Hoc',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
       user = new User(event);
       expect(user.shouldUpdateKong()).toBe(false);
@@ -156,7 +209,10 @@ describe('User', () => {
         oAuthApplicationType: '',
         oAuthRedirectURI: '',
         organization: 'The Rohirrim',
+        programName: '',
+        sponsorEmail: '',
         termsOfService: true,
+        vaEmail: '',
       };
     });
 

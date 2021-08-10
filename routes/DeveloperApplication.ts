@@ -10,8 +10,9 @@ import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
-import { validateApiList } from '../util/validators';
+import { vaEmailValidator, validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
+import { DeveloperApplicationRequestBody } from '../types';
 
 export const applySchema = Joi.object()
   .keys({
@@ -19,6 +20,11 @@ export const applySchema = Joi.object()
     description: Joi.string().allow(''),
     email: Joi.string().email().required(),
     firstName: Joi.string().required(),
+    internalApiInfo: Joi.object().keys({
+      programName: Joi.string().required(),
+      sponsorEmail: Joi.string().email().custom(vaEmailValidator).required(),
+      vaEmail: Joi.string().email().custom(vaEmailValidator),
+    }),
     lastName: Joi.string().required(),
     oAuthApplicationType: Joi.allow('').valid('web', 'native'),
     oAuthRedirectURI: Joi.string()
@@ -28,18 +34,6 @@ export const applySchema = Joi.object()
     termsOfService: Joi.required().valid(true),
   })
   .options({ abortEarly: false });
-
-interface DeveloperApplicationRequestBody {
-  firstName: string;
-  lastName: string;
-  organization: string;
-  description: string;
-  email: string;
-  oAuthRedirectURI: string;
-  oAuthApplicationType: string;
-  termsOfService: boolean;
-  apis: string;
-}
 
 type DeveloperApplicationRequest = Request<
   Record<string, unknown>,
@@ -57,29 +51,7 @@ const developerApplicationHandler =
     slack: SlackService | undefined,
   ) =>
   async (req: DeveloperApplicationRequest, res: Response, next: NextFunction): Promise<void> => {
-    const {
-      firstName,
-      lastName,
-      organization,
-      description,
-      email,
-      oAuthRedirectURI,
-      oAuthApplicationType,
-      termsOfService,
-      apis,
-    } = req.body;
-
-    const form: FormSubmission = {
-      apis,
-      description,
-      email,
-      firstName,
-      lastName,
-      oAuthApplicationType,
-      oAuthRedirectURI,
-      organization,
-      termsOfService,
-    };
+    const form: FormSubmission = new FormSubmission(req.body);
 
     const user: User = new User(form);
     /*
