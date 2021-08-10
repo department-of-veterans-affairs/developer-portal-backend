@@ -22,7 +22,7 @@ export const applySchema = Joi.object()
     firstName: Joi.string().required(),
     internalApiInfo: Joi.object().keys({
       programName: Joi.string().required(),
-      sponsorEmail: Joi.string().email().required(),
+      sponsorEmail: Joi.string().email().custom(vaEmailValidator).required(),
       vaEmail: Joi.string().email().custom(vaEmailValidator),
     }),
     lastName: Joi.string().required(),
