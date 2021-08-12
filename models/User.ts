@@ -1,6 +1,5 @@
 import process from 'process';
 import { ApplicationType } from '@okta/okta-sdk-nodejs';
-import { DynamoDB } from 'aws-sdk';
 import { GovDeliveryUser, KongUser } from '../types';
 import OktaService from '../services/OktaService';
 import SlackService, { SlackResponse } from '../services/SlackService';
@@ -180,10 +179,10 @@ export default class User implements KongUser, GovDeliveryUser {
         dynamoItem.okta_client_id = this.oauthApplication.client_id;
       }
 
-      // Convert to a DynamoDB Item to satisfy Record<string, unknown> type and convert empty strings to null.
-      const marshalledItem = DynamoDB.Converter.marshall(dynamoItem, { convertEmptyValues: true });
-
-      await service.putItem(marshalledItem, this.tableName);
+      Object.keys(dynamoItem)
+        .filter(key => !dynamoItem[key])
+        .forEach(key => (dynamoItem[key] = undefined));
+      await service.putItem(dynamoItem, this.tableName);
       return this;
     } catch (err: unknown) {
       (err as DevPortalError).action = 'failed saving to dynamo';
