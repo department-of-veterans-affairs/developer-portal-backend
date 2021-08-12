@@ -3,7 +3,6 @@ import { ScanInput, ScanOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { DevPortalError } from '../models/DevPortalError';
-import logger from '../config/logger';
 import { UserDynamoItem } from '../models/User';
 
 export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
@@ -24,10 +23,8 @@ export default class DynamoService implements MonitoredService {
         Item: item,
         TableName: tableName,
       };
-      logger.error(params);
       this.client.put(params, (err: AWSError | undefined) => {
         if (err) {
-          logger.error(err);
           const dynamoErr = new Error(err.message);
           reject(dynamoErr);
         }
