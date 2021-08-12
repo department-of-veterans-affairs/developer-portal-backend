@@ -249,12 +249,8 @@ describe('User', () => {
 
       expect(mockPutItem.mock.calls[0][0]).toEqual(
         expect.objectContaining({
-          okta_application_id: {
-            S: 'abc123',
-          },
-          okta_client_id: {
-            S: 'xyz456',
-          },
+          okta_application_id: 'abc123',
+          okta_client_id: 'xyz456',
         }),
       );
     });

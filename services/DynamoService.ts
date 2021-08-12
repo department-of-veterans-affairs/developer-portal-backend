@@ -4,6 +4,7 @@ import { AttributeMap } from 'aws-sdk/clients/dynamodbstreams';
 import { DynamoConfig, MonitoredService, ServiceHealthCheckResponse } from '../types';
 import { DevPortalError } from '../models/DevPortalError';
 import logger from '../config/logger';
+import { UserDynamoItem } from '../models/User';
 
 export type FilterParams = Pick<ScanInput, 'ExpressionAttributeValues' | 'FilterExpression'>;
 
@@ -17,7 +18,7 @@ export default class DynamoService implements MonitoredService {
     this.client = new DynamoDB.DocumentClient(config);
   }
 
-  public putItem(item: Record<string, unknown>, tableName: string): Promise<void> {
+  public putItem(item: UserDynamoItem, tableName: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const params = {
         Item: item,

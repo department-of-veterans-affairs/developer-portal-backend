@@ -9,6 +9,7 @@ import {
   ScanOutput,
 } from 'aws-sdk/clients/dynamodb';
 import { DynamoConfig } from '../types';
+import { UserDynamoItem } from '../models/User';
 import DynamoService from './DynamoService';
 
 describe('DynamoService', () => {
@@ -82,16 +83,11 @@ describe('DynamoService', () => {
   });
 
   describe('putItem', () => {
-    // We are marshalling the item as that is what we expect to receive from the User model
-    const item = DynamoDB.Converter.marshall(
-      {
-        commonName: 'Treebeard',
-        entishName: 'Not stored due to buffer overflow',
-        orcishName: '',
-        sidarinName: 'Fangorn',
-      },
-      { convertEmptyValues: true },
-    );
+    const item = {
+      commonName: 'Treebeard',
+      entishName: 'Not stored due to buffer overflow',
+      sidarinName: 'Fangorn',
+    } as unknown as UserDynamoItem;
     const tableName = 'Ents';
 
     it('puts to a DynamoDB table', async () => {
@@ -100,12 +96,6 @@ describe('DynamoService', () => {
         { Item: item, TableName: tableName },
         expect.any(Function),
       );
-    });
-
-    // The DynamoDB API breaks if empty strings are passed in
-    it('converts empty strings in user model to nulls', async () => {
-      await service.putItem(item, tableName);
-      expect(mockPut.mock.calls[0][0].Item.orcishName).toEqual({ NULL: true });
     });
 
     it('responds to an error with a rejection', async () => {
@@ -133,11 +123,11 @@ describe('DynamoService', () => {
 
   describe('scan', () => {
     const tableName = 'Ents';
-    const tableRecord: AttributeMap = {
-      commonName: { S: 'Treebeard' },
-      entishName: { S: 'Not stored due to buffer overflow' },
-      orcishName: { S: '' },
-      sidarinName: { S: 'Fangorn' },
+    const tableRecord = {
+      commonName: 'Treebeard',
+      entishName: 'Not stored due to buffer overflow',
+      orcishName: '',
+      sidarinName: 'Fangorn',
     };
     const projectionExp = 'commonName, sidarinName, entishName, orcishName';
     const filterParams = {
@@ -148,7 +138,7 @@ describe('DynamoService', () => {
     };
 
     it('retrieves rows from the table', async () => {
-      mockScan.mockImplementation((_params, cb: (err: AWSError | null, data: ScanOutput) => void) =>
+      mockScan.mockImplementation((_params, cb: (err: AWSError | null, data) => void) =>
         setTimeout(() => cb(null, { Items: [tableRecord] }), 5),
       );
 
