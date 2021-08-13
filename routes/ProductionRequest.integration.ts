@@ -20,59 +20,59 @@ describe(route, () => {
   const govDelivery = nock(process.env.GOVDELIVERY_HOST);
 
   const supportReq = {
-    apis: "benefits",
-    appDescription: "A social media platform with one room.",
-    appName: "One to Bind Them",
-    breachManagementProcess: "golem",
-    businessModel: "magical rings >> profit",
-    centralizedBackendLog: "non-existent",
+    apis: 'benefits',
+    appDescription: 'A social media platform with one room.',
+    appName: 'One to Bind Them',
+    breachManagementProcess: 'golem',
+    businessModel: 'magical rings >> profit',
+    centralizedBackendLog: 'non-existent',
     distributingAPIKeysToCustomers: false,
     exposeVeteranInformationToThirdParties: false,
     listedOnMyHealthApplication: false,
-    monitizationExplanation: "n/a",
+    monitizationExplanation: 'n/a',
     monitizedVeteranInformation: false,
-    multipleReqSafeguards: "golem",
-    namingConvention: "overly-complicated",
-    organization: "Sauron.INC",
-    phoneNumber: "555-867-5309",
-    piiStorageMethod: "Locking away in the fires from whence it came.",
-    platforms: "iOS",
+    multipleReqSafeguards: 'golem',
+    namingConvention: 'overly-complicated',
+    organization: 'Sauron.INC',
+    phoneNumber: '555-867-5309',
+    piiStorageMethod: 'Locking away in the fires from whence it came.',
+    platforms: 'iOS',
     policyDocuments: [
-      "www.example.com/tos"
+      'www.example.com/tos',
     ],
     primaryContact: {
-      email: "sam@fellowship.com",
-      firstName: "Samwise",
-      lastName: "Gamgee"
+      email: 'sam@fellowship.com',
+      firstName: 'Samwise',
+      lastName: 'Gamgee',
     },
-    productionKeyCredentialStorage: "stored in a volcano on mount doom",
-    productionOrOAuthKeyCredentialStorage: "also stored in a volcano",
+    productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+    productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
     scopesAccessRequested: [
-      "profile",
-      "email"
+      'profile',
+      'email',
     ],
     secondaryContact: {
-      email: "frodo@fellowship.com",
-      firstName: "Frodo",
-      lastName: "Baggins"
+      email: 'frodo@fellowship.com',
+      firstName: 'Frodo',
+      lastName: 'Baggins',
     },
     signUpLink: [
-      "www.one2bindthem.com/signup"
+      'www.one2bindthem.com/signup',
     ],
     statusUpdateEmails: [
-      "sam@fellowship.com"
+      'sam@fellowship.com',
     ],
     storePIIOrPHI: false,
     supportLink: [
-      "www.one2bindthem.com/support"
+      'www.one2bindthem.com/support',
     ],
-    thirdPartyInfoDescription: "n/a",
-    valueProvided: "n/a",
-    vasiSystemName: "asdf",
+    thirdPartyInfoDescription: 'n/a',
+    valueProvided: 'n/a',
+    vasiSystemName: 'asdf',
     veteranFacing: false,
-    veteranFacingDescription: "Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.",
-    vulnerabilityManagement: "golem",
-    website: "www.one2bindthem.com"
+    veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+    vulnerabilityManagement: 'golem',
+    website: 'www.one2bindthem.com',
   };
 
   it('sends a 400 response and descriptive errors if validations fail', async () => {
