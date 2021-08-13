@@ -8,7 +8,6 @@ import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object()
   .keys({
-    //TODO: UPDATE POSTMAN REQUEST.
     // APP INFORMATION
     apis: Joi.custom(validateApiList).required(),
     appDescription: Joi.string(),
