@@ -8,23 +8,15 @@ import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object()
   .keys({
+    //TODO: UPDATE POSTMAN REQUEST.
+    // APP INFORMATION
     apis: Joi.custom(validateApiList).required(),
-    appDescription: Joi.string().required(),
-    appName: Joi.string().required(),
-    breachManagementProcess: Joi.string(),
-    businessModel: Joi.string(),
-    centralizedBackendLog: Joi.string(),
-    credentialStorage: Joi.string().required(),
-    distributingAPIKeysToCustomers: Joi.boolean().required(),
-    exposeVeteranInformationToThirdParties: Joi.boolean(), // eslint-disable-line id-length
-    listedOnMyHealthApplication: Joi.boolean(),
-    monitizationExplanation: Joi.string(),
-    monitizedVeteranInformation: Joi.boolean().required(),
-    multipleReqSafeguards: Joi.string(),
-    namingConvention: Joi.string(),
-    organization: Joi.string().required(),
+    appDescription: Joi.string(),
+    appName: Joi.string(),
+    website: Joi.string(),
+    businessModel: Joi.string().required(),
     phoneNumber: Joi.custom(validatePhoneFormat).required(),
-    piiStorageMethod: Joi.string(),
+    organization: Joi.string().required(),
     platforms: Joi.string(),
     policyDocuments: Joi.array().items(Joi.string()).required(),
     primaryContact: Joi.object({
@@ -32,23 +24,37 @@ export const productionSchema = Joi.object()
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
     }).required(),
-    scopesAccessRequested: Joi.array().items(Joi.string()),
     secondaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
     }).required(),
-    signUpLink: Joi.array().items(Joi.string()),
     statusUpdateEmails: Joi.array().items(Joi.string().email().custom(emailValidator)).required(),
-    storePIIOrPHI: Joi.boolean().required(),
-    supportLink: Joi.array().items(Joi.string()),
-    thirdPartyInfoDescription: Joi.string(),
     valueProvided: Joi.string().required(),
-    vasiSystemName: Joi.string(),
+    listedOnMyHealthApplication: Joi.boolean(),
+    signUpLink: Joi.array().items(Joi.string()),
+    supportLink: Joi.array().items(Joi.string()),
+    scopesAccessRequested: Joi.array().items(Joi.string()),
+    //PII
+    piiStorageMethod: Joi.string(),
+    storePIIOrPHI: Joi.boolean().required(),
+    multipleReqSafeguards: Joi.string(),
+    breachManagementProcess: Joi.string(),
+    vulnerabilityManagement: Joi.string(),
+    //VETERAN INFORMATION
     veteranFacing: Joi.boolean().required(),
     veteranFacingDescription: Joi.string().max(415),
-    vulnerabilityManagement: Joi.string(),
-    website: Joi.string(),
+    monitizationExplanation: Joi.string(),
+    monitizedVeteranInformation: Joi.boolean().required(),
+    exposeVeteranInformationToThirdParties: Joi.boolean(), // eslint-disable-line id-length
+    thirdPartyInfoDescription: Joi.string(),
+    // SECURITY
+    productionKeyCredentialStorage: Joi.string(),
+    productionOrOAuthKeyCredentialStorage: Joi.string(),
+    distributingAPIKeysToCustomers: Joi.boolean(),
+    namingConvention: Joi.string(),
+    centralizedBackendLog: Joi.string(),
+    vasiSystemName: Joi.string(),
   })
   .options({ abortEarly: false });
 

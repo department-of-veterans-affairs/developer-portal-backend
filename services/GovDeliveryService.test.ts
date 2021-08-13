@@ -181,7 +181,8 @@ describe('GovDeliveryService', () => {
           breachManagementProcess: 'golem',
           businessModel: 'magical rings >> profit',
           centralizedBackendLog: 'non-existent',
-          credentialStorage: '',
+          productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+          productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
           distributingAPIKeysToCustomers: false,
           exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
           listedOnMyHealthApplication: false,

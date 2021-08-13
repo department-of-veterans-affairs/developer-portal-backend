@@ -330,9 +330,17 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
   <li>
     <div>
       <strong>
-        <div>Credential Storage:</div>
+        <div>Production Key Credential Storage:</div>
       </strong>
-      <div>{{credentialStorage}}</div>
+      <div>{{productionKeyCredentialStorage}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
+        <div>Production/OAuth Key Credential Storage:</div>
+      </strong>
+      <div>{{productionOrOAuthKeyCredentialStorage}}</div>
     </div>
   </li>
   <li>
