@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 import logger from '../config/logger';
@@ -15,7 +17,7 @@ export const productionSchema = Joi.object()
     businessModel: Joi.string().required(),
     centralizedBackendLog: Joi.string(),
     distributingAPIKeysToCustomers: Joi.boolean(),
-    exposeVeteranInformationToThirdParties: Joi.boolean(), // eslint-disable-line id-length
+    exposeVeteranInformationToThirdParties: Joi.boolean(),
     listedOnMyHealthApplication: Joi.boolean(),
     monitizationExplanation: Joi.string(),
     monitizedVeteranInformation: Joi.boolean().required(),
@@ -32,7 +34,7 @@ export const productionSchema = Joi.object()
       lastName: Joi.string().required(),
     }).required(),
     productionKeyCredentialStorage: Joi.string(),
-    productionOrOAuthKeyCredentialStorage: Joi.string(),// eslint-disable-line id-length
+    productionOrOAuthKeyCredentialStorage: Joi.string(),
     scopesAccessRequested: Joi.array().items(Joi.string()),
     secondaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
