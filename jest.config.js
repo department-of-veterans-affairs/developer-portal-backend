@@ -12,13 +12,8 @@ module.exports = {
       statements: 80,
     },
   },
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   testEnvironment: 'node',
-  setupFiles: [
-    './dotenv-config.js',
-  ],
+  setupFiles: ['./dotenv-config.js'],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec|integration))\\.[jt]sx?$',
 };

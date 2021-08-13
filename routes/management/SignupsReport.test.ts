@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
-import signupsReportHandler, { signupsReportSchema } from './SignupsReport';
 import SlackService from '../../services/SlackService';
-import SignupMetricsService, { SignupCountResult, SignupQueryOptions } from '../../services/SignupMetricsService';
- 
+import SignupMetricsService, {
+  SignupCountResult,
+  SignupQueryOptions,
+} from '../../services/SignupMetricsService';
+import signupsReportHandler, { signupsReportSchema } from './SignupsReport';
+
 describe('signupsReportHandler', () => {
   const mockSendSignupsMessage = jest.fn();
   const mockSlack = { sendSignupsMessage: mockSendSignupsMessage } as unknown as SlackService;
@@ -18,13 +21,15 @@ describe('signupsReportHandler', () => {
   let mockReq;
   const mockNext = jest.fn();
   const mockRes: Response = {
-    status: mockStatus,
     json: mockJson,
     sendStatus: mockSendStatus,
+    status: mockStatus,
   } as unknown as Response;
 
-  // Moment relies on Date.now when calling moment(). Mocking it here
-  // means that we can have a consistent date for these tests.
+  /*
+   * Moment relies on Date.now when calling moment(). Mocking it here
+   * means that we can have a consistent date for these tests.
+   */
   const originalDate = Date.now;
   Date.now = jest.fn().mockReturnValue(new Date('2003-12-17T00:00:00.000Z'));
 
@@ -33,32 +38,32 @@ describe('signupsReportHandler', () => {
   });
 
   const smallResult = {
-    total: 2,
     apiCounts: {
       benefits: 1,
-      facilities: 0,
-      vaForms: 0,
-      confirmation: 0,
-      health: 2,
-      communityCare: 0,
-      verification: 0,
       claims: 0,
+      communityCare: 0,
+      confirmation: 0,
+      facilities: 0,
+      health: 2,
+      vaForms: 0,
+      verification: 0,
     },
+    total: 2,
   };
   const largeResult = {
-    total: 12,
     apiCounts: {
       benefits: 1,
-      facilities: 2,
-      vaForms: 3,
-      confirmation: 4,
-      health: 5,
-      communityCare: 6,
-      verification: 7,
       claims: 8,
+      communityCare: 6,
+      confirmation: 4,
+      facilities: 2,
+      health: 5,
+      vaForms: 3,
+      verification: 7,
     },
+    total: 12,
   };
-  
+
   beforeEach(() => {
     mockReq = { query: {} } as Request;
 
@@ -66,7 +71,7 @@ describe('signupsReportHandler', () => {
     mockJson.mockClear();
     mockSendStatus.mockClear();
     mockNext.mockClear();
-    mockStatus.mockReturnValue(mockRes);  
+    mockStatus.mockReturnValue(mockRes);
 
     mockCountSignups.mockClear();
     mockCountSignups
@@ -83,7 +88,7 @@ describe('signupsReportHandler', () => {
       'week',
       '12/17/2003',
       smallResult,
-      largeResult
+      largeResult,
     );
 
     expect(mockSendStatus).toHaveBeenCalledWith(200);

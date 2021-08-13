@@ -1,15 +1,15 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { DevPortalError } from '../models/DevPortalError';
 import { MonitoredService, ServiceHealthCheckResponse } from '../types';
-import { SignupCountResult } from './SignupMetricsService';
 import { getEnvironment } from '../util/environments';
+import { SignupCountResult } from './SignupMetricsService';
 
-/* 
-WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
-As in when chat.postMessage is called you have to specify a channel. Bot is related to the
-healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
-and usable. There may be more options in the future.
-*/
+/*
+ * WebAPISlackOptions are extras provided for specific APIs. Channel is related to messaging.
+ * As in when chat.postMessage is called you have to specify a channel. Bot is related to the
+ * healthcheck. We use the bot id as a idempotent call to see if the API is correctly setup
+ * and usable. There may be more options in the future.
+ */
 interface WebAPISlackOptions {
   channel: string;
   bot: string;
@@ -28,11 +28,11 @@ interface Block {
     type: string;
     text: string;
   };
-  fields?: {
+  fields?: Array<{
     type: string;
     text: string;
     emoji?: boolean;
-  }[];
+  }>;
 }
 
 interface PostBody {
@@ -42,7 +42,7 @@ interface PostBody {
 }
 
 interface WebAPIHeaders {
-  'Authorization': string;
+  Authorization: string;
   'Content-Type': string;
 }
 
@@ -73,19 +73,19 @@ export interface SlackResponse {
   error?: string;
 }
 
-function capitalizeFirstLetter(word: string): string {
-  return word.charAt(0).toUpperCase() + word.slice(1);
-}
+const capitalizeFirstLetter = (word: string): string =>
+  word.charAt(0).toUpperCase() + word.slice(1);
 
 export default class SlackService implements MonitoredService {
-  private client: AxiosInstance;
-  private options: WebAPISlackOptions;
+  private readonly client: AxiosInstance;
 
-  constructor(baseURL: string, token: string, options: WebAPISlackOptions) {
+  private readonly options: WebAPISlackOptions;
+
+  public constructor(baseURL: string, token: string, options: WebAPISlackOptions) {
     const config: WebAPIRequestConfig = {
-      baseURL: baseURL,
+      baseURL,
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json; charset=UTF-8',
       },
     };
@@ -95,13 +95,15 @@ export default class SlackService implements MonitoredService {
 
   public sendSuccessMessage(message: string, title: string): Promise<SlackResponse> {
     const body: PostBody = {
+      attachments: [
+        {
+          color: 'good',
+          fallback: message,
+          text: message,
+          title,
+        },
+      ],
       text: '',
-      attachments: [{
-        text: message,
-        fallback: message,
-        color: 'good',
-        title,
-      }],
     };
 
     return this.post(body);
@@ -111,15 +113,15 @@ export default class SlackService implements MonitoredService {
     duration: string,
     endDate: string,
     timeSpanSignups: SignupCountResult,
-    allTimeSignups: SignupCountResult
+    allTimeSignups: SignupCountResult,
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
     const numsByApi = apis.map(api => {
       const timeSpanCount = timeSpanSignups.apiCounts[api];
       const allTimeCount = allTimeSignups.apiCounts[api];
       return {
-        type: 'mrkdwn',
         text: `_${api}_: ${timeSpanCount} new requests (${allTimeCount} all-time)`,
+        type: 'mrkdwn',
       };
     });
     const titleDuration = capitalizeFirstLetter(duration);
@@ -127,65 +129,65 @@ export default class SlackService implements MonitoredService {
     const body: PostBody = {
       blocks: [
         {
-          type: 'section',
           text: {
-            type: 'mrkdwn',
             text: `*${titleDuration}ly Sign-ups and Access Requests* for ${titleDuration} Ending ${endDate}`,
+            type: 'mrkdwn',
           },
+          type: 'section',
         },
         {
-          type: 'section',
           text: {
-            type: 'mrkdwn',
             text: `*Environment:* ${getEnvironment()}`,
+            type: 'mrkdwn',
           },
+          type: 'section',
         },
         {
           type: 'divider',
         },
         {
-          type: 'section',
           text: {
-            type: 'mrkdwn',
             text: '*New User Sign-ups* (excludes established users requesting additional APIs)',
+            type: 'mrkdwn',
           },
+          type: 'section',
         },
         {
-          type: 'section',
           fields: [
             {
-              type: 'mrkdwn',
               text: `_This ${duration}:_ ${timeSpanSignups.total} new users`,
+              type: 'mrkdwn',
             },
             {
-              type: 'mrkdwn',
               text: `_All-time:_ ${allTimeSignups.total} new users`,
+              type: 'mrkdwn',
             },
           ],
+          type: 'section',
         },
         {
           type: 'divider',
         },
         {
-          type: 'section',
           text: {
-            type: 'mrkdwn',
             text: '*API Access Requests* (includes new users, and established users requesting additional APIs)',
+            type: 'mrkdwn',
           },
+          type: 'section',
         },
         {
-          type: 'section',
           fields: numsByApi,
+          type: 'section',
         },
         {
           type: 'divider',
         },
         {
-          type: 'section',
           text: {
-            type: 'mrkdwn',
             text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+            type: 'mrkdwn',
           },
+          type: 'section',
         },
       ],
     };
@@ -193,39 +195,16 @@ export default class SlackService implements MonitoredService {
     return this.post(body);
   }
 
-  private async post(body: PostBody): Promise<SlackResponse> {
-    try {
-      const res = await this.client.post<SlackResponse>('/api/chat.postMessage', { channel: this.options.channel, ...body });
-      if(res.data.error){
-        throw new Error(res.data.error);
-      }
-      return res.data;
-    }
-    catch (err: unknown) {
-      // Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
-      // We will want that information, so we're re-writing the message field of the error
-      // that axios throws on 400 and 500 responses, since our default error handling
-      // will accept and log that field.
-      const { response } = err as AxiosError;
-      if (response) {
-        (err as Error).message =
-          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, `
-          + `Original: ${(err as AxiosError).message}`;
-      }
-      throw err;
-    }
-  }
-
   // Slack is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     const healthResponse: ServiceHealthCheckResponse = {
-      serviceName: 'Slack',
       healthy: false,
+      serviceName: 'Slack',
     };
     try {
       const botInfoResponse = await this.getBot();
       healthResponse.healthy = botInfoResponse.ok;
-      return Promise.resolve(healthResponse);
+      return await Promise.resolve(healthResponse);
     } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of Slack';
       healthResponse.err = err as Error;
@@ -240,9 +219,36 @@ export default class SlackService implements MonitoredService {
       },
     };
     const botInfoResponse = await this.client.get<SlackBotInfo>('/api/bots.info', config);
-    if(botInfoResponse.data.error){
+    if (botInfoResponse.data.error) {
       throw new Error(botInfoResponse.data.error);
     }
     return botInfoResponse.data;
+  }
+
+  private async post(body: PostBody): Promise<SlackResponse> {
+    try {
+      const res = await this.client.post<SlackResponse>('/api/chat.postMessage', {
+        channel: this.options.channel,
+        ...body,
+      });
+      if (res.data.error) {
+        throw new Error(res.data.error);
+      }
+      return res.data;
+    } catch (err: unknown) {
+      /*
+       * Slack provides responses as text/html like 'invalid_payload' or 'channel_is_archived'.
+       * We will want that information, so we're re-writing the message field of the error
+       * that axios throws on 400 and 500 responses, since our default error handling
+       * will accept and log that field.
+       */
+      const { response } = err as AxiosError;
+      if (response) {
+        (err as Error).message =
+          `Status: ${response.status}, Data: ${JSON.stringify(response.data)}, ` +
+          `Original: ${(err as AxiosError).message}`;
+      }
+      throw err;
+    }
   }
 }

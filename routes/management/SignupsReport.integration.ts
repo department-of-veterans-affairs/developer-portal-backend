@@ -8,17 +8,17 @@ const request = supertest(configureApp());
 
 if (!process.env.DYNAMODB_ENDPOINT) {
   throw new Error(
-    'Environment variable DYNAMODB_ENDPOINT must be defined for SignupsReport.integration test'
+    'Environment variable DYNAMODB_ENDPOINT must be defined for SignupsReport.integration test',
   );
 }
 if (!process.env.SLACK_BASE_URL) {
   throw new Error(
-    'Environment variable SLACK_BASE_URL must be defined for SignupsReport.integration test'
+    'Environment variable SLACK_BASE_URL must be defined for SignupsReport.integration test',
   );
 }
 if (!process.env.OKTA_HOST) {
   throw new Error(
-    'Environment variable OKTA_HOST must be defined for SignupsReport.integration test'
+    'Environment variable OKTA_HOST must be defined for SignupsReport.integration test',
   );
 }
 
@@ -32,8 +32,10 @@ describe(route, () => {
   });
 
   it('sends a message to slack', async () => {
-    // This test is just basically just a sanity check in it's current implementation...
-    // - it does not verify that the payload is correct, it just verifies that slack recieved a 'post' to the correct path
+    /*
+     * This test is just basically just a sanity check in it's current implementation...
+     * - it does not verify that the payload is correct, it just verifies that slack recieved a 'post' to the correct path
+     */
     dynamoDB.post('/').reply(200).post('/').reply(200);
 
     slack.post('/api/chat.postMessage').reply(200);

@@ -1,5 +1,6 @@
 import { Schema, ValidationErrorItem } from '@hapi/joi';
 import express, { Express, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import DynamoService from '../services/DynamoService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import KongService from '../services/KongService';
@@ -12,10 +13,10 @@ import contactUsHandler, { contactSchema } from './ContactUs';
 import healthCheckHandler from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
 import versionHandler from './Version';
-import cors from 'cors';
 
-function validationMiddleware(schema: Schema, toValidate: string) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+const validationMiddleware =
+  (schema: Schema, toValidate: string) =>
+  (req: Request, res: Response, next: NextFunction): void => {
     const { error } = schema.validate(req[toValidate]);
     if (error) {
       const messages = error.details.map((i: ValidationErrorItem) => i.message);
@@ -24,7 +25,6 @@ function validationMiddleware(schema: Schema, toValidate: string) {
       next();
     }
   };
-}
 
 interface AppServices {
   kong: KongService;
@@ -44,19 +44,12 @@ interface AppServices {
  */
 const GATEWAY_PATH_PREFIX = '/internal/developer-portal';
 const configureRoutes = (app: Express, services: AppServices): void => {
-  const {
-    kong,
-    okta,
-    dynamo,
-    govDelivery,
-    signups,
-    slack,
-  } = services;
+  const { kong, okta, dynamo, govDelivery, signups, slack } = services;
 
   /**
    * LOCAL DEV
    */
-  if(process.env.DEVELOPER_PORTAL_URL) {
+  if (process.env.DEVELOPER_PORTAL_URL) {
     const options: cors.CorsOptions = {
       origin: process.env.DEVELOPER_PORTAL_URL,
     };
@@ -67,24 +60,30 @@ const configureRoutes = (app: Express, services: AppServices): void => {
    * PUBLIC
    */
   const publicRoutes = express.Router();
-  publicRoutes.post('/developer_application',
+  publicRoutes.post(
+    '/developer_application',
     validationMiddleware(applySchema, 'body'),
-    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack));
+    developerApplicationHandler(kong, okta, dynamo, govDelivery, slack),
+  );
 
-  publicRoutes.post('/contact-us',
+  publicRoutes.post(
+    '/contact-us',
     validationMiddleware(contactSchema, 'body'),
-    contactUsHandler(govDelivery));
+    contactUsHandler(govDelivery),
+  );
 
-  publicRoutes.get('/health_check', healthCheckHandler(kong, okta, dynamo, govDelivery, slack));
+  publicRoutes.get('/health_check', healthCheckHandler({ dynamo, govDelivery, kong, okta, slack }));
 
   // This simple ping endpoint is for use with a Pingdom check
   publicRoutes.get('/ping', (_req, res) => {
     res.send('pong');
   });
 
-  publicRoutes.post('/production_request',
+  publicRoutes.post(
+    '/production_request',
     validationMiddleware(productionSchema, 'body'),
-    productionRequestHandler(govDelivery));
+    productionRequestHandler(govDelivery),
+  );
 
   app.use(`${GATEWAY_PATH_PREFIX}/public`, publicRoutes);
 
@@ -94,9 +93,11 @@ const configureRoutes = (app: Express, services: AppServices): void => {
    * PROTECTED
    */
   const adminRoutes = express.Router();
-  adminRoutes.get('/reports/signups',
+  adminRoutes.get(
+    '/reports/signups',
     validationMiddleware(signupsReportSchema, 'query'),
-    signupsReportHandler(signups, slack));
+    signupsReportHandler(signups, slack),
+  );
   app.use(`${GATEWAY_PATH_PREFIX}/admin`, adminRoutes);
 };
 

@@ -7,7 +7,10 @@ import {
   PUBLISHING_SUPPORT_TEMPLATE,
   CONSUMER_SUPPORT_TEMPLATE,
 } from '../templates';
-import {  PRODUCTION_ACCESS_SUPPORT_TEMPLATE, PRODUCTION_ACCESS_CONSUMER_TEMPLATE } from '../templates/production';
+import {
+  PRODUCTION_ACCESS_SUPPORT_TEMPLATE,
+  PRODUCTION_ACCESS_CONSUMER_TEMPLATE,
+} from '../templates/production';
 import User from '../models/User';
 import { DevPortalError } from '../models/DevPortalError';
 import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
@@ -111,15 +114,22 @@ interface GovDeliveryServiceConfig {
 
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
+
   public supportEmailRecipient: string;
+
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
+
   public consumerSupportTemplate: Handlebars.TemplateDelegate<ConsumerSupportEmail>;
+
   public publishingSupportTemplate: Handlebars.TemplateDelegate<PublishingSupportEmail>;
+
   public productionAccessSupportTemplate: Handlebars.TemplateDelegate<ProductionAccessSupportEmail>;
+
   public productionAccessConsumerTemplate: string;
+
   public client: AxiosInstance;
 
-  constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
+  public constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
@@ -133,84 +143,7 @@ export default class GovDeliveryService implements MonitoredService {
     });
   }
 
-  public sendWelcomeEmail(user: User): Promise<EmailResponse> {
-    if (user.token || (user.oauthApplication && user.oauthApplication.client_id)) {
-      const email: EmailRequest = {
-        subject: 'Welcome to the VA API Platform',
-        from_name: 'VA API Platform team',
-        body: this.welcomeTemplate({
-          apis: this.listApis(user),
-          clientID: user.oauthApplication ? user.oauthApplication.client_id : '',
-          clientSecret: user.oauthApplication ? user.oauthApplication.client_secret : '',
-          firstName: user.firstName,
-          oauth: !!user.oauthApplication,
-          key: user.token,
-          kongUsername: user.kongConsumerId ? user.consumerName() : '',
-          token_issued: !!user.token,
-          redirectURI:  user.oAuthRedirectURI,
-        }),
-        recipients: [{
-          email: user.email,
-        }],
-      };
-
-      return this.sendEmail(email);
-    }
-
-    throw Error('User must have token or client_id initialized');
-  }
-
-  public sendConsumerSupportEmail(supportRequest: ConsumerSupportEmail): Promise<EmailResponse> {
-    const email: EmailRequest = {
-      subject: 'Support Needed',
-      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
-      body: this.consumerSupportTemplate(supportRequest),
-      recipients: [{ email: this.supportEmailRecipient }],
-    };
-
-    return this.sendEmail(email);
-  }
-
-  public sendPublishingSupportEmail(supportRequest: PublishingSupportEmail): Promise<EmailResponse> {
-    const email: EmailRequest = {
-      subject: 'Publishing Support Needed',
-      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
-      body: this.publishingSupportTemplate(supportRequest),
-      recipients: [{ email: this.supportEmailRecipient }],
-    };
-
-    return this.sendEmail(email);
-  }
-
-  public sendProductionAccessEmail(supportRequest: ProductionAccessSupportEmail): Promise<EmailResponse> {
-    const email: EmailRequest = {
-      subject: `Production Access Requested for ${supportRequest.organization}`,
-      from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
-      body: this.productionAccessSupportTemplate(supportRequest),
-      recipients: [{email: this.supportEmailRecipient}],
-    };
-    return this.sendEmail(email);
-  }
-
-  public sendProductionAccessConsumerEmail(emails: string[]): Promise<EmailResponse> {
-    const mappedEmails: EmailRecipient[] = emails.map((x)=>{
-      return {email: x};
-    });
-    const email: EmailRequest = {
-      subject: 'Your Request for Production Access is Submitted',
-      from_name: 'VA API Platform team',
-      body: this.productionAccessConsumerTemplate,
-      recipients: mappedEmails,
-    };
-    return this.sendEmail(email);
-  }
-
-  private async sendEmail(email: EmailRequest): Promise<EmailResponse> {
-    const res: AxiosResponse<EmailResponse> = await this.client.post('/messages/email', email);
-    return res.data;
-  }
-
-  private listApis(user: GovDeliveryUser): string {
+  private static listApis(user: GovDeliveryUser): string {
     const apis = user.apiList;
     return apis.reduce((apiList, api, idx) => {
       const properName = APIS_TO_PROPER_NAMES[api];
@@ -225,15 +158,15 @@ export default class GovDeliveryService implements MonitoredService {
     }, '');
   }
 
-  // GovDelivery is considered healthy if <insert criteria>
   public async healthCheck(): Promise<ServiceHealthCheckResponse> {
     const healthResponse: ServiceHealthCheckResponse = {
-      serviceName: 'GovDelivery',
       healthy: false,
+      serviceName: 'GovDelivery',
     };
     try {
-      healthResponse.healthy = await this.getEmailStatusList(1)
-        .then(response => response.status === 200);
+      healthResponse.healthy = await this.getEmailStatusList(1).then(
+        response => response.status === 200,
+      );
       return Promise.resolve(healthResponse);
     } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of GovDelivery';
@@ -242,7 +175,89 @@ export default class GovDeliveryService implements MonitoredService {
     }
   }
 
-  private async getEmailStatusList(pageSize: number): Promise<AxiosResponse<Array<EmailStatus>>> {
+  public sendWelcomeEmail(user: User): Promise<EmailResponse> {
+    if (user.token || user.oauthApplication?.client_id) {
+      const email: EmailRequest = {
+        body: this.welcomeTemplate({
+          apis: GovDeliveryService.listApis(user),
+          clientID: user.oauthApplication ? user.oauthApplication.client_id : '',
+          clientSecret: user.oauthApplication ? user.oauthApplication.client_secret : '',
+          firstName: user.firstName,
+          key: user.token,
+          kongUsername: user.kongConsumerId ? user.consumerName() : '',
+          oauth: !!user.oauthApplication,
+          redirectURI: user.oAuthRedirectURI,
+          token_issued: !!user.token,
+        }),
+        from_name: 'VA API Platform team',
+        recipients: [
+          {
+            email: user.email,
+          },
+        ],
+        subject: 'Welcome to the VA API Platform',
+      };
+
+      return this.sendEmail(email);
+    }
+
+    throw Error('User must have token or client_id initialized');
+  }
+
+  public sendConsumerSupportEmail(supportRequest: ConsumerSupportEmail): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      body: this.consumerSupportTemplate(supportRequest),
+      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
+      recipients: [{ email: this.supportEmailRecipient }],
+      subject: 'Support Needed',
+    };
+
+    return this.sendEmail(email);
+  }
+
+  public sendPublishingSupportEmail(
+    supportRequest: PublishingSupportEmail,
+  ): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      body: this.publishingSupportTemplate(supportRequest),
+      from_name: `${supportRequest.firstName} ${supportRequest.lastName}`,
+      recipients: [{ email: this.supportEmailRecipient }],
+      subject: 'Publishing Support Needed',
+    };
+
+    return this.sendEmail(email);
+  }
+
+  public sendProductionAccessEmail(
+    supportRequest: ProductionAccessSupportEmail,
+  ): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      body: this.productionAccessSupportTemplate(supportRequest),
+      from_name: `${supportRequest.primaryContact.firstName} ${supportRequest.primaryContact.lastName}`,
+      recipients: [{ email: this.supportEmailRecipient }],
+      subject: `Production Access Requested for ${supportRequest.organization}`,
+    };
+    return this.sendEmail(email);
+  }
+
+  // eslint-disable-next-line id-length
+  public sendProductionAccessConsumerEmail(emails: string[]): Promise<EmailResponse> {
+    const mappedEmails: EmailRecipient[] = emails.map(x => ({ email: x }));
+    const email: EmailRequest = {
+      body: this.productionAccessConsumerTemplate,
+      from_name: 'VA API Platform team',
+      recipients: mappedEmails,
+      subject: 'Your Request for Production Access is Submitted',
+    };
+    return this.sendEmail(email);
+  }
+
+  private async sendEmail(email: EmailRequest): Promise<EmailResponse> {
+    const res: AxiosResponse<EmailResponse> = await this.client.post('/messages/email', email);
+    return res.data;
+  }
+
+  private async getEmailStatusList(pageSize: number): Promise<AxiosResponse<EmailStatus[]>> {
     let options;
     if (pageSize) {
       options = {
