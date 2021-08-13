@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 interface ContactDetails {
   firstName: string;
   lastName: string;

@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+
 import 'jest';
 import supertest from 'supertest';
 import nock from 'nock';
@@ -20,20 +22,21 @@ describe(route, () => {
   const supportReq = {
     apis: 'benefits',
     appDescription: 'A social media platform with one room.',
+    appImageLink: 'www.one2bindthem.com/assets/app.jpeg',
     appName: 'One to Bind Them',
     breachManagementProcess: 'golem',
     businessModel: 'magical rings >> profit',
     centralizedBackendLog: 'non-existent',
-    productionKeyCredentialStorage: 'stored in a volcano on mount doom',
-    productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
     distributingAPIKeysToCustomers: false,
-    exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
+    exposeVeteranInformationToThirdParties: false,
     listedOnMyHealthApplication: false,
+    medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/medicalDisclaimer.jpeg',
     monitizationExplanation: 'n/a',
     monitizedVeteranInformation: false,
     multipleReqSafeguards: 'golem',
     namingConvention: 'overly-complicated',
     organization: 'Sauron.INC',
+    patientWaitTimeImageLink: 'www.one2bindthem.com/assets/patientWaitTime.jpeg',
     phoneNumber: '555-867-5309',
     piiStorageMethod: 'Locking away in the fires from whence it came.',
     platforms: 'iOS',
@@ -43,6 +46,8 @@ describe(route, () => {
       firstName: 'Samwise',
       lastName: 'Gamgee',
     },
+    productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+    productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
     scopesAccessRequested: ['profile', 'email'],
     secondaryContact: {
       email: 'frodo@fellowship.com',
@@ -51,14 +56,13 @@ describe(route, () => {
     },
     signUpLink: ['www.one2bindthem.com/signup'],
     statusUpdateEmails: ['sam@fellowship.com'],
-    storePIIOrPHI: false,
     supportLink: ['www.one2bindthem.com/support'],
     thirdPartyInfoDescription: 'n/a',
     valueProvided: 'n/a',
     vasiSystemName: 'asdf',
     veteranFacing: false,
     veteranFacingDescription:
-      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+    'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vulnerabilityManagement: 'golem',
     website: 'www.one2bindthem.com',
   };
@@ -71,8 +75,6 @@ describe(route, () => {
       breachManagementProcess: 'golem',
       businessModel: 'magical rings >> profit',
       centralizedBackendLog: 'non-existent',
-      productionKeyCredentialStorage: 'stored in a volcano on mount doom',
-      productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
       distributingAPIKeysToCustomers: false,
       exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
       listedOnMyHealthApplication: false,
@@ -85,6 +87,8 @@ describe(route, () => {
       piiStorageMethod: 'Locking away in the fires from whence it came.',
       platforms: 'iOS',
       policyDocuments: ['www.example.com/tos'],
+      productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+      productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
       scopesAccessRequested: ['profile', 'email'],
       signUpLink: ['www.one2bindthem.com/signup'],
       statusUpdateEmails: ['sam@fellowship.com'],
@@ -95,7 +99,7 @@ describe(route, () => {
       vasiSystemName: 'asdf',
       veteranFacing: false,
       veteranFacingDescription:
-        'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
       vulnerabilityManagement: 'golem',
       website: 'www.one2bindthem.com',
     });
