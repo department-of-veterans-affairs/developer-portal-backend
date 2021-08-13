@@ -47,9 +47,9 @@ export const productionSchema = Joi.object()
     supportLink: Joi.array().items(Joi.string()),
     thirdPartyInfoDescription: Joi.string(),
     valueProvided: Joi.string().required(),
+    vasiSystemName: Joi.string(),
     veteranFacing: Joi.boolean().required(),
     veteranFacingDescription: Joi.string().max(415),
-    vasiSystemName: Joi.string(),
     vulnerabilityManagement: Joi.string(),
     website: Joi.string(),
   })

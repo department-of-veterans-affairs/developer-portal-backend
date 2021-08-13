@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable id-length */
 
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
