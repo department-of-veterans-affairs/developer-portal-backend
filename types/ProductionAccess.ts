@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 interface ContactDetails {
   firstName: string;
   lastName: string;
@@ -24,7 +25,8 @@ export interface ProductionAccessSupportEmail {
   platforms?: string;
   veteranFacingDescription?: string;
   vasiSystemName?: string;
-  credentialStorage: string;
+  productionKeyCredentialStorage: string;
+  productionOrOAuthKeyCredentialStorage: string;
   storePIIOrPHI: boolean;
   piiStorageMethod?: string;
   multipleReqSafeguards?: string;

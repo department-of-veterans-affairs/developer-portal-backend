@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable id-length */
 
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
@@ -181,7 +182,6 @@ describe('GovDeliveryService', () => {
           breachManagementProcess: 'golem',
           businessModel: 'magical rings >> profit',
           centralizedBackendLog: 'non-existent',
-          credentialStorage: '',
           distributingAPIKeysToCustomers: false,
           exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
           listedOnMyHealthApplication: false,
@@ -201,16 +201,18 @@ describe('GovDeliveryService', () => {
             firstName: 'Samwise',
             lastName: 'Gamgee',
           },
+          productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+          productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
           scopesAccessRequested: ['profile', 'email'],
           secondaryContact: {
             email: 'frodo@fellowship.com',
             firstName: 'Frodo',
             lastName: 'Baggins',
           },
-          signUpLink: 'www.one2bindthem.com/signup',
+          signUpLink: ['www.one2bindthem.com/signup'],
           statusUpdateEmails: ['sam@fellowship.com'],
           storePIIOrPHI: false,
-          supportLink: 'www.one2bindthem.com/support',
+          supportLink: ['www.one2bindthem.com/support'],
           thirdPartyInfoDescription: 'n/a',
           valueProvided: 'n/a',
           vasiSystemName: 'asdf',

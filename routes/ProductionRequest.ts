@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 import logger from '../config/logger';
@@ -9,14 +11,13 @@ import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 export const productionSchema = Joi.object()
   .keys({
     apis: Joi.custom(validateApiList).required(),
-    appDescription: Joi.string().required(),
-    appName: Joi.string().required(),
+    appDescription: Joi.string(),
+    appName: Joi.string(),
     breachManagementProcess: Joi.string(),
-    businessModel: Joi.string(),
+    businessModel: Joi.string().required(),
     centralizedBackendLog: Joi.string(),
-    credentialStorage: Joi.string().required(),
-    distributingAPIKeysToCustomers: Joi.boolean().required(),
-    exposeVeteranInformationToThirdParties: Joi.boolean(), // eslint-disable-line id-length
+    distributingAPIKeysToCustomers: Joi.boolean(),
+    exposeVeteranInformationToThirdParties: Joi.boolean(),
     listedOnMyHealthApplication: Joi.boolean(),
     monitizationExplanation: Joi.string(),
     monitizedVeteranInformation: Joi.boolean().required(),
@@ -32,6 +33,8 @@ export const productionSchema = Joi.object()
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
     }).required(),
+    productionKeyCredentialStorage: Joi.string(),
+    productionOrOAuthKeyCredentialStorage: Joi.string(),
     scopesAccessRequested: Joi.array().items(Joi.string()),
     secondaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
