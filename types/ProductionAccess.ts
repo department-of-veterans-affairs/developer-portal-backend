@@ -34,7 +34,7 @@ export interface ProductionAccessSupportEmail {
   vulnerabilityManagement?: string;
   exposeVeteranInformationToThirdParties?: boolean;
   thirdPartyInfoDescription?: string;
-  scopesAccessRequested?: string[];
+  scopesAccessRequested?: string;
   distributingAPIKeysToCustomers?: boolean;
   namingConvention?: string;
   centralizedBackendLog?: string;

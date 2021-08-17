@@ -47,10 +47,7 @@ describe(route, () => {
     },
     productionKeyCredentialStorage: 'stored in a volcano on mount doom',
     productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
-    scopesAccessRequested: [
-      'profile',
-      'email',
-    ],
+    scopesAccessRequested: 'profile',
     secondaryContact: {
       email: 'frodo@fellowship.com',
       firstName: 'Frodo',
@@ -97,7 +94,7 @@ describe(route, () => {
       policyDocuments: ['www.example.com/tos'],
       productionKeyCredentialStorage: 'stored in a volcano on mount doom',
       productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
-      scopesAccessRequested: ['profile', 'email'],
+      scopesAccessRequested: 'profile',
       signUpLink: ['www.one2bindthem.com/signup'],
       statusUpdateEmails: ['sam@fellowship.com'],
       storePIIOrPHI: false,
