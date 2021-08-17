@@ -59,7 +59,7 @@ describe('productionRequestHandler', () => {
         },
         productionKeyCredentialStorage: 'stored in a volcano on mount doom',
         productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
-        scopesAccessRequested: ['profile', 'email'],
+        scopesAccessRequested: 'profile',
         secondaryContact: {
           email: 'frodo@fellowship.com',
           firstName: 'Frodo',
@@ -129,7 +129,7 @@ describe('validations', () => {
     },
     productionKeyCredentialStorage: 'stored in a volcano on mount doom',
     productionOrOAuthKeyCredentialStorage: 'also stored in the volcano',
-    scopesAccessRequested: ['profile', 'email'],
+    scopesAccessRequested: 'profile',
     secondaryContact: {
       email: 'frodo@fellowship.com',
       firstName: 'Frodo',
@@ -614,12 +614,12 @@ describe('validations', () => {
   });
 
   describe('scopesAccessRequested', () => {
-    it('is an array', () => {
+    it('is a string', () => {
       const payload = { ...defaultPayload, scopesAccessRequested: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"scopesAccessRequested" must be an array');
+      expect(result.error?.message).toEqual('"scopesAccessRequested" must be a string');
     });
   });
 
