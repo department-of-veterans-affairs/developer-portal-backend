@@ -619,7 +619,7 @@ describe('validations', () => {
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"scopesAccessRequested" must be an string');
+      expect(result.error?.message).toEqual('"scopesAccessRequested" must be a string');
     });
   });
 
