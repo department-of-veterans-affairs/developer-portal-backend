@@ -1,3 +1,5 @@
+/* eslint-disable id-length */
+
 import 'jest';
 import supertest from 'supertest';
 import nock from 'nock';
@@ -24,9 +26,8 @@ describe(route, () => {
     breachManagementProcess: 'golem',
     businessModel: 'magical rings >> profit',
     centralizedBackendLog: 'non-existent',
-    credentialStorage: 'stored in a volcano on mount doom',
     distributingAPIKeysToCustomers: false,
-    exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
+    exposeVeteranInformationToThirdParties: false,
     listedOnMyHealthApplication: false,
     monitizationExplanation: 'n/a',
     monitizedVeteranInformation: false,
@@ -36,28 +37,40 @@ describe(route, () => {
     phoneNumber: '555-867-5309',
     piiStorageMethod: 'Locking away in the fires from whence it came.',
     platforms: 'iOS',
-    policyDocuments: ['www.example.com/tos'],
+    policyDocuments: [
+      'www.example.com/tos',
+    ],
     primaryContact: {
       email: 'sam@fellowship.com',
       firstName: 'Samwise',
       lastName: 'Gamgee',
     },
-    scopesAccessRequested: ['profile', 'email'],
+    productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+    productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
+    scopesAccessRequested: [
+      'profile',
+      'email',
+    ],
     secondaryContact: {
       email: 'frodo@fellowship.com',
       firstName: 'Frodo',
       lastName: 'Baggins',
     },
-    signUpLink: ['www.one2bindthem.com/signup'],
-    statusUpdateEmails: ['sam@fellowship.com'],
+    signUpLink: [
+      'www.one2bindthem.com/signup',
+    ],
+    statusUpdateEmails: [
+      'sam@fellowship.com',
+    ],
     storePIIOrPHI: false,
-    supportLink: ['www.one2bindthem.com/support'],
+    supportLink: [
+      'www.one2bindthem.com/support',
+    ],
     thirdPartyInfoDescription: 'n/a',
     valueProvided: 'n/a',
     vasiSystemName: 'asdf',
     veteranFacing: false,
-    veteranFacingDescription:
-      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+    veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vulnerabilityManagement: 'golem',
     website: 'www.one2bindthem.com',
   };
@@ -70,9 +83,8 @@ describe(route, () => {
       breachManagementProcess: 'golem',
       businessModel: 'magical rings >> profit',
       centralizedBackendLog: 'non-existent',
-      credentialStorage: 'stored in a volcano on mount doom',
       distributingAPIKeysToCustomers: false,
-      exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
+      exposeVeteranInformationToThirdParties: false,
       listedOnMyHealthApplication: false,
       monitizationExplanation: 'n/a',
       monitizedVeteranInformation: false,
@@ -83,6 +95,8 @@ describe(route, () => {
       piiStorageMethod: 'Locking away in the fires from whence it came.',
       platforms: 'iOS',
       policyDocuments: ['www.example.com/tos'],
+      productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+      productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
       scopesAccessRequested: ['profile', 'email'],
       signUpLink: ['www.one2bindthem.com/signup'],
       statusUpdateEmails: ['sam@fellowship.com'],
@@ -93,7 +107,7 @@ describe(route, () => {
       vasiSystemName: 'asdf',
       veteranFacing: false,
       veteranFacingDescription:
-        'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
       vulnerabilityManagement: 'golem',
       website: 'www.one2bindthem.com',
     });

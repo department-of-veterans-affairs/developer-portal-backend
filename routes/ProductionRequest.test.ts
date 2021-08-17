@@ -38,7 +38,6 @@ describe('productionRequestHandler', () => {
         breachManagementProcess: 'golem',
         businessModel: 'magical rings >> profit',
         centralizedBackendLog: 'non-existent',
-        credentialStorage: 'stored in a volcano on mount doom',
         distributingAPIKeysToCustomers: false,
         exposeVeteranInformationToThirdParties: false,
         listedOnMyHealthApplication: false,
@@ -58,6 +57,8 @@ describe('productionRequestHandler', () => {
           firstName: 'Samwise',
           lastName: 'Gamgee',
         },
+        productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+        productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
         scopesAccessRequested: ['profile', 'email'],
         secondaryContact: {
           email: 'frodo@fellowship.com',
@@ -109,7 +110,6 @@ describe('validations', () => {
     breachManagementProcess: 'golem',
     businessModel: 'magical rings >> profit',
     centralizedBackendLog: 'non-existent',
-    credentialStorage: 'stored in a volcano on mount doom',
     distributingAPIKeysToCustomers: false,
     exposeVeteranInformationToThirdParties: false,
     listedOnMyHealthApplication: false,
@@ -127,6 +127,8 @@ describe('validations', () => {
       firstName: 'Samwise',
       lastName: 'Gamgee',
     },
+    productionKeyCredentialStorage: 'stored in a volcano on mount doom',
+    productionOrOAuthKeyCredentialStorage: 'also stored in the volcano',
     scopesAccessRequested: ['profile', 'email'],
     secondaryContact: {
       email: 'frodo@fellowship.com',
@@ -201,12 +203,12 @@ describe('validations', () => {
   });
 
   describe('appName', () => {
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, appName: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"appName" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
     it('is a string', () => {
       const payload = { ...defaultPayload, appName: 123456789 };
@@ -226,12 +228,12 @@ describe('validations', () => {
       expect(result.error?.message).toEqual('"appDescription" must be a string');
     });
 
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, appDescription: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"appDescription" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
   });
 
@@ -501,13 +503,13 @@ describe('validations', () => {
     });
   });
 
-  describe('credentialStorage', () => {
+  describe('productionKeyCredentialStorage', () => {
     it('is a string', () => {
-      const payload = { ...defaultPayload, credentialStorage: 123456 };
+      const payload = { ...defaultPayload, productionKeyCredentialStorage: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"credentialStorage" must be a string');
+      expect(result.error?.message).toEqual('"productionKeyCredentialStorage" must be a string');
     });
   });
 
@@ -629,12 +631,12 @@ describe('validations', () => {
 
       expect(result.error?.message).toEqual('"distributingAPIKeysToCustomers" must be a boolean');
     });
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, distributingAPIKeysToCustomers: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toBe('"distributingAPIKeysToCustomers" is required');
+      expect(result.error?.message).toBe(undefined);
     });
   });
 
