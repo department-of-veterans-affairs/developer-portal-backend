@@ -35,7 +35,7 @@ export const productionSchema = Joi.object()
     }).required(),
     productionKeyCredentialStorage: Joi.string(),
     productionOrOAuthKeyCredentialStorage: Joi.string(),
-    scopesAccessRequested: Joi.array().items(Joi.string()),
+    scopesAccessRequested: Joi.string(),
     secondaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
       firstName: Joi.string().required(),
