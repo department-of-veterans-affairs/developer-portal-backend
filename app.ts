@@ -67,9 +67,10 @@ const errorLoggingMiddleware: express.ErrorRequestHandler = (
 };
 
 const configureGovDeliveryService = (): GovDeliveryService => {
-  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
+  const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL, VA_PROFILE_DISTRIBUTION_EMAIL } =
+    process.env;
 
-  if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
+  if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL || !VA_PROFILE_DISTRIBUTION_EMAIL) {
     throw new Error('GovDelivery Config Missing');
   }
 
@@ -77,6 +78,7 @@ const configureGovDeliveryService = (): GovDeliveryService => {
     host: GOVDELIVERY_HOST,
     supportEmailRecipient: SUPPORT_EMAIL,
     token: GOVDELIVERY_KEY,
+    vaProfileDistributionRecipient: VA_PROFILE_DISTRIBUTION_EMAIL,
   });
 };
 

@@ -151,6 +151,7 @@ describe(route, () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         token: 'my-precious',
       });
@@ -168,11 +169,12 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         redirectURI: 'https://fake-oAuth-redirect-uri',
       });
     });
 
-    it('succeeds (with an empty response) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
+    it('succeeds (with an empty response except for email) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
       const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
@@ -181,7 +183,9 @@ describe(route, () => {
       });
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({});
+      expect(response.body).toEqual({
+        email: 'frodo@fellowship.org',
+      });
     });
 
     it('succeeds for a request with both key auth and oauth apis', async () => {
@@ -191,6 +195,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
@@ -219,6 +224,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -243,6 +249,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -280,6 +287,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -300,6 +308,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
@@ -319,6 +328,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',

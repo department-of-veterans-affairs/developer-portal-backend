@@ -7,6 +7,7 @@ import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import DynamoService from '../services/DynamoService';
 import { INTERNAL_ONLY_APIS, KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
+import logger from '../config/logger';
 import Application from './Application';
 import { DevPortalError } from './DevPortalError';
 
@@ -60,6 +61,8 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public description: string;
 
+  public isApplyingForInternal: boolean;
+
   public oAuthRedirectURI: string;
 
   public oAuthApplicationType?: string;
@@ -112,16 +115,30 @@ export default class User implements KongUser, GovDeliveryUser {
 
     this.apiList = this.apis ? this.apis.split(',') : [];
 
-    const isApplyingForInternal = INTERNAL_ONLY_APIS.some(api => this.apiList.includes(api));
+    this.isApplyingForInternal = INTERNAL_ONLY_APIS.some(api => this.apiList.includes(api));
     const hasVAEmail = this.email.endsWith('va.gov') || this.vaEmail?.endsWith('va.gov');
-
-    if (isApplyingForInternal && !hasVAEmail) {
+    if (this.isApplyingForInternal && !hasVAEmail) {
       throw new Error('Applying for internal api without VA email');
+    }
+    if (this.isApplyingForInternal && hasVAEmail) {
+      this.vaEmail = this.vaEmail ?? this.email;
     }
   }
 
   public consumerName(): string {
     return `${this.organization}${this.lastName}`.replace(/\W/g, '');
+  }
+
+  public getConsumerNameOrUndefined(): string | undefined {
+    return !this.isApplyingForInternal && this.kongConsumerId ? this.consumerName() : undefined;
+  }
+
+  public getSentEmailAddress(): string {
+    return this.isApplyingForInternal && this.vaEmail ? this.vaEmail : this.email;
+  }
+
+  public getTokenOrUndefined(): string | undefined {
+    return this.isApplyingForInternal ? undefined : this.token;
   }
 
   public async saveToKong(client: KongService): Promise<User> {
@@ -140,9 +157,23 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public sendEmail(client: GovDeliveryService): Promise<EmailResponse> {
     try {
-      return client.sendWelcomeEmail(this);
+      logger.info({ message: 'sending welcome email for api signup' });
+      return client.sendWelcomeEmail(this, this.getSentEmailAddress());
     } catch (err: unknown) {
       (err as DevPortalError).action = 'failed sending welcome email';
+      throw err;
+    }
+  }
+
+  public async sendDistributionEmail(client: GovDeliveryService): Promise<void> {
+    try {
+      if (this.apiList.includes('addressValidation')) {
+        logger.info({ message: 'sending distribution email for address validation signup' });
+        const response = await client.sendVAProfileDistributionEmail(this);
+        logger.info(response);
+      }
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'failed sending distribution email';
       throw err;
     }
   }

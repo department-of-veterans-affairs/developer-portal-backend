@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import * as Handlebars from 'handlebars';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { APIS_TO_PROPER_NAMES } from '../config/apis';
@@ -6,6 +7,7 @@ import {
   WELCOME_TEMPLATE,
   PUBLISHING_SUPPORT_TEMPLATE,
   CONSUMER_SUPPORT_TEMPLATE,
+  VA_PROFILE_DISTRIBUTION_TEMPLATE,
 } from '../templates';
 import {
   PRODUCTION_ACCESS_SUPPORT_TEMPLATE,
@@ -55,6 +57,18 @@ export interface PublishingSupportEmail {
   apiInternalOnly: boolean;
   apiInternalOnlyDetails?: string;
   apiOtherInfo?: string;
+}
+
+export interface VAProfileDistributionEmail {
+  firstName: string;
+  lastName: string;
+  requester: string;
+  description: string;
+  organization?: string;
+  apis: string;
+  programName: string;
+  sponsorEmail: string;
+  vaEmail: string;
 }
 export interface EmailResponse {
   from_name: string;
@@ -110,12 +124,15 @@ interface GovDeliveryServiceConfig {
   token: string;
   host: string;
   supportEmailRecipient: string;
+  vaProfileDistributionRecipient: string;
 }
 
 export default class GovDeliveryService implements MonitoredService {
   public host: string;
 
   public supportEmailRecipient: string;
+
+  public vaProfileDistributionRecipient: string;
 
   public welcomeTemplate: Handlebars.TemplateDelegate<WelcomeEmail>;
 
@@ -125,17 +142,26 @@ export default class GovDeliveryService implements MonitoredService {
 
   public productionAccessSupportTemplate: Handlebars.TemplateDelegate<ProductionAccessSupportEmail>;
 
+  public vaProfileDistributionTemplate: Handlebars.TemplateDelegate<VAProfileDistributionEmail>;
+
   public productionAccessConsumerTemplate: string;
 
   public client: AxiosInstance;
 
-  public constructor({ token, host, supportEmailRecipient }: GovDeliveryServiceConfig) {
+  public constructor({
+    token,
+    host,
+    supportEmailRecipient,
+    vaProfileDistributionRecipient,
+  }: GovDeliveryServiceConfig) {
     this.host = host;
     this.supportEmailRecipient = supportEmailRecipient;
+    this.vaProfileDistributionRecipient = vaProfileDistributionRecipient;
     this.welcomeTemplate = Handlebars.compile(WELCOME_TEMPLATE);
     this.consumerSupportTemplate = Handlebars.compile(CONSUMER_SUPPORT_TEMPLATE);
     this.publishingSupportTemplate = Handlebars.compile(PUBLISHING_SUPPORT_TEMPLATE);
     this.productionAccessSupportTemplate = Handlebars.compile(PRODUCTION_ACCESS_SUPPORT_TEMPLATE);
+    this.vaProfileDistributionTemplate = Handlebars.compile(VA_PROFILE_DISTRIBUTION_TEMPLATE);
     this.productionAccessConsumerTemplate = PRODUCTION_ACCESS_CONSUMER_TEMPLATE;
     this.client = axios.create({
       baseURL: this.host,
@@ -175,7 +201,7 @@ export default class GovDeliveryService implements MonitoredService {
     }
   }
 
-  public sendWelcomeEmail(user: User): Promise<EmailResponse> {
+  public sendWelcomeEmail(user: User, emailAddress?: string): Promise<EmailResponse> {
     if (user.token || user.oauthApplication?.client_id) {
       const email: EmailRequest = {
         body: this.welcomeTemplate({
@@ -192,7 +218,7 @@ export default class GovDeliveryService implements MonitoredService {
         from_name: 'VA API Platform team',
         recipients: [
           {
-            email: user.email,
+            email: emailAddress ?? user.email,
           },
         ],
         subject: 'Welcome to the VA API Platform',
@@ -249,6 +275,27 @@ export default class GovDeliveryService implements MonitoredService {
       recipients: mappedEmails,
       subject: 'Your Request for Production Access is Submitted',
     };
+    return this.sendEmail(email);
+  }
+
+  public sendVAProfileDistributionEmail(user: User): Promise<EmailResponse> {
+    const email: EmailRequest = {
+      body: this.vaProfileDistributionTemplate({
+        apis: GovDeliveryService.listApis(user),
+        description: user.description,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        organization: user.organization,
+        programName: user.programName ?? '',
+        requester: user.email,
+        sponsorEmail: user.sponsorEmail ?? '',
+        vaEmail: user.vaEmail ?? '',
+      }),
+      from_name: `${user.firstName} ${user.lastName}`,
+      recipients: [{ email: this.vaProfileDistributionRecipient }],
+      subject: 'VA Profile Signup Request',
+    };
+
     return this.sendEmail(email);
   }
 
