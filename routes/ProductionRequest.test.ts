@@ -290,12 +290,12 @@ describe('validations', () => {
   });
 
   describe('policyDocuments', () => {
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, policyDocuments: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"policyDocuments" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is an array', () => {

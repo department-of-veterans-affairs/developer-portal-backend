@@ -13,7 +13,7 @@ export interface ProductionAccessSupportEmail {
   statusUpdateEmails: string[];
   valueProvided: string;
   businessModel?: string;
-  policyDocuments: string[];
+  policyDocuments?: string[];
   phoneNumber: string;
   apis?: string;
   monitizedVeteranInformation: boolean;

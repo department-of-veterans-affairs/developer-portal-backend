@@ -27,7 +27,7 @@ export const productionSchema = Joi.object()
     phoneNumber: Joi.custom(validatePhoneFormat).required(),
     piiStorageMethod: Joi.string(),
     platforms: Joi.string(),
-    policyDocuments: Joi.array().items(Joi.string()).required(),
+    policyDocuments: Joi.array().items(Joi.string()),
     primaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
       firstName: Joi.string().required(),
