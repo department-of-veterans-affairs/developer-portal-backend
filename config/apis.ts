@@ -6,6 +6,30 @@ const addressValidation: KeyAuthAPI = {
   name: 'Address Validation API',
 };
 
+const appealsStatus: KeyAuthAPI = {
+  acl: 'appeals',
+  key: 'appeals',
+  name: 'Appeals Status API',
+};
+
+const clinicalHealth: KeyAuthAPI = {
+  acl: '',
+  key: 'clincialHealth',
+  name: 'Clinical Health API (FHIR)',
+};
+
+const decisionReviews: KeyAuthAPI = {
+  acl: 'appeals',
+  key: 'decision_reviews',
+  name: 'Decision Reviews API',
+};
+
+const loanGuaranty: KeyAuthAPI = {
+  acl: 'loan_guaranty',
+  key: 'loan_guaranty',
+  name: 'Loan Guaranty API',
+};
+
 const oauthAPIList: OAuthAPI[] = [
   {
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
@@ -58,7 +82,13 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   addressValidation,
 ];
 
-const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [addressValidation];
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
+  addressValidation,
+  appealsStatus,
+  clinicalHealth,
+  decisionReviews,
+  loanGuaranty,
+];
 
 export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;
@@ -85,3 +115,5 @@ export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce(
 export const OKTA_CONSUMER_APIS: string[] = Object.keys(OKTA_AUTHZ_ENDPOINTS);
 
 export const API_LIST: string[] = KONG_CONSUMER_APIS.concat(OKTA_CONSUMER_APIS);
+
+export const PRODUCTION_REQUEST_API_LIST: string[] = API_LIST.concat(INTERNAL_ONLY_APIS);

@@ -1,4 +1,4 @@
-import { API_LIST } from '../config/apis';
+import { API_LIST, PRODUCTION_REQUEST_API_LIST } from '../config/apis';
 // disabling because eslint acts weird with literals in regex patterns
 
 /* eslint-disable no-useless-escape */
@@ -21,6 +21,22 @@ export const validateApiList = (val: string): string => {
   try {
     const apis = val.split(',');
     result = apis.every(api => API_LIST.includes(api));
+  } catch {
+    throw new Error('it was unable to process the provided data');
+  }
+
+  if (!result) {
+    throw new Error('invalid apis in list');
+  }
+
+  return val;
+};
+
+export const validateProductionApiList = (val: string): string => {
+  let result: boolean;
+  try {
+    const apis = val.split(',');
+    result = apis.every(api => PRODUCTION_REQUEST_API_LIST.includes(api));
   } catch {
     throw new Error('it was unable to process the provided data');
   }
