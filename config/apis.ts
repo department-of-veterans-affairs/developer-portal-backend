@@ -61,7 +61,7 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   },
   {
     acl: 'claims_attributes',
-    key: 'claimsAttributes',
+    key: 'claims_attributes',
     name: 'Claims Attributes API',
   },
   {
