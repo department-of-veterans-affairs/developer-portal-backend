@@ -5,12 +5,12 @@ import Joi from '@hapi/joi';
 import logger from '../config/logger';
 import GovDeliveryService from '../services/GovDeliveryService';
 import { DevPortalError } from '../models/DevPortalError';
-import { validateProductionApiList, emailValidator, validatePhoneFormat } from '../util/validators';
+import { validateApiList, emailValidator, validatePhoneFormat } from '../util/validators';
 import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 
 export const productionSchema = Joi.object()
   .keys({
-    apis: Joi.custom(validateProductionApiList).required(),
+    apis: Joi.custom(validateApiList).required(),
     appDescription: Joi.string(),
     appName: Joi.string(),
     breachManagementProcess: Joi.string(),

@@ -6,30 +6,6 @@ const addressValidation: KeyAuthAPI = {
   name: 'Address Validation API',
 };
 
-const appealsStatus: KeyAuthAPI = {
-  acl: 'appeals',
-  key: 'appeals',
-  name: 'Appeals Status API',
-};
-
-const clinicalHealth: OAuthAPI = {
-  authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR,
-  key: 'clinicalHealth',
-  name: 'Clinical Health API (FHIR)',
-};
-
-const decisionReviews: KeyAuthAPI = {
-  acl: 'appeals',
-  key: 'decision_reviews',
-  name: 'Decision Reviews API',
-};
-
-const loanGuaranty: KeyAuthAPI = {
-  acl: 'loan_guaranty',
-  key: 'loan_guaranty',
-  name: 'Loan Guaranty API',
-};
-
 const oauthAPIList: OAuthAPI[] = [
   {
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
@@ -40,6 +16,12 @@ const oauthAPIList: OAuthAPI[] = [
     authzEndpoint: process.env.AUTHZ_SERVER_VERIFICATION,
     key: 'verification',
     name: 'Veteran Verification API',
+  },
+  // clinicalHealth is only present in .env.test, and will need to be added for real world use
+  {
+    authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR ?? 'Unknown endpoint',
+    key: 'clinicalHealth',
+    name: 'Clinical Health API (FHIR)',
   },
   {
     authzEndpoint: process.env.AUTHZ_SERVER_COMMUNITYCARE,
@@ -55,6 +37,11 @@ const oauthAPIList: OAuthAPI[] = [
 
 const keyAuthAPIList: KeyAuthAPI[] = [
   {
+    acl: 'appeals',
+    key: 'appeals',
+    name: 'Appeals Status API',
+  },
+  {
     acl: 'vba_documents',
     key: 'benefits',
     name: 'Benefits Intake API',
@@ -65,15 +52,26 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     name: 'Claims Attributes API',
   },
   {
+    acl: 'appeals',
+    key: 'decisionReviews',
+    name: 'Decision Reviews API',
+  },
+  {
     acl: 'va_facilities',
     key: 'facilities',
     name: 'VA Facilities API',
+  },
+  {
+    acl: 'loan_guaranty',
+    key: 'loanGuaranty',
+    name: 'Loan Guaranty API',
   },
   {
     acl: 'va_forms',
     key: 'vaForms',
     name: 'VA Form API',
   },
+
   {
     acl: 'veteran_confirmation',
     key: 'confirmation',
@@ -82,13 +80,7 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   addressValidation,
 ];
 
-const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
-  addressValidation,
-  appealsStatus,
-  clinicalHealth,
-  decisionReviews,
-  loanGuaranty,
-];
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [addressValidation];
 
 export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;
@@ -115,5 +107,3 @@ export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce(
 export const OKTA_CONSUMER_APIS: string[] = Object.keys(OKTA_AUTHZ_ENDPOINTS);
 
 export const API_LIST: string[] = KONG_CONSUMER_APIS.concat(OKTA_CONSUMER_APIS);
-
-export const PRODUCTION_REQUEST_API_LIST: string[] = API_LIST.concat(INTERNAL_ONLY_APIS);
