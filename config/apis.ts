@@ -5,6 +5,29 @@ const addressValidation: KeyAuthAPI = {
   key: 'addressValidation',
   name: 'Address Validation API',
 };
+const appealsStatus: KeyAuthAPI = {
+  acl: 'appeals',
+  key: 'appeals',
+  name: 'Appeals Status API',
+};
+// clinicalHealth is only present in .env.test, and will need to be added for real world use
+const clinicalHealth: OAuthAPI = {
+  authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR ?? 'Unknown endpoint',
+  key: 'clinicalHealth',
+  name: 'Clinical Health API (FHIR)',
+};
+
+const decisionReviews: KeyAuthAPI = {
+  acl: 'hlr',
+  key: 'decision_reviews',
+  name: 'Decision Reviews API',
+};
+
+const loanGuaranty: KeyAuthAPI = {
+  acl: 'loan_guaranty',
+  key: 'loan_guaranty',
+  name: 'Loan Guaranty API',
+};
 
 const oauthAPIList: OAuthAPI[] = [
   {
@@ -27,6 +50,7 @@ const oauthAPIList: OAuthAPI[] = [
     key: 'claims',
     name: 'Claims API',
   },
+  clinicalHealth,
 ];
 
 const keyAuthAPIList: KeyAuthAPI[] = [
@@ -56,9 +80,18 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     name: 'Veteran Confirmation API',
   },
   addressValidation,
+  appealsStatus,
+  decisionReviews,
+  loanGuaranty,
 ];
 
-const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [addressValidation];
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
+  addressValidation,
+  appealsStatus,
+  clinicalHealth,
+  decisionReviews,
+  loanGuaranty,
+];
 
 export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;

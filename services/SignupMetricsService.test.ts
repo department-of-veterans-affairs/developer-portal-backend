@@ -149,13 +149,17 @@ describe('SignupMetricsService', () => {
         const result = await service.countSignups({});
         expect(result.apiCounts).toStrictEqual({
           addressValidation: 0,
+          appeals: 0,
           benefits: 3,
           claims: 3,
           claimsAttributes: 1,
+          clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
+          decision_reviews: 0,
           facilities: 3,
           health: 3,
+          loan_guaranty: 0,
           vaForms: 2,
           verification: 2,
         });
@@ -174,13 +178,17 @@ describe('SignupMetricsService', () => {
         expect(result.total).toBe(3);
         expect(result.apiCounts).toStrictEqual({
           addressValidation: 0,
+          appeals: 0,
           benefits: 3,
           claims: 3,
           claimsAttributes: 1,
+          clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
+          decision_reviews: 0,
           facilities: 3,
           health: 3,
+          loan_guaranty: 0,
           vaForms: 2,
           verification: 2,
         });
@@ -199,13 +207,17 @@ describe('SignupMetricsService', () => {
         expect(result.total).toBe(3);
         expect(result.apiCounts).toStrictEqual({
           addressValidation: 0,
+          appeals: 0,
           benefits: 2,
           claims: 3,
           claimsAttributes: 1,
+          clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
+          decision_reviews: 0,
           facilities: 2,
           health: 2,
+          loan_guaranty: 0,
           vaForms: 2,
           verification: 2,
         });
