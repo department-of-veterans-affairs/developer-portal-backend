@@ -17,7 +17,7 @@ describe('API constants', () => {
       benefits: 'vba_documents',
       claimsAttributes: 'claims_attributes',
       confirmation: 'veteran_confirmation',
-      decisionReviews: 'appeals',
+      decisionReviews: 'hlr',
       facilities: 'va_facilities',
       loanGuaranty: 'loan_guaranty',
       vaForms: 'va_forms',
