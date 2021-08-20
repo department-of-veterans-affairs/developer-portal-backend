@@ -90,7 +90,7 @@ describe('SignupMetricsService', () => {
       service = new SignupMetricsService(mockDynamoService);
       mockUniqueSignups = jest.spyOn(service, 'getUniqueSignups').mockResolvedValue([
         {
-          apis: 'benefits,facilities,health,verification,claims_attributes',
+          apis: 'benefits,facilities,health,verification,claimsAttributes',
           createdAt: '2020-06-29T14:00:00.000Z',
           email: 'frodo.baggins@theshire.com',
         },
@@ -152,7 +152,7 @@ describe('SignupMetricsService', () => {
           appeals: 0,
           benefits: 3,
           claims: 3,
-          claims_attributes: 1,
+          claimsAttributes: 1,
           clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
@@ -181,7 +181,7 @@ describe('SignupMetricsService', () => {
           appeals: 0,
           benefits: 3,
           claims: 3,
-          claims_attributes: 1,
+          claimsAttributes: 1,
           clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
@@ -210,7 +210,7 @@ describe('SignupMetricsService', () => {
           appeals: 0,
           benefits: 2,
           claims: 3,
-          claims_attributes: 1,
+          claimsAttributes: 1,
           clinicalHealth: 0,
           communityCare: 0,
           confirmation: 1,
