@@ -17,9 +17,9 @@ describe('API constants', () => {
       benefits: 'vba_documents',
       claimsAttributes: 'claims_attributes',
       confirmation: 'veteran_confirmation',
-      decisionReviews: 'hlr',
+      decision_reviews: 'hlr',
       facilities: 'va_facilities',
-      loanGuaranty: 'loan_guaranty',
+      loan_guaranty: 'loan_guaranty',
       vaForms: 'va_forms',
     });
   });
@@ -34,10 +34,10 @@ describe('API constants', () => {
       clinicalHealth: 'Clinical Health API (FHIR)',
       communityCare: 'Community Care Eligibility API',
       confirmation: 'Veteran Confirmation API',
-      decisionReviews: 'Decision Reviews API',
+      decision_reviews: 'Decision Reviews API',
       facilities: 'VA Facilities API',
       health: 'Health API',
-      loanGuaranty: 'Loan Guaranty API',
+      loan_guaranty: 'Loan Guaranty API',
       vaForms: 'VA Form API',
       verification: 'Veteran Verification API',
     });
@@ -45,15 +45,15 @@ describe('API constants', () => {
 
   it('KONG_CONSUMER_APIS', () => {
     expect(KONG_CONSUMER_APIS).toEqual([
-      'appeals',
       'benefits',
       'claimsAttributes',
-      'decisionReviews',
       'facilities',
-      'loanGuaranty',
       'vaForms',
       'confirmation',
       'addressValidation',
+      'appeals',
+      'decision_reviews',
+      'loan_guaranty',
     ]);
   });
 
@@ -71,9 +71,9 @@ describe('API constants', () => {
     expect(OKTA_CONSUMER_APIS).toEqual([
       'health',
       'verification',
-      'clinicalHealth',
       'communityCare',
       'claims',
+      'clinicalHealth',
     ]);
   });
 
@@ -87,10 +87,10 @@ describe('API constants', () => {
       'clinicalHealth',
       'communityCare',
       'confirmation',
-      'decisionReviews',
+      'decision_reviews',
       'facilities',
       'health',
-      'loanGuaranty',
+      'loan_guaranty',
       'vaForms',
       'verification',
     ]);

@@ -5,6 +5,29 @@ const addressValidation: KeyAuthAPI = {
   key: 'addressValidation',
   name: 'Address Validation API',
 };
+const appealsStatus: KeyAuthAPI = {
+  acl: 'appeals',
+  key: 'appeals',
+  name: 'Appeals Status API',
+};
+// clinicalHealth is only present in .env.test, and will need to be added for real world use
+const clinicalHealth: OAuthAPI = {
+  authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR ?? 'Unknown endpoint',
+  key: 'clinicalHealth',
+  name: 'Clinical Health API (FHIR)',
+};
+
+const decisionReviews: KeyAuthAPI = {
+  acl: 'hlr',
+  key: 'decision_reviews',
+  name: 'Decision Reviews API',
+};
+
+const loanGuaranty: KeyAuthAPI = {
+  acl: 'loan_guaranty',
+  key: 'loan_guaranty',
+  name: 'Loan Guaranty API',
+};
 
 const oauthAPIList: OAuthAPI[] = [
   {
@@ -17,12 +40,6 @@ const oauthAPIList: OAuthAPI[] = [
     key: 'verification',
     name: 'Veteran Verification API',
   },
-  // clinicalHealth is only present in .env.test, and will need to be added for real world use
-  {
-    authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR ?? 'Unknown endpoint',
-    key: 'clinicalHealth',
-    name: 'Clinical Health API (FHIR)',
-  },
   {
     authzEndpoint: process.env.AUTHZ_SERVER_COMMUNITYCARE,
     key: 'communityCare',
@@ -33,14 +50,10 @@ const oauthAPIList: OAuthAPI[] = [
     key: 'claims',
     name: 'Claims API',
   },
+  clinicalHealth,
 ];
 
 const keyAuthAPIList: KeyAuthAPI[] = [
-  {
-    acl: 'appeals',
-    key: 'appeals',
-    name: 'Appeals Status API',
-  },
   {
     acl: 'vba_documents',
     key: 'benefits',
@@ -52,35 +65,33 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     name: 'Claims Attributes API',
   },
   {
-    acl: 'hlr',
-    key: 'decisionReviews',
-    name: 'Decision Reviews API',
-  },
-  {
     acl: 'va_facilities',
     key: 'facilities',
     name: 'VA Facilities API',
-  },
-  {
-    acl: 'loan_guaranty',
-    key: 'loanGuaranty',
-    name: 'Loan Guaranty API',
   },
   {
     acl: 'va_forms',
     key: 'vaForms',
     name: 'VA Form API',
   },
-
   {
     acl: 'veteran_confirmation',
     key: 'confirmation',
     name: 'Veteran Confirmation API',
   },
   addressValidation,
+  appealsStatus,
+  decisionReviews,
+  loanGuaranty,
 ];
 
-const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [addressValidation];
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
+  addressValidation,
+  appealsStatus,
+  clinicalHealth,
+  decisionReviews,
+  loanGuaranty,
+];
 
 export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;
