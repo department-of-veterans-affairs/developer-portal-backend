@@ -14,7 +14,7 @@ const appealsStatus: KeyAuthAPI = {
 
 const clinicalHealth: OAuthAPI = {
   authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR,
-  key: 'clincialHealth',
+  key: 'clinicalHealth',
   name: 'Clinical Health API (FHIR)',
 };
 
