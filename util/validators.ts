@@ -33,16 +33,16 @@ export const validateApiList = (val: string): string => {
 };
 
 export const validateProductionApiList = (val: string): string => {
-  let result: boolean;
+  let invalidAPIs: string[];
   try {
     const apis = val.split(',');
-    result = apis.every(api => PRODUCTION_REQUEST_API_LIST.includes(api));
+    invalidAPIs = apis.filter(api => !API_LIST.includes(api));
   } catch {
     throw new Error('it was unable to process the provided data');
   }
 
-  if (!result) {
-    throw new Error('invalid apis in list');
+  if (invalidAPIs.length > 0) {
+    throw new Error(`invalid apis in list: ${invalidAPIs.join(', ')}`);
   }
 
   return val;
