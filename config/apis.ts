@@ -12,8 +12,8 @@ const appealsStatus: KeyAuthAPI = {
   name: 'Appeals Status API',
 };
 
-const clinicalHealth: KeyAuthAPI = {
-  acl: '',
+const clinicalHealth: OAuthAPI = {
+  authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR,
   key: 'clincialHealth',
   name: 'Clinical Health API (FHIR)',
 };
