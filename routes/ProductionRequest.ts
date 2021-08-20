@@ -14,7 +14,7 @@ export const productionSchema = Joi.object()
     appDescription: Joi.string(),
     appName: Joi.string(),
     breachManagementProcess: Joi.string(),
-    businessModel: Joi.string().required(),
+    businessModel: Joi.string(),
     centralizedBackendLog: Joi.string(),
     distributingAPIKeysToCustomers: Joi.boolean(),
     exposeVeteranInformationToThirdParties: Joi.boolean(),

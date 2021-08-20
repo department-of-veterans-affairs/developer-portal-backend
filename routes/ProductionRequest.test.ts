@@ -272,6 +272,14 @@ describe('validations', () => {
   });
 
   describe('businessModel', () => {
+    it('is not required', () => {
+      const payload = { ...defaultPayload, businessModel: undefined };
+
+      const result = productionSchema.validate(payload);
+
+      expect(result.error?.message).toEqual(undefined);
+    });
+
     it('is a string', () => {
       const payload = { ...defaultPayload, businessModel: 12345 };
 
