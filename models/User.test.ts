@@ -105,7 +105,7 @@ describe('User', () => {
       event = {
         apis: api,
         description: 'Mayhem',
-        email: 'ed@adhocteam.us',
+        email: 'ed@va.gov',
         firstName: 'Edward',
         lastName: 'Paget',
         oAuthRedirectURI: '',
