@@ -59,7 +59,7 @@ describe('productionRequestHandler', () => {
         },
         productionKeyCredentialStorage: 'stored in a volcano on mount doom',
         productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
-        scopesAccessRequested: ['profile', 'email'],
+        scopesAccessRequested: 'profile',
         secondaryContact: {
           email: 'frodo@fellowship.com',
           firstName: 'Frodo',
@@ -129,7 +129,7 @@ describe('validations', () => {
     },
     productionKeyCredentialStorage: 'stored in a volcano on mount doom',
     productionOrOAuthKeyCredentialStorage: 'also stored in the volcano',
-    scopesAccessRequested: ['profile', 'email'],
+    scopesAccessRequested: 'profile',
     secondaryContact: {
       email: 'frodo@fellowship.com',
       firstName: 'Frodo',
@@ -272,6 +272,14 @@ describe('validations', () => {
   });
 
   describe('businessModel', () => {
+    it('is not required', () => {
+      const payload = { ...defaultPayload, businessModel: undefined };
+
+      const result = productionSchema.validate(payload);
+
+      expect(result.error?.message).toEqual(undefined);
+    });
+
     it('is a string', () => {
       const payload = { ...defaultPayload, businessModel: 12345 };
 
@@ -290,12 +298,12 @@ describe('validations', () => {
   });
 
   describe('policyDocuments', () => {
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, policyDocuments: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"policyDocuments" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is an array', () => {
@@ -614,12 +622,12 @@ describe('validations', () => {
   });
 
   describe('scopesAccessRequested', () => {
-    it('is an array', () => {
+    it('is a string', () => {
       const payload = { ...defaultPayload, scopesAccessRequested: 123456 };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"scopesAccessRequested" must be an array');
+      expect(result.error?.message).toEqual('"scopesAccessRequested" must be a string');
     });
   });
 

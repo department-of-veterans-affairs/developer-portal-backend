@@ -14,7 +14,7 @@ export const productionSchema = Joi.object()
     appDescription: Joi.string(),
     appName: Joi.string(),
     breachManagementProcess: Joi.string(),
-    businessModel: Joi.string().required(),
+    businessModel: Joi.string(),
     centralizedBackendLog: Joi.string(),
     distributingAPIKeysToCustomers: Joi.boolean(),
     exposeVeteranInformationToThirdParties: Joi.boolean(),
@@ -27,7 +27,7 @@ export const productionSchema = Joi.object()
     phoneNumber: Joi.custom(validatePhoneFormat).required(),
     piiStorageMethod: Joi.string(),
     platforms: Joi.string(),
-    policyDocuments: Joi.array().items(Joi.string()).required(),
+    policyDocuments: Joi.array().items(Joi.string()),
     primaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
       firstName: Joi.string().required(),
@@ -35,7 +35,7 @@ export const productionSchema = Joi.object()
     }).required(),
     productionKeyCredentialStorage: Joi.string(),
     productionOrOAuthKeyCredentialStorage: Joi.string(),
-    scopesAccessRequested: Joi.array().items(Joi.string()),
+    scopesAccessRequested: Joi.string(),
     secondaryContact: Joi.object({
       email: Joi.string().email().custom(emailValidator).required(),
       firstName: Joi.string().required(),

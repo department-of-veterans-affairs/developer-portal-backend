@@ -205,7 +205,7 @@ describe('GovDeliveryService', () => {
           },
           productionKeyCredentialStorage: 'stored in a volcano on mount doom',
           productionOrOAuthKeyCredentialStorage: 'also stored in a volcano',
-          scopesAccessRequested: ['profile', 'email'],
+          scopesAccessRequested: 'profile',
           secondaryContact: {
             email: 'frodo@fellowship.com',
             firstName: 'Frodo',
