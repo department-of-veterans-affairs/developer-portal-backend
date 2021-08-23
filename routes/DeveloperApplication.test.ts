@@ -435,7 +435,7 @@ describe('validations', () => {
       const result = applySchema.validate(payload);
 
       expect(result.error?.message).toEqual(
-        '"apis" failed custom validation because invalid apis in list',
+        '"apis" failed custom validation because invalid apis in list: horsies',
       );
     });
 

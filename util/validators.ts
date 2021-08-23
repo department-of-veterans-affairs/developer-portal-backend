@@ -17,16 +17,16 @@ const VALID_PHONE_REGEX =
   /^(?:\([2-9]\d{2}\)\ ?|[2-9]\d{2}(?:\-?|\ ?|\.?))[2-9]\d{2}[- .]?\d{4}((\ )?(\()?(ext|x|extension)([- .:])?\d{1,6}(\))?)?$/;
 
 export const validateApiList = (val: string): string => {
-  let result: boolean;
+  let invalidAPIs: string[];
   try {
     const apis = val.split(',');
-    result = apis.every(api => API_LIST.includes(api));
+    invalidAPIs = apis.filter(api => !API_LIST.includes(api));
   } catch {
     throw new Error('it was unable to process the provided data');
   }
 
-  if (!result) {
-    throw new Error('invalid apis in list');
+  if (invalidAPIs.length > 0) {
+    throw new Error(`invalid apis in list: ${invalidAPIs.join(', ')}`);
   }
 
   return val;
