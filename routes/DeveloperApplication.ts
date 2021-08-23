@@ -77,14 +77,16 @@ const developerApplicationHandler =
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
+          email: user.getSentEmailAddress(),
+          kongUsername: user.getConsumerNameOrUndefined(),
           redirectURI: user.oAuthRedirectURI,
-          token: user.token,
+          token: user.getTokenOrUndefined(),
         });
       } else {
         res.json({
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-          token: user.token,
+          email: user.getSentEmailAddress(),
+          kongUsername: user.getConsumerNameOrUndefined(),
+          token: user.getTokenOrUndefined(),
         });
       }
     } catch (err: unknown) {
@@ -100,6 +102,7 @@ const developerApplicationHandler =
       if (govdelivery) {
         logger.info({ message: 'sending email to new user' });
         await user.sendEmail(govdelivery);
+        await user.sendDistributionEmail(govdelivery);
       }
     } catch (err: unknown) {
       (err as DevPortalError).action = 'sending govdelivery signup notification';

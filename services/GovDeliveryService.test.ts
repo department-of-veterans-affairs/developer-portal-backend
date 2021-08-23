@@ -3,22 +3,23 @@
 
 import 'jest';
 import axios, { AxiosInstance } from 'axios';
-import User from '../models/User';
+import User, { UserConfig } from '../models/User';
 import { ProductionAccessSupportEmail } from '../types/ProductionAccess';
 import GovDeliveryService, {
   ConsumerSupportEmail,
   PublishingSupportEmail,
 } from './GovDeliveryService';
 
-const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL } = process.env;
+const { GOVDELIVERY_KEY, GOVDELIVERY_HOST, SUPPORT_EMAIL, VA_PROFILE_DISTRIBUTION_EMAIL } =
+  process.env;
 
-if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL) {
+if (!GOVDELIVERY_KEY || !GOVDELIVERY_HOST || !SUPPORT_EMAIL || !VA_PROFILE_DISTRIBUTION_EMAIL) {
   throw new Error('Environment variable configuration is required to test GovDeliveryService');
 }
 
 describe('GovDeliveryService', () => {
   let client: GovDeliveryService;
-  let event;
+  let event: UserConfig;
   let user: User;
 
   const mockPost = jest.fn();
@@ -35,6 +36,7 @@ describe('GovDeliveryService', () => {
       host: GOVDELIVERY_HOST,
       supportEmailRecipient: SUPPORT_EMAIL,
       token: GOVDELIVERY_KEY,
+      vaProfileDistributionRecipient: VA_PROFILE_DISTRIBUTION_EMAIL,
     });
     event = {
       apis: 'facilities,benefits',
@@ -44,7 +46,7 @@ describe('GovDeliveryService', () => {
       lastName: 'Paget',
       organization: 'Ad Hoc',
       termsOfService: true,
-    };
+    } as UserConfig;
     user = new User(event);
     user.token = 'fakeKey';
 
@@ -252,6 +254,28 @@ describe('GovDeliveryService', () => {
     });
   });
 
+  describe('sendVAProfileDistrubtionEmail', () => {
+    it('should send a request', async () => {
+      event = {
+        ...event,
+        apis: 'facilities,benefits,addressValidation',
+        programName: 'FindAWayPastTheBlackGate',
+        sponsorEmail: 'gandalf.the.gray@va.gov',
+        vaEmail: 'frodo.baggins@va.gov',
+      };
+      user = new User(event);
+      await client.sendVAProfileDistributionEmail(user);
+      expect(mockPost).toHaveBeenCalledWith(
+        '/messages/email',
+        expect.objectContaining({
+          body: expect.stringContaining('frodo.baggins@va.gov') as unknown,
+          recipients: [{ email: 'elrond@rivendell.com' }],
+          subject: 'VA Profile Signup Request',
+        }),
+      );
+    });
+  });
+
   describe('Healthcheck Validation', () => {
     it('returns true when healthcheck endpoint returns 200', async () => {
       const mockGet = jest.fn().mockResolvedValue({
@@ -269,6 +293,7 @@ describe('GovDeliveryService', () => {
         host: GOVDELIVERY_HOST,
         supportEmailRecipient: SUPPORT_EMAIL,
         token: GOVDELIVERY_KEY,
+        vaProfileDistributionRecipient: VA_PROFILE_DISTRIBUTION_EMAIL,
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ healthy: true, serviceName: 'GovDelivery' });
@@ -288,6 +313,7 @@ describe('GovDeliveryService', () => {
         host: GOVDELIVERY_HOST,
         supportEmailRecipient: SUPPORT_EMAIL,
         token: GOVDELIVERY_KEY,
+        vaProfileDistributionRecipient: VA_PROFILE_DISTRIBUTION_EMAIL,
       });
       const res = await client.healthCheck();
       expect(res).toEqual({ err, healthy: false, serviceName: 'GovDelivery' });

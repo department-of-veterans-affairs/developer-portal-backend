@@ -11,6 +11,9 @@ import developerApplicationHandler, { applySchema } from '../routes/DeveloperApp
  * to create a user model that can have its return values overriden for
  * each test.
  */
+const mockGetConsumerNameOrUndefined = jest.fn();
+const mockGetSentEmailAddress = jest.fn();
+const mockGetTokenOrUndefined = jest.fn();
 const mockSaveToKong = jest.fn();
 const mockSaveToDynamo = jest.fn();
 const mockSaveToOkta = jest.fn();
@@ -24,6 +27,9 @@ let stubToken: unknown;
 
 jest.mock('../models/User', () =>
   jest.fn().mockImplementation(() => ({
+    getConsumerNameOrUndefined: mockGetConsumerNameOrUndefined,
+    getSentEmailAddress: mockGetSentEmailAddress,
+    getTokenOrUndefined: mockGetTokenOrUndefined,
     oauthApplication: stubOAuthCreds,
     saveToDynamo: mockSaveToDynamo,
     saveToKong: mockSaveToKong,
@@ -71,13 +77,17 @@ describe('developerApplicationHandler', () => {
     };
 
     stubToken = 'onering';
-
+    mockGetConsumerNameOrUndefined.mockReset();
+    mockGetSentEmailAddress.mockReset();
+    mockGetTokenOrUndefined.mockReset();
+    mockJson.mockReset();
     mockSaveToDynamo.mockReset();
     mockSaveToKong.mockReset();
     mockSaveToOkta.mockReset();
     mockSendEmail.mockReset();
     mockSendSlackSuccess.mockReset();
     stubNext.mockReset();
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
   });
 
   it('signs users up for Kong if they requested access to valid standard APIs', async () => {
@@ -93,7 +103,7 @@ describe('developerApplicationHandler', () => {
   it('signs users up for Okta if they requested access to valid OAuth APIs', async () => {
     mockShouldUpdateOkta.mockReturnValue(true);
     stubToken = '';
-
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
     const handler = developerApplicationHandler(kong, okta, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
@@ -132,7 +142,7 @@ describe('developerApplicationHandler', () => {
     mockShouldUpdateOkta.mockReturnValue(true);
 
     stubToken = '';
-
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
     const handler = developerApplicationHandler(kong, okta, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
