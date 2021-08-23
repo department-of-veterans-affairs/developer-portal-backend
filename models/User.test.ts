@@ -67,7 +67,7 @@ describe('User', () => {
         try {
           user = new User(event);
         } catch (err: unknown) {
-          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+          expect((err as Error).message).toEqual('Applying for internal API without VA email');
         }
       });
 
@@ -78,7 +78,7 @@ describe('User', () => {
         try {
           user = new User(event);
         } catch (err: unknown) {
-          expect((err as Error).message).toEqual('Applying for internal api without VA email');
+          expect((err as Error).message).toEqual('Applying for internal API without VA email');
         }
       });
 

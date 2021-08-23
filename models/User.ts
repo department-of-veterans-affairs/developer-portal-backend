@@ -118,7 +118,7 @@ export default class User implements KongUser, GovDeliveryUser {
     this.isApplyingForInternal = INTERNAL_ONLY_APIS.some(api => this.apiList.includes(api));
     const hasVAEmail = this.email.endsWith('va.gov') || this.vaEmail?.endsWith('va.gov');
     if (this.isApplyingForInternal && !hasVAEmail) {
-      throw new Error('Applying for internal api without VA email');
+      throw new Error('Applying for internal API without VA email');
     }
     if (this.isApplyingForInternal && hasVAEmail) {
       this.vaEmail = this.vaEmail ?? this.email;
