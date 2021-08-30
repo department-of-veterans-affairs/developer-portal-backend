@@ -64,7 +64,6 @@
         "code"
       ],
       "grant_types": [
-        "implicit",
         "authorization_code"
       ],
       "application_type": "native",
