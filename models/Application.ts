@@ -65,8 +65,6 @@ export default class Application implements OktaApplication {
     };
     if (applicationType === 'native') {
       this.settings.credentials = { oauthClient: { token_endpoint_auth_method: 'none' } };
-    } else if (applicationType === 'web') {
-      this.settings.settings.oauthClient.response_types.push('token', 'id_token');
     }
   }
 
