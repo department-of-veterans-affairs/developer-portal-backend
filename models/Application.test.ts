@@ -26,7 +26,7 @@ describe('Application', () => {
       const { oauthClient } = application.toOktaApp().settings;
 
       expect(oauthClient.application_type).toEqual('web');
-      expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
+      expect(oauthClient.response_types.sort()).toEqual(['code']);
       expect(oauthClient.grant_types.sort()).toEqual(['authorization_code', 'refresh_token']);
     });
 
@@ -39,7 +39,7 @@ describe('Application', () => {
       const { oauthClient } = application.toOktaApp().settings;
 
       expect(oauthClient.application_type).toEqual('web');
-      expect(oauthClient.response_types.sort()).toEqual(['code', 'id_token', 'token']);
+      expect(oauthClient.response_types.sort()).toEqual(['code']);
       expect(oauthClient.grant_types.sort()).toEqual(['authorization_code', 'refresh_token']);
     });
 
