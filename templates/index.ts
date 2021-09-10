@@ -131,58 +131,13 @@ export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
 </ul>`;
 
 export const VA_PROFILE_DISTRIBUTION_TEMPLATE = `<ul>
-    <li>
-        <div>
-            <div>First Name:</div>
-            <div>{{firstName}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>Last Name:</div>
-            <div>{{lastName}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>Organization:</div>
-            <div>{{organization}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>From Email:</div>
-            <div>{{requester}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>Description:</div>
-            <div>{{description}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>APIs:</div>
-            <div>{{apis}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>Program Name:</div>
-            <div>{{programName}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>Sponsor Email:</div>
-            <div>{{sponsorEmail}}</div>
-        </div>
-    </li>
-    <li>
-        <div>
-            <div>VA Email:</div>
-            <div>{{vaEmail}}</div>
-        </div>
-    </li>
+    <li><strong>First Name:</strong> {{firstName}}</li>
+    <li><strong>Last Name:</strong> {{lastName}}</li>
+    <li><strong>Organization:</strong> {{organization}}</li>
+    <li><strong>From Email:</strong> {{requester}}</li>
+    <li><strong>Description:</strong> {{description}}</li>
+    <li><strong>APIs:</strong> {{apis}}</li>
+    <li><strong>Program Name:</strong> {{programName}}</li>
+    <li><strong>Sponsor Email:</strong> {{sponsorEmail}}</li>
+    <li><strong>VA Email:</strong> {{vaEmail}}</li>
 </ul>`;
