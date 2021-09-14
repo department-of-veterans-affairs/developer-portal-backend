@@ -24,7 +24,7 @@ export const productionSchema = Joi.object()
     multipleReqSafeguards: Joi.string(),
     namingConvention: Joi.string(),
     organization: Joi.string().required(),
-    phoneNumber: Joi.custom(validatePhoneFormat).required(),
+    phoneNumber: Joi.custom(validatePhoneFormat),
     piiStorageMethod: Joi.string(),
     platforms: Joi.string(),
     policyDocuments: Joi.array().items(Joi.string()),
