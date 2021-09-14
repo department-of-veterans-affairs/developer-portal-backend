@@ -29,7 +29,7 @@ export const productionSchema = Joi.object()
     platforms: Joi.string(),
     policyDocuments: Joi.array().items(Joi.string()),
     primaryContact: Joi.object({
-      email: Joi.string().email().custom(emailValidator).required(),
+      email: Joi.string().email({tlds:false}).custom(emailValidator).required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
     }).required(),
@@ -37,12 +37,12 @@ export const productionSchema = Joi.object()
     productionOrOAuthKeyCredentialStorage: Joi.string(),
     scopesAccessRequested: Joi.string(),
     secondaryContact: Joi.object({
-      email: Joi.string().email().custom(emailValidator).required(),
+      email: Joi.string().email({tlds:false}).custom(emailValidator).required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
     }).required(),
     signUpLink: Joi.array().items(Joi.string()),
-    statusUpdateEmails: Joi.array().items(Joi.string().email().custom(emailValidator)).required(),
+    statusUpdateEmails: Joi.array().items(Joi.string().email({tlds:false}).custom(emailValidator)).required(),
     storePIIOrPHI: Joi.boolean().required(),
     supportLink: Joi.array().items(Joi.string()),
     thirdPartyInfoDescription: Joi.string(),
