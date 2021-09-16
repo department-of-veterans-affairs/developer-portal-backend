@@ -12,15 +12,14 @@ interface HealthCheckServiceOptions {
   kong: KongService;
   okta: OktaService;
   dynamo: DynamoService;
-  govDelivery: GovDeliveryService;
   slack: SlackService;
 }
 
 const healthCheckHandler =
-  ({ kong, okta, dynamo, govDelivery, slack }: HealthCheckServiceOptions): RequestHandler =>
+  ({ kong, okta, dynamo, slack }: HealthCheckServiceOptions): RequestHandler =>
   async (_req, res, next): Promise<void> => {
     try {
-      const services: MonitoredService[] = [kong, okta, dynamo, govDelivery, slack];
+      const services: MonitoredService[] = [kong, okta, dynamo, slack];
       const healthCheck = new HealthCheck(services);
       await healthCheck.check();
       res.json(healthCheck.getResults());
@@ -30,4 +29,18 @@ const healthCheckHandler =
     }
   };
 
+  const govDeliveryHealthCheckHandler =
+  (govDelivery: GovDeliveryService): RequestHandler =>
+  async (_req, res, next): Promise<void> => {
+    try {
+      const healthCheck = new HealthCheck([ govDelivery ]);
+      await healthCheck.check();
+      res.json(healthCheck.getResults());
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'checking health of services';
+      next(err);
+    }
+  };
+
 export default healthCheckHandler;
+export { govDeliveryHealthCheckHandler };

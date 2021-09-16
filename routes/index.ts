@@ -10,7 +10,7 @@ import SlackService from '../services/SlackService';
 import developerApplicationHandler, { applySchema } from './DeveloperApplication';
 import productionRequestHandler, { productionSchema } from './ProductionRequest';
 import contactUsHandler, { contactSchema } from './ContactUs';
-import healthCheckHandler from './HealthCheck';
+import healthCheckHandler, { govDeliveryHealthCheckHandler } from './HealthCheck';
 import signupsReportHandler, { signupsReportSchema } from './management/SignupsReport';
 import versionHandler from './Version';
 
@@ -72,7 +72,10 @@ const configureRoutes = (app: Express, services: AppServices): void => {
     contactUsHandler(govDelivery),
   );
 
-  publicRoutes.get('/health_check', healthCheckHandler({ dynamo, govDelivery, kong, okta, slack }));
+  publicRoutes.get('/health_check', healthCheckHandler({ dynamo, kong, okta, slack }));
+
+  // Dedicated health check for Granicus/GovDelivery service
+  publicRoutes.get('/govDelivery/health_check', govDeliveryHealthCheckHandler(govDelivery));
 
   // This simple ping endpoint is for use with a Pingdom check
   publicRoutes.get('/ping', (_req, res) => {
