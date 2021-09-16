@@ -191,14 +191,16 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       <div>{{website}}</div>
     </div>
   </li>
-  <li>
-    <div>
-      <strong>
-        <div>Phone Number:</div>
-      </strong>
-      <div>{{phoneNumber}}</div>
-    </div>
-  </li>
+  {{#if phoneNumber}}
+    <li>
+      <div>
+        <strong>
+          <div>Phone Number:</div>
+        </strong>
+        <div>{{phoneNumber}}</div>
+      </div>
+    </li>
+  {{/if}}
   <li>
     <div>
       <strong>

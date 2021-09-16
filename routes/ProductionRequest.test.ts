@@ -316,12 +316,12 @@ describe('validations', () => {
   });
 
   describe('phoneNumber', () => {
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, phoneNumber: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"phoneNumber" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {
