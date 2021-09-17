@@ -33,7 +33,7 @@ const healthCheckHandler =
   (govDelivery: GovDeliveryService): RequestHandler =>
   async (_req, res, next): Promise<void> => {
     try {
-      const healthCheck = new HealthCheck([ govDelivery ]);
+      const healthCheck = new HealthCheck([govDelivery]);
       await healthCheck.check();
       res.json(healthCheck.getResults());
     } catch (err: unknown) {
