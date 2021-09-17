@@ -1,18 +1,19 @@
 import process from 'process';
+import { ApplicationType } from '@okta/okta-sdk-nodejs';
 import { GovDeliveryUser, KongUser } from '../types';
-import Application from './Application';
 import OktaService from '../services/OktaService';
 import SlackService, { SlackResponse } from '../services/SlackService';
 import KongService from '../services/KongService';
 import GovDeliveryService, { EmailResponse } from '../services/GovDeliveryService';
 import DynamoService from '../services/DynamoService';
-import { KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
-import { ApplicationType } from '@okta/okta-sdk-nodejs';
+import { INTERNAL_ONLY_APIS, KONG_CONSUMER_APIS, OKTA_CONSUMER_APIS } from '../config/apis';
+import logger from '../config/logger';
+import Application from './Application';
 import { DevPortalError } from './DevPortalError';
 
 type APIFilterFn = (api: string) => boolean;
 
-type UserDynamoItem = {
+export interface UserDynamoItem {
   apis: string;
   email: string;
   firstName: string;
@@ -22,10 +23,14 @@ type UserDynamoItem = {
   kongConsumerId?: string;
   tosAccepted: boolean;
   description: string;
+  programName: string;
+  sponsorEmail: string;
+  vaEmail: string;
   createdAt: string;
   okta_application_id?: string;
   okta_client_id?: string;
 }
+
 export interface UserConfig {
   firstName: string;
   lastName: string;
@@ -34,27 +39,53 @@ export interface UserConfig {
   apis: string;
   description: string;
   oAuthRedirectURI: string;
-  oAuthApplicationType: string;
+  oAuthApplicationType?: string;
   termsOfService: boolean;
+  programName: string | undefined;
+  sponsorEmail: string | undefined;
+  vaEmail: string | undefined;
 }
 
 export default class User implements KongUser, GovDeliveryUser {
   public createdAt: Date;
+
   public firstName: string;
+
   public lastName: string;
+
   public organization: string;
+
   public email: string;
+
   public apis: string;
+
   public description: string;
+
+  public isApplyingForInternal: boolean;
+
   public oAuthRedirectURI: string;
+
   public oAuthApplicationType?: string;
+
   public kongConsumerId?: string;
+
+  public programName?: string;
+
+  public sponsorEmail?: string;
+
   public token?: string;
+
   public oauthApplication?: Application;
-  public tableName: string = process.env.DYNAMODB_TABLE || 'Users';
+
+  public tableName: string = process.env.DYNAMODB_TABLE ?? 'Users';
+
   public tosAccepted: boolean;
 
-  constructor({
+  public vaEmail?: string;
+
+  public readonly apiList: string[];
+
+  public constructor({
     firstName,
     lastName,
     organization,
@@ -63,7 +94,10 @@ export default class User implements KongUser, GovDeliveryUser {
     description,
     oAuthRedirectURI,
     oAuthApplicationType,
+    programName,
+    sponsorEmail,
     termsOfService,
+    vaEmail,
   }: UserConfig) {
     this.createdAt = new Date(Date.now());
     this.firstName = firstName;
@@ -74,20 +108,37 @@ export default class User implements KongUser, GovDeliveryUser {
     this.description = description;
     this.oAuthRedirectURI = oAuthRedirectURI;
     this.oAuthApplicationType = oAuthApplicationType;
+    this.programName = programName;
+    this.sponsorEmail = sponsorEmail;
     this.tosAccepted = termsOfService;
+    this.vaEmail = vaEmail;
+
+    this.apiList = this.apis ? this.apis.split(',') : [];
+
+    this.isApplyingForInternal = INTERNAL_ONLY_APIS.some(api => this.apiList.includes(api));
+    const hasVAEmail = this.email.endsWith('va.gov') || this.vaEmail?.endsWith('va.gov');
+    if (this.isApplyingForInternal && !hasVAEmail) {
+      throw new Error('Applying for internal API without VA email');
+    }
+    if (this.isApplyingForInternal && hasVAEmail) {
+      this.vaEmail = this.vaEmail ?? this.email;
+    }
   }
 
   public consumerName(): string {
     return `${this.organization}${this.lastName}`.replace(/\W/g, '');
   }
 
-  private toSlackString(): string {
-    const intro = `${this.lastName}, ${this.firstName}: ${this.email}\nDescription: ${this.description}\nRequested access to:\n`;
-    return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro);
+  public getConsumerNameOrUndefined(): string | undefined {
+    return !this.isApplyingForInternal && this.kongConsumerId ? this.consumerName() : undefined;
   }
 
-  public get apiList(): string[] {
-    return this._apiList;
+  public getSentEmailAddress(): string {
+    return this.isApplyingForInternal && this.vaEmail ? this.vaEmail : this.email;
+  }
+
+  public getTokenOrUndefined(): string | undefined {
+    return this.isApplyingForInternal ? undefined : this.token;
   }
 
   public async saveToKong(client: KongService): Promise<User> {
@@ -106,20 +157,31 @@ export default class User implements KongUser, GovDeliveryUser {
 
   public sendEmail(client: GovDeliveryService): Promise<EmailResponse> {
     try {
-      return client.sendWelcomeEmail(this);
-    } catch (err) {
+      logger.info({ message: 'sending welcome email for api signup' });
+      return client.sendWelcomeEmail(this, this.getSentEmailAddress());
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'failed sending welcome email';
+      throw err;
+    }
+  }
+
+  public async sendDistributionEmail(client: GovDeliveryService): Promise<void> {
+    try {
+      if (this.apiList.includes('addressValidation')) {
+        logger.info({ message: 'sending distribution email for address validation signup' });
+        const response = await client.sendVAProfileDistributionEmail(this);
+        logger.info(response);
+      }
+    } catch (err: unknown) {
+      (err as DevPortalError).action = 'failed sending distribution email';
       throw err;
     }
   }
 
   public sendSlackSuccess(client: SlackService): Promise<SlackResponse> {
     try {
-      return client.sendSuccessMessage(
-        this.toSlackString(),
-        'New User Application',
-      );
-    } catch (err) {
+      return client.sendSuccessMessage(this.toSlackString(), 'New User Application');
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'failed sending slack success';
       throw err;
     }
@@ -129,25 +191,31 @@ export default class User implements KongUser, GovDeliveryUser {
     try {
       const dynamoItem: UserDynamoItem = {
         apis: this.apis,
+        createdAt: this.createdAt.toISOString(),
+        description: this.description || 'no description',
         email: this.email,
         firstName: this.firstName,
-        lastName: this.lastName,
-        organization: this.organization,
-        oAuthRedirectURI: this.oAuthRedirectURI,
         kongConsumerId: this.kongConsumerId,
+        lastName: this.lastName,
+        oAuthRedirectURI: this.oAuthRedirectURI,
+        organization: this.organization,
+        programName: this.programName ?? '',
+        sponsorEmail: this.sponsorEmail ?? '',
         tosAccepted: this.tosAccepted,
-        description: this.description || 'no description',
-        createdAt: this.createdAt.toISOString(),
+        vaEmail: this.vaEmail ?? '',
       };
 
-      if (this.oauthApplication && this.oauthApplication.oktaID) {
+      if (this.oauthApplication?.oktaID) {
         dynamoItem.okta_application_id = this.oauthApplication.oktaID;
         dynamoItem.okta_client_id = this.oauthApplication.client_id;
       }
 
+      Object.keys(dynamoItem)
+        .filter(key => !dynamoItem[key])
+        .forEach(key => (dynamoItem[key] = undefined));
       await service.putItem(dynamoItem, this.tableName);
       return this;
-    } catch (err) {
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'failed saving to dynamo';
       throw err;
     }
@@ -160,20 +228,21 @@ export default class User implements KongUser, GovDeliveryUser {
         this.oauthApplication = new Application(
           {
             applicationType: this.oAuthApplicationType as ApplicationType,
-            // Save with the consumerName + current date in ISO format to avoid name clashes
-            // Without accounts there isn't a good way to look up and avoid creating applications
-            // with the same name which isn't allowed by Okta
+            /*
+             * Save with the consumerName + current date in ISO format to avoid name clashes
+             * Without accounts there isn't a good way to look up and avoid creating applications
+             * with the same name which isn't allowed by Okta
+             */
             name: `${this.consumerName()}-${this.createdAt.toISOString()}`,
             redirectURIs: [this.oAuthRedirectURI],
           },
           this,
         );
-        if (this.oauthApplication) {
-          await this.oauthApplication.createOktaApplication(client);
-        }
+
+        await this.oauthApplication.createOktaApplication(client);
       }
       return this;
-    } catch (err) {
+    } catch (err: unknown) {
       (err as DevPortalError).action = 'failed saving to okta';
       throw err;
     }
@@ -189,10 +258,11 @@ export default class User implements KongUser, GovDeliveryUser {
     return OKTA_CONSUMER_APIS.some(isOktaApi);
   }
 
-  private get _apiList(): string[] {
-    if (this.apis) {
-      return this.apis.split(',');
-    }
-    return [];
+  private toSlackString(): string {
+    const email = this.vaEmail
+      ? `Contact Email: ${this.email} | VA Email: ${this.vaEmail}`
+      : `${this.email}`;
+    const intro = `${this.lastName}, ${this.firstName}: ${email}\nDescription: ${this.description}\nRequested access to:\n`;
+    return this.apiList.reduce((m, api) => m.concat(`* ${api}\n`), intro);
   }
 }

@@ -13,4 +13,3 @@ export const getEnvironment = (): string => {
 
   return ENVIRONMENTS[DEFAULT_TABLE];
 };
-

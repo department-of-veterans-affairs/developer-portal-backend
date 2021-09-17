@@ -1,36 +1,35 @@
-import OktaService from './OktaService';
-import { OktaApplication } from '../types';
 import {
   OAuthApplication,
   OktaApplicationResponse,
   OktaPolicy,
   OktaPolicyCollection,
 } from '@okta/okta-sdk-nodejs';
+
+import { OktaApplication } from '../types';
 import { OKTA_AUTHZ_ENDPOINTS } from '../config/apis';
+import OktaService from './OktaService';
 
 const scaffoldOktaPolicy = (id: string, name: string): OktaPolicy => ({
-  type: 'test',
-  id,
-  status: 'test',
-  name,
-  description: 'test',
-  priority: 1,
-  system: true,
   conditions: {
     clients: {
       include: [],
     },
   },
+  description: 'test',
+  id,
+  name,
+  priority: 1,
+  status: 'test',
+  system: true,
+  type: 'test',
 });
 
-const createOktaPolicyCollection = (
-  ...policies: OktaPolicy[]
-): OktaPolicyCollection => {
+const createOktaPolicyCollection = (...policies: OktaPolicy[]): OktaPolicyCollection => {
   const each = (iterator: (obj: OktaPolicy) => void | boolean): Promise<void> => {
     policies.forEach(iterator);
     return Promise.resolve();
   };
-  
+
   return {
     each,
   };
@@ -38,19 +37,19 @@ const createOktaPolicyCollection = (
 
 describe('OktaService', () => {
   const service: OktaService = new OktaService({
-    token: 'fakeToken',
     host: 'https://fake-va-org.okta.com',
+    token: 'fakeToken',
   });
 
   describe('createApplication', () => {
     const appRes: OktaApplicationResponse = {
-      id: '123',
       credentials: {
         oauthClient: {
           client_id: 'fakeid',
           client_secret: 'fakesecret',
         },
       },
+      id: '123',
     };
     let createMock, groupMock, updateAuthPolicyMock;
 
@@ -68,23 +67,22 @@ describe('OktaService', () => {
       // The policy with name === 'default' is the only one that we update
       const spyListAuthServerPolicies = jest.spyOn(
         service.client,
-        'listAuthorizationServerPolicies'
+        'listAuthorizationServerPolicies',
       ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
-      spyListAuthServerPolicies.mockImplementation(
-        (authServerId: string) => {
-          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
-          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'default');
-          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
-          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
-        });
+      spyListAuthServerPolicies.mockImplementation((authServerId: string) => {
+        const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+        const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'default');
+        const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+        return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
+      });
     });
 
     it('creates an application in Okta and assigns a group to its id', async () => {
       const application: OktaApplication = {
         owner: {
           apiList: ['health', 'communityCare'],
-          organization: 'organization',
           email: 'email',
+          organization: 'organization',
         },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
@@ -100,9 +98,9 @@ describe('OktaService', () => {
         healthApiEndpoint,
         healthPolicyId,
         expect.objectContaining({
+          conditions: { clients: { include: ['fakeid'] } },
           id: healthPolicyId,
           name: 'default',
-          conditions: { clients: { include: ['fakeid'] } },
         }),
       );
 
@@ -115,9 +113,9 @@ describe('OktaService', () => {
         communityCareApiEndpoint,
         communityCarePolicyId,
         expect.objectContaining({
+          conditions: { clients: { include: ['fakeid'] } },
           id: communityCarePolicyId,
           name: 'default',
-          conditions: { clients: { include: ['fakeid'] } },
         }),
       );
 
@@ -128,21 +126,20 @@ describe('OktaService', () => {
       // we have to reset the list of policies to not include one with the 'default' name
       const spyListAuthServerPolicies = jest.spyOn(
         service.client,
-        'listAuthorizationServerPolicies'
+        'listAuthorizationServerPolicies',
       ) as jest.SpyInstance<Promise<OktaPolicyCollection>, string[]>;
-      spyListAuthServerPolicies.mockImplementation(
-        (authServerId: string) => {
-          const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
-          const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'policy2');
-          const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
-          return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
-        });
+      spyListAuthServerPolicies.mockImplementation((authServerId: string) => {
+        const policy1 = scaffoldOktaPolicy(`${authServerId}-1-policy`, 'policy1');
+        const policy2 = scaffoldOktaPolicy(`${authServerId}-policy`, 'policy2');
+        const policy3 = scaffoldOktaPolicy(`${authServerId}-3-policy`, 'policy3');
+        return Promise.resolve(createOktaPolicyCollection(policy1, policy2, policy3));
+      });
 
       const application: OktaApplication = {
         owner: {
           apiList: ['health'],
-          organization: 'organization',
           email: 'email',
+          organization: 'organization',
         },
         toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
       };
@@ -150,14 +147,13 @@ describe('OktaService', () => {
       await expect(service.createApplication(application, 'testgroup')).rejects.toThrow();
     });
 
-
     describe('ignores non okta endpoints', () => {
       it('ignores kong (key based) endpoint and only calls okta endpoint', async () => {
         const application: OktaApplication = {
           owner: {
             apiList: ['health', 'facilities'],
-            organization: 'organization',
             email: 'email',
+            organization: 'organization',
           },
           toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
         };
@@ -176,9 +172,9 @@ describe('OktaService', () => {
           healthApiEndpoint,
           healthPolicyId,
           expect.objectContaining({
+            conditions: { clients: { include: ['fakeid'] } },
             id: healthPolicyId,
             name: 'default',
-            conditions: { clients: { include: ['fakeid'] } },
           }),
         );
 
@@ -189,8 +185,8 @@ describe('OktaService', () => {
         const application: OktaApplication = {
           owner: {
             apiList: ['health', 'invalid'],
-            organization: 'organization',
             email: 'email',
+            organization: 'organization',
           },
           toOktaApp: () => ({ name: 'oidc_client' } as OAuthApplication),
         };
@@ -209,9 +205,9 @@ describe('OktaService', () => {
           healthApiEndpoint,
           healthPolicyId,
           expect.objectContaining({
+            conditions: { clients: { include: ['fakeid'] } },
             id: healthPolicyId,
             name: 'default',
-            conditions: { clients: { include: ['fakeid'] } },
           }),
         );
 
@@ -234,7 +230,7 @@ describe('OktaService', () => {
 
     it('returns unhealthy when it catches an error', async () => {
       const err = new Error('Invalid token provided');
-      const expectedReturn = { serviceName: 'Okta', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Okta' };
       getUserMock.mockRejectedValue(err);
 
       const healthCheck = await service.healthCheck();
@@ -244,7 +240,7 @@ describe('OktaService', () => {
     it('returns unhealthy when it receives anything but a User object from Okta', async () => {
       const mockValue = { constructor: { name: 'Orc' } };
       const err = new Error(`Okta did not return a user: ${JSON.stringify(mockValue)}`);
-      const expectedReturn = { serviceName: 'Okta', healthy: false, err: err };
+      const expectedReturn = { err, healthy: false, serviceName: 'Okta' };
       getUserMock.mockResolvedValue(mockValue);
 
       const healthCheck = await service.healthCheck();
@@ -252,7 +248,7 @@ describe('OktaService', () => {
     });
 
     it('returns healthy when it receives a User object from Okta', async () => {
-      const expectedReturn = { serviceName: 'Okta', healthy: true };
+      const expectedReturn = { healthy: true, serviceName: 'Okta' };
       getUserMock.mockResolvedValue({ constructor: { name: 'User' } });
 
       const resp = await service.healthCheck();

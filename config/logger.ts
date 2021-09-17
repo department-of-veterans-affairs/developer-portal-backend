@@ -1,8 +1,8 @@
 import { createLogger, format, transports } from 'winston';
 
 const logger = createLogger({
-  level: 'info',
   format: format.json(),
+  level: 'info',
   transports: [
     new transports.Console({
       // Don't log during test runs

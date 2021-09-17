@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import contactUsHandler, { ConsumerSupportRequest, contactSchema, PublishingSupportRequest } from './ContactUs';
 import GovDeliveryService from '../services/GovDeliveryService';
+import contactUsHandler, {
+  ConsumerSupportRequest,
+  contactSchema,
+  PublishingSupportRequest,
+} from './ContactUs';
 
 describe('contactUsHandler', () => {
   const mockSendConsumerSupportEmail = jest.fn();
@@ -12,19 +16,20 @@ describe('contactUsHandler', () => {
   } as unknown as GovDeliveryService;
   mockSendConsumerSupportEmail.mockResolvedValue({});
 
-
   const mockStatus = jest.fn();
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   const mockRes: Response = {
-    status: mockStatus,
     json: mockJson,
     sendStatus: mockSendStatus,
+    status: mockStatus,
   } as unknown as Response;
-  
-  // The call to status needs to return the response object again for json
-  // to be called properly.
-  mockStatus.mockReturnValue(mockRes);  
+
+  /*
+   * The call to status needs to return the response object again for json
+   * to be called properly.
+   */
+  mockStatus.mockReturnValue(mockRes);
 
   beforeEach(() => {
     mockStatus.mockClear();
@@ -39,24 +44,24 @@ describe('contactUsHandler', () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        apis: ['benefits', 'facilities'],
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
-        description: 'Need help getting to Mt. Doom',
-        apis: ['benefits', 'facilities'],
       },
     } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
+      apis: ['benefits', 'facilities'],
+      description: mockReq.body.description,
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
-      requester: mockReq.body.email,
-      description: mockReq.body.description,
       organization: mockReq.body.organization,
-      apis: ['benefits', 'facilities'],
+      requester: mockReq.body.email,
     });
 
     expect(mockSendStatus).toHaveBeenCalledWith(200);
@@ -66,40 +71,42 @@ describe('contactUsHandler', () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        apis: ['facilities', 'health'],
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
         organization: 'The Fellowship of the Ring',
-        description: 'Need help getting to Mt. Doom',
-        apis: ['facilities', 'health'],
       },
     } as Request;
 
     await handler(mockReq, mockRes, mockNext);
 
-    expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith(expect.objectContaining({
-      apis: ['facilities', 'health'],
-    }));
+    expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apis: ['facilities', 'health'],
+      }),
+    );
   });
 
   it('gracefully handles no apis or organization being provided', async () => {
     const handler = contactUsHandler(mockGovDelivery);
     const mockReq = {
       body: {
+        description: 'Need help getting to Mt. Doom',
+        email: 'samwise@thefellowship.org',
         firstName: 'Samwise',
         lastName: 'Gamgee',
-        email: 'samwise@thefellowship.org',
-        description: 'Need help getting to Mt. Doom',
       },
     } as Request<Record<string, unknown>, Record<string, unknown>, ConsumerSupportRequest>;
 
     await handler(mockReq, mockRes, mockNext);
 
     expect(mockSendConsumerSupportEmail).toHaveBeenCalledWith({
+      description: mockReq.body.description,
       firstName: mockReq.body.firstName,
       lastName: mockReq.body.lastName,
       requester: mockReq.body.email,
-      description: mockReq.body.description,
     });
   });
 
@@ -108,31 +115,31 @@ describe('contactUsHandler', () => {
       const handler = contactUsHandler(mockGovDelivery);
       const mockReq = {
         body: {
-          type: "PUBLISHING",
+          apiDescription: 'Ring',
+          apiDetails: "I can't carry it for you, but I can carry you.",
+          apiInternalOnly: false,
+          apiOtherInfo: 'bad guys go away',
+          email: 'samwise@thefellowship.org',
           firstName: 'Samwise',
           lastName: 'Gamgee',
-          email: 'samwise@thefellowship.org',
           organization: 'The Fellowship of the Ring',
-          apiInternalOnly: false,
-          apiDetails: "I can't carry it for you, but I can carry you.",
-          apiDescription: "Ring",
-          apiOtherInfo: 'bad guys go away',
+          type: 'PUBLISHING',
         },
       } as Request<Record<string, unknown>, Record<string, unknown>, PublishingSupportRequest>;
-  
+
       await handler(mockReq, mockRes, mockNext);
-  
+
       expect(mockSendPublshingSupportEmail).toHaveBeenCalledWith({
+        apiDescription: mockReq.body.apiDescription,
+        apiDetails: mockReq.body.apiDetails,
+        apiInternalOnly: mockReq.body.apiInternalOnly,
+        apiOtherInfo: mockReq.body.apiOtherInfo,
         firstName: mockReq.body.firstName,
         lastName: mockReq.body.lastName,
-        requester: mockReq.body.email,
         organization: mockReq.body.organization,
-        apiInternalOnly: mockReq.body.apiInternalOnly,
-        apiDetails: mockReq.body.apiDetails,
-        apiDescription: mockReq.body.apiDescription,
-        apiOtherInfo: mockReq.body.apiOtherInfo,
+        requester: mockReq.body.email,
       });
-  
+
       expect(mockSendStatus).toHaveBeenCalledWith(200);
     });
   });
@@ -140,15 +147,15 @@ describe('contactUsHandler', () => {
 
 describe('validations', () => {
   const basePayload = {
+    description: 'Need help getting to Mt. Doom',
+    email: 'samwise@thefellowship.org',
     firstName: 'Samwise',
     lastName: 'Gamgee',
-    email: 'samwise@thefellowship.org',
-    description: 'Need help getting to Mt. Doom',
   };
 
   describe('firstName', () => {
     it('is required', () => {
-      const payload = {...basePayload, firstName: undefined};
+      const payload = { ...basePayload, firstName: undefined };
 
       const result = contactSchema.validate(payload);
 
@@ -156,7 +163,7 @@ describe('validations', () => {
     });
 
     it('is a string', () => {
-      const payload = {...basePayload, firstName: 1234};
+      const payload = { ...basePayload, firstName: 1234 };
 
       const result = contactSchema.validate(payload);
 
@@ -166,7 +173,7 @@ describe('validations', () => {
 
   describe('lastName', () => {
     it('is required', () => {
-      const payload = {...basePayload, lastName: undefined};
+      const payload = { ...basePayload, lastName: undefined };
 
       const result = contactSchema.validate(payload);
 
@@ -174,7 +181,7 @@ describe('validations', () => {
     });
 
     it('is a string', () => {
-      const payload = {...basePayload, lastName: { name: 'Gamegee' }};
+      const payload = { ...basePayload, lastName: { name: 'Gamegee' } };
 
       const result = contactSchema.validate(payload);
 
@@ -184,15 +191,15 @@ describe('validations', () => {
 
   describe('email', () => {
     it('is required', () => {
-      const payload = {...basePayload, email: undefined};
+      const payload = { ...basePayload, email: undefined };
 
       const result = contactSchema.validate(payload);
-      
+
       expect(result.error?.message).toEqual('"email" is required');
     });
 
     it('is in a valid format', () => {
-      const payload = {...basePayload, email: 'http://theyaretakingthehobbitstoisengard.com'};
+      const payload = { ...basePayload, email: 'http://theyaretakingthehobbitstoisengard.com' };
 
       const result = contactSchema.validate(payload);
 
@@ -202,7 +209,7 @@ describe('validations', () => {
 
   describe('organization', () => {
     it('is a string', () => {
-      const payload = {...basePayload, organization: ['The', 'Fellowship']};
+      const payload = { ...basePayload, organization: ['The', 'Fellowship'] };
 
       const result = contactSchema.validate(payload);
 
@@ -210,7 +217,7 @@ describe('validations', () => {
     });
 
     it('is allowed to be empty', () => {
-      const payload = {...basePayload, organization: ''};
+      const payload = { ...basePayload, organization: '' };
 
       const result = contactSchema.validate(payload);
 
@@ -218,7 +225,7 @@ describe('validations', () => {
     });
 
     it('accepts other strings', () => {
-      const payload = {...basePayload, organization: 'The Fellowship'};
+      const payload = { ...basePayload, organization: 'The Fellowship' };
 
       const result = contactSchema.validate(payload);
 
@@ -226,18 +233,20 @@ describe('validations', () => {
     });
   });
 
-
   describe('description', () => {
     it('is required', () => {
-      const payload = {...basePayload, description: undefined};
+      const payload = { ...basePayload, description: undefined };
 
       const result = contactSchema.validate(payload);
-      
+
       expect(result.error?.message).toEqual('"description" is required');
     });
 
     it('is a string', () => {
-      const payload = {...basePayload, description: { potatoes: 'boil em, mash em, stick em in a stew' }};
+      const payload = {
+        ...basePayload,
+        description: { potatoes: 'boil em, mash em, stick em in a stew' },
+      };
 
       const result = contactSchema.validate(payload);
 
@@ -247,7 +256,7 @@ describe('validations', () => {
 
   describe('apis', () => {
     it('is an array', () => {
-      const payload = {...basePayload, apis: 'health,benefits,facilities' };
+      const payload = { ...basePayload, apis: 'health,benefits,facilities' };
 
       const result = contactSchema.validate(payload);
 
@@ -255,63 +264,71 @@ describe('validations', () => {
     });
 
     it('is an array of strings', () => {
-      const payload = {...basePayload, apis: [1, 2]};
+      const payload = { ...basePayload, apis: [1, 2] };
 
       const result = contactSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis[0]" must be a string. "apis[1]" must be a string');
+      expect(result.error?.message).toEqual(
+        '"apis[0]" must be a string. "apis[1]" must be a string',
+      );
     });
 
     it('allows an empty array', () => {
-      const payload = {...basePayload, apis: []};
+      const payload = { ...basePayload, apis: [] };
 
       const result = contactSchema.validate(payload);
 
       expect(result.error).toBe(undefined);
     });
   });
-  
+
   describe('type is publishing', () => {
     const publishingPayload = {
       ...basePayload,
-      type: 'PUBLISHING',
       apiDetails: 'Need help getting to Mt. Doom',
       apiInternalOnly: false,
       description: undefined,
+      type: 'PUBLISHING',
     };
 
     describe('apiDetails', () => {
       it('is required', () => {
         const payload = { ...publishingPayload, apiDetails: undefined };
-  
+
         const result = contactSchema.validate(payload);
-        
+
         expect(result.error?.message).toEqual('"apiDetails" is required');
       });
 
       it('is a string', () => {
-        const payload = { ...publishingPayload, apiDetails: { potatoes: 'boil em, mash em, stick em in a stew' } };
-  
+        const payload = {
+          ...publishingPayload,
+          apiDetails: { potatoes: 'boil em, mash em, stick em in a stew' },
+        };
+
         const result = contactSchema.validate(payload);
-  
+
         expect(result.error?.message).toEqual('"apiDetails" must be a string');
       });
     });
 
     describe('apiDescription', () => {
       it('can be blank', () => {
-        const payload = { ...publishingPayload, apiDescription: "" };
-  
+        const payload = { ...publishingPayload, apiDescription: '' };
+
         const result = contactSchema.validate(payload);
-        
+
         expect(result.error).toBeFalsy();
       });
 
       it('is a string', () => {
-        const payload = { ...publishingPayload, apiDescription: { potatoes: 'boil em, mash em, stick em in a stew' } };
-  
+        const payload = {
+          ...publishingPayload,
+          apiDescription: { potatoes: 'boil em, mash em, stick em in a stew' },
+        };
+
         const result = contactSchema.validate(payload);
-  
+
         expect(result.error?.message).toEqual('"apiDescription" must be a string');
       });
     });
@@ -319,17 +336,20 @@ describe('validations', () => {
     describe('apiInternalOnly', () => {
       it('is required', () => {
         const payload = { ...publishingPayload, apiInternalOnly: undefined };
-  
+
         const result = contactSchema.validate(payload);
-        
+
         expect(result.error?.message).toEqual('"apiInternalOnly" is required');
       });
 
       it('is a boolean', () => {
-        const payload = { ...publishingPayload, apiInternalOnly: { potatoes: 'boil em, mash em, stick em in a stew' } };
-  
+        const payload = {
+          ...publishingPayload,
+          apiInternalOnly: { potatoes: 'boil em, mash em, stick em in a stew' },
+        };
+
         const result = contactSchema.validate(payload);
-  
+
         expect(result.error?.message).toEqual('"apiInternalOnly" must be a boolean');
       });
 
@@ -337,28 +357,28 @@ describe('validations', () => {
         describe('apiInternalOnlyDetails', () => {
           it('is required', () => {
             const payload = { ...publishingPayload, apiInternalOnly: true };
-      
+
             const result = contactSchema.validate(payload);
-            
+
             expect(result.error?.message).toEqual('"apiInternalOnlyDetails" is required');
           });
         });
       });
     });
 
-    describe("description", () => {
+    describe('description', () => {
       it('is forbidden', () => {
-        const payload = { ...publishingPayload, description: "Woah how did this get here" };
-  
+        const payload = { ...publishingPayload, description: 'Woah how did this get here' };
+
         const result = contactSchema.validate(payload);
-        
+
         expect(result.error?.message).toEqual('"description" is not allowed');
       });
     });
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {...basePayload, firstName: undefined, lastName: undefined};
+    const payload = { ...basePayload, firstName: undefined, lastName: undefined };
 
     const result = contactSchema.validate(payload);
 

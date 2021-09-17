@@ -1,8 +1,8 @@
 import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
-import DynamoService, { FilterParams } from './DynamoService';
-import { DEFAULT_TABLE } from '../util/environments';
 import { API_LIST } from '../config/apis';
+import { DEFAULT_TABLE } from '../util/environments';
+import DynamoService, { FilterParams } from './DynamoService';
 
 export interface SignupQueryOptions {
   startDate?: Moment;
@@ -25,21 +25,61 @@ export interface SignupCountResult {
 }
 
 export default class SignupMetricsService {
-  private tableName: string = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
-  private dynamoService: DynamoService;
+  private readonly tableName: string = process.env.DYNAMODB_TABLE ?? DEFAULT_TABLE;
+
+  private readonly dynamoService: DynamoService;
 
   public constructor(dynamoService: DynamoService) {
     this.dynamoService = dynamoService;
+  }
+
+  private static buildFilterParams(options: SignupQueryOptions): FilterParams {
+    let filterParams = {};
+    if (options.startDate && options.endDate) {
+      filterParams = {
+        ExpressionAttributeValues: {
+          ':endDate': options.endDate.toISOString(),
+          ':startDate': options.startDate.toISOString(),
+        },
+        FilterExpression: 'createdAt BETWEEN :startDate AND :endDate',
+      };
+    } else if (options.startDate) {
+      filterParams = {
+        ExpressionAttributeValues: {
+          ':startDate': options.startDate.toISOString(),
+        },
+        FilterExpression: 'createdAt >= :startDate',
+      };
+    } else if (options.endDate) {
+      filterParams = {
+        ExpressionAttributeValues: {
+          ':endDate': options.endDate.toISOString(),
+        },
+        FilterExpression: 'createdAt <= :endDate',
+      };
+    }
+
+    return filterParams;
+  }
+
+  private static mapItemsToSignups(items: AttributeMap[]): Signup[] {
+    return items.map(item => ({
+      /* eslint-disable @typescript-eslint/no-base-to-string */
+      apis: item.apis.toString(),
+      createdAt: item.createdAt.toString(),
+      email: item.email.toString(),
+      /* eslint-enable @typescript-eslint/no-base-to-string */
+    }));
   }
 
   public async querySignups(options: SignupQueryOptions = {}): Promise<Signup[]> {
     const items = await this.dynamoService.scan(
       this.tableName,
       'email, createdAt, apis',
-      this.buildFilterParams(options),
+      SignupMetricsService.buildFilterParams(options),
     );
 
-    return this.mapItemsToSignups(items);
+    return SignupMetricsService.mapItemsToSignups(items);
   }
 
   public async getUniqueSignups(options: SignupQueryOptions): Promise<Signup[]> {
@@ -49,6 +89,7 @@ export default class SignupMetricsService {
 
     signups.forEach((signup: Signup) => {
       const existingSignup = signupsByEmail[signup.email.toString()];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!existingSignup || signup.createdAt < existingSignup.createdAt) {
         signupsByEmail[signup.email] = signup;
         apisByEmail[signup.email] = new Set<string>();
@@ -80,22 +121,26 @@ export default class SignupMetricsService {
       },
     );
 
-    return this.mapItemsToSignups(items);
+    return SignupMetricsService.mapItemsToSignups(items);
   }
 
   public async countSignups(options: SignupQueryOptions): Promise<SignupCountResult> {
-    const apiCounts = API_LIST.reduce((acc, current) => ((acc[current] = 0), acc), {});
+    const apiCounts = API_LIST.reduce((acc, current) => {
+      acc[current] = 0;
+      return acc;
+    }, {});
+
     const result = {
-      total: 0,
       apiCounts,
+      total: 0,
     };
 
     const uniqueSignups: Signup[] = await this.getUniqueSignups(options);
-    for (let i = 0; i < uniqueSignups.length; i++) {
-      const previousSignups = await this.getPreviousSignups(uniqueSignups[i]);
-      const newApis = new Set<string>(uniqueSignups[i].apis.split(','));
+    for (const uniqueSignup of uniqueSignups) {
+      const previousSignups = await this.getPreviousSignups(uniqueSignup);
+      const newApis = new Set<string>(uniqueSignup.apis.split(','));
       if (previousSignups.length === 0) {
-        result.total++;
+        result.total += 1;
       } else {
         previousSignups.forEach((signup: Signup) => {
           signup.apis.split(',').forEach((apiId: string) => {
@@ -109,49 +154,10 @@ export default class SignupMetricsService {
           throw new Error(`Encountered unknown API: ${apiId}`);
         }
 
-        result.apiCounts[apiId]++;
+        result.apiCounts[apiId] += 1;
       });
     }
 
     return result;
-  }
-
-  private buildFilterParams(options: SignupQueryOptions): FilterParams {
-    let filterParams = {};
-    if (options.startDate && options.endDate) {
-      filterParams = {
-        ExpressionAttributeValues: {
-          ':startDate': options.startDate.toISOString(),
-          ':endDate': options.endDate.toISOString(),
-        },
-        FilterExpression: 'createdAt BETWEEN :startDate AND :endDate',
-      };
-    } else if (options.startDate) {
-      filterParams = {
-        ExpressionAttributeValues: {
-          ':startDate': options.startDate.toISOString(),
-        },
-        FilterExpression: 'createdAt >= :startDate',
-      };
-    } else if (options.endDate) {
-      filterParams = {
-        ExpressionAttributeValues: {
-          ':endDate': options.endDate.toISOString(),
-        },
-        FilterExpression: 'createdAt <= :endDate',
-      };
-    }
-
-    return filterParams;
-  }
-
-  private mapItemsToSignups(items: AttributeMap[]): Signup[] {
-    return items.map(item => {
-      return {
-        email: item.email.toString(),
-        createdAt: item.createdAt.toString(),
-        apis: item.apis.toString(),
-      };
-    });
   }
 }

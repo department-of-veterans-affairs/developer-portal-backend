@@ -1,4 +1,4 @@
-import { OAuthApplication } from "@okta/okta-sdk-nodejs";
+import { OAuthApplication } from '@okta/okta-sdk-nodejs';
 
 export type Protocol = 'http' | 'https';
 
@@ -59,13 +59,30 @@ export interface DynamoConfig {
   endpoint?: string | undefined;
 }
 
-export type OAuthAPI = {
+export interface OAuthAPI {
   name: string;
   key: string;
   authzEndpoint: string | undefined;
-};
-export type KeyAuthAPI = {
+}
+export interface KeyAuthAPI {
   name: string;
   key: string;
   acl: string;
-};
+}
+
+export interface DeveloperApplicationRequestBody {
+  firstName: string;
+  lastName: string;
+  organization: string;
+  description: string;
+  email: string;
+  oAuthRedirectURI: string;
+  oAuthApplicationType: string;
+  termsOfService: boolean;
+  apis: string;
+  internalApiInfo?: {
+    programName: string;
+    sponsorEmail: string;
+    vaEmail: string;
+  };
+}

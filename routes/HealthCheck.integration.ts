@@ -9,32 +9,32 @@ const route = '/internal/developer-portal/public/health_check';
 describe(route, () => {
   if (!process.env.DYNAMODB_ENDPOINT) {
     throw new Error(
-      'Environment variable DYNAMODB_ENDPOINT must be defined for HealthCheck.integration test'
+      'Environment variable DYNAMODB_ENDPOINT must be defined for HealthCheck.integration test',
     );
   }
   if (!process.env.KONG_HOST) {
     throw new Error(
-      'Environment variable KONG_HOST must be defined for HealthCheck.integration test'
+      'Environment variable KONG_HOST must be defined for HealthCheck.integration test',
     );
   }
   if (!process.env.GOVDELIVERY_HOST) {
     throw new Error(
-      'Environment variable GOVDELIVERY_HOST must be defined for HealthCheck.integration test'
+      'Environment variable GOVDELIVERY_HOST must be defined for HealthCheck.integration test',
     );
   }
   if (!process.env.SLACK_BOT_ID) {
     throw new Error(
-      'Environment variable SLACK_BOT_ID must be defined for HealthCheck.integration test'
+      'Environment variable SLACK_BOT_ID must be defined for HealthCheck.integration test',
     );
   }
   if (!process.env.OKTA_HOST) {
     throw new Error(
-      'Environment variable OKTA_HOST must be defined for HealthCheck.integration test'
+      'Environment variable OKTA_HOST must be defined for HealthCheck.integration test',
     );
   }
   if (!process.env.SLACK_BASE_URL) {
     throw new Error(
-      'Environment variable SLACK_BASE_URL must be defined for HealthCheck.integration test'
+      'Environment variable SLACK_BASE_URL must be defined for HealthCheck.integration test',
     );
   }
 
@@ -52,7 +52,7 @@ describe(route, () => {
 
   beforeEach(() => {
     kong.get(kongMockPath).reply(200, {
-      username: "_internal_DeveloperPortal",
+      username: '_internal_DeveloperPortal',
     });
     okta.get(oktaMockPath).reply(200, {});
     dynamoDB.post(dynamoMockPath).reply(200, '{"TableNames":["mock-table"]}');
@@ -65,8 +65,8 @@ describe(route, () => {
       const response = await request.get(route);
 
       expect(response.body).toEqual({
-        healthStatus: 'vibrant',
         failedHealthChecks: [],
+        healthStatus: 'vibrant',
       });
       expect(response.status).toEqual(200);
     });
@@ -83,12 +83,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Kong',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Kong',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -97,17 +99,19 @@ describe(route, () => {
         const interceptor = kong.get(kongMockPath);
         nock.removeInterceptor(interceptor);
 
-        kong.get(kongMockPath).reply(200, {username: 'wrongUser'});
+        kong.get(kongMockPath).reply(200, { username: 'wrongUser' });
 
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Kong',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Kong',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -123,12 +127,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Okta',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Okta',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -144,12 +150,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Dynamo',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Dynamo',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -163,12 +171,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Dynamo',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Dynamo',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -184,12 +194,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'GovDelivery',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'GovDelivery',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -203,12 +215,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'GovDelivery',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'GovDelivery',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -224,12 +238,14 @@ describe(route, () => {
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Slack',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Slack',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });
@@ -238,17 +254,19 @@ describe(route, () => {
         const interceptor = slack.get(slackMockPath);
         nock.removeInterceptor(interceptor);
 
-        slack.post(slackMockPath).reply(200, {ok: false});
+        slack.post(slackMockPath).reply(200, { ok: false });
 
         const response = await request.get(route);
 
         expect(response.body).toEqual({
+          failedHealthChecks: [
+            {
+              err: expect.any(Object) as unknown,
+              healthy: false,
+              serviceName: 'Slack',
+            },
+          ],
           healthStatus: 'lackluster',
-          failedHealthChecks: [{
-            healthy: false,
-            serviceName: 'Slack',
-            err: expect.any(Object) as unknown,
-          }],
         });
         expect(response.status).toEqual(200);
       });

@@ -6,9 +6,14 @@ import OktaService from '../services/OktaService';
 import DynamoService from '../services/DynamoService';
 import developerApplicationHandler, { applySchema } from '../routes/DeveloperApplication';
 
-// The mocking that follows that is outside of the describe block is
-// to create a user model that can have its return values overriden for
-// each test.
+/*
+ * The mocking that follows that is outside of the describe block is
+ * to create a user model that can have its return values overriden for
+ * each test.
+ */
+const mockGetConsumerNameOrUndefined = jest.fn();
+const mockGetSentEmailAddress = jest.fn();
+const mockGetTokenOrUndefined = jest.fn();
 const mockSaveToKong = jest.fn();
 const mockSaveToDynamo = jest.fn();
 const mockSaveToOkta = jest.fn();
@@ -20,21 +25,22 @@ const mockSendSlackSuccess = jest.fn();
 let stubOAuthCreds: unknown;
 let stubToken: unknown;
 
-jest.mock('../models/User', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      saveToKong: mockSaveToKong,
-      saveToDynamo: mockSaveToDynamo,
-      saveToOkta: mockSaveToOkta,
-      sendEmail: mockSendEmail,
-      sendSlackSuccess: mockSendSlackSuccess,
-      shouldUpdateKong: mockShouldUpdateKong,
-      shouldUpdateOkta: mockShouldUpdateOkta,
-      token: stubToken,
-      oauthApplication: stubOAuthCreds,
-    };
-  });
-});
+jest.mock('../models/User', () =>
+  jest.fn().mockImplementation(() => ({
+    getConsumerNameOrUndefined: mockGetConsumerNameOrUndefined,
+    getSentEmailAddress: mockGetSentEmailAddress,
+    getTokenOrUndefined: mockGetTokenOrUndefined,
+    oauthApplication: stubOAuthCreds,
+    saveToDynamo: mockSaveToDynamo,
+    saveToKong: mockSaveToKong,
+    saveToOkta: mockSaveToOkta,
+    sendEmail: mockSendEmail,
+    sendSlackSuccess: mockSendSlackSuccess,
+    shouldUpdateKong: mockShouldUpdateKong,
+    shouldUpdateOkta: mockShouldUpdateOkta,
+    token: stubToken,
+  })),
+);
 
 describe('developerApplicationHandler', () => {
   const kong = {} as KongService;
@@ -71,13 +77,17 @@ describe('developerApplicationHandler', () => {
     };
 
     stubToken = 'onering';
-
+    mockGetConsumerNameOrUndefined.mockReset();
+    mockGetSentEmailAddress.mockReset();
+    mockGetTokenOrUndefined.mockReset();
+    mockJson.mockReset();
     mockSaveToDynamo.mockReset();
     mockSaveToKong.mockReset();
     mockSaveToOkta.mockReset();
     mockSendEmail.mockReset();
     mockSendSlackSuccess.mockReset();
     stubNext.mockReset();
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
   });
 
   it('signs users up for Kong if they requested access to valid standard APIs', async () => {
@@ -93,7 +103,7 @@ describe('developerApplicationHandler', () => {
   it('signs users up for Okta if they requested access to valid OAuth APIs', async () => {
     mockShouldUpdateOkta.mockReturnValue(true);
     stubToken = '';
-
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
     const handler = developerApplicationHandler(kong, okta, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
@@ -113,7 +123,7 @@ describe('developerApplicationHandler', () => {
     const handler = developerApplicationHandler(kong, undefined, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
-    expect(mockSaveToDynamo).toHaveBeenCalled();    
+    expect(mockSaveToDynamo).toHaveBeenCalled();
   });
 
   it('renders a token as a response if no OAuth applications were requested', async () => {
@@ -132,7 +142,7 @@ describe('developerApplicationHandler', () => {
     mockShouldUpdateOkta.mockReturnValue(true);
 
     stubToken = '';
-
+    mockGetTokenOrUndefined.mockReturnValue(stubToken);
     const handler = developerApplicationHandler(kong, okta, dynamo, undefined, undefined);
     await handler(stubReq, stubRes, stubNext);
 
@@ -224,7 +234,7 @@ describe('developerApplicationHandler', () => {
   });
 
   it('sends GovDelivery errors to the default error handler', async () => {
-    const err = new Error('failed sending email');    
+    const err = new Error('failed sending email');
     mockShouldUpdateKong.mockReturnValue(true);
     mockSendEmail.mockRejectedValue(err);
 
@@ -235,7 +245,7 @@ describe('developerApplicationHandler', () => {
   });
 
   it('sends Slack errors to the default error handler', async () => {
-    const err = new Error('failed sending slack message');    
+    const err = new Error('failed sending slack message');
     mockShouldUpdateKong.mockReturnValue(true);
     mockSendSlackSuccess.mockRejectedValue(err);
 
@@ -248,9 +258,9 @@ describe('developerApplicationHandler', () => {
 
 describe('validations', () => {
   const defaultPayload = {
-    firstName: 'Eowyn',
     apis: 'benefits',
     email: 'eowyn@rohan.horse',
+    firstName: 'Eowyn',
     lastName: 'Eorl',
     organization: 'Rohan',
     termsOfService: true,
@@ -258,7 +268,7 @@ describe('validations', () => {
 
   describe('firstName', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, firstName: undefined};
+      const payload = { ...defaultPayload, firstName: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -276,7 +286,7 @@ describe('validations', () => {
 
   describe('lastName', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, lastName: undefined};
+      const payload = { ...defaultPayload, lastName: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -294,7 +304,7 @@ describe('validations', () => {
 
   describe('organization', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, organization: undefined};
+      const payload = { ...defaultPayload, organization: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -302,7 +312,7 @@ describe('validations', () => {
     });
 
     it('is a string', () => {
-      const payload = {...defaultPayload, organization: { name: 'Rohan' }};
+      const payload = { ...defaultPayload, organization: { name: 'Rohan' } };
 
       const result = applySchema.validate(payload);
 
@@ -312,15 +322,15 @@ describe('validations', () => {
 
   describe('description', () => {
     it('is a string', () => {
-      const payload = {...defaultPayload, description: 123456789};
-      
+      const payload = { ...defaultPayload, description: 123456789 };
+
       const result = applySchema.validate(payload);
 
       expect(result.error?.message).toEqual('"description" must be a string');
     });
 
     it('is allowed to be an empty string', () => {
-      const payload = {...defaultPayload, description: ''};
+      const payload = { ...defaultPayload, description: '' };
 
       const result = applySchema.validate(payload);
 
@@ -330,7 +340,7 @@ describe('validations', () => {
 
   describe('email', () => {
     it('is required', () => {
-      const payload = {...defaultPayload, email: undefined};
+      const payload = { ...defaultPayload, email: undefined };
 
       const result = applySchema.validate(payload);
 
@@ -360,7 +370,9 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern');
+      expect(result.error?.message).toEqual(
+        '"oAuthRedirectURI" must be a valid uri with a scheme matching the http|https pattern',
+      );
     });
 
     it('is allowed to be an empty string', () => {
@@ -422,7 +434,9 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis" failed custom validation because invalid apis in list');
+      expect(result.error?.message).toEqual(
+        '"apis" failed custom validation because invalid apis in list: horsies',
+      );
     });
 
     it('gracefully handles non-string types', () => {
@@ -430,12 +444,119 @@ describe('validations', () => {
 
       const result = applySchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"apis" failed custom validation because it was unable to process the provided data');
+      expect(result.error?.message).toEqual(
+        '"apis" failed custom validation because it was unable to process the provided data',
+      );
+    });
+  });
+
+  describe('internalApiInfo', () => {
+    const defaultInternalApiInfo = {
+      programName: 'Battle of the Hornburg',
+      sponsorEmail: 'aragorn@va.gov',
+      vaEmail: 'eowyn@va.gov',
+    };
+    describe('programName', () => {
+      it('is required', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, programName: undefined };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.programName" is required');
+      });
+
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, programName: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.programName" must be a string');
+      });
+    });
+
+    describe('sponsorEmail', () => {
+      it('is required', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: undefined };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.sponsorEmail" is required');
+      });
+
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.sponsorEmail" must be a string');
+      });
+
+      it('is in a valid format', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, sponsorEmail: 'lolnotanemail.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.sponsorEmail" must be a valid email. "internalApiInfo.sponsorEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+
+      it('is in a valid email from the VA', () => {
+        const internalApiInfo = {
+          ...defaultInternalApiInfo,
+          sponsorEmail: 'gloin@son-of-groin.com',
+        };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.sponsorEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+    });
+
+    describe('vaEmail', () => {
+      it('is a string', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 12345 };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual('"internalApiInfo.vaEmail" must be a string');
+      });
+
+      it('is in a valid format', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'lolnotanemail.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" must be a valid email. "internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
+
+      it('is in a valid email from the VA', () => {
+        const internalApiInfo = { ...defaultInternalApiInfo, vaEmail: 'gloin@son-of-groin.com' };
+        const payload = { ...defaultPayload, internalApiInfo };
+
+        const result = applySchema.validate(payload);
+
+        expect(result.error?.message).toEqual(
+          '"internalApiInfo.vaEmail" failed custom validation because VA email is not valid. Please check that a real VA email has been submitted',
+        );
+      });
     });
   });
 
   it('reports multiple failures at a time', () => {
-    const payload = {...defaultPayload, firstName: undefined, lastName: undefined};
+    const payload = { ...defaultPayload, firstName: undefined, lastName: undefined };
 
     const result = applySchema.validate(payload);
 

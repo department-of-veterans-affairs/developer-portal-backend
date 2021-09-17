@@ -1,5 +1,3 @@
 import { oktaAuthMocks } from './Okta';
 
-export {
-  oktaAuthMocks,
-};
+export { oktaAuthMocks };

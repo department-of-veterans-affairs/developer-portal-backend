@@ -1,68 +1,114 @@
 import { KeyAuthAPI, OAuthAPI } from '../types';
 
+const addressValidation: KeyAuthAPI = {
+  acl: 'internal-va:address_validation',
+  key: 'addressValidation',
+  name: 'Address Validation API',
+};
+const appealsStatus: KeyAuthAPI = {
+  acl: 'appeals',
+  key: 'appeals',
+  name: 'Appeals Status API',
+};
+// clinicalHealth is only present in .env.test, and will need to be added for real world use
+const clinicalHealth: OAuthAPI = {
+  authzEndpoint: process.env.AUTHZ_SERVER_CLINICAL_FHIR ?? 'Unknown endpoint',
+  key: 'clinicalHealth',
+  name: 'Clinical Health API (FHIR)',
+};
+
+const decisionReviews: KeyAuthAPI = {
+  acl: 'hlr',
+  key: 'decision_reviews',
+  name: 'Decision Reviews API',
+};
+
+const loanGuaranty: KeyAuthAPI = {
+  acl: 'loan_guaranty',
+  key: 'loan_guaranty',
+  name: 'Loan Guaranty API',
+};
+
 const oauthAPIList: OAuthAPI[] = [
   {
-    name: 'Health API',
-    key: 'health',
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
+    key: 'health',
+    name: 'Health API',
   },
   {
-    name: 'Veteran Verification API',
-    key: 'verification',
     authzEndpoint: process.env.AUTHZ_SERVER_VERIFICATION,
+    key: 'verification',
+    name: 'Veteran Verification API',
   },
   {
-    name: 'Community Care Eligibility API',
-    key: 'communityCare',
     authzEndpoint: process.env.AUTHZ_SERVER_COMMUNITYCARE,
+    key: 'communityCare',
+    name: 'Community Care Eligibility API',
   },
   {
-    name: 'Claims API',
-    key: 'claims',
     authzEndpoint: process.env.AUTHZ_SERVER_CLAIMS,
+    key: 'claims',
+    name: 'Claims API',
   },
+  clinicalHealth,
 ];
 
 const keyAuthAPIList: KeyAuthAPI[] = [
   {
-    name: 'Benefits Intake API',
-    key: 'benefits',
     acl: 'vba_documents',
+    key: 'benefits',
+    name: 'Benefits Intake API',
   },
   {
-    name: 'Claims Attributes API',
-    key: 'claimsAttributes',
     acl: 'claims_attributes',
+    key: 'claimsAttributes',
+    name: 'Claims Attributes API',
   },
   {
-    name: 'VA Facilities API',
-    key: 'facilities',
     acl: 'va_facilities',
+    key: 'facilities',
+    name: 'VA Facilities API',
   },
   {
-    name: 'VA Form API',
-    key: 'vaForms',
     acl: 'va_forms',
+    key: 'vaForms',
+    name: 'VA Form API',
   },
   {
-    name: 'Veteran Confirmation API',
-    key: 'confirmation',
     acl: 'veteran_confirmation',
+    key: 'confirmation',
+    name: 'Veteran Confirmation API',
   },
+  addressValidation,
+  appealsStatus,
+  decisionReviews,
+  loanGuaranty,
 ];
 
-export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc,endpoint) => {
+const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
+  addressValidation,
+  appealsStatus,
+  clinicalHealth,
+  decisionReviews,
+  loanGuaranty,
+];
+
+export const APIS_TO_ACLS: Record<string, string> = keyAuthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.acl;
   return acc;
 }, {});
 
-export const APIS_TO_PROPER_NAMES: Record<string, string> = [...oauthAPIList, ...keyAuthAPIList].reduce((acc,endpoint) => {
+export const APIS_TO_PROPER_NAMES: Record<string, string> = [
+  ...oauthAPIList,
+  ...keyAuthAPIList,
+].reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.name;
   return acc;
 }, {});
 
-export const KONG_CONSUMER_APIS: string[] = keyAuthAPIList
-  .map((x) => x.key);
+export const INTERNAL_ONLY_APIS: string[] = internalOnlyApis.map(x => x.key);
+
+export const KONG_CONSUMER_APIS: string[] = keyAuthAPIList.map(x => x.key);
 
 export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.authzEndpoint;

@@ -12,27 +12,27 @@ const route = '/internal/developer-portal/public/developer_application';
 describe(route, () => {
   if (!process.env.KONG_HOST) {
     throw new Error(
-      'Environment variable KONG_HOST must be defined for DeveloperApplication.integration test'
+      'Environment variable KONG_HOST must be defined for DeveloperApplication.integration test',
     );
   }
   if (!process.env.DYNAMODB_ENDPOINT) {
     throw new Error(
-      'Environment variable DYNAMODB_ENDPOINT must be defined for DeveloperApplication.integration test'
+      'Environment variable DYNAMODB_ENDPOINT must be defined for DeveloperApplication.integration test',
     );
   }
   if (!process.env.GOVDELIVERY_HOST) {
     throw new Error(
-      'Environment variable GOVDELIVERY_HOST must be defined for DeveloperApplication.integration test'
+      'Environment variable GOVDELIVERY_HOST must be defined for DeveloperApplication.integration test',
     );
   }
   if (!process.env.OKTA_HOST) {
     throw new Error(
-      'Environment variable OKTA_HOST must be defined for DeveloperApplication.integration test'
+      'Environment variable OKTA_HOST must be defined for DeveloperApplication.integration test',
     );
   }
   if (!process.env.SLACK_BASE_URL) {
     throw new Error(
-      'Environment variable SLACK_BASE_URL must be defined for DeveloperApplication.integration test'
+      'Environment variable SLACK_BASE_URL must be defined for DeveloperApplication.integration test',
     );
   }
 
@@ -54,33 +54,60 @@ describe(route, () => {
   const devAppRequest = {
     ...baseAppRequest,
     apis: 'facilities,verification',
-    oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
     oAuthApplicationType: 'web',
+    oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
   };
 
   beforeEach(() => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
 
-    kong.get('/internal/admin/consumers/FellowshipBaggins').reply(404)
-      .get('/internal/admin/consumers/FellowshipBaggins/acls').reply(404)
-      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'va_facilities'}).reply(201,
-        { group: 'facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
-      )
-      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'veteran_verification'}).reply(201,
-        { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } },
-      )
-      .post('/internal/admin/consumers', { username: 'FellowshipBaggins' }).reply(201, { id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null })
-      .post('/internal/admin/consumers/FellowshipBaggins/key-auth').reply(201, { key: 'my-precious' });
+    kong
+      .get('/internal/admin/consumers/FellowshipBaggins')
+      .reply(404)
+      .get('/internal/admin/consumers/FellowshipBaggins/acls')
+      .reply(404)
+      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'va_facilities' })
+      .reply(201, {
+        consumer: { id: '222' },
+        created_at: 1040169600,
+        group: 'facilities',
+        id: '123',
+      })
+      .post('/internal/admin/consumers/FellowshipBaggins/acls', { group: 'veteran_verification' })
+      .reply(201, {
+        consumer: { id: '222' },
+        created_at: 1040169600,
+        group: 'veteran_verification',
+        id: '123',
+      })
+      .post('/internal/admin/consumers', { username: 'FellowshipBaggins' })
+      .reply(201, {
+        created_at: 1008720000,
+        custom_id: '222',
+        id: '123',
+        tags: null,
+        username: 'frodo',
+      })
+      .post('/internal/admin/consumers/FellowshipBaggins/key-auth')
+      .reply(201, { key: 'my-precious' });
 
-    okta.post('/api/v1/apps').reply(200, { id: '123', credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } } })
-      .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`).reply(200, {});
+    okta
+      .post('/api/v1/apps')
+      .reply(200, {
+        credentials: { oauthClient: { client_id: 'gollum', client_secret: 'mordor' } },
+        id: '123',
+      })
+      .put(`/api/v1/apps/123/groups/${IDME_GROUP_ID}`)
+      .reply(200, {});
 
     const { oktaPolicyCollection, oktaPolicy } = oktaAuthMocks;
     const verificationApiEndpoint = OKTA_AUTHZ_ENDPOINTS.verification;
     okta
-      .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`).reply(200, oktaPolicyCollection)
-      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`).reply(200, oktaPolicy);
+      .get(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies`)
+      .reply(200, oktaPolicyCollection)
+      .put(`/api/v1/authorizationServers/${verificationApiEndpoint}/policies/defaultPolicyIdHere`)
+      .reply(200, oktaPolicy);
 
     dynamoDB.post('/').reply(200);
 
@@ -98,13 +125,20 @@ describe(route, () => {
     const response = await request.post(route).send({
       apis: 'benefits',
       email: 'eowyn@rohan.horse',
+      internalApiInfo: {
+        programName: 'Battle of the Hornburg',
+      },
       lastName: 'Eorl',
       termsOfService: true,
     });
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({
-      errors: ['"firstName" is required', '"organization" is required'],
+      errors: [
+        '"firstName" is required',
+        '"internalApiInfo.sponsorEmail" is required',
+        '"organization" is required',
+      ],
     });
   });
 
@@ -117,8 +151,9 @@ describe(route, () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
-        token: 'my-precious',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
+        token: 'my-precious',
       });
     });
 
@@ -126,28 +161,31 @@ describe(route, () => {
       const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
-        oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
         oAuthApplicationType: 'web',
+        oAuthRedirectURI: 'https://fake-oAuth-redirect-uri',
       });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         redirectURI: 'https://fake-oAuth-redirect-uri',
       });
     });
 
-    it('succeeds (with an empty response) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
+    it('succeeds (with an empty response except for email) for a request with only oauth api and an empty oAuthRedirectURI', async () => {
       const response = await request.post(route).send({
         ...baseAppRequest,
         apis: 'verification',
-        oAuthRedirectURI: '',
         oAuthApplicationType: 'web',
+        oAuthRedirectURI: '',
       });
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({});
+      expect(response.body).toEqual({
+        email: 'frodo@fellowship.org',
+      });
     });
 
     it('succeeds for a request with both key auth and oauth apis', async () => {
@@ -157,6 +195,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
@@ -170,7 +209,11 @@ describe(route, () => {
       beforeEach(() => {
         nock.removeInterceptor(consumerInterceptor);
         kong.get(consumerPath).reply(200, {
-          id: '123', created_at: 1008720000, username: 'frodo', custom_id: '222', tags: null,
+          created_at: 1008720000,
+          custom_id: '222',
+          id: '123',
+          tags: null,
+          username: 'frodo',
         });
       });
 
@@ -181,6 +224,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -193,9 +237,10 @@ describe(route, () => {
         nock.removeInterceptor(aclInterceptor);
 
         kong.get(aclPath).reply(200, {
-          total: 1, data: [
-            { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+          data: [
+            { consumer: { id: '222' }, created_at: 1040169600, group: 'va_facilities', id: '123' },
           ],
+          total: 1,
         });
 
         const response = await request.post(route).send(devAppRequest);
@@ -204,6 +249,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -216,11 +262,23 @@ describe(route, () => {
         nock.removeInterceptor(aclInterceptor);
 
         kong.get(aclPath).reply(200, {
-
-          total: 2, data: [
-            { group: 'va_facilities', created_at: 1040169600, id: '123', consumer: { id: '222' } },
-            { group: 'veteran_verification', created_at: 1040169600, id: '123', consumer: { id: '222' } },
+          data: [
+            {
+              consumer: {
+                id: '222',
+              },
+              created_at: 1040169600,
+              group: 'va_facilities',
+              id: '123',
+            },
+            {
+              consumer: { id: '222' },
+              created_at: 1040169600,
+              group: 'veteran_verification',
+              id: '123',
+            },
           ],
+          total: 2,
         });
 
         const response = await request.post(route).send(devAppRequest);
@@ -229,6 +287,7 @@ describe(route, () => {
         expect(response.body).toEqual({
           clientID: 'gollum',
           clientSecret: 'mordor',
+          email: 'frodo@fellowship.org',
           kongUsername: 'FellowshipBaggins',
           redirectURI: 'https://fake-oAuth-redirect-uri',
           token: 'my-precious',
@@ -249,6 +308,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',
@@ -268,6 +328,7 @@ describe(route, () => {
       expect(response.body).toEqual({
         clientID: 'gollum',
         clientSecret: 'mordor',
+        email: 'frodo@fellowship.org',
         kongUsername: 'FellowshipBaggins',
         redirectURI: 'https://fake-oAuth-redirect-uri',
         token: 'my-precious',

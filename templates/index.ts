@@ -129,3 +129,15 @@ export const PUBLISHING_SUPPORT_TEMPLATE = `<ul>
     </div>
 </li>
 </ul>`;
+
+export const VA_PROFILE_DISTRIBUTION_TEMPLATE = `<ul>
+    <li><strong>First Name:</strong> {{firstName}}</li>
+    <li><strong>Last Name:</strong> {{lastName}}</li>
+    <li><strong>Organization:</strong> {{organization}}</li>
+    <li><strong>From Email:</strong> {{requester}}</li>
+    <li><strong>Description:</strong> {{description}}</li>
+    <li><strong>APIs:</strong> {{apis}}</li>
+    <li><strong>Program Name:</strong> {{programName}}</li>
+    <li><strong>Sponsor Email:</strong> {{sponsorEmail}}</li>
+    <li><strong>VA Email:</strong> {{vaEmail}}</li>
+</ul>`;

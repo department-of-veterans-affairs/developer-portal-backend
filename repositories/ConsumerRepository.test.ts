@@ -1,40 +1,46 @@
 import 'jest';
 import DynamoService from '../services/DynamoService';
+import { UserDynamoItem } from '../models/User';
 import ConsumerRepository from './ConsumerRepository';
-import User from '../models/User';
 
-const mockUserList: User[] = [
-  new User({
+const mockUserList: UserDynamoItem[] = [
+  {
+    apis: 'ab',
+    createdAt: '1234567890',
+    description: 'super chill',
+    email: 'fbag@hobbiton.com',
     firstName: 'Frodo',
     lastName: 'Baggins',
-    organization: 'The Fellowship',
-    email: 'fbag@hobbiton.com',
-    apis: 'ab',
-    description: 'super chill',
     oAuthRedirectURI: 'http://elvish-swords.com',
-    oAuthApplicationType: '',
-    termsOfService: true,
-  }),
-  new User({
+    okta_application_id: 'okta-id',
+    okta_client_id: 'okta-client-id',
+    organization: 'The Fellowship',
+    programName: 'shire-hero',
+    sponsorEmail: 'bbag@hobbiton.com',
+    tosAccepted: true,
+    vaEmail: 'frodo.baggins@shire.com',
+  },
+  {
+    apis: 'va,xz,dx',
+    createdAt: '1234567890',
+    description: 'super cool',
+    email: 'wizz@higherbeings.com',
     firstName: 'Gandalf',
     lastName: 'Gray',
-    organization: 'The Fellowship',
-    email: 'wizz@higherbeings.com',
-    apis: 'va,xz,dx',
-    description: 'super cool',
     oAuthRedirectURI: 'http://wanna-use-magic.com',
-    oAuthApplicationType: '',
-    termsOfService: true,
-  }),
+    organization: 'The Fellowship',
+    programName: 'Istari',
+    sponsorEmail: 'manwe@ainur.com',
+    tosAccepted: true,
+    vaEmail: 'olorin@middle-earth.com',
+  },
 ];
 
-const mockedUsersAB: User = mockUserList[0];
+const mockedUsersAB: UserDynamoItem = mockUserList[0];
 
-const expectedMockedUsers: User[] = Array.from(mockUserList);
-expectedMockedUsers[0].createdAt = expect.any(Date) as Date;
-expectedMockedUsers[1].createdAt = expect.any(Date) as Date;
+const expectedMockedUsers: UserDynamoItem[] = Array.from(mockUserList);
 
-describe('ConsumerRepository', ()=> {
+describe('ConsumerRepository', () => {
   const mockScan = jest.fn();
 
   const mockDynamoService = {
@@ -48,34 +54,68 @@ describe('ConsumerRepository', ()=> {
   });
 
   describe('get users', () => {
-    it('returns all users when no api list is given', async () => {
+    it('returns all users when no args are given', async () => {
       mockScan.mockResolvedValue(mockUserList);
 
-      const users: User[] = await consumerRepo.getConsumers();
+      const users: UserDynamoItem[] = await consumerRepo.getConsumers();
 
       expect(users).toEqual(expectedMockedUsers);
     });
 
-    it('should call dynamo scan method with proper params', async () => { 
-      mockScan.mockResolvedValue([mockedUsersAB]);  
-      
+    it('should call dynamo scan with proper params with only api list given', async () => {
+      mockScan.mockResolvedValue([mockedUsersAB]);
+
       const tableName = process.env.DYNAMODB_TABLE;
-      const projectionExp = 'email, firstName, lastName, apis';
-      const expressionAttributeValues = {":api_ab": "ab"};
-      const filterExpression = "contains(apis, :api_ab)";
+      const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
+      const expressionAttributeValues = { ':apis_0': 'ab' };
+      const filterExpression = '(contains(apis, :apis_0))';
 
       const apiList: string[] = ['ab'];
       await consumerRepo.getConsumers(apiList);
 
-      expect(mockScan)
-        .toHaveBeenCalledWith(
-          tableName, 
-          projectionExp, 
-          {
-            ExpressionAttributeValues: expressionAttributeValues,
-            FilterExpression: filterExpression,
-          });
+      expect(mockScan).toHaveBeenCalledWith(tableName, projectionExp, {
+        ExpressionAttributeValues: expressionAttributeValues,
+        FilterExpression: filterExpression,
+      });
+    });
+
+    it('should call dynamo scan with proper prarams with only okta application id list given', async () => {
+      mockScan.mockResolvedValue([mockedUsersAB]);
+
+      const tableName = process.env.DYNAMODB_TABLE;
+      const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
+      const expressionAttributeValues = { ':okta_application_id_0': 'my-okta-id' };
+      const filterExpression = '(okta_application_id = :okta_application_id_0)';
+
+      const oktaApplicationIdList: string[] = ['my-okta-id'];
+      await consumerRepo.getConsumers(undefined, oktaApplicationIdList);
+
+      expect(mockScan).toHaveBeenCalledWith(tableName, projectionExp, {
+        ExpressionAttributeValues: expressionAttributeValues,
+        FilterExpression: filterExpression,
+      });
+    });
+
+    it('should call dynamo scan with proper prarams with all arguments given', async () => {
+      mockScan.mockResolvedValue([mockedUsersAB]);
+
+      const tableName = process.env.DYNAMODB_TABLE;
+      const projectionExp = 'email, firstName, lastName, apis, okta_application_id';
+      const expressionAttributeValues = {
+        ':apis_0': 'ab',
+        ':okta_application_id_0': 'myid',
+      };
+      const filterExpression =
+        '(contains(apis, :apis_0)) and (okta_application_id = :okta_application_id_0)';
+
+      const apiList: string[] = ['ab'];
+      const oktaApplicationIdList: string[] = ['myid'];
+      await consumerRepo.getConsumers(apiList, oktaApplicationIdList);
+
+      expect(mockScan).toHaveBeenCalledWith(tableName, projectionExp, {
+        ExpressionAttributeValues: expressionAttributeValues,
+        FilterExpression: filterExpression,
+      });
     });
   });
-
 });

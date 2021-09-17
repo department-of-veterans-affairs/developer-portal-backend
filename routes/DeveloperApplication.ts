@@ -1,3 +1,5 @@
+/* eslint-disable max-params */
+
 import { Request, Response, NextFunction } from 'express';
 import Joi from '@hapi/joi';
 import { FormSubmission } from '../types/FormSubmission';
@@ -8,89 +10,51 @@ import OktaService from '../services/OktaService';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 import DynamoService from '../services/DynamoService';
-import { API_LIST } from '../config/apis';
+import { vaEmailValidator, validateApiList } from '../util/validators';
 import { DevPortalError } from '../models/DevPortalError';
+import { DeveloperApplicationRequestBody } from '../types';
 
-function validateApiList(val: string): string {
-  let result: boolean;
-  try {
-    const apis = val.split(',');
-    result = apis.every(api => API_LIST.includes(api));
-  } catch {
-    throw new Error('it was unable to process the provided data');
-  }
+export const applySchema = Joi.object()
+  .keys({
+    apis: Joi.custom(validateApiList).required(),
+    description: Joi.string().allow(''),
+    email: Joi.string().email().required(),
+    firstName: Joi.string().required(),
+    internalApiInfo: Joi.object().keys({
+      programName: Joi.string().required(),
+      sponsorEmail: Joi.string().email().custom(vaEmailValidator).required(),
+      vaEmail: Joi.string().email().custom(vaEmailValidator),
+    }),
+    lastName: Joi.string().required(),
+    oAuthApplicationType: Joi.allow('').valid('web', 'native'),
+    oAuthRedirectURI: Joi.string()
+      .allow('')
+      .uri({ scheme: ['http', 'https'] }),
+    organization: Joi.string().required(),
+    termsOfService: Joi.required().valid(true),
+  })
+  .options({ abortEarly: false });
 
-  if (!result) {
-    throw new Error('invalid apis in list');
-  }
+type DeveloperApplicationRequest = Request<
+  Record<string, unknown>,
+  Record<string, unknown>,
+  DeveloperApplicationRequestBody,
+  Record<string, unknown>
+>;
 
-  return val;
-}
-
-export const applySchema = Joi.object().keys({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  organization: Joi.string().required(),
-  description: Joi.string().allow(''),
-  email: Joi.string().email().required(),
-  oAuthRedirectURI: Joi.string().allow('').uri({ scheme: ['http', 'https']}),
-  oAuthApplicationType: Joi.allow('').valid('web', 'native'),
-  termsOfService: Joi.required().valid(true),
-  apis: Joi.custom(validateApiList).required(),
-}).options({ abortEarly: false });
-
-interface DeveloperApplicationRequestBody {
-  firstName: string;
-  lastName: string;
-  organization: string;
-  description: string;
-  email: string;
-  oAuthRedirectURI: string;
-  oAuthApplicationType: string;
-  termsOfService: boolean;
-  apis: string;
-}
-
-type DeveloperApplicationRequest = Request<Record<string, unknown>, Record<string, unknown>, DeveloperApplicationRequestBody, Record<string, unknown>>;
-
-export default function developerApplicationHandler(
-  kong: KongService,
-  okta: OktaService | undefined,
-  dynamo: DynamoService,
-  govdelivery: GovDeliveryService | undefined,
-  slack: SlackService | undefined,
-) {
-  return async function (
-    req: DeveloperApplicationRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    const {
-      firstName,
-      lastName,
-      organization,
-      description,
-      email,
-      oAuthRedirectURI,
-      oAuthApplicationType,
-      termsOfService,
-      apis,
-    } = req.body;
-
-    const form: FormSubmission = {
-      firstName,
-      lastName,
-      organization,
-      description,
-      email,
-      oAuthRedirectURI,
-      oAuthApplicationType,
-      termsOfService,
-      apis,
-    };
+const developerApplicationHandler =
+  (
+    kong: KongService,
+    okta: OktaService | undefined,
+    dynamo: DynamoService,
+    govdelivery: GovDeliveryService | undefined,
+    slack: SlackService | undefined,
+  ) =>
+  async (req: DeveloperApplicationRequest, res: Response, next: NextFunction): Promise<void> => {
+    const form: FormSubmission = new FormSubmission(req.body);
 
     const user: User = new User(form);
-    /* 
+    /*
      * Sign up the user in Kong and Okta, record it in DynamoDB,
      * and return the result to UI as quickly as possible. Report
      * an error to the UI with the call to next if any of these critical steps fail.
@@ -109,21 +73,23 @@ export default function developerApplicationHandler(
       logger.info({ message: 'recording signup in DynamoDB' });
       await user.saveToDynamo(dynamo);
 
-      if (!user.oauthApplication) {
-        res.json({ 
-          token: user.token,
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-        });
-      } else {
+      if (user.oauthApplication) {
         res.json({
           clientID: user.oauthApplication.client_id,
           clientSecret: user.oauthApplication.client_secret,
-          kongUsername: user.kongConsumerId ? user.consumerName() : undefined,
-          token: user.token,
+          email: user.getSentEmailAddress(),
+          kongUsername: user.getConsumerNameOrUndefined(),
           redirectURI: user.oAuthRedirectURI,
+          token: user.getTokenOrUndefined(),
+        });
+      } else {
+        res.json({
+          email: user.getSentEmailAddress(),
+          kongUsername: user.getConsumerNameOrUndefined(),
+          token: user.getTokenOrUndefined(),
         });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       next(err);
       return;
     }
@@ -136,6 +102,7 @@ export default function developerApplicationHandler(
       if (govdelivery) {
         logger.info({ message: 'sending email to new user' });
         await user.sendEmail(govdelivery);
+        await user.sendDistributionEmail(govdelivery);
       }
     } catch (err: unknown) {
       (err as DevPortalError).action = 'sending govdelivery signup notification';
@@ -152,4 +119,5 @@ export default function developerApplicationHandler(
       next(err);
     }
   };
-}
+
+export default developerApplicationHandler;
