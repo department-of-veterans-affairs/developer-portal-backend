@@ -42,4 +42,5 @@ export interface ProductionAccessSupportEmail {
   appImageLink: string;
   patientWaitTimeImageLink: string;
   medicalDisclaimerImageLink: string;
+  is508Compliant: boolean;
 }
