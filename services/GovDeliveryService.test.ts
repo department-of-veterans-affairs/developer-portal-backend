@@ -186,6 +186,7 @@ describe('GovDeliveryService', () => {
           centralizedBackendLog: 'non-existent',
           distributingAPIKeysToCustomers: false,
           exposeVeteranInformationToThirdParties: false, // eslint-disable-line id-length
+          is508Compliant: true,
           listedOnMyHealthApplication: false,
           medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/disclaimer',
           monitizationExplanation: 'n/a',

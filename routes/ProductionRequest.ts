@@ -18,6 +18,7 @@ export const productionSchema = Joi.object()
     centralizedBackendLog: Joi.string(),
     distributingAPIKeysToCustomers: Joi.boolean(),
     exposeVeteranInformationToThirdParties: Joi.boolean(),
+    is508Compliant: Joi.boolean().required(),
     listedOnMyHealthApplication: Joi.boolean(),
     monitizationExplanation: Joi.string(),
     monitizedVeteranInformation: Joi.boolean().required(),
