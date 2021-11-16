@@ -361,7 +361,6 @@ describeFunc('signups module', () => {
     const zeroCounts = {
       benefits: 0,
       claims: 0,
-      claimsAttributes: 0,
       communityCare: 0,
       confirmation: 0,
       facilities: 0,
@@ -511,7 +510,6 @@ describeFunc('signups module', () => {
         apiCounts: {
           benefits: 1,
           claims: 1,
-          claimsAttributes: 0,
           communityCare: 1,
           confirmation: 1,
           facilities: 1,
