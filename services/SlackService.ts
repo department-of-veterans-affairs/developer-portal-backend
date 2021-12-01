@@ -116,6 +116,7 @@ export default class SlackService implements MonitoredService {
     allTimeSignups: SignupCountResult,
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
+    console.log(JSON.stringify(apis));
     const numsByApi = apis.map(api => {
       const timeSpanCount = timeSpanSignups.apiCounts[api];
       const allTimeCount = allTimeSignups.apiCounts[api];
@@ -175,22 +176,26 @@ export default class SlackService implements MonitoredService {
           },
           type: 'section',
         },
-        {
-          fields: numsByApi,
-          type: 'section',
-        },
-        {
-          type: 'divider',
-        },
-        {
-          text: {
-            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
-            type: 'mrkdwn',
-          },
-          type: 'section',
-        },
       ],
     };
+    while (numsByApi.length > 0) {
+      body.blocks?.push({
+        fields: numsByApi.splice(0, 10),
+        type: 'section',
+      });
+    }
+    body.blocks?.push(
+      {
+        type: 'divider',
+      },
+      {
+        text: {
+          text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+          type: 'mrkdwn',
+        },
+        type: 'section',
+      },
+    );
 
     return this.post(body);
   }
@@ -226,6 +231,7 @@ export default class SlackService implements MonitoredService {
   }
 
   private async post(body: PostBody): Promise<SlackResponse> {
+    console.log(JSON.stringify(body));
     try {
       const res = await this.client.post<SlackResponse>('/api/chat.postMessage', {
         channel: this.options.channel,
