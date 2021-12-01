@@ -60,11 +60,6 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     name: 'Benefits Intake API',
   },
   {
-    acl: 'claims_attributes',
-    key: 'claimsAttributes',
-    name: 'Claims Attributes API',
-  },
-  {
     acl: 'va_facilities',
     key: 'facilities',
     name: 'VA Facilities API',

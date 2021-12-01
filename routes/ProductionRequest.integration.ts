@@ -28,6 +28,7 @@ describe(route, () => {
     centralizedBackendLog: 'non-existent',
     distributingAPIKeysToCustomers: false,
     exposeVeteranInformationToThirdParties: false,
+    is508Compliant: true,
     listedOnMyHealthApplication: false,
     monitizationExplanation: 'n/a',
     monitizedVeteranInformation: false,
@@ -37,9 +38,7 @@ describe(route, () => {
     phoneNumber: '555-867-5309',
     piiStorageMethod: 'Locking away in the fires from whence it came.',
     platforms: 'iOS',
-    policyDocuments: [
-      'www.example.com/tos',
-    ],
+    policyDocuments: ['www.example.com/tos'],
     primaryContact: {
       email: 'sam@fellowship.com',
       firstName: 'Samwise',
@@ -53,21 +52,16 @@ describe(route, () => {
       firstName: 'Frodo',
       lastName: 'Baggins',
     },
-    signUpLink: [
-      'www.one2bindthem.com/signup',
-    ],
-    statusUpdateEmails: [
-      'sam@fellowship.com',
-    ],
+    signUpLink: ['www.one2bindthem.com/signup'],
+    statusUpdateEmails: ['sam@fellowship.com'],
     storePIIOrPHI: false,
-    supportLink: [
-      'www.one2bindthem.com/support',
-    ],
+    supportLink: ['www.one2bindthem.com/support'],
     thirdPartyInfoDescription: 'n/a',
     valueProvided: 'n/a',
     vasiSystemName: 'asdf',
     veteranFacing: false,
-    veteranFacingDescription: 'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+    veteranFacingDescription:
+      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
     vulnerabilityManagement: 'golem',
     website: 'www.one2bindthem.com',
   };
@@ -82,6 +76,7 @@ describe(route, () => {
       centralizedBackendLog: 'non-existent',
       distributingAPIKeysToCustomers: false,
       exposeVeteranInformationToThirdParties: false,
+      is508Compliant: true,
       listedOnMyHealthApplication: false,
       monitizationExplanation: 'n/a',
       monitizedVeteranInformation: false,
@@ -104,7 +99,7 @@ describe(route, () => {
       vasiSystemName: 'asdf',
       veteranFacing: false,
       veteranFacingDescription:
-      'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
+        'Now the Elves made many rings; but secretly Sauron made One Ring to rule all the others, and their power was bound up with it, to be subject wholly to it and to last only so long as it too should last.',
       vulnerabilityManagement: 'golem',
       website: 'www.one2bindthem.com',
     });

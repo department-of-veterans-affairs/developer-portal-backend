@@ -193,7 +193,7 @@ export default class GovDeliveryService implements MonitoredService {
       healthResponse.healthy = await this.getEmailStatusList(1).then(
         response => response.status === 200,
       );
-      return Promise.resolve(healthResponse);
+      return await Promise.resolve(healthResponse);
     } catch (err: unknown) {
       (err as DevPortalError).action = 'checking health of GovDelivery';
       healthResponse.err = err as DevPortalError;

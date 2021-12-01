@@ -15,7 +15,6 @@ describe('API constants', () => {
       addressValidation: 'internal-va:address_validation',
       appeals: 'appeals',
       benefits: 'vba_documents',
-      claimsAttributes: 'claims_attributes',
       confirmation: 'veteran_confirmation',
       decision_reviews: 'hlr',
       facilities: 'va_facilities',
@@ -30,7 +29,6 @@ describe('API constants', () => {
       appeals: 'Appeals Status API',
       benefits: 'Benefits Intake API',
       claims: 'Claims API',
-      claimsAttributes: 'Claims Attributes API',
       clinicalHealth: 'Clinical Health API (FHIR)',
       communityCare: 'Community Care Eligibility API',
       confirmation: 'Veteran Confirmation API',
@@ -46,7 +44,6 @@ describe('API constants', () => {
   it('KONG_CONSUMER_APIS', () => {
     expect(KONG_CONSUMER_APIS).toEqual([
       'benefits',
-      'claimsAttributes',
       'facilities',
       'vaForms',
       'confirmation',
@@ -83,7 +80,6 @@ describe('API constants', () => {
       'appeals',
       'benefits',
       'claims',
-      'claimsAttributes',
       'clinicalHealth',
       'communityCare',
       'confirmation',
