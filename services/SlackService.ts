@@ -116,7 +116,6 @@ export default class SlackService implements MonitoredService {
     allTimeSignups: SignupCountResult,
   ): Promise<SlackResponse> {
     const apis = Object.keys(timeSpanSignups.apiCounts);
-    console.log(JSON.stringify(apis));
     const numsByApi = apis.map(api => {
       const timeSpanCount = timeSpanSignups.apiCounts[api];
       const allTimeCount = allTimeSignups.apiCounts[api];
@@ -231,7 +230,6 @@ export default class SlackService implements MonitoredService {
   }
 
   private async post(body: PostBody): Promise<SlackResponse> {
-    console.log(JSON.stringify(body));
     try {
       const res = await this.client.post<SlackResponse>('/api/chat.postMessage', {
         channel: this.options.channel,

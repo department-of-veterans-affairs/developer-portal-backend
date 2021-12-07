@@ -1,4 +1,4 @@
-import { KeyAuthAPI, OAuthAPI } from '../types';
+import { HistoricalAPI, KeyAuthAPI, OAuthAPI } from '../types';
 
 const addressValidation: KeyAuthAPI = {
   acl: 'internal-va:address_validation',
@@ -80,6 +80,13 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   loanGuaranty,
 ];
 
+const historicalAPIsList: HistoricalAPI[] = [
+  {
+    key: 'claimsAttributes',
+    name: 'Claims Attributes',
+  },
+];
+
 const internalOnlyApis: Array<KeyAuthAPI | OAuthAPI> = [
   addressValidation,
   appealsStatus,
@@ -105,6 +112,8 @@ export const INTERNAL_ONLY_APIS: string[] = internalOnlyApis.map(x => x.key);
 
 export const KONG_CONSUMER_APIS: string[] = keyAuthAPIList.map(x => x.key);
 
+export const HISTORICAL_APIS: string[] = historicalAPIsList.map(x => x.key);
+
 export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce((acc, endpoint) => {
   acc[endpoint.key] = endpoint.authzEndpoint;
   return acc;
@@ -113,3 +122,5 @@ export const OKTA_AUTHZ_ENDPOINTS: Record<string, string> = oauthAPIList.reduce(
 export const OKTA_CONSUMER_APIS: string[] = Object.keys(OKTA_AUTHZ_ENDPOINTS);
 
 export const API_LIST: string[] = KONG_CONSUMER_APIS.concat(OKTA_CONSUMER_APIS);
+
+export const HISTORICAL_API_LIST: string[] = HISTORICAL_APIS.concat(API_LIST);
