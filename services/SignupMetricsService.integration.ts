@@ -513,17 +513,13 @@ describeFunc('signups module', () => {
 
       expect(result).toEqual({
         apiCounts: {
-          addressValidation: 0,
-          appeals: 0,
+          ...zeroCounts,
           benefits: 1,
           claims: 1,
-          clinicalHealth: 0,
           communityCare: 1,
           confirmation: 1,
-          decision_reviews: 0,
           facilities: 1,
           health: 1,
-          loan_guaranty: 0,
           vaForms: 2,
           verification: 1,
         },
