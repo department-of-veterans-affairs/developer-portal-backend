@@ -6,6 +6,7 @@ import ConsumerRepository from '../repositories/ConsumerRepository';
 import ObjectsToCsv from 'objects-to-csv';
 import { UserDynamoItem } from '../models/User';
 import { mergeUserDynamoItems } from '../util/merge-user-dynamo-items';
+import { DEFAULT_TABLE } from '../util/environments';
 
 // CLI Configuration
 const cliOptions: OptionDefinition[] = [
@@ -41,7 +42,7 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
   throw new Error('Must run the consumer report utility in an MFA session');
 }
 
-process.env.DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || 'dvp-prod-developer-portal-users';
+process.env.DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || DEFAULT_TABLE;
 
 config.update({
   region: 'us-gov-west-1',

@@ -175,22 +175,26 @@ export default class SlackService implements MonitoredService {
           },
           type: 'section',
         },
-        {
-          fields: numsByApi,
-          type: 'section',
-        },
-        {
-          type: 'divider',
-        },
-        {
-          text: {
-            text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
-            type: 'mrkdwn',
-          },
-          type: 'section',
-        },
       ],
     };
+    while (numsByApi.length > 0) {
+      body.blocks?.push({
+        fields: numsByApi.splice(0, 10),
+        type: 'section',
+      });
+    }
+    body.blocks?.push(
+      {
+        type: 'divider',
+      },
+      {
+        text: {
+          text: '_Have questions about these numbers? Read <https://community.max.gov/display/VAExternal/Calculating Sandbox Signups|how we calculate signups>._',
+          type: 'mrkdwn',
+        },
+        type: 'section',
+      },
+    );
 
     return this.post(body);
   }
