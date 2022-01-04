@@ -74,6 +74,11 @@ const keyAuthAPIList: KeyAuthAPI[] = [
     key: 'confirmation',
     name: 'Veteran Confirmation API',
   },
+  {
+    acl: 'benefits-reference-data',
+    key: 'benefitsReferenceData',
+    name: 'Benefits Reference Data API',
+  },
   addressValidation,
   appealsStatus,
   decisionReviews,
