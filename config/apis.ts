@@ -50,6 +50,11 @@ const oauthAPIList: OAuthAPI[] = [
     key: 'claims',
     name: 'Claims API',
   },
+  {
+    authzEndpoint: process.env.AUTHZ_SERVER_LOAN_GUARANTY,
+    key: 'lgyGuarantyRemittance',
+    name: 'Guaranty Remittance API',
+  },
   clinicalHealth,
 ];
 
