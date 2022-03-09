@@ -69,6 +69,10 @@ export interface KeyAuthAPI {
   key: string;
   acl: string;
 }
+export interface HistoricalAPI {
+  name: string;
+  key: string;
+}
 
 export interface DeveloperApplicationRequestBody {
   firstName: string;

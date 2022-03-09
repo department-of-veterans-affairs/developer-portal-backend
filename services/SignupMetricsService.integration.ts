@@ -359,13 +359,17 @@ describeFunc('signups module', () => {
 
   describe('countSignups', () => {
     const zeroCounts = {
+      addressValidation: 0,
+      appeals: 0,
       benefits: 0,
       claims: 0,
-      claimsAttributes: 0,
+      clinicalHealth: 0,
       communityCare: 0,
       confirmation: 0,
+      decision_reviews: 0,
       facilities: 0,
       health: 0,
+      loan_guaranty: 0,
       vaForms: 0,
       verification: 0,
     };
@@ -509,9 +513,9 @@ describeFunc('signups module', () => {
 
       expect(result).toEqual({
         apiCounts: {
+          ...zeroCounts,
           benefits: 1,
           claims: 1,
-          claimsAttributes: 0,
           communityCare: 1,
           confirmation: 1,
           facilities: 1,

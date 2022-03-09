@@ -1,6 +1,6 @@
 import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Moment } from 'moment';
-import { API_LIST } from '../config/apis';
+import { API_LIST, HISTORICAL_APIS } from '../config/apis';
 import { DEFAULT_TABLE } from '../util/environments';
 import DynamoService, { FilterParams } from './DynamoService';
 
@@ -150,7 +150,7 @@ export default class SignupMetricsService {
       }
 
       newApis.forEach((apiId: string) => {
-        if (!(apiId in result.apiCounts)) {
+        if (!HISTORICAL_APIS.includes(apiId) && !(apiId in result.apiCounts)) {
           throw new Error(`Encountered unknown API: ${apiId}`);
         }
 

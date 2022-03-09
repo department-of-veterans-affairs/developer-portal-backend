@@ -145,7 +145,19 @@ export const PRODUCTION_ACCESS_CONSUMER_TEMPLATE = `
 </div>
 `;
 
-export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
+export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `
+<h2>Verification</h2>
+<ul>
+  <li>
+    <div>
+      <strong>
+        <div>Application is 508 Compliant:</div>
+      </strong>
+      <div>{{is508Compliant}}</div>
+    </div>
+  </li>
+</ul>
+<h2>Basic Information</h2>
 <ul>
   <li>
     <div>
@@ -191,14 +203,16 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `<h2>Basic Information</h2>
       <div>{{website}}</div>
     </div>
   </li>
-  <li>
-    <div>
-      <strong>
-        <div>Phone Number:</div>
-      </strong>
-      <div>{{phoneNumber}}</div>
-    </div>
-  </li>
+  {{#if phoneNumber}}
+    <li>
+      <div>
+        <strong>
+          <div>Phone Number:</div>
+        </strong>
+        <div>{{phoneNumber}}</div>
+      </div>
+    </li>
+  {{/if}}
   <li>
     <div>
       <strong>

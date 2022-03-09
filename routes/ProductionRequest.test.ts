@@ -40,6 +40,7 @@ describe('productionRequestHandler', () => {
         centralizedBackendLog: 'non-existent',
         distributingAPIKeysToCustomers: false,
         exposeVeteranInformationToThirdParties: false,
+        is508Compliant: true,
         listedOnMyHealthApplication: false,
         medicalDisclaimerImageLink: 'www.one2bindthem.com/assets/medicalDisclaimer.jpeg',
         monitizationExplanation: 'n/a',
@@ -112,6 +113,7 @@ describe('validations', () => {
     centralizedBackendLog: 'non-existent',
     distributingAPIKeysToCustomers: false,
     exposeVeteranInformationToThirdParties: false,
+    is508Compliant: true,
     listedOnMyHealthApplication: false,
     monitizationExplanation: 'n/a',
     monitizedVeteranInformation: false,
@@ -147,6 +149,24 @@ describe('validations', () => {
     vulnerabilityManagement: 'golem',
     website: 'www.one2bindthem.com',
   };
+
+  describe('is508Compliant', () => {
+    it('is required', () => {
+      const payload = { ...defaultPayload, is508Compliant: undefined };
+
+      const result = productionSchema.validate(payload);
+
+      expect(result.error?.message).toEqual('"is508Compliant" is required');
+    });
+
+    it('is a boolean', () => {
+      const payload = { ...defaultPayload, is508Compliant: 123456 };
+
+      const result = productionSchema.validate(payload);
+
+      expect(result.error?.message).toEqual('"is508Compliant" must be a boolean');
+    });
+  });
 
   describe('primaryContact', () => {
     it('is required', () => {
@@ -316,12 +336,12 @@ describe('validations', () => {
   });
 
   describe('phoneNumber', () => {
-    it('is required', () => {
+    it('is not required', () => {
       const payload = { ...defaultPayload, phoneNumber: undefined };
 
       const result = productionSchema.validate(payload);
 
-      expect(result.error?.message).toEqual('"phoneNumber" is required');
+      expect(result.error?.message).toEqual(undefined);
     });
 
     it('is a string', () => {

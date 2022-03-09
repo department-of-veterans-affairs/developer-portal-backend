@@ -24,7 +24,7 @@ services:
     env_file: '.env'
 
   kong-migrations:
-    image: kong:1.2.2
+    image: kong:2.6.0
     command: kong migrations bootstrap
     depends_on:
       - kong-database
@@ -37,7 +37,7 @@ services:
     restart: on-failure
 
   kong-migrations-up:
-    image: kong:1.2.2
+    image: kong:2.6.0
     command: kong migrations up && kong migrations finish
     depends_on:
       - kong-database
@@ -46,7 +46,7 @@ services:
       - KONG_PG_HOST=kong-database
       - KONG_PG_DATABASE=kong
       - KONG_PG_USER=kong
-      - KONG_PG_PASSWORD=kong  
+      - KONG_PG_PASSWORD=kong
     restart: on-failure
 
   kong-database:
@@ -62,7 +62,7 @@ services:
       retries: 5
 
   kong:
-    image: kong:1.2.2
+    image: kong:2.6.0
     ports:
       - 8001:8001
       - 8000:8000
@@ -104,7 +104,7 @@ services:
     depends_on:
       - dynamodb
     command: node dev/dynamodb_schema.js
-    
+
   mock:
     build:
       context: dev/mocks/
