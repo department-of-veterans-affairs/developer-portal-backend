@@ -6,6 +6,7 @@ import configureApp from '../app';
 
 const request = supertest(configureApp());
 const route = '/internal/developer-portal/public/health_check';
+const govDeliveryRoute = '/internal/developer-portal/public/govDelivery/health_check';
 describe(route, () => {
   if (!process.env.DYNAMODB_ENDPOINT) {
     throw new Error(
@@ -191,7 +192,7 @@ describe(route, () => {
 
         govDelivery.post(govDeliveryMockPath).reply(500);
 
-        const response = await request.get(route);
+        const response = await request.get(govDeliveryRoute);
 
         expect(response.body).toEqual({
           failedHealthChecks: [
@@ -212,7 +213,7 @@ describe(route, () => {
 
         govDelivery.post(govDeliveryMockPath).reply(401);
 
-        const response = await request.get(route);
+        const response = await request.get(govDeliveryRoute);
 
         expect(response.body).toEqual({
           failedHealthChecks: [
@@ -257,7 +258,6 @@ describe(route, () => {
         slack.post(slackMockPath).reply(200, { ok: false });
 
         const response = await request.get(route);
-
         expect(response.body).toEqual({
           failedHealthChecks: [
             {

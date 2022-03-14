@@ -29,7 +29,7 @@ const healthCheckHandler =
     }
   };
 
-  const govDeliveryHealthCheckHandler =
+const govDeliveryHealthCheckHandler =
   (govDelivery: GovDeliveryService): RequestHandler =>
   async (_req, res, next): Promise<void> => {
     try {

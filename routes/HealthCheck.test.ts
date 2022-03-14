@@ -8,7 +8,7 @@ import { Request, Response } from 'express';
 import KongService from '../services/KongService';
 import OktaService from '../services/OktaService';
 import DynamoService from '../services/DynamoService';
-import healthCheckHandler from '../routes/HealthCheck';
+import healthCheckHandler, { govDeliveryHealthCheckHandler } from '../routes/HealthCheck';
 import GovDeliveryService from '../services/GovDeliveryService';
 import SlackService from '../services/SlackService';
 
@@ -22,9 +22,9 @@ describe('healthCheckHandler', () => {
   const mockDynamoHealthCheck = jest.fn();
   const mockDynamo = { healthCheck: mockDynamoHealthCheck } as unknown as DynamoService;
 
-  const mockGovDelivery = {
-    healthCheck: () => ({ healthy: true }),
-  } as unknown as GovDeliveryService;
+  const mockGovDeliveryHealthCheck = jest.fn();
+  const mockGovDelivery = { healthCheck: mockGovDeliveryHealthCheck } as unknown as GovDeliveryService;
+
   const mockSlack = { healthCheck: () => ({ healthy: true }) } as unknown as SlackService;
 
   const mockJson = jest.fn();
@@ -38,6 +38,7 @@ describe('healthCheckHandler', () => {
     mockKongHealthCheck.mockClear();
     mockOktaHealthCheck.mockClear();
     mockDynamoHealthCheck.mockClear();
+    mockGovDeliveryHealthCheck.mockClear();
 
     mockNext.mockClear();
     mockJson.mockClear();
@@ -45,13 +46,13 @@ describe('healthCheckHandler', () => {
     mockKongHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Kong' });
     mockOktaHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Okta' });
     mockDynamoHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'Dynamo' });
+    mockGovDeliveryHealthCheck.mockResolvedValue({ healthy: true, serviceName: 'GovDelivery' });
   });
 
   describe('checks Kong', () => {
     it('calls Kong healthCheck', async () => {
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -68,7 +69,6 @@ describe('healthCheckHandler', () => {
 
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -86,7 +86,6 @@ describe('healthCheckHandler', () => {
     it('calls Okta healthCheck', async () => {
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -103,7 +102,6 @@ describe('healthCheckHandler', () => {
 
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -121,7 +119,6 @@ describe('healthCheckHandler', () => {
     it('calls Dynamo healthCheck', async () => {
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -138,7 +135,6 @@ describe('healthCheckHandler', () => {
 
       const handler = healthCheckHandler({
         dynamo: mockDynamo,
-        govDelivery: mockGovDelivery,
         kong: mockKong,
         okta: mockOkta,
         slack: mockSlack,
@@ -152,13 +148,35 @@ describe('healthCheckHandler', () => {
     });
   });
 
+  describe('checks GovDelivery', () => {
+    it('calls GovDelivery healthCheck', async () => {
+      const handler = govDeliveryHealthCheckHandler(mockGovDelivery);
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockGovDeliveryHealthCheck).toHaveBeenCalled();
+    });
+
+    it('returns unhealthy response if GovDelivery fails to report back healthy', async () => {
+      const err = new Error('GovDelivery did not return a valid response');
+      const mockGDHealthCheckResponse = { err, healthy: false, serviceName: 'GovDelivery' };
+      mockGovDeliveryHealthCheck.mockResolvedValue(mockGDHealthCheckResponse);
+
+      const handler = govDeliveryHealthCheckHandler(mockGovDelivery);
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockJson).toHaveBeenCalledWith({
+        failedHealthChecks: [mockGDHealthCheckResponse],
+        healthStatus: 'lackluster',
+      });
+    });
+  });
+
   it('sends error to the default error handler if an error occurs', async () => {
     const err = new Error('service does not exist');
     mockKongHealthCheck.mockRejectedValue(err);
 
     const handler = healthCheckHandler({
       dynamo: mockDynamo,
-      govDelivery: mockGovDelivery,
       kong: mockKong,
       okta: mockOkta,
       slack: mockSlack,
@@ -174,7 +192,6 @@ describe('healthCheckHandler', () => {
 
     const handler = healthCheckHandler({
       dynamo: mockDynamo,
-      govDelivery: mockGovDelivery,
       kong: mockKong,
       okta: mockOkta,
       slack: mockSlack,
