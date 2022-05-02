@@ -20,6 +20,7 @@ describe('API constants', () => {
       decision_reviews: 'hlr',
       facilities: 'va_facilities',
       loan_guaranty: 'loan_guaranty',
+      providerDirectory: 'provider_directory',
       vaForms: 'va_forms',
     });
   });
@@ -39,6 +40,7 @@ describe('API constants', () => {
       health: 'Health API',
       lgyGuarantyRemittance: 'Guaranty Remittance API',
       loan_guaranty: 'Loan Guaranty API',
+      providerDirectory: 'Provider Directory API',
       vaForms: 'VA Form API',
       verification: 'Veteran Verification API',
     });
@@ -55,6 +57,7 @@ describe('API constants', () => {
       'appeals',
       'decision_reviews',
       'loan_guaranty',
+      'providerDirectory',
     ]);
   });
 
@@ -95,6 +98,7 @@ describe('API constants', () => {
       'health',
       'lgyGuarantyRemittance',
       'loan_guaranty',
+      'providerDirectory',
       'vaForms',
       'verification',
     ]);

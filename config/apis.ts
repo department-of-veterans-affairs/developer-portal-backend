@@ -29,6 +29,12 @@ const loanGuaranty: KeyAuthAPI = {
   name: 'Loan Guaranty API',
 };
 
+const providerDirectory: KeyAuthAPI = {
+  acl: 'provider_directory',
+  key: 'providerDirectory',
+  name: 'Provider Directory API',
+};
+
 const oauthAPIList: OAuthAPI[] = [
   {
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
@@ -88,6 +94,7 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   appealsStatus,
   decisionReviews,
   loanGuaranty,
+  providerDirectory,
 ];
 
 const historicalAPIsList: HistoricalAPI[] = [

@@ -161,6 +161,7 @@ describe('SignupMetricsService', () => {
           health: 3,
           lgyGuarantyRemittance: 0,
           loan_guaranty: 0,
+          providerDirectory: 0,
           vaForms: 2,
           verification: 2,
         });
@@ -191,6 +192,7 @@ describe('SignupMetricsService', () => {
           health: 3,
           lgyGuarantyRemittance: 0,
           loan_guaranty: 0,
+          providerDirectory: 0,
           vaForms: 2,
           verification: 2,
         });
@@ -221,6 +223,7 @@ describe('SignupMetricsService', () => {
           health: 2,
           lgyGuarantyRemittance: 0,
           loan_guaranty: 0,
+          providerDirectory: 0,
           vaForms: 2,
           verification: 2,
         });
