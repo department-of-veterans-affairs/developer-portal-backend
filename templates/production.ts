@@ -360,6 +360,14 @@ export const PRODUCTION_ACCESS_SUPPORT_TEMPLATE = `
   <li>
     <div>
       <strong>
+        <div>Requested Scopes:</div>
+      </strong>
+      <div>{{scopesAccessRequested}}</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <strong>
         <div>Application Stores PII/PHI:</div>
       </strong>
       <div>{{storePIIOrPHI}}</div>
