@@ -29,6 +29,12 @@ const loanGuaranty: KeyAuthAPI = {
   name: 'Loan Guaranty API',
 };
 
+const providerDirectory: KeyAuthAPI = {
+  acl: 'provider_directory',
+  key: 'providerDirectory',
+  name: 'Provider Directory API',
+};
+
 const oauthAPIList: OAuthAPI[] = [
   {
     authzEndpoint: process.env.AUTHZ_SERVER_HEALTH,
@@ -49,6 +55,11 @@ const oauthAPIList: OAuthAPI[] = [
     authzEndpoint: process.env.AUTHZ_SERVER_CLAIMS,
     key: 'claims',
     name: 'Claims API',
+  },
+  {
+    authzEndpoint: process.env.AUTHZ_SERVER_LOAN_GUARANTY,
+    key: 'lgyGuarantyRemittance',
+    name: 'Guaranty Remittance API',
   },
   clinicalHealth,
 ];
@@ -83,6 +94,7 @@ const keyAuthAPIList: KeyAuthAPI[] = [
   appealsStatus,
   decisionReviews,
   loanGuaranty,
+  providerDirectory,
 ];
 
 const historicalAPIsList: HistoricalAPI[] = [
