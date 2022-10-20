@@ -1,3 +1,7 @@
+# Archived
+
+This repository is no longer in use and all backend processing related to the [Developer Portal](https://developer.va.gov) have been moved to the [Lighthouse Platform Backend](https://github.com/department-of-veterans-affairs/lighthouse-platform-backend) project.
+
 # Developer Portal Backend
 
 This application handles backend work for the [Developer Portal](https://github.com/department-of-veterans-affairs/developer-portal). It replaced a [Lambda function](https://github.com/department-of-veterans-affairs/developer-portal-lambda-backend) that handled applications for sandbox environment credentials.
